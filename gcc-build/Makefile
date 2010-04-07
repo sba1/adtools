@@ -21,5 +21,6 @@ cross:
 											--enable-languages=c,c++  \
 											--enable-haifa            \
 											--enable-sjlj-exceptions  \
-											--disable-libstdcxx-pch
+											--disable-libstdcxx-pch \
+											--disable-tls
 	make -C cross-$(VERSION)
