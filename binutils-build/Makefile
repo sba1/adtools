@@ -1,12 +1,21 @@
 #
-# Makefile to compile binutils
+# Makefile to compile binutils cross
 #
-SRC_DIR=../../binutils
+# Use SRC_DIR to alter the path of the source (default ../binutils)
+# Use VERSION to specify the version (alters the name of the created drawer)
+#
+
+SRC_DIR=../binutils
+VERSION=trunk
+DEST_DIR=cross-$(VERSION)
+PREFIX=/usr/local/amiga
 
 all: cross
 
 .PHONY: cross
 cross:
-	mkdir -p cross
-	cd cross; $(SRC_DIR)/configure --target=ppc-amigaos --prefix=/usr/local/amiga
-	make -C cross
+	mkdir -p cross-$(VERSION)
+	cd cross-$(VERSION); ../$(SRC_DIR)/configure \
+											--target=ppc-amigaos \
+											--prefix=$(PREFIX)
+	make -C cross-$(VERSION)
