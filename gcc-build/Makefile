@@ -4,6 +4,12 @@
 # Use SRC_DIR to alter the path of the source (default ../gcc)
 # Use VERSION to specify the version (alters the name of the created drawer)
 #
+# TODO: Add 
+# --with-pkgversion=
+# --with-bugurl="<URL:http://www.sf.net/projects/adtools/>"
+#
+# when compiling 4.4.x or newer.
+# 
 
 SRC_DIR=../gcc
 VERSION=trunk
