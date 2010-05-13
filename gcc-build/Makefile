@@ -4,10 +4,6 @@
 # Use SRC_DIR to alter the path of the source (default ../gcc)
 # Use VERSION to specify the version (alters the name of the created drawer)
 #
-# TODO: Add 
-# --with-pkgversion=
-# --with-bugurl="<URL:http://www.sf.net/projects/adtools/>"
-#
 # when compiling 4.4.x or newer.
 # 
 
@@ -22,6 +18,8 @@ all: cross
 cross:
 	mkdir -p cross-$(VERSION)
 	cd cross-$(VERSION); ../$(SRC_DIR)/configure \
+                      --with-bugurl='http://www.sf.net/projects/adtools' \
+                      --with-pkgversion='adtools build $(VERSION)' \
 											--target=ppc-amigaos \
 											--prefix=$(PREFIX) \
 											--enable-languages=c,c++  \
