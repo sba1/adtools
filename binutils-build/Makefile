@@ -19,3 +19,11 @@ cross:
 											--target=ppc-amigaos \
 											--prefix=$(PREFIX)
 	make -C cross-$(VERSION)
+
+native:
+	mkdir -p native-$(VERSION)
+	cd native-$(VERSION); ../$(SRC_DIR)/configure \
+											--target=ppc-amigaos \
+											--host=ppc-amigaos \
+											--prefix=/gcc
+	make -C native-$(VERSION)
