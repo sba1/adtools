@@ -15,7 +15,7 @@ all: cross
 .PHONY: cross
 cross:
 	mkdir -p cross-$(VERSION)
-	cd cross-$(VERSION); ../$(SRC_DIR)/configure \
+	cd cross-$(VERSION); CFLAGS=-Wno-switch ../$(SRC_DIR)/configure \
 											--target=ppc-amigaos \
 											--prefix=$(PREFIX)
 	make -C cross-$(VERSION)
