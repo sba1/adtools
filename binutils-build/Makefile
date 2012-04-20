@@ -7,23 +7,26 @@
 
 SRC_DIR=../binutils
 VERSION=trunk
-DEST_DIR=cross-$(VERSION)
+CROSS_BUILD_DIR=cross-$(VERSION)
+NATIVE_BUILD_DIR=cross-$(VERSION)
 PREFIX=/usr/local/amiga
+REAL_SRC_DIR=$(realpath $(SRC_DIR))
 
 all: cross
 
 .PHONY: cross
 cross:
-	mkdir -p cross-$(VERSION)
-	cd cross-$(VERSION); CFLAGS=-Wno-switch ../$(SRC_DIR)/configure \
-											--target=ppc-amigaos \
-											--prefix=$(PREFIX)
-	make -C cross-$(VERSION)
+	mkdir -p $(CROSS_BUILD_DIR)
+	cd $(CROSS_BUILD_DIR); CFLAGS="-Wno-switch -Wno-unused" $(REAL_SRC_DIR)/configure \
+									--target=ppc-amigaos \
+									--prefix=$(PREFIX)
+	make -C $(CROSS_BUILD_DIR)
 
 native:
-	mkdir -p native-$(VERSION)
-	cd native-$(VERSION); ../$(SRC_DIR)/configure \
+	mkdir -p $(NATIVE_BUILD_DIR)
+	cd $(NATIVE_BUILD_DIR);  CFLAGS="-Wno-switch -Wno-unused" $(REAL_SRC_DIR)/configure \
 											--target=ppc-amigaos \
 											--host=ppc-amigaos \
 											--prefix=/gcc
-	make -C native-$(VERSION)
+	make -C $(NATIVE_BUILD_DIR)
+
