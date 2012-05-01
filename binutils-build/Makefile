@@ -24,7 +24,7 @@ cross:
 
 native:
 	mkdir -p $(NATIVE_BUILD_DIR)
-	cd $(NATIVE_BUILD_DIR);  CFLAGS="-Wno-switch -Wno-unused" $(REAL_SRC_DIR)/configure \
+	cd $(NATIVE_BUILD_DIR);  LDFLAGS="-lunix" CFLAGS="-Wno-switch -Wno-unused" $(REAL_SRC_DIR)/configure \
 											--target=ppc-amigaos \
 											--host=ppc-amigaos \
 											--prefix=/gcc

@@ -36,7 +36,7 @@ cross:
 .PHONY: native
 native:
 	mkdir -p $(NATIVE_BUILD_DIR)
-	cd $(NATIVE_BUILD_DIR); $(REAL_SRC_DIR)/configure \
+	cd $(NATIVE_BUILD_DIR); LDFLAGS="-lunix" $(REAL_SRC_DIR)/configure \
                       --with-bugurl='http://www.sf.net/projects/adtools' \
                       --with-pkgversion='adtools build $(VERSION)' \
 											--host=ppc-amigaos \
