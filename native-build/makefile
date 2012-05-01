@@ -78,12 +78,27 @@ binutils-native-done: libraries-done
 # Build the native gcc
 #
 gcc-native-done: binutils-native-done
+	mkdir -p $(ROOT_DIR)/root-native/gcc/include
 	PATH="$(ROOT_DIR)/root-cross/bin:$(PATH)" make -C ../gcc-build native \
 			SRC_DIR=../../branches/gcc/4.5.x/ \
 			PREFIX=/gcc \
 			NATIVE_BUILD_DIR=$(ROOT_DIR)/gcc-native-build \
 			VERSION=4.5.3 \
-			LIB_PATH=$(ROOT_DIR)/root-cross
+			LIB_PATH=$(ROOT_DIR)/root-cross \
+			NATIVE_SYS_ROOT=$(ROOT_DIR)/root-native
+	touch $@
+
+#
+# Install native compiler into /gcc. Needs write acess to this directory
+#
+native-install: gcc-native-done
+	rm -Rf /gcc/*
+	make -C binutils-native-build install
+	make -C gcc-native-build install
+	cp -R $(ROOT_DIR)/root-cross/ppc-amigaos/SDK /gcc
+	cp -Rf $(ROOT_DIR)/root-cross/lib/gcc/ppc-amigaos /gcc/lib/gcc/
+	# Move lib archives (e.g., libgcc.a into the proper directory)
+	cd /gcc/lib/gcc ; for lib in `find -name *.a`; do mkdir -p `dirname $$lib`/lib; mv $$lib `dirname $$lib`/lib ; done
 
 #
 # Cleanup everything
