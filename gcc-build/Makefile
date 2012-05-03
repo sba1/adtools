@@ -43,7 +43,7 @@ native:
 											--target=ppc-amigaos \
 											--disable-nls \
 											--prefix=/gcc \
-											--enable-languages=c  \
+											--enable-languages=c,c++  \
 											--enable-haifa            \
 											--enable-sjlj-exceptions  \
 											--disable-libstdcxx-pch \
