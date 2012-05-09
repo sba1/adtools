@@ -4,6 +4,8 @@
 # We then build the native compiler using the freshly-built cross
 # compiler.
 #
+# The user running this script must have write access to /gcc
+#
 
 ROOT_DIR=$(realpath .)
 
@@ -79,6 +81,7 @@ binutils-native-done: libraries-done
 #
 gcc-native-done: binutils-native-done
 	mkdir -p $(ROOT_DIR)/root-native/gcc/include
+	mkdir -p /gcc/include
 	PATH="$(ROOT_DIR)/root-cross/bin:$(PATH)" make -C ../gcc-build native \
 			SRC_DIR=../../branches/gcc/4.5.x/ \
 			PREFIX=/gcc \
@@ -93,16 +96,16 @@ gcc-native-done: binutils-native-done
 #
 native-install: gcc-native-done
 	rm -Rf /gcc/*
-	make -C binutils-native-build install
-	make -C gcc-native-build install
+	PATH="$(ROOT_DIR)/root-cross/bin:$(PATH)" make -C binutils-native-build install
+	PATH="$(ROOT_DIR)/root-cross/bin:$(PATH)" make -C gcc-native-build install
 	cp -R $(ROOT_DIR)/root-cross/ppc-amigaos/SDK /gcc
 	cp -Rf $(ROOT_DIR)/root-cross/lib/gcc/ppc-amigaos /gcc/lib/gcc/
 	# Move lib archives (e.g., libgcc.a into the proper directory)
-	cd /gcc/lib/gcc ; for lib in `find -name *.a`; do mkdir -p `dirname $$lib`/lib; mv $$lib `dirname $$lib`/lib ; done
+	cd /gcc/lib/gcc ; for lib in `find -name *.a -o -name *.so`; do mkdir -p `dirname $$lib`/lib; mv $$lib `dirname $$lib`/lib ; done
 
 #
 # Cleanup everything
 #
 .PHONY: clean
 clean:
-	rm -Rf binutils-cross-build binutils-native-build root-cross build-cross-done downloads-done downloads binutils-cross-done binutils-native-done gcc-cross-build gcc-cross-done gcc-native-build includes-done libraries-done
+	rm -Rf binutils-cross-build binutils-native-build root-cross build-cross-done downloads-done downloads binutils-cross-done binutils-native-done gcc-cross-build gcc-cross-done gcc-native-build includes-done libraries-done root-native
