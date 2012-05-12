@@ -91,6 +91,12 @@ gcc-native-done: binutils-native-done
 			NATIVE_SYS_ROOT=$(ROOT_DIR)/root-native
 	touch $@
 
+coreutils-native-done: gcc-cross-done
+	mkdir -p coreutils-native-build
+	cd coreutils-native-build ; PATH="$(ROOT_DIR)/root-cross/bin:$(PATH)" ../../coreutils/configure --prefix=/gcc --host=ppc-amigaos
+	make -C coreutils-native-build
+	touch $@
+
 #
 # Install native compiler into /gcc. Needs write acess to this directory
 #
@@ -98,6 +104,7 @@ native-install: gcc-native-done
 	rm -Rf /gcc/*
 	PATH="$(ROOT_DIR)/root-cross/bin:$(PATH)" make -C binutils-native-build install
 	PATH="$(ROOT_DIR)/root-cross/bin:$(PATH)" make -C gcc-native-build install
+	PATH="$(ROOT_DIR)/root-cross/bin:$(PATH)" make -C coreutils-native-build install
 	cp -R $(ROOT_DIR)/root-cross/ppc-amigaos/SDK /gcc
 	cp -Rf $(ROOT_DIR)/root-cross/lib/gcc/ppc-amigaos /gcc/lib/gcc/
 	# Move lib archives (e.g., libgcc.a into the proper directory)
