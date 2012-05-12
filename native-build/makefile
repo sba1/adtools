@@ -93,7 +93,7 @@ gcc-native-done: binutils-native-done
 
 coreutils-native-done: gcc-cross-done
 	mkdir -p coreutils-native-build
-	cd coreutils-native-build ; PATH="$(ROOT_DIR)/root-cross/bin:$(PATH)" ../../coreutils/configure --prefix=/gcc --host=ppc-amigaos
+	cd coreutils-native-build ; PATH="$(ROOT_DIR)/root-cross/bin:$(PATH)" LDFLAGS="-lunix" ../../coreutils/configure --prefix=/gcc --host=ppc-amigaos
 	make -C coreutils-native-build
 	touch $@
 
