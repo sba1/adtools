@@ -17,8 +17,17 @@ needs the development packages of
  libmpc (libmpc-dev on Debian)
  libmpfr (libmpfr-dev on Debian)
 
+Other required packages are:
+ lha
+ bzip2
+ wget
+
 Note that the makefile accesses remote resources during
 the build, so you also need a working Internet connection.
+
+During the build process, a directory /gcc is accessed. Make
+sure that the user under which you build the package, has
+write access to this directory.
 
 If you have met the requirements, you just need to invoke
   make
