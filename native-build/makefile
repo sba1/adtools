@@ -100,7 +100,7 @@ coreutils-native-done: gcc-cross-done
 #
 # Install native compiler into /gcc. Needs write acess to this directory
 #
-native-install: gcc-native-done
+native-install: coreutils-native-done gcc-native-done
 	rm -Rf /gcc/*
 	PATH="$(ROOT_DIR)/root-cross/bin:$(PATH)" make -C binutils-native-build install
 	PATH="$(ROOT_DIR)/root-cross/bin:$(PATH)" make -C gcc-native-build install
