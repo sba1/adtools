@@ -94,7 +94,7 @@ gcc-native-done: binutils-native-done
 coreutils-native-done: gcc-cross-done
 	mkdir -p coreutils-native-build
 	cd coreutils-native-build ; PATH="$(ROOT_DIR)/root-cross/bin:$(PATH)" LDFLAGS="-lunix" ../../coreutils/configure --prefix=/gcc --host=ppc-amigaos
-	make -C coreutils-native-build
+	PATH="$(ROOT_DIR)/root-cross/bin:$(PATH)" make -C coreutils-native-build
 	touch $@
 
 #
@@ -115,4 +115,4 @@ native-install: coreutils-native-done gcc-native-done
 #
 .PHONY: clean
 clean:
-	rm -Rf binutils-cross-build binutils-native-build root-cross build-cross-done downloads-done downloads binutils-cross-done binutils-native-done gcc-cross-build gcc-cross-done gcc-native-build includes-done libraries-done root-native
+	rm -Rf binutils-cross-build binutils-native-build root-cross build-cross-done downloads-done downloads binutils-cross-done binutils-native-done gcc-cross-build gcc-cross-done gcc-native-build gcc-native-done includes-done libraries-done root-native
