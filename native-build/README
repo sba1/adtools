@@ -30,5 +30,10 @@ sure that the user under which you build the package, has
 write access to this directory.
 
 If you have met the requirements, you just need to invoke
-  make
-in the directory where you opened this file.
+ make
+in the directory where you opened this file. If all goes
+through without any error, you shall invoke
+ make install
+to get native compiler including coreutils copied to /gcc.
+You shall be able to deposit the contents for this directory
+on your Amiga.
