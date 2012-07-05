@@ -115,4 +115,4 @@ native-install: coreutils-native-done gcc-native-done
 #
 .PHONY: clean
 clean:
-	rm -Rf binutils-cross-build binutils-native-build root-cross build-cross-done downloads-done downloads binutils-cross-done binutils-native-done gcc-cross-build gcc-cross-done gcc-native-build gcc-native-done includes-done libraries-done root-native
+	rm -Rf binutils-cross-build binutils-native-build root-cross build-cross-done downloads-done downloads binutils-cross-done binutils-native-done gcc-cross-build gcc-cross-done gcc-native-build gcc-native-done includes-done libraries-done root-native coreutils-native-build coreutils-native-done
