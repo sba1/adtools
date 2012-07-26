@@ -13,6 +13,9 @@ GMP_ARCHIVE=gmp-5.0.4.tar.bz2
 MPFR_ARCHIVE=mpfr-3.1.1.tar.bz2
 MPC_ARCHIVE=mpc-0.9.tar.gz
 
+GCC_VERSION=4.5.4
+GCC_SRC_DIR=../../branches/gcc/4.5.x/
+
 all: gcc-native-done
 
 #
@@ -53,7 +56,7 @@ includes-done: downloads-done
 # Build the cross compiler
 #
 gcc-cross-done: includes-done binutils-cross-done
-	make -C ../gcc-build SRC_DIR=../../branches/gcc/4.5.x/ PREFIX=$(ROOT_DIR)/root-cross CROSS_BUILD_DIR=$(ROOT_DIR)/gcc-cross-build VERSION=4.5.4
+	make -C ../gcc-build SRC_DIR=$(GCC_SRC_DIR) PREFIX=$(ROOT_DIR)/root-cross CROSS_BUILD_DIR=$(ROOT_DIR)/gcc-cross-build VERSION=$(GCC_VERSION)
 	make -C $(ROOT_DIR)/gcc-cross-build install
 	touch $@
 
@@ -83,10 +86,10 @@ gcc-native-done: binutils-native-done
 	mkdir -p $(ROOT_DIR)/root-native/gcc/include
 	mkdir -p /gcc/include
 	PATH="$(ROOT_DIR)/root-cross/bin:$(PATH)" make -C ../gcc-build native \
-			SRC_DIR=../../branches/gcc/4.5.x/ \
+			SRC_DIR=$(GCC_SRC_DIR) \
 			PREFIX=/gcc \
 			NATIVE_BUILD_DIR=$(ROOT_DIR)/gcc-native-build \
-			VERSION=4.5.4 \
+			VERSION=$(GCC_VERSION) \
 			LIB_PATH=$(ROOT_DIR)/root-cross \
 			NATIVE_SYS_ROOT=$(ROOT_DIR)/root-native
 	touch $@
