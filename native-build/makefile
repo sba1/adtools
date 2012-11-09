@@ -61,6 +61,18 @@ gcc-cross-done: includes-done binutils-cross-done
 	touch $@
 
 #
+# Optional target for additional libs
+#
+.PHONY: additionals-libs
+additionals-libs:
+	mkdir -p $(ROOT_DIR)/root-cross/ppc-amigaos/SDK/local/common/include
+	mkdir -p /tmp/abcd
+	cd downloads && lha xw=/tmp/abcd SDK_53.20.lha
+	cd /tmp/abcd/SDK_Install && lha x pthread.lha
+	cp -Rf /tmp/abcd/SDK_Install/Local/* $(ROOT_DIR)/root-cross/ppc-amigaos/SDK/local
+	rm -Rf /tmp/abcd
+
+#
 # Build and install the libraries
 #
 libraries-done: gcc-cross-done
