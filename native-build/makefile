@@ -33,8 +33,8 @@ downloads-done:
 # Builds the cross binutils package (assembler, etc).
 #
 binutils-cross-done:
-	make -C ../binutils-build PREFIX=$(ROOT_DIR)/root-cross CROSS_BUILD_DIR=$(ROOT_DIR)/binutils-cross-build
-	make -C $(ROOT_DIR)/binutils-cross-build install
+	$(MAKE) -C ../binutils-build PREFIX=$(ROOT_DIR)/root-cross CROSS_BUILD_DIR=$(ROOT_DIR)/binutils-cross-build
+	$(MAKE) -C $(ROOT_DIR)/binutils-cross-build install
 	touch $@
 
 #
@@ -56,8 +56,8 @@ includes-done: downloads-done
 # Build the cross compiler
 #
 gcc-cross-done: includes-done binutils-cross-done
-	make -C ../gcc-build SRC_DIR=$(GCC_SRC_DIR) PREFIX=$(ROOT_DIR)/root-cross CROSS_BUILD_DIR=$(ROOT_DIR)/gcc-cross-build VERSION=$(GCC_VERSION)
-	make -C $(ROOT_DIR)/gcc-cross-build install
+	$(MAKE) -C ../gcc-build SRC_DIR=$(GCC_SRC_DIR) PREFIX=$(ROOT_DIR)/root-cross CROSS_BUILD_DIR=$(ROOT_DIR)/gcc-cross-build VERSION=$(GCC_VERSION)
+	$(MAKE) -C $(ROOT_DIR)/gcc-cross-build install
 	touch $@
 
 #
@@ -76,7 +76,7 @@ libraries-done: gcc-cross-done
 # Build the native binutils
 #
 binutils-native-done: libraries-done
-	PATH="$(ROOT_DIR)/root-cross/bin:$(PATH)" make -C ../binutils-build PREFIX=/gcc NATIVE_BUILD_DIR=$(ROOT_DIR)/binutils-native-build native
+	PATH="$(ROOT_DIR)/root-cross/bin:$(PATH)" $(MAKE) -C ../binutils-build PREFIX=/gcc NATIVE_BUILD_DIR=$(ROOT_DIR)/binutils-native-build native
 	touch $@
 
 #
@@ -85,7 +85,7 @@ binutils-native-done: libraries-done
 gcc-native-done: binutils-native-done
 	mkdir -p $(ROOT_DIR)/root-native/gcc/include
 	mkdir -p /gcc/include
-	PATH="$(ROOT_DIR)/root-cross/bin:$(PATH)" make -C ../gcc-build native \
+	PATH="$(ROOT_DIR)/root-cross/bin:$(PATH)" $(MAKE) -C ../gcc-build native \
 			SRC_DIR=$(GCC_SRC_DIR) \
 			PREFIX=/gcc \
 			NATIVE_BUILD_DIR=$(ROOT_DIR)/gcc-native-build \
@@ -97,7 +97,7 @@ gcc-native-done: binutils-native-done
 coreutils-native-done: gcc-cross-done
 	mkdir -p coreutils-native-build
 	cd coreutils-native-build ; PATH="$(ROOT_DIR)/root-cross/bin:$(PATH)" LDFLAGS="-lunix" ../../coreutils/configure --prefix=/gcc --host=ppc-amigaos
-	PATH="$(ROOT_DIR)/root-cross/bin:$(PATH)" make -C coreutils-native-build
+	PATH="$(ROOT_DIR)/root-cross/bin:$(PATH)" $(MAKE) -C coreutils-native-build
 	touch $@
 
 #
@@ -105,9 +105,9 @@ coreutils-native-done: gcc-cross-done
 #
 native-install: coreutils-native-done gcc-native-done
 	rm -Rf /gcc/*
-	PATH="$(ROOT_DIR)/root-cross/bin:$(PATH)" make -C binutils-native-build install
-	PATH="$(ROOT_DIR)/root-cross/bin:$(PATH)" make -C gcc-native-build install
-	PATH="$(ROOT_DIR)/root-cross/bin:$(PATH)" make -C coreutils-native-build install
+	PATH="$(ROOT_DIR)/root-cross/bin:$(PATH)" $(MAKE) -C binutils-native-build install
+	PATH="$(ROOT_DIR)/root-cross/bin:$(PATH)" $(MAKE) -C gcc-native-build install
+	PATH="$(ROOT_DIR)/root-cross/bin:$(PATH)" $(MAKE) -C coreutils-native-build install
 	cp -R $(ROOT_DIR)/root-cross/ppc-amigaos/SDK /gcc
 	cp -Rf $(ROOT_DIR)/root-cross/lib/gcc/ppc-amigaos /gcc/lib/gcc/
 	# Move lib archives (e.g., libgcc.a into the proper directory)
