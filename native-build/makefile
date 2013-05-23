@@ -9,8 +9,8 @@
 
 ROOT_DIR=$(realpath .)
 
-GMP_ARCHIVE=gmp-5.0.4.tar.bz2
-MPFR_ARCHIVE=mpfr-3.1.1.tar.bz2
+GMP_ARCHIVE=gmp-5.0.5/gmp-5.0.5.tar.bz2
+MPFR_ARCHIVE=mpfr-3.1.2/mpfr-3.1.2.tar.bz2
 MPC_ARCHIVE=mpc-0.9.tar.gz
 
 GCC_VERSION=4.5.4
@@ -24,8 +24,8 @@ all: gcc-native-done
 downloads-done:
 	mkdir -p downloads
 	wget "http://www.hyperion-entertainment.biz/index.php?option=com_registration&amp;view=download&amp;format=raw&amp;file=38&amp;Itemid=63" -O downloads/SDK_53.20.lha
-	cd downloads && wget -N ftp://ftp.gmplib.org/pub/gmp-5.0.4/$(GMP_ARCHIVE)
-	cd downloads && wget -N http://www.mpfr.org/mpfr-current/$(MPFR_ARCHIVE)
+	cd downloads && wget -N ftp://ftp.gmplib.org/pub/$(GMP_ARCHIVE)
+	cd downloads && wget -N http://www.mpfr.org/$(MPFR_ARCHIVE)
 	cd downloads && wget -N http://www.multiprecision.org/mpc/download/$(MPC_ARCHIVE)
 	touch $@
 
