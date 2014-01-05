@@ -76,12 +76,12 @@ additionals-libs:
 # Build and install the libraries
 #
 libraries-done: gcc-cross-done
-	cd downloads && tar -xjf $(GMP_ARCHIVE)
-	cd downloads && tar -xjf $(MPFR_ARCHIVE)
-	cd downloads && tar -xzf $(MPC_ARCHIVE)
-	cd $(basename $(basename downloads/$(GMP_ARCHIVE))) && PATH="$(ROOT_DIR)/root-cross/bin:$(PATH)" ./configure --host=ppc-amigaos --prefix=$(ROOT_DIR)/root-cross && PATH="$(ROOT_DIR)/root-cross/bin:$(PATH)" make install
-	cd $(basename $(basename downloads/$(MPFR_ARCHIVE))) && PATH="$(ROOT_DIR)/root-cross/bin:$(PATH)" ./configure --host=ppc-amigaos --prefix=$(ROOT_DIR)/root-cross -with-gmp=$(ROOT_DIR)/root-cross && PATH="$(ROOT_DIR)/root-cross/bin:$(PATH)" make install
-	cd $(basename $(basename downloads/$(MPC_ARCHIVE))) && PATH="$(ROOT_DIR)/root-cross/bin:$(PATH)" ./configure --host=ppc-amigaos --prefix=$(ROOT_DIR)/root-cross --with-gmp=$(ROOT_DIR)/root-cross --with-mpfr=$(ROOT_DIR)/root-cross && PATH="$(ROOT_DIR)/root-cross/bin:$(PATH)" make install
+	cd downloads && tar -xjf $(notdir $(GMP_ARCHIVE))
+	cd downloads && tar -xjf $(notdir $(MPFR_ARCHIVE))
+	cd downloads && tar -xzf $(notdir $(MPC_ARCHIVE))
+	cd $(basename $(basename downloads/$(notdir $(GMP_ARCHIVE)))) && PATH="$(ROOT_DIR)/root-cross/bin:$(PATH)" ./configure --host=ppc-amigaos --prefix=$(ROOT_DIR)/root-cross && PATH="$(ROOT_DIR)/root-cross/bin:$(PATH)" make install
+	cd $(basename $(basename downloads/$(notdir $(MPFR_ARCHIVE)))) && PATH="$(ROOT_DIR)/root-cross/bin:$(PATH)" ./configure --host=ppc-amigaos --prefix=$(ROOT_DIR)/root-cross -with-gmp=$(ROOT_DIR)/root-cross && PATH="$(ROOT_DIR)/root-cross/bin:$(PATH)" make install
+	cd $(basename $(basename downloads/$(notdir $(MPC_ARCHIVE)))) && PATH="$(ROOT_DIR)/root-cross/bin:$(PATH)" ./configure --host=ppc-amigaos --prefix=$(ROOT_DIR)/root-cross --with-gmp=$(ROOT_DIR)/root-cross --with-mpfr=$(ROOT_DIR)/root-cross && PATH="$(ROOT_DIR)/root-cross/bin:$(PATH)" make install
 	touch $@
 
 #
