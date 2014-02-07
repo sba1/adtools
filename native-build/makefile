@@ -68,7 +68,7 @@ additionals-libs:
 	mkdir -p $(ROOT_DIR)/root-cross/ppc-amigaos/SDK/local/common/include
 	mkdir -p /tmp/abcd
 	cd downloads && lha xw=/tmp/abcd SDK_53.20.lha
-	cd /tmp/abcd/SDK_Install && lha x pthread.lha
+	cd /tmp/abcd/SDK_Install && lha x pthread.lha && lha x zlib-1.2.3.lha
 	cp -Rf /tmp/abcd/SDK_Install/Local/* $(ROOT_DIR)/root-cross/ppc-amigaos/SDK/local
 	rm -Rf /tmp/abcd
 
