@@ -13,6 +13,9 @@ GMP_ARCHIVE=gmp-5.0.5/gmp-5.0.5.tar.bz2
 MPFR_ARCHIVE=mpfr-3.1.2/mpfr-3.1.2.tar.bz2
 MPC_ARCHIVE=mpc-0.9.tar.gz
 
+BINUTILS_VERSION=2.18
+BINUTILS_SRC_DIR=../binutils
+
 GCC_VERSION=4.5.4
 GCC_SRC_DIR=../../branches/gcc/4.5.x/
 
@@ -32,9 +35,9 @@ downloads-done:
 #
 # Builds the cross binutils package (assembler, etc).
 #
-binutils-cross-done:
-	$(MAKE) -C ../binutils-build PREFIX=$(ROOT_DIR)/root-cross CROSS_BUILD_DIR=$(ROOT_DIR)/binutils-cross-build
-	$(MAKE) -C $(ROOT_DIR)/binutils-cross-build install
+binutils-cross-done-$(BINUTILS_VERSION):
+	$(MAKE) -C ../binutils-build SRC_DIR=$(BINUTILS_SRC_DIR) PREFIX=$(ROOT_DIR)/root-cross CROSS_BUILD_DIR=$(ROOT_DIR)/binutils-cross-build-$(BINUTILS_VERSION)
+	$(MAKE) -C $(ROOT_DIR)/binutils-cross-build-$(BINUTILS_VERSION) install
 	touch $@
 
 #
@@ -55,7 +58,7 @@ includes-done: downloads-done
 #
 # Build the cross compiler
 #
-gcc-cross-done-$(GCC_VERSION): includes-done binutils-cross-done
+gcc-cross-done-$(GCC_VERSION): includes-done binutils-cross-done-$(BINUTILS_VERSION)
 	$(MAKE) -C ../gcc-build SRC_DIR=$(GCC_SRC_DIR) PREFIX=$(ROOT_DIR)/root-cross CROSS_BUILD_DIR=$(ROOT_DIR)/gcc-cross-build-$(GCC_VERSION) VERSION=$(GCC_VERSION)
 	$(MAKE) -C $(ROOT_DIR)/gcc-cross-build-$(GCC_VERSION) install
 	touch $@
@@ -87,14 +90,14 @@ libraries-done: gcc-cross-done-$(GCC_VERSION)
 #
 # Build the native binutils
 #
-binutils-native-done: libraries-done
-	PATH="$(ROOT_DIR)/root-cross/bin:$(PATH)" $(MAKE) -C ../binutils-build PREFIX=/gcc NATIVE_BUILD_DIR=$(ROOT_DIR)/binutils-native-build native
+binutils-native-done-$(BINUTILS_VERSION): libraries-done
+	PATH="$(ROOT_DIR)/root-cross/bin:$(PATH)" $(MAKE) -C ../binutils-build PREFIX=/gcc NATIVE_BUILD_DIR=$(ROOT_DIR)/binutils-native-build-$(BINUTILS_VERSION) native
 	touch $@
 
 #
 # Build the native gcc
 #
-gcc-native-done-$(GCC_VERSION): binutils-native-done
+gcc-native-done-$(GCC_VERSION): binutils-native-done-$(BINUTILS_VERSION)
 	mkdir -p $(ROOT_DIR)/root-native/gcc/include
 	mkdir -p /gcc/include
 	PATH="$(ROOT_DIR)/root-cross/bin:$(PATH)" $(MAKE) -C ../gcc-build native \
