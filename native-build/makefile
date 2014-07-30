@@ -13,9 +13,15 @@ GMP_ARCHIVE=gmp-5.0.5/gmp-5.0.5.tar.bz2
 MPFR_ARCHIVE=mpfr-3.1.2/mpfr-3.1.2.tar.bz2
 MPC_ARCHIVE=mpc-0.9.tar.gz
 
+#BINUTILS_VERSION=2.23.2
+#BINUTILS_SRC_DIR=../../branches/binutils/2.23.2
+#BINUTILS_VERSION=2.19.1
+#BINUTILS_SRC_DIR=../../branches/binutils/2.19.1
 BINUTILS_VERSION=2.18
 BINUTILS_SRC_DIR=../binutils
 
+#GCC_VERSION=4.9.1
+#GCC_SRC_DIR=../../branches/gcc/4.9.x/
 GCC_VERSION=4.5.4
 GCC_SRC_DIR=../../branches/gcc/4.5.x/
 
