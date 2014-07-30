@@ -63,6 +63,9 @@ gcc-cross-done-$(GCC_VERSION): includes-done binutils-cross-done-$(BINUTILS_VERS
 	$(MAKE) -C $(ROOT_DIR)/gcc-cross-build-$(GCC_VERSION) install
 	touch $@
 
+.PHONY: gcc-cross
+gcc-cross: gcc-cross-done-$(GCC_VERSION)
+
 #
 # Optional target for additional libs
 #
@@ -91,7 +94,10 @@ libraries-done: gcc-cross-done-$(GCC_VERSION)
 # Build the native binutils
 #
 binutils-native-done-$(BINUTILS_VERSION): libraries-done
-	PATH="$(ROOT_DIR)/root-cross/bin:$(PATH)" $(MAKE) -C ../binutils-build PREFIX=/gcc NATIVE_BUILD_DIR=$(ROOT_DIR)/binutils-native-build-$(BINUTILS_VERSION) native
+	PATH="$(ROOT_DIR)/root-cross/bin:$(PATH)" $(MAKE) -C ../binutils-build native \
+			SRC_DIR=$(BINUTILS_SRC_DIR) \
+			PREFIX=/gcc \
+			NATIVE_BUILD_DIR=$(ROOT_DIR)/binutils-native-build-$(BINUTILS_VERSION)
 	touch $@
 
 #
@@ -133,4 +139,4 @@ native-install: coreutils-native-done gcc-native-done-$(GCC_VERSION)
 #
 .PHONY: clean
 clean:
-	rm -Rf binutils-cross-build binutils-native-build root-cross build-cross-done downloads-done downloads binutils-cross-done binutils-native-done gcc-cross-build-$(GCC_VERSION) gcc-cross-done-$(GCC_VERSION) gcc-native-build-$(GCC_VERSION) gcc-native-done-$(GCC_VERSION) includes-done libraries-done root-native coreutils-native-build coreutils-native-done
+	rm -Rf binutils-cross-build-$(BINUTILS_VERSION) binutils-native-build root-cross build-cross-done downloads-done downloads binutils-cross-done-$(BINUTILS_VERSION) binutils-native-done gcc-cross-build-$(GCC_VERSION) gcc-cross-done-$(GCC_VERSION) gcc-native-build-$(GCC_VERSION) gcc-native-done-$(GCC_VERSION) includes-done libraries-done root-native coreutils-native-build coreutils-native-done
