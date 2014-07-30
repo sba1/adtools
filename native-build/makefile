@@ -32,7 +32,7 @@ all: gcc-native-done-$(GCC_VERSION)
 #
 downloads-done:
 	mkdir -p downloads
-	wget "http://www.hyperion-entertainment.biz/index.php?option=com_registration&amp;view=download&amp;format=raw&amp;file=38&amp;Itemid=63" -O downloads/SDK_53.20.lha
+	wget "http://www.hyperion-entertainment.biz/index.php?option=com_registration&amp;view=download&amp;format=raw&amp;file=69&amp;Itemid=63" -O downloads/SDK_53.24.lha
 	cd downloads && wget -N ftp://ftp.gmplib.org/pub/$(GMP_ARCHIVE)
 	cd downloads && wget -N http://www.mpfr.org/$(MPFR_ARCHIVE)
 	cd downloads && wget -N http://www.multiprecision.org/mpc/download/$(MPC_ARCHIVE)
@@ -51,7 +51,7 @@ binutils-cross-done-$(BINUTILS_VERSION):
 #
 includes-done: downloads-done
 	mkdir -p $(ROOT_DIR)/root-cross/ppc-amigaos/SDK/include
-	cd downloads && lha x SDK_53.20.lha
+	cd downloads && lha x SDK_53.24.lha
 	cd downloads/SDK_Install && lha xf clib2*.lha
 	cd downloads/SDK_Install && lha xf newlib*.lha
 	cd downloads/SDK_Install && lha xf base.lha
@@ -79,7 +79,7 @@ gcc-cross: gcc-cross-done-$(GCC_VERSION)
 additionals-libs:
 	mkdir -p $(ROOT_DIR)/root-cross/ppc-amigaos/SDK/local/common/include
 	mkdir -p /tmp/abcd
-	cd downloads && lha xw=/tmp/abcd SDK_53.20.lha
+	cd downloads && lha xw=/tmp/abcd SDK_53.24.lha
 	cd /tmp/abcd/SDK_Install && lha x pthread.lha && lha x zlib-1.2.3.lha
 	cp -Rf /tmp/abcd/SDK_Install/Local/* $(ROOT_DIR)/root-cross/ppc-amigaos/SDK/local
 	rm -Rf /tmp/abcd
