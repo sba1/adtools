@@ -17,13 +17,13 @@ MPC_ARCHIVE=mpc-0.9.tar.gz
 #BINUTILS_SRC_DIR=../../branches/binutils/2.23.2
 #BINUTILS_VERSION=2.19.1
 #BINUTILS_SRC_DIR=../../branches/binutils/2.19.1
-BINUTILS_VERSION=2.18
-BINUTILS_SRC_DIR=../binutils
+BINUTILS_VERSION?=2.18
+BINUTILS_SRC_DIR?=../binutils
 
 #GCC_VERSION=4.9.1
 #GCC_SRC_DIR=../../branches/gcc/4.9.x/
-GCC_VERSION=4.5.4
-GCC_SRC_DIR=../../branches/gcc/4.5.x/
+GCC_VERSION?=4.5.4
+GCC_SRC_DIR?=../../branches/gcc/4.5.x/
 
 all: gcc-native-done-$(GCC_VERSION)
 
