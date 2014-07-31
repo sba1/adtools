@@ -18,7 +18,6 @@ override_dh_auto_build:
 override_dh_auto_install:
 	mkdir -p debian/adtools/opt/
 	$(MAKE) -C $(MAKE_DIR) binutils-install CROSS_PREFIX=/opt/adtools DESTDIR=$(shell pwd)/debian/adtools-binutils
-#	cp -R $(MAKE_DIR)/root-cross debian/adtools/opt/adtools
 
 # We don't have any useful tests
 override_dh_auto_test:
