@@ -1,0 +1,42 @@
+#!/usr/bin/make -f
+
+export BINUTILS_VERSION=2.23.2
+export BINUTILS_SRC_DIR=../../branches/binutils/2.23.2
+
+export GCC_VERSION=4.9.1
+export GCC_SRC_DIR=../../branches/gcc/4.9.x/
+
+MAKE_DIR=../../../native-build
+
+build:
+	dh_testdir
+	$(MAKE) -C $(MAKE_DIR) binutils-build CROSS_PREFIX=/opt/adtools
+
+override_dh_auto_build:
+	$(MAKE) -C $(MAKE_DIR) binutils-build CROSS_PREFIX=/opt/adtools
+
+override_dh_auto_install:
+	mkdir -p debian/adtools/opt/
+	$(MAKE) -C $(MAKE_DIR) binutils-install CROSS_PREFIX=/opt/adtools DESTDIR=$(shell pwd)/debian/adtools-binutils
+#	cp -R $(MAKE_DIR)/root-cross debian/adtools/opt/adtools
+
+# We don't have any useful tests
+override_dh_auto_test:
+
+# Don't strip ppc files
+override_dh_strip:
+	dh_strip --exclude=ppc-amigaos/lib --exclude=ppc-amigaos/SDK --exclude=lib/gcc/ppc-amigaos
+
+# As per default, but ignore ppc files
+override_dh_makeshlibs:
+	dh_makeshlibs --exclude=ppc-amigaos/lib --exclude=lib/gcc/ppc-amigaos
+
+# As per default, but ignore ppc files
+override_dh_shlibdeps:
+	dh_shlibdeps --exclude=ppc-amigaos/lib --exclude=lib/gcc/ppc-amigaos
+
+%:
+	echo $@
+	dh $@
+
+
