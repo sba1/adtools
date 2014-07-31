@@ -43,10 +43,19 @@ downloads-done:
 #
 # Builds the cross binutils package (assembler, etc).
 #
-binutils-cross-done-$(BINUTILS_VERSION):
+binutils-cross-build-done-$(BINUTILS_VERSION):
 	$(MAKE) -C ../binutils-build SRC_DIR=$(BINUTILS_SRC_DIR) PREFIX=$(CROSS_PREFIX) CROSS_BUILD_DIR=$(ROOT_DIR)/binutils-cross-build-$(BINUTILS_VERSION)
+	touch $@
+
+#
+# Installs the cross binutils package (assembler, etc).
+#
+binutils-cross-done-$(BINUTILS_VERSION): binutils-cross-build-done-$(BINUTILS_VERSION)
 	$(MAKE) -C $(ROOT_DIR)/binutils-cross-build-$(BINUTILS_VERSION) install
 	touch $@
+
+.PHONY: binutils-install
+binutils-install: binutils-cross-done-$(BINUTILS_VERSION)
 
 #
 # Prepares the includes
