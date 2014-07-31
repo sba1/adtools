@@ -26,6 +26,7 @@ GCC_VERSION?=4.5.4
 GCC_SRC_DIR?=../../branches/gcc/4.5.x/
 
 CROSS_PREFIX?=$(ROOT_DIR)/root-cross
+DESTDIR?=$(CROSS_PREFIX)
 
 all: gcc-native-done-$(GCC_VERSION)
 
@@ -47,11 +48,14 @@ binutils-cross-build-done-$(BINUTILS_VERSION):
 	$(MAKE) -C ../binutils-build SRC_DIR=$(BINUTILS_SRC_DIR) PREFIX=$(CROSS_PREFIX) CROSS_BUILD_DIR=$(ROOT_DIR)/binutils-cross-build-$(BINUTILS_VERSION)
 	touch $@
 
+.PHONY: binutils-build
+binutils-build: binutils-cross-build-done-$(BINUTILS_VERSION)
+
 #
 # Installs the cross binutils package (assembler, etc).
 #
 binutils-cross-done-$(BINUTILS_VERSION): binutils-cross-build-done-$(BINUTILS_VERSION)
-	$(MAKE) -C $(ROOT_DIR)/binutils-cross-build-$(BINUTILS_VERSION) install
+	$(MAKE) -C $(ROOT_DIR)/binutils-cross-build-$(BINUTILS_VERSION) install DESTDIR=$(DESTDIR)
 	touch $@
 
 .PHONY: binutils-install
@@ -156,7 +160,7 @@ native-install: coreutils-native-done gcc-native-done-$(GCC_VERSION)
 #
 .PHONY: clean
 clean:
-	rm -Rf binutils-cross-build-$(BINUTILS_VERSION) binutils-native-build $(CROSS_PREFIX) build-cross-done binutils-cross-done-$(BINUTILS_VERSION) binutils-native-done gcc-cross-build-$(GCC_VERSION) gcc-cross-done-$(GCC_VERSION) gcc-native-build-$(GCC_VERSION) gcc-native-done-$(GCC_VERSION) includes-done libraries-done root-native coreutils-native-build coreutils-native-done
+	rm -Rf binutils-cross-build-$(BINUTILS_VERSION) binutils-native-build $(CROSS_PREFIX) build-cross-done binutils-cross-build-done-$(BINUTILS_VERSION) binutils-cross-done-$(BINUTILS_VERSION) binutils-native-done gcc-cross-build-$(GCC_VERSION) gcc-cross-done-$(GCC_VERSION) gcc-native-build-$(GCC_VERSION) gcc-native-done-$(GCC_VERSION) includes-done libraries-done root-native coreutils-native-build coreutils-native-done
 
 #
 # Cleanup really everything
