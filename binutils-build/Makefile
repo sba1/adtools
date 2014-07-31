@@ -27,7 +27,6 @@ native:
 	cd $(NATIVE_BUILD_DIR);  LDFLAGS="-lunix" CFLAGS="-Wno-switch -Wno-unused" $(REAL_SRC_DIR)/configure \
 											--target=ppc-amigaos \
 											--host=ppc-amigaos \
-											--disable-nls \
 											--prefix=/gcc
 	make -C $(NATIVE_BUILD_DIR)
 
