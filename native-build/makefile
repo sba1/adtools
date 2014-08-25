@@ -26,7 +26,8 @@ GCC_VERSION?=4.5.4
 GCC_SRC_DIR?=../../branches/gcc/4.5.x/
 
 CROSS_PREFIX?=$(ROOT_DIR)/root-cross
-DESTDIR?=$(CROSS_PREFIX)
+# This assumes that cross prefix is absolute
+DESTDIR?=/
 
 all: gcc-native-done-$(GCC_VERSION)
 
