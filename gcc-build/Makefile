@@ -7,8 +7,8 @@
 # when compiling 4.4.x or newer.
 # 
 
-SRC_DIR=../gcc
-VERSION=trunk
+SRC_DIR=../gcc-4.9.x
+VERSION=4.9.x
 CROSS_BUILD_DIR=cross-$(VERSION)
 NATIVE_BUILD_DIR=native-$(VERSION)
 PREFIX=/usr/local/amiga
