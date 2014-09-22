@@ -1,23 +1,21 @@
 #!/usr/bin/make -f
 
-export BINUTILS_VERSION=2.23.2
-export BINUTILS_SRC_DIR=../../branches/binutils/2.23.2
-
 export GCC_VERSION=4.9.1
 export GCC_SRC_DIR=../../branches/gcc/4.9.x/
 
-MAKE_DIR=../../../native-build
+MAKE_DIR=../../../gcc-build
+PWD=$(shell pwd)
 
 build:
 	dh_testdir
-	$(MAKE) -C $(MAKE_DIR) gcc-cross
+	$(MAKE) -C $(MAKE_DIR) SRC_DIR=$(GCC_SRC_DIR) PREFIX=/opt/adtools VERSION=$(GCC_VERSION)
 
-override_dh_auto_build:
-	$(MAKE) -C $(MAKE_DIR) gcc-cross
+#override_dh_auto_build:
+#	$(MAKE) -C $(MAKE_DIR) gcc-cross
 
 override_dh_auto_install:
-	mkdir -p debian/adtools/opt/
-	cp -R $(MAKE_DIR)/root-cross debian/adtools/opt/adtools
+	$(MAKE) -C $(MAKE_DIR)/cross-$(GCC_VERSION) DESTDIR=$(PWD)/debian/adtools-gcc install
+	rm -f debian/adtools-gcc/opt/adtools/share/info/dir
 
 # We don't have any useful tests
 override_dh_auto_test:

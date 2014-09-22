@@ -1,4 +1,4 @@
-adtools (0.0.1-0) UNRELEASED; urgency=medium
+adtools-gcc (0.0.1-0) UNRELEASED; urgency=medium
 
   * Initial packaging. Does not work yet.
 
