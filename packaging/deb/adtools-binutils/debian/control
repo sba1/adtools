@@ -1,7 +1,7 @@
 Source: adtools-binutils
 Section: devel
 Priority: extra
-Build-Depends: debhelper (>=9)
+Build-Depends: debhelper (>=9), texinfo
 Maintainer: Sebastian Bauer <mail@sebastianbauer.info>
 
 Package: adtools-binutils
