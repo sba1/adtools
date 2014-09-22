@@ -1,10 +1,10 @@
-Source: adtools
+Source: adtools-gcc
 Section: devel
 Priority: extra
-Build-Depends: debhelper (>=9)
+Build-Depends: debhelper (>=9), adtools-binutils, adtools-sdk
 Maintainer: Sebastian Bauer <mail@sebastianbauer.info>
 
-Package: adtools
+Package: adtools-compiler
 Depends: ${shlibs:Depends}
 Description: Amiga Development Tools
 Architecture: any
