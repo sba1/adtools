@@ -41,6 +41,9 @@ case "$1" in
 		(cd ${EXTRACTDIR}; find newlib clib2 -type f | sort | xargs sha1sum >${CROSS_ROOT}/crt.sha1sum)
 		(cd ${EXTRACTDIR}/Include; find * -type f | sort | xargs sha1sum >${CROSS_ROOT}/include.sha1sum)
 
+		# Make the files readable for all
+		chmod -R a+r ${EXTRACTDIR}
+
 		# Now copy/move the files to the appropriate destination
 		mv ${EXTRACTDIR}/clib2* ${EXTRACTDIR}/newlib* ${CROSS_ROOT}/ppc-amigaos/SDK
 		mv ${EXTRACTDIR}/Include/* ${CROSS_ROOT}/ppc-amigaos/SDK/include
