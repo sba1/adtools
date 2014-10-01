@@ -6,12 +6,8 @@ export GCC_SRC_DIR=../../branches/gcc/4.9.x/
 MAKE_DIR=../../../gcc-build
 PWD=$(shell pwd)
 
-build:
-	dh_testdir
+override_dh_auto_build:
 	$(MAKE) -C $(MAKE_DIR) SRC_DIR=$(GCC_SRC_DIR) PREFIX=/opt/adtools VERSION=$(GCC_VERSION)
-
-#override_dh_auto_build:
-#	$(MAKE) -C $(MAKE_DIR) gcc-cross
 
 override_dh_auto_install:
 	$(MAKE) -C $(MAKE_DIR)/cross-$(GCC_VERSION) DESTDIR=$(PWD)/debian/adtools-gcc install
