@@ -13,7 +13,12 @@ RUN apt-get install -y \
 RUN apt-get install -y --no-install-recommends \
 	debhelper \
 	devscripts \
-	texinfo
+	texinfo \
+	lhasa \
+	libgmp-dev \
+	libmpfr-dev \
+	libmpc-dev \
+	flex
 
 # Download original gcc archives
 RUN mkdir /build
@@ -56,17 +61,10 @@ RUN debuild -i -us -uc -b
 
 # Install just built packages
 WORKDIR /build/adtools/trunk/packaging/deb/
-RUN apt-get install -y --no-install-recommends \
-	lhasa
 RUN dpkg --install *.deb
 
 # Build GCC package
 WORKDIR /build/adtools/trunk/packaging/deb/adtools-gcc
-RUN apt-get install -y --no-install-recommends \
-	libgmp-dev \
-	libmpfr-dev \
-	libmpc-dev \
-	flex
 
 # Extend path
 ENV PATH /opt/adtools/bin:$PATH
