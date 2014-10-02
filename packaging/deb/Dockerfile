@@ -72,8 +72,8 @@ RUN apt-get install -y --no-install-recommends \
 ENV PATH /opt/adtools/bin:$PATH
 
 # Update debian packaging
-RUN rm -Rf /adtools/trunk/packaging/deb/adtools-gcc
-COPY adtools-gcc /adtools/trunk/packaging/deb
+RUN rm -Rf /build/adtools/trunk/packaging/deb/adtools-gcc
+COPY adtools-gcc /build/adtools/trunk/packaging/deb/adtools-gcc
 
 # Try to build the package, does not work yet
-#RUN debuild -i -us -uc -b -j2
+RUN debuild -j2 -i -us -uc -b
