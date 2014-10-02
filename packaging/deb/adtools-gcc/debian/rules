@@ -1,5 +1,10 @@
 #!/usr/bin/make -f
 
+export DH_VERBOSE=1
+
+# Disable all security flags. The build will not go through otherwise.
+export DEB_BUILD_MAINT_OPTIONS=hardening=-all
+
 export GCC_VERSION=4.9.1
 export GCC_SRC_DIR=../../branches/gcc/4.9.x/
 
