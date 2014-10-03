@@ -3,14 +3,13 @@
 FROM debian:wheezy         
                     
 RUN apt-get update
-RUN apt-get install -y \
+RUN apt-get install -y --no-install-recommends \
 	binutils \
 	patch \
 	gcc \
 	subversion \
 	build-essential \
-	wget
-RUN apt-get install -y --no-install-recommends \
+	wget \
 	debhelper \
 	devscripts \
 	texinfo \
@@ -18,6 +17,7 @@ RUN apt-get install -y --no-install-recommends \
 	libgmp-dev \
 	libmpfr-dev \
 	libmpc-dev \
+	fakeroot \
 	flex
 
 # Download original gcc archives
