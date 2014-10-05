@@ -75,3 +75,13 @@ COPY adtools-gcc /build/adtools/trunk/packaging/deb/adtools-gcc
 
 # Try to build the package, does not work yet
 RUN debuild -j2 -i -us -uc -b
+
+# Now copy all artifacts to a known directory
+RUN mkdir /artifacts
+WORKDIR /build/adtools/trunk/packaging/deb
+RUN cp *.deb /artifacts
+WORKDIR /artifacts
+
+# The default command that is executed when the container is started
+# We simply generated a tar that the host should extract
+CMD tar c *.deb
