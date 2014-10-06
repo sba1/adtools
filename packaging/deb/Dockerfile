@@ -81,7 +81,8 @@ RUN mkdir /artifacts
 WORKDIR /build/adtools/trunk/packaging/deb
 RUN cp *.deb /artifacts
 WORKDIR /artifacts
+RUN dpkg-scanpackages ./ /dev/null | gzip >Packages.gz
 
 # The default command that is executed when the container is started
 # We simply generated a tar that the host should extract
-CMD tar c *.deb
+CMD tar c .
