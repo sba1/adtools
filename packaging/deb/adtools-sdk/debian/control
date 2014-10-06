@@ -5,6 +5,6 @@ Build-Depends: debhelper (>=9)
 Maintainer: Sebastian Bauer <mail@sebastianbauer.info>
 
 Package: adtools-sdk
-Depends: lha | lhasa
+Depends: lha | lhasa, wget
 Description: Amiga Development Tools - SDK
 Architecture: any
