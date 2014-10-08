@@ -20,30 +20,6 @@ RUN apt-get install -y --no-install-recommends \
 	fakeroot \
 	flex
 
-# Download original gcc archives
-RUN mkdir /build
-
-WORKDIR  /build
-
-RUN mkdir -p /build/adtools/trunk
-RUN mkdir -p /build/adtools/branches
-
-# Download sources
-WORKDIR /build/adtools/trunk
-RUN svn export svn://svn.code.sf.net/p/adtools/code/trunk/binutils-build
-RUN svn export svn://svn.code.sf.net/p/adtools/code/trunk/gcc-build
-RUN svn export svn://svn.code.sf.net/p/adtools/code/trunk/native-build
-RUN svn export svn://svn.code.sf.net/p/adtools/code/trunk/packaging
-
-WORKDIR /build/adtools/branches
-RUN mkdir binutils gcc
-
-WORKDIR /build/adtools/branches/binutils
-RUN svn export svn://svn.code.sf.net/p/adtools/code/branches/binutils/2.23.2
-
-WORKDIR /build/adtools/branches/gcc
-RUN svn export svn://svn.code.sf.net/p/adtools/code/branches/gcc/4.9.x
-
 # Build Cygwin compiler first
 RUN mkdir -p /cygwin/src
 WORKDIR /cygwin/src
@@ -103,11 +79,32 @@ RUN ../gcc-4.8.3/configure \
 RUN make -j2
 RUN make install
 
-# Now create build dirs for binutils and gcc
-WORKDIR /build
-RUN mkdir -p adtools-build/binutils-build adtools-build/gcc-build
+#
+# Now really try to build the adtools cygwin packages
+#
+# Start creating necessary directories
+#
+RUN mkdir -p \
+	/build/adtools/trunk \
+	/build/adtools/branches\binutils \
+	/build/adtools/branches\gcc \
+	/build/adtools-build/binutils-build \
+	/build/adtools-build/gcc-build
 
-# Now build adtools binutils
+# Download sources
+WORKDIR /build/adtools/trunk
+RUN svn export svn://svn.code.sf.net/p/adtools/code/trunk/binutils-build
+RUN svn export svn://svn.code.sf.net/p/adtools/code/trunk/gcc-build
+RUN svn export svn://svn.code.sf.net/p/adtools/code/trunk/native-build
+RUN svn export svn://svn.code.sf.net/p/adtools/code/trunk/packaging
+
+WORKDIR /build/adtools/branches/binutils
+RUN svn export svn://svn.code.sf.net/p/adtools/code/branches/binutils/2.23.2
+
+WORKDIR /build/adtools/branches/gcc
+RUN svn export svn://svn.code.sf.net/p/adtools/code/branches/gcc/4.9.x
+
+# Now build and install adtools binutils
 WORKDIR /build/adtools-build/binutils-build
 RUN CFLAGS="-Wno-switch -Wno-unused" ../../adtools/branches/binutils/2.23.2/configure \
 	--host=i686-pc-cygwin \
@@ -116,7 +113,7 @@ RUN CFLAGS="-Wno-switch -Wno-unused" ../../adtools/branches/binutils/2.23.2/conf
 RUN make -j2
 RUN make install
 
-# Now build adtools gcc
+# Now build and install adtools gcc
 WORKDIR /build/adtools-build/gcc-build
 RUN ../../adtools/branches/gcc/4.9.x/configure \
 	--host=i686-pc-cygwin \
