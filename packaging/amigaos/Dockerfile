@@ -92,3 +92,6 @@ RUN ../../adtools/branches/gcc/4.9.x/configure \
 	
 RUN make -j2
 RUN make install
+
+# Switch back to the root
+WORKDIR /
