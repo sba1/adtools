@@ -9,7 +9,7 @@
 set -e
 
 # Root of the cross compiler environment
-CROSS_ROOT=/opt/adtools
+CROSS_ROOT=/usr/
 
 # Usage
 display_usage() {

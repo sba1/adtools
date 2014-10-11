@@ -1,5 +1,7 @@
 #!/usr/bin/make -f
 
+top_dir := $(shell pwd)
+
 export DH_VERBOSE=1
 
 # Disable all security flags. The build will not go through otherwise.
@@ -12,11 +14,24 @@ MAKE_DIR=../../../gcc-build
 PWD=$(shell pwd)
 
 override_dh_auto_build:
-	$(MAKE) -C $(MAKE_DIR) SRC_DIR=$(GCC_SRC_DIR) PREFIX=/opt/adtools VERSION=$(GCC_VERSION)
+	CFLAGS="-Wno-switch" ../../$(GCC_SRC_DIR)/configure \
+		--target=ppc-amigaos \
+		--prefix=/usr \
+		--libexec=/usr/lib \
+		--with-bugurl='http://sf.net/p/adtools' \
+		--with-pkgversion='adtools build $(VERSION)' \
+		--enable-languages=c,c++  \
+		--enable-haifa            \
+		--enable-sjlj-exceptions  \
+		--disable-libstdcxx-pch \
+		--disable-tls \
+		--disable-nls
+	$(MAKE)
 
 override_dh_auto_install:
-	$(MAKE) -C $(MAKE_DIR)/cross-$(GCC_VERSION) DESTDIR=$(PWD)/debian/adtools-gcc install
-	rm -f debian/adtools-gcc/opt/adtools/share/info/dir
+	$(MAKE) install DESTDIR=$(top_dir)/debian/adtools-gcc
+	rm -f debian/adtools-gcc/usr/share/info/dir
+	find debian/adtools-gcc
 
 # We don't have any useful tests
 override_dh_auto_test:

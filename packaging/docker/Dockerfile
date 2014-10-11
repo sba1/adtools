@@ -11,6 +11,3 @@ RUN apt-get install -y --force-yes --no-install-recommends \
 	adtools-binutils \
 	adtools-sdk \
 	adtools-gcc
-
-# Now extend the PATH env variable
-ENV PATH /opt/adtools/bin:$PATH

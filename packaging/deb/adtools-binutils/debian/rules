@@ -1,23 +1,22 @@
 #!/usr/bin/make -f
 
+top_dir := $(shell pwd)
+
 export BINUTILS_VERSION=2.23.2
 export BINUTILS_SRC_DIR=../../branches/binutils/2.23.2
 
-export GCC_VERSION=4.9.1
-export GCC_SRC_DIR=../../branches/gcc/4.9.x/
-
-MAKE_DIR=../../../native-build
-
-build:
-	dh_testdir
-	$(MAKE) -C $(MAKE_DIR) binutils-build CROSS_PREFIX=/opt/adtools
-
 override_dh_auto_build:
-	$(MAKE) -C $(MAKE_DIR) binutils-build CROSS_PREFIX=/opt/adtools
+	CFLAGS="-Wno-switch" ../../$(BINUTILS_SRC_DIR)/configure \
+		--target=ppc-amigaos \
+		--prefix=/usr \
+		--disable-nls
+	$(MAKE)
 
 override_dh_auto_install:
 	mkdir -p debian/adtools/opt/
-	$(MAKE) -C $(MAKE_DIR) binutils-install CROSS_PREFIX=/opt/adtools DESTDIR=$(shell pwd)/debian/adtools-binutils
+	$(MAKE) install DESTDIR=$(top_dir)/debian/adtools-binutils
+	rm -Rf $(top_dir)/debian/adtools-binutils/usr/share/info
+	rm -Rf $(top_dir)/debian/adtools-binutils/usr/lib/libiberty.a
 
 # We don't have any useful tests
 override_dh_auto_test:

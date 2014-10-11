@@ -51,9 +51,17 @@ RUN svn export svn://svn.code.sf.net/p/adtools/code/branches/gcc/4.9.x
 # Download deb files
 #RUN svn export svn://svn.code.sf.net/p/adtools/code/trunk/packaging . --depth infinity
 
+# Update SDK packaging
+RUN rm -Rf /build/adtools/trunk/packaging/deb/adtools-sdk #
+COPY adtools-sdk /build/adtools/trunk/packaging/deb/adtools-sdk
+
 # Build SDK package
 WORKDIR /build/adtools/trunk/packaging/deb/adtools-sdk
 RUN debuild -i -us -uc -b
+
+# Update debian packaging
+RUN rm -Rf /build/adtools/trunk/packaging/deb/adtools-binutils
+COPY adtools-binutils /build/adtools/trunk/packaging/deb/adtools-binutils
 
 # Build Binutils package
 WORKDIR /build/adtools/trunk/packaging/deb/adtools-binutils
@@ -65,9 +73,6 @@ RUN dpkg --install *.deb
 
 # Build GCC package
 WORKDIR /build/adtools/trunk/packaging/deb/adtools-gcc
-
-# Extend path
-ENV PATH /opt/adtools/bin:$PATH
 
 # Update debian packaging
 RUN rm -Rf /build/adtools/trunk/packaging/deb/adtools-gcc
