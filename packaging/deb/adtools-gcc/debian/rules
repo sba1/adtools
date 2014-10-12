@@ -32,13 +32,10 @@ override_dh_auto_install:
 	$(MAKE) install DESTDIR=$(top_dir)/debian/adtools-gcc
 	rm -f $(top_dir)/debian/adtools-gcc/usr/share/info/dir
 	rm -f $(top_dir)/debian/adtools-gcc/usr/lib/libiberty.a
-	rm -f $(top_dir)/debian/adtools-gcc/usr/lib/gcc/ppc-amigaos/4.9.1/libgcc_eh.a
-	rm -f $(top_dir)/debian/adtools-gcc/usr/lib/gcc/ppc-amigaos/4.9.1/libgcc.a
-	rm -f $(top_dir)/debian/adtools-gcc/usr/lib/gcc/ppc-amigaos/4.9.1/libgcc.so
-	rm -f $(top_dir)/debian/adtools-gcc/usr/ppc-amigaos/lib/*.a
-	rm -f $(top_dir)/debian/adtools-gcc/usr/ppc-amigaos/lib/*.la
-	rm -f $(top_dir)/debian/adtools-gcc/usr/ppc-amigaos/lib/*.so
-	rm -f $(top_dir)/debian/adtools-gcc/usr/ppc-amigaos/lib/*.py
+#	rm -f $(top_dir)/debian/adtools-gcc/usr/ppc-amigaos/lib/*.a
+#	rm -f $(top_dir)/debian/adtools-gcc/usr/ppc-amigaos/lib/*.la
+#	rm -f $(top_dir)/debian/adtools-gcc/usr/ppc-amigaos/lib/*.so
+#	rm -f $(top_dir)/debian/adtools-gcc/usr/ppc-amigaos/lib/*.py
 	rm -Rf $(top_dir)/debian/adtools-gcc/usr/share/info
 	rm -Rf $(top_dir)/debian/adtools-gcc/usr/share/man/man7
 	rm -Rf $(top_dir)/debian/adtools-gcc/usr/share/gcc-4.9.1
