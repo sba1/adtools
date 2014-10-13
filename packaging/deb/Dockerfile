@@ -1,9 +1,9 @@
 # Dockerfile for generating adtools Debian packages
-                           
 FROM debian:wheezy         
-                    
+
+RUN echo deb http://ftp.debian.org/debian wheezy-backports main >>/etc/apt/sources.list
 RUN apt-get update
-RUN apt-get install -y --no-install-recommends \
+RUN apt-get install -t wheezy-backports -y --no-install-recommends \
 	binutils \
 	patch \
 	gcc \
@@ -43,7 +43,6 @@ RUN svn export svn://svn.code.sf.net/p/adtools/code/branches/binutils/2.23.2
 
 WORKDIR /build/adtools/branches/gcc
 RUN svn export svn://svn.code.sf.net/p/adtools/code/branches/gcc/4.9.x
-RUN svn export svn://svn.code.sf.net/p/adtools/code/branches/gcc/4.5.x
 
 # Download original sources
 #RUN wget http://ftpmirror.gnu.org/gcc/gcc-4.9.1/gcc-4.9.1.tar.bz2
@@ -75,15 +74,6 @@ RUN dpkg --install *.deb
 # Update debian packaging
 RUN rm -Rf /build/adtools/trunk/packaging/deb/adtools-gcc
 COPY adtools-gcc /build/adtools/trunk/packaging/deb/adtools-gcc
-
-RUN rm -Rf /build/adtools/trunk/packaging/deb/adtools-gcc-4.5
-COPY adtools-gcc-4.5 /build/adtools/trunk/packaging/deb/adtools-gcc-4.5
-
-# Build GCC package
-WORKDIR /build/adtools/trunk/packaging/deb/adtools-gcc-4.5
-
-# Try to build the package
-RUN debuild -j2 -i -us -uc -b
 
 # Build GCC package
 WORKDIR /build/adtools/trunk/packaging/deb/adtools-gcc
