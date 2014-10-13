@@ -85,6 +85,7 @@ RUN ../../adtools/branches/gcc/4.9.x/configure \
 	--enable-haifa            \
 	--enable-sjlj-exceptions  \
 	--disable-libstdcxx-pch \
+	--disable-nls \
 	--disable-tls \
 	--with-gmp=/opt/adtools \
 	--with-mpfr=/opt/adtools \
@@ -92,6 +93,23 @@ RUN ../../adtools/branches/gcc/4.9.x/configure \
 	
 RUN make -j2
 RUN make install
+
+WORKDIR /gcc/bin
+RUN ppc-amigaos-strip *
+RUN ln -sf ppc-amigaos-gcc-4.9.1 gcc
+RUN ln -sf ppc-amigaos-gcc-4.9.1 ppc-amigaos-gcc
+RUN ln -sf ppc-amigaos-g++ ppc-amigaos-c++
+RUN ln -sf ppc-amigaos-g++ c++
+RUN ln -sf ppc-amigaos-g++ g++
+RUN ln -sf ld.bfd ld
+
+WORKDIR /gcc/libexec/gcc/ppc-amigaos/4.9.1
+RUN ppc-amigaos-strip \
+	cc1 \
+	cc1plus
+# Merging the following with the previous segfaults
+RUN ppc-amigaos-strip \
+	lto1
 
 # Switch back to the root
 WORKDIR /
