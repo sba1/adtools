@@ -6,7 +6,7 @@ export BINUTILS_VERSION=2.23.2
 export BINUTILS_SRC_DIR=../../branches/binutils/2.23.2
 
 override_dh_auto_build:
-	CFLAGS="-Wno-switch" ../../$(BINUTILS_SRC_DIR)/configure \
+	CFLAGS="-Wno-switch -Wno-unused" ../../$(BINUTILS_SRC_DIR)/configure \
 		--target=ppc-amigaos \
 		--prefix=/usr \
 		--disable-nls
