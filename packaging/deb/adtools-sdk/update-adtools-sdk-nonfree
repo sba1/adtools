@@ -38,8 +38,8 @@ case "$1" in
 		mkdir -p ${CROSS_ROOT}/ppc-amigaos/SDK/include
 
 		# Keep information about which files we copied
-		(cd ${EXTRACTDIR}; find newlib clib2 -type f | sort | xargs sha1sum >${CROSS_ROOT}/crt.sha1sum)
-		(cd ${EXTRACTDIR}/Include; find * -type f | sort | xargs sha1sum >${CROSS_ROOT}/include.sha1sum)
+		(cd ${EXTRACTDIR}; find newlib clib2 -type f | sort | xargs sha1sum >${CROSS_ROOT}/ppc-amigaos/crt.sha1sum)
+		(cd ${EXTRACTDIR}/Include; find * -type f | sort | xargs sha1sum >${CROSS_ROOT}/ppc-amigaos/include.sha1sum)
 
 		# Make the files readable for all
 		chmod -R a+r ${EXTRACTDIR}
@@ -50,7 +50,10 @@ case "$1" in
 
 		;;
 	--uninstall)
-		echo "Uninstalling not yet supported!"
+		(cd ${CROSS_ROOT}/ppc-amigaos/SDK; sha1sum -c ../crt.sha1sum | grep OK$  | cut -d ':' -f 1 | xargs rm)
+		(cd ${CROSS_ROOT}/ppc-amigaos/SDK/include; sha1sum -c ../../include.sha1sum | grep OK$  | cut -d ':' -f 1 | xargs rm)
+		rm ${CROSS_ROOT}/ppc-amigaos/crt.sha1sum
+		rm ${CROSS_ROOT}/ppc-amigaos/include.sha1sum
 		;;
 
 	*)
