@@ -54,6 +54,7 @@ case "$1" in
 		(cd ${CROSS_ROOT}/ppc-amigaos/SDK/include; sha1sum -c ../../include.sha1sum | grep OK$  | cut -d ':' -f 1 | xargs rm)
 		rm ${CROSS_ROOT}/ppc-amigaos/crt.sha1sum
 		rm ${CROSS_ROOT}/ppc-amigaos/include.sha1sum
+		find ${CROSS_ROOT}/ppc-amigaos -depth -type d -delete
 		;;
 
 	*)
