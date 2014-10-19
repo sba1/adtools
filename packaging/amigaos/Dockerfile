@@ -75,7 +75,7 @@ RUN make install
 
 # Now build and install adtools gcc
 WORKDIR /build/adtools-build/gcc-build
-RUN ../../adtools/branches/gcc/4.9.x/configure \
+RUN CPPFLAGS="-static" LDFLAGS="-static" ../../adtools/branches/gcc/4.9.x/configure \
 	--host=ppc-amigaos \
 	--target=ppc-amigaos \
 	--prefix=/gcc \
