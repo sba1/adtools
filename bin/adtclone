@@ -1,0 +1,17 @@
+#! /bin/bash -x
+#
+# This script clones or updates all repositories
+#
+
+# The home of the script
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+# The root of the repo
+ROOT_DIR="$(readlink -f ${DIR}/..)"
+
+# gcc
+if [ ! -e "${ROOT_DIR}/gcc/repo" ]; then
+    $(cd "${ROOT_DIR}/gcc" && git clone -n `cat repo.url` repo)
+else
+    $(cd "${ROOT_DIR}/gcc/repo" && git fetch origin)
+fi
