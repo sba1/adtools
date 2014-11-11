@@ -48,5 +48,5 @@ call(["git", "branch", "-f", branch+"-base"])
 patches = os.path.join("..",branch,"patches","*.patch")
 
 # Apply them
-call(["git", "apply"] + glob.glob(patches))
+call(["git", "am"] + glob.glob(patches))
 
