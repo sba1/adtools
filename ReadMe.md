@@ -26,11 +26,11 @@ A very naive patch management system that should simplify the management
 of patches is included here. The scripts are situated in bin directory.
 The scripts depend on Python.
 
-* ```adtclone```: will fetch all relevant baselines into the respective
- ```repo``` directories.
+* ```adtclone```: will fetch the external sources of all components into
+ the respective ```repo``` directories. The checkout will not be affected.
 
-* ```adtcheckout ```: will checkout a specific branch to the working
-directory of the ```repo``` directory and apply the current patches for
-this branch. The result of this is what should be used for compiling. It
-can also be used to adjust the order and content of the patches e.g.,
-using ```git rebase``` etc.
+* ```adtcheckout ```: will checkout for a specific component a specific 
+ branch to the working directory of the ```repo``` directory and apply 
+ the current patches for this branch. The result of this is what should 
+ be used for compiling. It can also be used to adjust the order and 
+ content of the patches e.g., using ```git rebase``` etc.
