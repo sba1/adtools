@@ -12,7 +12,7 @@ from subprocess import call
 script = os.path.realpath(sys.argv[0])
 root = os.path.realpath(os.path.dirname(script) + "/../")
 
-components = ['gcc']
+components = ['binutils', 'gcc']
 
 for component in components:
 	os.chdir(os.path.join(root,component))
