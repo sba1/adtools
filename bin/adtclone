@@ -1,17 +1,25 @@
-#! /bin/bash -x
+#! /usr/bin/python
 #
-# This script clones or updates all repositories
+# This script clones or updates all the vendor git repositories
+#
+# (c) 2014 by Sebastian Bauer
 #
 
-# The home of the script
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+import os
+import sys
+from subprocess import call
 
-# The root of the repo
-ROOT_DIR="$(readlink -f ${DIR}/..)"
+script = os.path.realpath(sys.argv[0])
+root = os.path.realpath(os.path.dirname(script) + "/../")
 
-# gcc
-if [ ! -e "${ROOT_DIR}/gcc/repo" ]; then
-    $(cd "${ROOT_DIR}/gcc" && git clone -n `cat repo.url` repo)
-else
-    $(cd "${ROOT_DIR}/gcc/repo" && git fetch origin)
-fi
+components = ['gcc']
+
+for component in components:
+	os.chdir(os.path.join(root,component))
+	if os.path.exists("repo"):
+		os.chdir("repo")
+		call(['git', 'fetch', 'origin'])
+	else:
+		repo = open("repo.url").readline().strip()
+		call(['git', 'clone', repo, 'repo'])
+
