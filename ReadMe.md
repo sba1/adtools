@@ -33,4 +33,11 @@ The scripts depend on Python.
  branch to the working directory of the ```repo``` directory and apply 
  the current patches for this branch. The result of this is what should 
  be used for compiling. It can also be used to adjust the order and 
- content of the patches e.g., using ```git rebase``` etc.
+ content of the patches e.g., using ```git rebase``` etc. For example,
+ invoke
+ ```
+ $ adtcheckout gcc 4.9
+ ```
+ to checkout the version 4.9 branch of gcc and apply all adtools patches
+ for this branch.
+
