@@ -1,0 +1,310 @@
+From 3851af7b8d2926853b97630537cb8a543a113945 Mon Sep 17 00:00:00 2001
+From: Sebastian Bauer <mail@sebastianbauer.info>
+Date: Fri, 14 Nov 2014 20:03:56 +0100
+Subject: [PATCH 2/2] Added new function attribute "lineartags" and pragma
+ "amigaos tagtype".
+
+Functions that have the lineartags attribute are assumed to be functions
+with tags, in which case type checking is now enabled. That is, the value
+that follow a specific tag is assumed to be a certain type. If this is
+not the case, the compiler will warn.
+
+The compiler can be taught about that types via the new pragma
+#pragma amigaos tagtype(TYPE)
+which is written before an "enum" or a "static const int" that defines
+the number of the tag.
+
+For instance:
+
+#pragma amigaos tagtype(struct Screen *)
+static const int WA_CustomScreen = WA_Dummy + 0x0D;
+
+ or
+
+#pragma amigaos tagtype(struct Screen *)
+enum {WA_CustomScreen = WA_Dummy + 0x0D};
+
+is possible now.
+
+It is not very robust yet wrt to catching misuses of the new feature.
+For instance, no check is done that the attribute is applied to varargs
+functions.
+---
+ gcc/c-family/c-pragma.c            |  10 +++
+ gcc/c/c-parser.c                   | 129 +++++++++++++++++++++++++++++++++++++
+ gcc/c/c-typeck.c                   |  24 +++++++
+ gcc/config/rs6000/amigaos-protos.h |   1 +
+ gcc/config/rs6000/amigaos.c        |   7 ++
+ 5 files changed, 171 insertions(+)
+
+diff --git a/gcc/c-family/c-pragma.c b/gcc/c-family/c-pragma.c
+index ad115e9..25a6ec7 100644
+--- a/gcc/c-family/c-pragma.c
++++ b/gcc/c-family/c-pragma.c
+@@ -1051,6 +1051,15 @@ handle_pragma_message (cpp_reader *ARG_UNUSED(dummy))
+     inform (input_location, "#pragma message: %s", TREE_STRING_POINTER (message));
+ }
+ 
++/* This is queried by the invoker of the handler */
++int was_tagtypepragma;
++/* Tagtype pragma */
++static void
++handle_pragma_tagtype (cpp_reader *reader)
++{
++  was_tagtypepragma = 1;
++}
++
+ /* Mark whether the current location is valid for a STDC pragma.  */
+ 
+ static bool valid_location_for_stdc_pragma;
+@@ -1432,6 +1441,7 @@ init_pragma (void)
+ 
+   c_register_pragma_with_expansion (0, "message", handle_pragma_message);
+ 
++  c_register_pragma_with_expansion ("amigaos", "tagtype", handle_pragma_tagtype);
+ #ifdef REGISTER_TARGET_PRAGMAS
+   REGISTER_TARGET_PRAGMAS ();
+ #endif
+diff --git a/gcc/c/c-parser.c b/gcc/c/c-parser.c
+index a51af2e..906230c 100644
+--- a/gcc/c/c-parser.c
++++ b/gcc/c/c-parser.c
+@@ -62,6 +62,68 @@ along with GCC; see the file COPYING3.  If not see
+ #include "plugin.h"
+ #include "omp-low.h"
+ 
++static htab_t amigaos_tagdecl_to_type;
++
++struct amigaos_hash_type
++{
++  tree decl;
++  tree type;
++};
++
++static hashval_t
++amigaos_hash_descriptor (const void *p)
++{
++  return htab_hash_pointer (((const amigaos_hash_type *)p)->decl);
++}
++
++static int
++amigaos_eq_descriptor (const void *p1, const void *p2)
++{
++  return ((const amigaos_hash_type *)p1)->decl == ((const amigaos_hash_type *)p2)->decl;
++}
++
++/**
++ * Returns the tag type that is associated with the given type.
++ *
++ * @param type
++ * @return
++ */
++tree amigaos_get_type_associated_tagtype(tree decl)
++{
++  amigaos_hash_type aht = {decl, 0};
++  amigaos_hash_type *faht;
++
++  if (!amigaos_tagdecl_to_type)
++    return NULL;
++
++  faht = (amigaos_hash_type *)htab_find(amigaos_tagdecl_to_type, &aht);
++  if (!faht)
++    return NULL;
++  return faht->type;
++}
++
++static void amigaos_put_type_associated_tagtype(tree decl, tree type)
++{
++  gcc_assert(decl);
++
++  if (!amigaos_tagdecl_to_type)
++    amigaos_tagdecl_to_type = htab_create (10, amigaos_hash_descriptor, amigaos_eq_descriptor, NULL);
++
++  amigaos_hash_type *aht = (amigaos_hash_type *)xmalloc(sizeof(*aht));
++  aht->decl = decl;
++  aht->type = type;
++
++  void **pentry = htab_find_slot (amigaos_tagdecl_to_type, aht, INSERT);
++  gcc_assert(pentry);
++  gcc_assert(*pentry == NULL);
++  *pentry = aht;
++}
++
++/**
++ * Contains the tagtype that is currently processed or NULL_TREE
++ * if no tagtype is processed.
++ */
++static tree amigaos_current_tagtype;
+ 
+ /* Initialization routine for this file.  */
+ 
+@@ -2325,6 +2387,9 @@ c_parser_declspecs (c_parser *parser, struct c_declspecs *specs,
+ 	  seen_type = true;
+ 	  t = c_parser_enum_specifier (parser);
+ 	  declspecs_add_type (loc, specs, t);
++	  /* Handle special tagtype enhanced enums */
++	  if (amigaos_current_tagtype != NULL_TREE && t.spec != NULL_TREE)
++	    amigaos_put_type_associated_tagtype(t.spec, amigaos_current_tagtype);
+ 	  break;
+ 	case RID_STRUCT:
+ 	case RID_UNION:
+@@ -9359,6 +9424,26 @@ c_parser_objc_at_dynamic_declaration (c_parser *parser)
+ }
+ 
+ 
++/**
++ * This function is called whenever a declaration was finished that was preceded
++ * by a tagtype pragma.
++ *
++ * @param gcc_data will be the finished declaration
++ * @param user_data will be the parsed c type of the declaration (c_type_name *)
++ *  that was specified ahead of the declaration via the pragma.
++ */
++static void amigaos_tagtype_finish_decl_callback (void *gcc_data, void *user_data)
++{
++  tree decl = (tree)gcc_data;
++  c_type_name *ctype = (c_type_name*)user_data;
++  tree type = groktypename (ctype, NULL, NULL);
++
++  /* TODO: All sorts of checks */
++
++  /* Now put the association in our own hash table */
++  amigaos_put_type_associated_tagtype(decl, type);
++}
++
+ /* Handle pragmas.  Some OpenMP pragmas are associated with, and therefore
+    should be considered, statements.  ALLOW_STMT is true if we're within
+    the context of a function and such pragmas are to be allowed.  Returns
+@@ -9510,6 +9595,50 @@ c_parser_pragma (c_parser *parser, enum pragma_context context)
+   c_parser_consume_pragma (parser);
+   c_invoke_pragma_handler (id);
+ 
++  /* If was_tagtypepragma is set, the pragma was a tagtype one,
++   * which, at the moment, cannot easily handled outside of this
++   * file.
++   */
++  extern int was_tagtypepragma;
++  if (was_tagtypepragma)
++  {
++    c_token *tok = c_parser_peek_token (the_parser);
++    enum cpp_ttype ret = tok->type;
++    c_parser_consume_token(parser);
++
++    c_type_name *ctype = c_parser_type_name(parser);
++    tree ctypetree = groktypename (ctype, NULL, NULL);
++
++    /* Make the parsed type available to all functions called from here on */
++    amigaos_current_tagtype = ctypetree;
++
++    tok = c_parser_peek_token (the_parser);
++    ret = tok->type;
++    c_parser_consume_token(parser);
++    c_parser_skip_to_pragma_eol(parser);
++
++    tok = c_parser_peek_token (the_parser);
++    ret = tok->type;
++
++    /* Parse the line that follows. We will register for a PLUGIN_FINISH_DECL event
++     * to minimize contermination
++     */
++    bool old_flag_plugin_added = flag_plugin_added;
++    register_callback ("amigaos-tagtype", PLUGIN_FINISH_DECL,
++                       amigaos_tagtype_finish_decl_callback,
++                       ctype);
++    flag_plugin_added = 1;
++    c_parser_declaration_or_fndef(parser, false, false, true, false, true, NULL, vNULL);
++    unregister_callback ("amigaos-tagtype", PLUGIN_FINISH_DECL);
++    flag_plugin_added = old_flag_plugin_added;
++    /* Reset the variable that is set in the pragma handler */
++    was_tagtypepragma = 0;
++    /* The tagtype has been processed */
++    amigaos_current_tagtype = NULL_TREE;
++    return false;
++  }
++
++
+   /* Skip to EOL, but suppress any error message.  Those will have been
+      generated by the handler routine through calling error, as opposed
+      to calling c_parser_error.  */
+diff --git a/gcc/c/c-typeck.c b/gcc/c/c-typeck.c
+index 0a9b51a..c441207 100644
+--- a/gcc/c/c-typeck.c
++++ b/gcc/c/c-typeck.c
+@@ -3045,6 +3045,8 @@ convert_arguments (location_t loc, vec<location_t> arg_loc, tree typelist,
+     && lookup_attribute ("type generic", TYPE_ATTRIBUTES (TREE_TYPE (fundecl)));
+   bool type_generic_remove_excess_precision = false;
+   tree selector;
++  const bool lineartags = fundecl
++    && lookup_attribute ("lineartags", TYPE_ATTRIBUTES (TREE_TYPE (fundecl)));
+ 
+   /* Change pointer to function to the function itself for
+      diagnostics.  */
+@@ -3084,6 +3086,8 @@ convert_arguments (location_t loc, vec<location_t> arg_loc, tree typelist,
+   /* Scan the given expressions and types, producing individual
+      converted arguments.  */
+ 
++  tree prev_tagtype = NULL_TREE;
++
+   for (typetail = typelist, parmnum = 0;
+        values && values->iterate (parmnum, &val);
+        ++parmnum)
+@@ -3132,6 +3136,26 @@ convert_arguments (location_t loc, vec<location_t> arg_loc, tree typelist,
+ 
+       val = require_complete_type (val);
+ 
++      /* If this is a function call with linear tags try to improve the expected
++       * type on base of recorded tag <-> type mapping.
++       */
++      if (lineartags && type == 0)
++        {
++          extern tree amigaos_get_type_associated_tagtype(tree type);
++
++          if (prev_tagtype)
++            {
++              type = prev_tagtype;
++              prev_tagtype = NULL_TREE;
++            }
++          else
++            {
++              prev_tagtype = amigaos_get_type_associated_tagtype(val);
++              if (!prev_tagtype)
++                prev_tagtype = amigaos_get_type_associated_tagtype((*origtypes)[parmnum]);
++            }
++        }
++
+       if (type != 0)
+ 	{
+ 	  /* Formal parm type is specified by a function prototype.  */
+diff --git a/gcc/config/rs6000/amigaos-protos.h b/gcc/config/rs6000/amigaos-protos.h
+index eb5f8fc..3b8c994 100644
+--- a/gcc/config/rs6000/amigaos-protos.h
++++ b/gcc/config/rs6000/amigaos-protos.h
+@@ -30,6 +30,7 @@ extern struct rtx_def *amigaos_expand_builtin_saveregs (void);
+ extern void amigaos_init_builtins (void);
+ extern rtx amigaos_expand_builtin (tree, rtx, rtx, enum machine_mode, int, bool*);
+ extern tree amigaos_handle_linearvarargs_attribute (tree *, tree, tree, int, bool*);
++extern tree amigaos_handle_lineartags_attribute (tree *, tree, tree, int, bool*);
+ extern tree amigaos_handle_baserel_restore_attribute (tree *, tree, tree, int, bool*);
+ extern tree amigaos_handle_force_no_baserel_attribute (tree *, tree, tree, int, bool*);
+ extern tree amigaos_handle_check68kfuncptr_attribute (tree *, tree, tree, int, bool*);
+diff --git a/gcc/config/rs6000/amigaos.c b/gcc/config/rs6000/amigaos.c
+index a355b6c..af162a5 100644
+--- a/gcc/config/rs6000/amigaos.c
++++ b/gcc/config/rs6000/amigaos.c
+@@ -343,6 +343,13 @@ amigaos_handle_linearvarargs_attribute (tree *node, tree name,
+   return NULL_TREE;
+ }
+ 
++tree
++amigaos_handle_lineartags_attribute (tree *node, tree name, tree args, int flags, bool *no_add_attrs)
++{
++  /* TODO: This function should applied only to functions or methods */
++  return NULL_TREE;
++}
++
+ 
+ /* Generate code for base relative access */
+ 
+-- 
+2.1.1
+
