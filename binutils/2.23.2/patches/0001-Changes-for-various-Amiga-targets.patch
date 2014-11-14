@@ -1,9 +1,8 @@
-From 5e5a2105a658ad148eefeecebfd3517adb553fb1 Mon Sep 17 00:00:00 2001
+From a7d00da0616529fdc1dd5d09eae716aeb0c10fda Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
-Date: Wed, 12 Nov 2014 19:24:02 +0100
-Subject: [PATCH] Initial patch derived from adtools.
+Date: Fri, 14 Nov 2014 23:48:30 +0100
+Subject: [PATCH] Changes for various Amiga targets.
 
-This is the raw diff generated from adtools project as of today.
 ---
  bfd/ChangeLog-9697                |   64 +
  bfd/ChangeLog-9899                |    5 +
@@ -24,7 +23,7 @@ This is the raw diff generated from adtools project as of today.
  bfd/doc/Makefile.in               |   15 +-
  bfd/doc/bfd.texinfo               |   13 +-
  bfd/elf32-amiga.c                 | 3844 ++++++++++++++
- bfd/elf32-amigaos.c               | 9973 +++++++++++++++++++++++++++++++++++++
+ bfd/elf32-amigaos.c               | 9972 +++++++++++++++++++++++++++++++++++++
  bfd/elf32-i386-amithlon.c         |  198 +
  bfd/elf32-i386.c                  |   17 +-
  bfd/elf32-morphos.c               | 7137 ++++++++++++++++++++++++++
@@ -122,7 +121,7 @@ This is the raw diff generated from adtools project as of today.
  libiberty/config/mh-morphos       |   12 +
  libiberty/lrealpath.c             |    6 +
  opcodes/m68k-dis.c                |    2 +-
- 117 files changed, 34547 insertions(+), 252 deletions(-)
+ 117 files changed, 34546 insertions(+), 252 deletions(-)
  create mode 100644 bfd/amigaos.c
  create mode 100644 bfd/amigaoslink.c
  create mode 100644 bfd/aout-amiga.c
@@ -164,7 +163,7 @@ This is the raw diff generated from adtools project as of today.
  create mode 100644 libiberty/config/mh-morphos
 
 diff --git a/bfd/ChangeLog-9697 b/bfd/ChangeLog-9697
-index e9a5c1d..3199163 100644
+index e9a5c1d..1c2bb3f 100644
 --- a/bfd/ChangeLog-9697
 +++ b/bfd/ChangeLog-9697
 @@ -49,6 +49,13 @@ Mon Dec 22 13:04:33 1997  Joel Sherrill  <joel@oarcorp.com>
@@ -174,9 +173,9 @@ index e9a5c1d..3199163 100644
 +Fri Dec 19 14:25:58 1997  Daniel Verite  <daniel@brainstorm.fr>
 +
 +	* amigaos.c (amiga_bfd_copy_private_section_data): Add return
-+ 	value. 
-+ 	* amigaoslink.c (amiga_final_link): Update linker_mark fields for
-+ 	input sections involved in the output.
++	value.
++	* amigaoslink.c (amiga_final_link): Update linker_mark fields for
++	input sections involved in the output.
 +
  Thu Dec 18 16:01:25 1997  Doug Evans  <devans@canuck.cygnus.com>
  
@@ -204,9 +203,9 @@ index e9a5c1d..3199163 100644
  
 +Mon Aug 25 16:32:00 1997  Steffen Opel  <opel@rumms.uni-mannheim.de>
 +
-+	* Makefile.in (guide, install-guide, clean-guide, bfd.guide): 
++	* Makefile.in (guide, install-guide, clean-guide, bfd.guide):
 +	New targets for AmigaGuide documentation.
-+ 	(install): Add install-info and install-guide.
++	(install): Add install-info and install-guide.
 +
  Mon Aug 25 16:14:34 1997  Christopher Provenzano  <proven@cygnus.com>
  
@@ -497,7 +496,7 @@ index 9990275..bcdf435 100644
  .NOEXPORT:
 diff --git a/bfd/amigaos.c b/bfd/amigaos.c
 new file mode 100644
-index 0000000..dc764db
+index 0000000..9d715d6
 --- /dev/null
 +++ b/bfd/amigaos.c
 @@ -0,0 +1,3189 @@
@@ -670,7 +669,7 @@ index 0000000..dc764db
 +	amiga_symbol_type *, reloc_howto_type *, long));
 +static sec_ptr amiga_make_unique_section PARAMS ((bfd *, const char *));
 +static bfd_boolean parse_archive_units PARAMS ((bfd *, int *, unsigned long,
-+ 	bfd_boolean, struct arch_syms **, symindex *));
++	bfd_boolean, struct arch_syms **, symindex *));
 +static bfd_boolean amiga_digest_file PARAMS ((bfd *));
 +static bfd_boolean amiga_read_unit PARAMS ((bfd *, unsigned long));
 +static bfd_boolean amiga_read_load PARAMS ((bfd *));
@@ -9180,10 +9179,10 @@ index 0000000..cf6c6cb
 +#include "elf32-target.h"
 diff --git a/bfd/elf32-amigaos.c b/bfd/elf32-amigaos.c
 new file mode 100644
-index 0000000..a642a4f
+index 0000000..68bd40d
 --- /dev/null
 +++ b/bfd/elf32-amigaos.c
-@@ -0,0 +1,9973 @@
+@@ -0,0 +1,9972 @@
 +/* PowerPC-specific support for 32-bit ELF
 +   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
 +   2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012
@@ -9386,7 +9385,7 @@ index 0000000..a642a4f
 +  ((SYM)->root.u.def.section->output_section->vma	\
 +   + (SYM)->root.u.def.section->output_offset		\
 +   + (SYM)->root.u.def.value)
-+
++
 +static reloc_howto_type *ppc_elf_howto_table[R_PPC_max];
 +
 +static reloc_howto_type ppc_elf_howto_raw[] = {
@@ -10681,7 +10680,7 @@ index 0000000..a642a4f
 +	 0,			/* src_mask */
 +	 0xff,			/* dst_mask */
 +	 TRUE),			/* pcrel_offset */
-+
++	 
 +  /* A relative 15 bit branch.  */
 +  HOWTO (R_PPC_VLE_REL15,	/* type */
 +	 1,			/* rightshift */
@@ -10697,7 +10696,7 @@ index 0000000..a642a4f
 +	 0xfe,			/* dst_mask */
 +	 TRUE),			/* pcrel_offset */
 +
-+  /* A relative 24 bit branch.  */
++  /* A relative 24 bit branch.  */ 
 +  HOWTO (R_PPC_VLE_REL24,	/* type */
 +	 1,			/* rightshift */
 +	 2,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -11043,7 +11042,7 @@ index 0000000..a642a4f
 +	 0xffff,		/* dst_mask */
 +	 FALSE),		/* pcrel_offset */
 +};
-+
++
 +/* Initialize the ppc_elf_howto_table, so that linear accesses can be done.  */
 +
 +static void
@@ -11320,7 +11319,7 @@ index 0000000..a642a4f
 +    }
 +  return bfd_reloc_dangerous;
 +}
-+
++
 +/* Sections created by the linker.  */
 +
 +typedef struct elf_linker_section
@@ -11529,7 +11528,7 @@ index 0000000..a642a4f
 +}
 +
 +static flagword
-+ppc_elf_lookup_section_flags (char *flag_name)
++ppc_elf_lookup_section_flags (char *flag_name) 
 +{
 +
 +  if (!strcmp (flag_name, "SHF_PPC_VLE"))
@@ -11734,7 +11733,7 @@ index 0000000..a642a4f
 +
 +  return _bfd_elf_get_sec_type_attr (abfd, sec);
 +}
-+
++
 +/* Very simple linked list structure for recording apuinfo values.  */
 +typedef struct apuinfo_list
 +{
@@ -11985,7 +11984,7 @@ index 0000000..a642a4f
 +
 +  apuinfo_list_finish ();
 +}
-+
++
 +static bfd_boolean
 +is_nonpic_glink_stub (bfd *abfd, asection *glink, bfd_vma off)
 +{
@@ -12221,7 +12220,7 @@ index 0000000..a642a4f
 +
 +  return count;
 +}
-+
++
 +/* The following functions are specific to the ELF linker, while
 +   functions above are used generally.  They appear in this file more
 +   or less in the order in which they are called.  eg.
@@ -12787,7 +12786,7 @@ index 0000000..a642a4f
 +
 +  return TRUE;
 +}
-+
++
 +static bfd_boolean
 +create_sdata_sym (struct bfd_link_info *info, elf_linker_section_t *lsect)
 +{
@@ -13701,7 +13700,7 @@ index 0000000..a642a4f
 +
 +  return TRUE;
 +}
-+
++
 +
 +/* Merge object attributes from IBFD into OBFD.  Raise an error if
 +   there are conflicting attributes.  */
@@ -13959,7 +13958,7 @@ index 0000000..a642a4f
 +  bfd_put_32 (output_bfd, insn, contents + offset);
 +}
 +
-+
++
 +/* Choose which PLT scheme to use, and set .plt flags appropriately.
 +   Returns -1 on error, 0 for old PLT, 1 for new PLT.  */
 +int
@@ -14057,10 +14056,9 @@ index 0000000..a642a4f
 +	  && !bfd_set_section_alignment (htab->elf.dynobj, htab->glink, 0))
 +	return -1;
 +    }
-+
 +  return htab->plt_type == PLT_NEW;
 +}
-+
++
 +/* Return the section that should be marked against GC for a given
 +   relocation.  */
 +
@@ -14256,7 +14254,7 @@ index 0000000..a642a4f
 +    }
 +  return TRUE;
 +}
-+
++
 +/* Set plt output section type, htab->tls_get_addr, and call the
 +   generic ELF tls_setup function.  */
 +
@@ -14614,7 +14612,7 @@ index 0000000..a642a4f
 +      }
 +  return TRUE;
 +}
-+
++
 +/* Return true if we have dynamic relocs that apply to read-only sections.  */
 +
 +static bfd_boolean
@@ -14799,7 +14797,7 @@ index 0000000..a642a4f
 +
 +  return _bfd_elf_adjust_dynamic_copy (h, s);
 +}
-+
++
 +/* Generate a symbol to mark plt call stubs.  For non-PIC code the sym is
 +   xxxxxxxx.plt_call32.<callee> where xxxxxxxx is a hex number, usually 0,
 +   specifying the addend on the plt relocation.  For -fpic code, the sym
@@ -15698,7 +15696,6 @@ index 0000000..a642a4f
 +      if (!add_dynamic_entry(DT_AMIGAOS_DYNVERSION, 2))
 +        return FALSE;
 +   }
-+
 +#undef add_dynamic_entry
 +
 +  if (htab->glink_eh_frame != NULL
@@ -16312,7 +16309,7 @@ index 0000000..a642a4f
 +    free (internal_relocs);
 +  return FALSE;
 +}
-+
++
 +/* What to do when ld finds relocations against symbols defined in
 +   discarded sections.  */
 +
@@ -16327,7 +16324,7 @@ index 0000000..a642a4f
 +
 +  return _bfd_elf_default_action_discarded (sec);
 +}
-+
++
 +/* Fill in the address for a pointer generated in a linker section.  */
 +
 +static bfd_vma
@@ -17801,7 +17798,7 @@ index 0000000..a642a4f
 +	  }
 +	  break;
 +#if 0
-+ 	case R_PPC_AMIGAOS_BREL:
++	case R_PPC_AMIGAOS_BREL:
 +	case R_PPC_AMIGAOS_BREL_HI:
 +	case R_PPC_AMIGAOS_BREL_LO:
 +	case R_PPC_AMIGAOS_BREL_HA:
@@ -18230,6 +18227,7 @@ index 0000000..a642a4f
 +				    rel->r_offset,
 +				    relocation,
 +				    addend);
++
 +#ifdef DEBUG
 +      fprintf (stderr, "%p %p %p\n", (void *)rel->r_offset, (void *)relocation, (void *)addend);
 +#endif
@@ -18279,7 +18277,7 @@ index 0000000..a642a4f
 +
 +  return ret;
 +}
-+
++
 +/* Finish up dynamic symbol handling.  We set the contents of various
 +   dynamic sections here.  */
 +
@@ -18633,7 +18631,7 @@ index 0000000..a642a4f
 +
 +  return TRUE;
 +}
-+
++
 +static enum elf_reloc_type_class
 +ppc_elf_reloc_type_class (const Elf_Internal_Rela *rela)
 +{
@@ -19087,7 +19085,7 @@ index 0000000..a642a4f
 +
 +  return ret;
 +}
-+
++
 +#define TARGET_BIG_SYM		bfd_elf32_amigaos_vec
 +#define TARGET_BIG_NAME		"elf32-amigaos"
 +#define ELF_ARCH		bfd_arch_powerpc
@@ -27060,7 +27058,7 @@ index 45174b7..ce7746c 100644
  supported ELF OSABI are the same as @option{--input-osabi}.
  
 diff --git a/binutils/objcopy.c b/binutils/objcopy.c
-index 020d54d..d76998f 100644
+index 020d54d..88bd071 100644
 --- a/binutils/objcopy.c
 +++ b/binutils/objcopy.c
 @@ -1104,6 +1104,11 @@ filter_symbols (bfd *abfd, bfd *obfd, asymbol **osyms,
@@ -27081,7 +27079,7 @@ index 020d54d..d76998f 100644
        if (strip_symbols == STRIP_ALL)
 -	keep = FALSE;
 +      {
-+      	if (strcmp(name, "_start") == 0 || strcmp(name, "__amigaos4__") == 0 || strcmp(name, "_SDA_BASE_") == 0)
++        if (strcmp(name, "_start") == 0 || strcmp(name, "__amigaos4__") == 0 || strcmp(name, "_SDA_BASE_") == 0)
 +          keep = TRUE;
 +        else
 +          keep = FALSE;
@@ -27128,7 +27126,7 @@ index 020d54d..d76998f 100644
  	      temp_relpp [temp_relcount++] = relpp [i];
 +	    else
 +	    {
-+	    	/* Don't keep the symbol, but keep the reloc */
++		/* Don't keep the symbol, but keep the reloc */
 +		temp_relpp [temp_relcount] = relpp[i];
 +		temp_relpp [temp_relcount]->addend = bfd_asymbol_value(*relpp [i]->sym_ptr_ptr)
 +							 - sec->vma
@@ -27274,7 +27272,7 @@ index 0000000..4889ea4
 +HARDLINK = cp
 diff --git a/config/mh-morphos b/config/mh-morphos
 new file mode 100644
-index 0000000..02c9cb5
+index 0000000..c00202a
 --- /dev/null
 +++ b/config/mh-morphos
 @@ -0,0 +1,13 @@
@@ -27282,7 +27280,7 @@ index 0000000..02c9cb5
 +
 +# There is no standard system compiler.  Assume using GNU C.
 +CC = gcc
-+CFLAGS = -g -O2 
++CFLAGS = -g -O2
 +
 +# We have both types of links under AmigaOS with GNU
 +# utils, however the links need to be made in canonical
@@ -27340,7 +27338,7 @@ index 5efb4a3..fea7239 100644
      host_makefile_frag="config/mh-ppc-aix"
      ;;
 diff --git a/gas/ChangeLog-9697 b/gas/ChangeLog-9697
-index f39e995..a19274c 100644
+index f39e995..08dbfbc 100644
 --- a/gas/ChangeLog-9697
 +++ b/gas/ChangeLog-9697
 @@ -877,6 +877,12 @@ Tue Aug 26 12:23:25 1997  Ian Lance Taylor  <ian@cygnus.com>
@@ -27349,7 +27347,7 @@ index f39e995..a19274c 100644
  
 +Mon Aug 25 16:32:00 1997  Steffen Opel  <opel@rumms.uni-mannheim.de>
 +
-+	* Makefile.in (guide, install-guide, clean-guide): New targets 
++	* Makefile.in (guide, install-guide, clean-guide): New targets
 +	for AmigaGuide documentation.
 +	(install): Add install-info and install-guide.
 +
@@ -27926,7 +27924,7 @@ index de132d6..14b67f0 100644
  enum processor_type
  {
 diff --git a/gas/config/tc-m68k.c b/gas/config/tc-m68k.c
-index 21accf6..e3b6488 100644
+index 21accf6..8b5f6c6 100644
 --- a/gas/config/tc-m68k.c
 +++ b/gas/config/tc-m68k.c
 @@ -38,6 +38,16 @@
@@ -28448,7 +28446,7 @@ index 21accf6..e3b6488 100644
 +	  /* so this is really a pc-relative address */
 +	  fragP->fr_opcode[1] |= 0x3a;
 +	  fix_new (fragP, fragP->fr_fix, 2, fragP->fr_symbol, fragP->fr_offset, 1, NO_RELOC, 0);
-+  	  break;
++	  break;
 +	}
 +      /* in that case we have to generate base-relative code
 +       * (note: if we're in N_UNDF, this could as well be pc-relative, but the linker
@@ -28688,7 +28686,7 @@ index bcf4607..144b7c7 100644
     force word mode by faking AIM.  */
  #define md_prepare_relax_scan(fragP, address, aim, this_state, this_type) \
 diff --git a/gas/config/tc-ppc.c b/gas/config/tc-ppc.c
-index 208d76d..84bd98b 100644
+index 208d76d..1194932 100644
 --- a/gas/config/tc-ppc.c
 +++ b/gas/config/tc-ppc.c
 @@ -1424,6 +1424,11 @@ ppc_target_format (void)
@@ -28772,7 +28770,7 @@ index 208d76d..84bd98b 100644
  	  break;
  
  #ifdef OBJ_ELF
-+  	case BFD_RELOC_PPC_AMIGAOS_BREL:
++	case BFD_RELOC_PPC_AMIGAOS_BREL:
 +	case BFD_RELOC_PPC_AMIGAOS_BREL_HI:
 +	case BFD_RELOC_PPC_AMIGAOS_BREL_LO:
 +	case BFD_RELOC_PPC_AMIGAOS_BREL_HA:
@@ -29668,7 +29666,7 @@ index 0000000..2cbcd49
 +
 +#endif /* _ELF_AMIGAOS_H */
 diff --git a/include/elf/ppc.h b/include/elf/ppc.h
-index f80a1e8..80df1b3 100644
+index f80a1e8..9893a88 100644
 --- a/include/elf/ppc.h
 +++ b/include/elf/ppc.h
 @@ -131,6 +131,18 @@ START_RELOC_NUMBERS (elf_ppc_reloc_type)
@@ -29680,13 +29678,13 @@ index f80a1e8..80df1b3 100644
 +  RELOC_NUMBER (R_PPC_MORPHOS_DREL_LO,	201)
 +  RELOC_NUMBER (R_PPC_MORPHOS_DREL_HI,	202)
 +  RELOC_NUMBER (R_PPC_MORPHOS_DREL_HA,	203)
-+ 
++
 +/* AmigaOS4 relocs */
 +  RELOC_NUMBER (R_PPC_AMIGAOS_BREL,	210)
 +  RELOC_NUMBER (R_PPC_AMIGAOS_BREL_LO,	211)
 +  RELOC_NUMBER (R_PPC_AMIGAOS_BREL_HI,  212)
 +  RELOC_NUMBER (R_PPC_AMIGAOS_BREL_HA,  213)
-+ 
++
  /* PowerPC VLE relocations.  */
    RELOC_NUMBER (R_PPC_VLE_REL8,		216)
    RELOC_NUMBER (R_PPC_VLE_REL15,	217)
@@ -29704,7 +29702,7 @@ index cacde80..595ecf4 100644
  #else
  /* Do not allow basename to be used if there is no prototype seen.  We
 diff --git a/ld/ChangeLog-9197 b/ld/ChangeLog-9197
-index 9307f33..5364129 100644
+index 9307f33..0f0e189 100644
 --- a/ld/ChangeLog-9197
 +++ b/ld/ChangeLog-9197
 @@ -147,6 +147,11 @@ Fri Oct 17 00:00:13 1997  Richard Henderson  <rth@cygnus.com>
@@ -29727,7 +29725,7 @@ index 9307f33..5364129 100644
 +
 +	* ldfile.c (ldfile_open_file_search): Use alloca to allocate
 +	dynamically sized array, rather than using a GNU C extension that
-+	is not portable.	
++	is not portable.
 +
  Fri Aug  2 14:57:49 1996  Ian Lance Taylor  <ian@cygnus.com>
  
@@ -29744,7 +29742,7 @@ index 9307f33..5364129 100644
  
  	* configure.tgt: Add support for *-*-rtems* configurations.
 diff --git a/ld/ChangeLog-9899 b/ld/ChangeLog-9899
-index 866e4a0..d35f33a 100644
+index 866e4a0..de28812 100644
 --- a/ld/ChangeLog-9899
 +++ b/ld/ChangeLog-9899
 @@ -1884,6 +1884,11 @@ Sun Mar  8 23:34:14 1998  Stan Cox  <scox@equinox.cygnus.com>
@@ -29754,7 +29752,7 @@ index 866e4a0..d35f33a 100644
 +Sun Mar  8 20:25:09 1998  Daniel Verite  <daniel@brainstorm.fr>
 +
 +	* ldlang.c (new_afile): Remove obsolete references to
-+ 	amiga_attribute.
++	amiga_attribute.
 +
  Mon Mar  2 19:24:08 1998  Michael Meissner  <meissner@cygnus.com>
  
@@ -30139,7 +30137,7 @@ index 0000000..8d1720f
 +ARCH=powerpc
 diff --git a/ld/emultempl/amiga.em b/ld/emultempl/amiga.em
 new file mode 100644
-index 0000000..f3dd63e
+index 0000000..c6abc5c
 --- /dev/null
 +++ b/ld/emultempl/amiga.em
 @@ -0,0 +1,288 @@
@@ -30300,13 +30298,13 @@ index 0000000..f3dd63e
 +  return TRUE;
 +}
 +
-+void 
++void
 +amiga_after_parse ()
 +{
 +  ldfile_sort_flavors();
 +}
 +
-+void 
++void
 +amiga_after_open ()
 +{
 +  ldctor_build_sets ();
@@ -32952,7 +32950,7 @@ index 0000000..3128255
 +EOF
 diff --git a/ld/emultempl/amithlon.em b/ld/emultempl/amithlon.em
 new file mode 100644
-index 0000000..14d85d3
+index 0000000..5e453a7
 --- /dev/null
 +++ b/ld/emultempl/amithlon.em
 @@ -0,0 +1,1698 @@
@@ -33044,7 +33042,7 @@ index 0000000..14d85d3
 +  PARAMS ((int *isfile));
 +
 +extern void ldfile_add_flavor (char*);
-+  
++
 +EOF
 +
 +# Import any needed special functions and/or overrides.
@@ -34656,7 +34654,7 @@ index 0000000..14d85d3
 +EOF
 diff --git a/ld/emultempl/morphos.em b/ld/emultempl/morphos.em
 new file mode 100644
-index 0000000..298ab03
+index 0000000..cd3b9a7
 --- /dev/null
 +++ b/ld/emultempl/morphos.em
 @@ -0,0 +1,1104 @@
@@ -34782,7 +34780,7 @@ index 0000000..298ab03
 +
 +      if (! bfd_hash_table_init (link_info.keep_hash, bfd_hash_newfunc))
 +	einfo ("%P%F: bfd_hash_table_init failed: %E\n");
-+ 
++
 +      if (bfd_hash_lookup (link_info.keep_hash, "__amigappc__", true, true)
 +	  == (struct bfd_hash_entry *) NULL)
 +	einfo ("%P%F: bfd_hash_lookup for insertion failed: %E\n");
@@ -35510,7 +35508,7 @@ index 0000000..298ab03
 +#define OPTION_MORPHOS_DATADATA_RELOC  (OPTION_IGNORE + 1)
 +#define OPTION_MORPHOS_BASEREL32       (OPTION_IGNORE + 2)
 +#define OPTION_FLAVOR                  (OPTION_IGNORE + 3)
-+  
++
 +#define OPTION_DISABLE_NEW_DTAGS	(400)
 +#define OPTION_ENABLE_NEW_DTAGS		(OPTION_DISABLE_NEW_DTAGS + 1)
 +#define OPTION_GROUP			(OPTION_ENABLE_NEW_DTAGS + 1)
@@ -35590,7 +35588,7 @@ index 0000000..298ab03
 +     /*case OPTION_MORPHOS_BASEREL32:
 +      morphos_baserel32=1;
 +      break;*/
-+      
++
 +    case OPTION_FLAVOR:
 +      ldfile_add_flavor (optarg);
 +      break;
@@ -35765,7 +35763,7 @@ index 0000000..298ab03
 +};
 +EOF
 diff --git a/ld/emultempl/ppc32elf.em b/ld/emultempl/ppc32elf.em
-index 6843770..f528725 100644
+index 6843770..801d1d6 100644
 --- a/ld/emultempl/ppc32elf.em
 +++ b/ld/emultempl/ppc32elf.em
 @@ -29,6 +29,9 @@ fragment <<EOF
@@ -35785,10 +35783,10 @@ index 6843770..f528725 100644
 +#ifdef TARGET_IS_amigaos
 +      new_plt = ppc_elf_amigaos_select_plt_layout (link_info.output_bfd, &link_info,
 +					   plt_style, emit_stub_syms);
-+#else      
++#else
        new_plt = ppc_elf_select_plt_layout (link_info.output_bfd, &link_info,
  					   plt_style, emit_stub_syms);
-+#endif					   
++#endif
        if (new_plt < 0)
  	einfo ("%X%P: select_plt_layout problem %E\n");
  
@@ -36495,7 +36493,7 @@ index 0000000..668ce7c
 +EOF
 diff --git a/ld/scripttempl/amigaos.sc b/ld/scripttempl/amigaos.sc
 new file mode 100644
-index 0000000..cf23a57
+index 0000000..865c9ba
 --- /dev/null
 +++ b/ld/scripttempl/amigaos.sc
 @@ -0,0 +1,527 @@
@@ -36538,7 +36536,7 @@ index 0000000..cf23a57
 +#	PLT_BEFORE_GOT - .plt just before .got when .plt is in data segement.
 +#	BSS_PLT - .plt should be in bss segment
 +#	TEXT_DYNAMIC - .dynamic in text segment, not data segment.
-+#	EMBEDDED - whether this is for an embedded system. 
++#	EMBEDDED - whether this is for an embedded system.
 +#	SHLIB_TEXT_START_ADDR - if set, add to SIZEOF_HEADERS to set
 +#		start address of shared library.
 +#	INPUT_FILES - INPUT command of files to always include
@@ -36641,7 +36639,7 @@ index 0000000..cf23a57
 +  SDATA="/* We want the small data sections together, so single-instruction offsets
 +     can access them all, and initialized data all before uninitialized, so
 +     we can shorten the on-disk segment size.  */
-+  .sdata        ${RELOCATING-0} : 
++  .sdata        ${RELOCATING-0} :
 +  {
 +    ${RELOCATING+${SDATA_START_SYMBOLS}}
 +    ${CREATE_SHLIB+*(.sdata2 .sdata2.* .gnu.linkonce.s2.*)}
@@ -36699,7 +36697,7 @@ index 0000000..cf23a57
 +    *(.ldata${RELOCATING+ .ldata.* .gnu.linkonce.l.*})
 +    ${RELOCATING+. = ALIGN(. != 0 ? ${ALIGNMENT} : 1);}
 +  }"
-+CTOR=".ctors        ${CONSTRUCTING-0} : 
++CTOR=".ctors        ${CONSTRUCTING-0} :
 +  {
 +    ${CONSTRUCTING+${CTOR_START}}
 +    /* gcc uses crtbegin.o to find the start of
@@ -37028,7 +37026,7 @@ index 0000000..cf23a57
 +EOF
 diff --git a/ld/scripttempl/amithlon.sc b/ld/scripttempl/amithlon.sc
 new file mode 100644
-index 0000000..fe6c135
+index 0000000..b8248cd
 --- /dev/null
 +++ b/ld/scripttempl/amithlon.sc
 @@ -0,0 +1,412 @@
@@ -37060,7 +37058,7 @@ index 0000000..fe6c135
 +#	DATA_PLT - .plt should be in data segment, not text segment.
 +#	BSS_PLT - .plt should be in bss segment
 +#	TEXT_DYNAMIC - .dynamic in text segment, not data segment.
-+#	EMBEDDED - whether this is for an embedded system. 
++#	EMBEDDED - whether this is for an embedded system.
 +#	SHLIB_TEXT_START_ADDR - if set, add to SIZEOF_HEADERS to set
 +#		start address of shared library.
 +#	INPUT_FILES - INPUT command of files to always include
@@ -37134,7 +37132,7 @@ index 0000000..fe6c135
 +  SDATA="/* We want the small data sections together, so single-instruction offsets
 +     can access them all, and initialized data all before uninitialized, so
 +     we can shorten the on-disk segment size.  */
-+  .sdata        ${RELOCATING-0} : 
++  .sdata        ${RELOCATING-0} :
 +  {
 +    ${RELOCATING+${SDATA_START_SYMBOLS}}
 +    *(.sdata${RELOCATING+ .sdata.* .gnu.linkonce.s.*})
@@ -37149,7 +37147,7 @@ index 0000000..fe6c135
 +  REL_SBSS2=".rel.sbss2    ${RELOCATING-0} : { *(.rel.sbss2${RELOCATING+ .rel.sbss2.* .rel.gnu.linkonce.sb2.*}) }
 +  .rela.sbss2   ${RELOCATING-0} : { *(.rela.sbss2${RELOCATING+ .rela.sbss2.* .rela.gnu.linkonce.sb2.*}) }"
 +fi
-+CTOR=".ctors        ${CONSTRUCTING-0} : 
++CTOR=".ctors        ${CONSTRUCTING-0} :
 +  {
 +    ${CONSTRUCTING+${CTOR_START}}
 +    /* gcc uses crtbegin.o to find the start of
@@ -37446,7 +37444,7 @@ index 0000000..fe6c135
 +EOF
 diff --git a/ld/scripttempl/morphos.sc b/ld/scripttempl/morphos.sc
 new file mode 100644
-index 0000000..bb5c0be
+index 0000000..469a8f5
 --- /dev/null
 +++ b/ld/scripttempl/morphos.sc
 @@ -0,0 +1,232 @@
@@ -37608,10 +37606,10 @@ index 0000000..bb5c0be
 +  /* We want the small data sections together, so single-instruction offsets
 +     can access them all, and initialized data all before uninitialized, so
 +     we can shorten the on-disk segment size.  */
-+  .sdata	${RELOCATING-0} : 
-+  { 
++  .sdata	${RELOCATING-0} :
++  {
 +    PROVIDE (__sdata_start = .);
-+    *(.sdata) 
++    *(.sdata)
 +    PROVIDE (__r13_init = 0x8000);
 +    PROVIDE (__sdata_end = .);
 +  }
@@ -37684,7 +37682,7 @@ index 0000000..bb5c0be
 +EOF
 diff --git a/ld/scripttempl/morphos_baserel.sc b/ld/scripttempl/morphos_baserel.sc
 new file mode 100644
-index 0000000..8571e58
+index 0000000..4f0f4ab
 --- /dev/null
 +++ b/ld/scripttempl/morphos_baserel.sc
 @@ -0,0 +1,199 @@
@@ -37756,13 +37754,13 @@ index 0000000..8571e58
 +  .rela.plt	${RELOCATING-0} : { *(.rela.plt)	}
 +  .rela.rodata  ${RELOCATING-0} :
 +    { *(.rela.rodata) *(.rela.gnu.linkonce.r*) }
-+  .rela.sdata	${RELOCATING-0} : 
++  .rela.sdata	${RELOCATING-0} :
 +  {
-+    *(.rela.data) 
++    *(.rela.data)
 +    *(.rela.gnu.linkonce.d*)
 +    *(.rela.sdata)
 +  }
-+  .rela.sbss	${RELOCATING-0} : 
++  .rela.sbss	${RELOCATING-0} :
 +  {
 +    *(.rela.sbss)
 +    *(.rela.bss)
@@ -37907,7 +37905,7 @@ index 0000000..495fa7e
 +#HDEFINES = -mstackextend
 diff --git a/libiberty/config/mh-morphos b/libiberty/config/mh-morphos
 new file mode 100644
-index 0000000..12b49a0
+index 0000000..064647a
 --- /dev/null
 +++ b/libiberty/config/mh-morphos
 @@ -0,0 +1,12 @@
@@ -37922,7 +37920,7 @@ index 0000000..12b49a0
 +CC = gcc
 +
 +# Compile for automatic stack extension.
-+HDEFINES = 
++HDEFINES =
 diff --git a/libiberty/lrealpath.c b/libiberty/lrealpath.c
 index b27c8de..e94add4 100644
 --- a/libiberty/lrealpath.c
