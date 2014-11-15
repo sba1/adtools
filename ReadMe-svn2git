@@ -1,0 +1,18 @@
+This branch contains the result of the svn2git conversion of the build and packaging
+parts of the adtools repository. To populate it, following command will be used
+
+  git svn clone file:///home/sba/amiga/adtools.svn/code/trunk \
+    --include-paths "packaging|native-build|binutils-build|gcc-build|native-build" \
+    --ignore-paths "(README.packaging|before-merge-with-binutils-2.18)" \
+    --use-svnsync-props \
+    --authors-file ~/scripts/svn2git-authors
+
+where in /home/sba/amiga/adtools.svn/code/ the svnsync'ed or rsync'ed repositoy is located.
+The --use-svnsync-props makes sure that the orginal URL is written in the metadata that is
+added to each commit.
+
+The branch will then be freed from empty commits using:
+  git filter-branch --prune-empty --tag-name-filter cat -- --all
+
+Note that the code in the branch will not work in isolation. Its only purpose is to preserve
+the evolution of the build an packaging procedure of the adtools project.
