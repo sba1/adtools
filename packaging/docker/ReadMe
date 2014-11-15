@@ -1,0 +1,3 @@
+In this directory a docker image will be created that provides
+and foundation for creating AmigaOS4 binaries. It requires the
+adtools-deb image.

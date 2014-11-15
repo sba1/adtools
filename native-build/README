@@ -1,0 +1,39 @@
+This is an attempt to simplify the building of a native
+compiler suite targeting AmigaOS4.
+
+You must have checked out the entire trunk directory
+of the adtools project. In addition, the
+branches/gcc/4.5.x directory must be checked out in
+the same location as it is in the subversion repository.
+That is, the checked-out layout should look like this
+
+  adtools/trunk
+  adtools/branches/gcc/4.5.x
+
+The makefile first builds the cross compiler. For this
+to be successful, your build machine, among other things,
+needs the development packages of
+ libgmp (libgmp-dev on Debian)
+ libmpc (libmpc-dev on Debian)
+ libmpfr (libmpfr-dev on Debian)
+
+Other required packages are:
+ lha
+ bzip2
+ wget
+
+Note that the makefile accesses remote resources during
+the build, so you also need a working Internet connection.
+
+During the build process, a directory /gcc is accessed. Make
+sure that the user under which you build the package, has
+write access to this directory.
+
+If you have met the requirements, you just need to invoke
+ make
+in the directory where you opened this file. If all goes
+through without any error, you shall invoke
+ make install
+to get native compiler including coreutils copied to /gcc.
+You shall be able to deposit the contents for this directory
+on your Amiga.

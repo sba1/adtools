@@ -1,0 +1,10 @@
+Source: adtools-binutils
+Section: devel
+Priority: extra
+Build-Depends: debhelper (>=9), texinfo
+Maintainer: Sebastian Bauer <mail@sebastianbauer.info>
+
+Package: adtools-binutils
+Depends: ${shlibs:Depends}
+Description: Amiga Development Tools - Binutils
+Architecture: any

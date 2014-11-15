@@ -1,0 +1,67 @@
+#!/usr/bin/make -f
+
+top_dir := $(shell pwd)
+
+export DH_VERBOSE=1
+
+# Disable all security flags. The build will not go through otherwise.
+export DEB_BUILD_MAINT_OPTIONS=hardening=-all
+
+export GCC_VERSION=4.9.1
+export GCC_SRC_DIR=../gcc/repo
+
+MAKE_DIR=../../../gcc-build
+PWD=$(shell pwd)
+
+override_dh_auto_build:
+	CFLAGS="-Wno-switch -Wno-unused" ../../$(GCC_SRC_DIR)/configure \
+		--target=ppc-amigaos \
+		--prefix=/usr \
+		--libexec=/usr/lib \
+		--with-bugurl='http://sf.net/p/adtools' \
+		--with-pkgversion='adtools build $(VERSION)' \
+		--enable-languages=c,c++  \
+		--enable-haifa            \
+		--enable-sjlj-exceptions  \
+		--disable-libstdcxx-pch \
+		--disable-tls \
+		--disable-nls
+	$(MAKE)
+
+override_dh_auto_install:
+	$(MAKE) install DESTDIR=$(top_dir)/debian/adtools-gcc
+	rm -f $(top_dir)/debian/adtools-gcc/usr/share/info/dir
+	rm -f $(top_dir)/debian/adtools-gcc/usr/lib/libiberty.a
+#	rm -f $(top_dir)/debian/adtools-gcc/usr/ppc-amigaos/lib/*.a
+#	rm -f $(top_dir)/debian/adtools-gcc/usr/ppc-amigaos/lib/*.la
+#	rm -f $(top_dir)/debian/adtools-gcc/usr/ppc-amigaos/lib/*.so
+#	rm -f $(top_dir)/debian/adtools-gcc/usr/ppc-amigaos/lib/*.py
+	rm -Rf $(top_dir)/debian/adtools-gcc/usr/share/info
+	rm -Rf $(top_dir)/debian/adtools-gcc/usr/share/man/man7
+	rm -Rf $(top_dir)/debian/adtools-gcc/usr/share/gcc-4.9.1
+
+# We don't have any useful tests
+override_dh_auto_test:
+
+# Don't strip ppc files
+override_dh_strip:
+	dh_strip --exclude=ppc-amigaos/lib --exclude=ppc-amigaos/SDK --exclude=lib/gcc/ppc-amigaos/
+	-strip --remove-section=.comment --remove-section=.note $(top_dir)/debian/adtools-gcc/usr/lib/gcc/ppc-amigaos/4.9.1/cc1
+	-strip --remove-section=.comment --remove-section=.note $(top_dir)/debian/adtools-gcc/usr/lib/gcc/ppc-amigaos/4.9.1/cc1plus
+	-strip --remove-section=.comment --remove-section=.note $(top_dir)/debian/adtools-gcc/usr/lib/gcc/ppc-amigaos/4.9.1/collect2
+	-strip --remove-section=.comment --remove-section=.note $(top_dir)/debian/adtools-gcc/usr/lib/gcc/ppc-amigaos/4.9.1/lto1
+	-strip --remove-section=.comment --remove-section=.note $(top_dir)/debian/adtools-gcc/usr/lib/gcc/ppc-amigaos/4.9.1/lto-wrapper
+
+# As per default, but ignore ppc files
+override_dh_makeshlibs:
+	dh_makeshlibs --exclude=ppc-amigaos/lib --exclude=lib/gcc/ppc-amigaos
+
+# As per default, but ignore ppc files
+override_dh_shlibdeps:
+	dh_shlibdeps --exclude=ppc-amigaos/lib --exclude=lib/gcc/ppc-amigaos
+
+%:
+	echo $@
+	dh $@
+
+

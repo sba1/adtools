@@ -1,0 +1,40 @@
+#!/usr/bin/make -f
+
+top_dir := $(shell pwd)
+
+export BINUTILS_VERSION=2.23.2
+export BINUTILS_SRC_DIR=../binutils/repo
+
+override_dh_auto_build:
+	CFLAGS="-Wno-switch -Wno-unused" ../../$(BINUTILS_SRC_DIR)/configure \
+		--target=ppc-amigaos \
+		--prefix=/usr \
+		--disable-nls
+	$(MAKE)
+
+override_dh_auto_install:
+	mkdir -p debian/adtools/opt/
+	$(MAKE) install DESTDIR=$(top_dir)/debian/adtools-binutils
+	rm -Rf $(top_dir)/debian/adtools-binutils/usr/share/info
+	rm -Rf $(top_dir)/debian/adtools-binutils/usr/lib/libiberty.a
+
+# We don't have any useful tests
+override_dh_auto_test:
+
+# Don't strip ppc files
+override_dh_strip:
+	dh_strip --exclude=ppc-amigaos/lib --exclude=ppc-amigaos/SDK --exclude=lib/gcc/ppc-amigaos
+
+# As per default, but ignore ppc files
+override_dh_makeshlibs:
+	dh_makeshlibs --exclude=ppc-amigaos/lib --exclude=lib/gcc/ppc-amigaos
+
+# As per default, but ignore ppc files
+override_dh_shlibdeps:
+	dh_shlibdeps --exclude=ppc-amigaos/lib --exclude=lib/gcc/ppc-amigaos
+
+%:
+	echo $@
+	dh $@
+
+

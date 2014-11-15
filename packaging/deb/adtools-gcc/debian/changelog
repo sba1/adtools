@@ -1,0 +1,5 @@
+adtools-gcc (0.0.1-0) UNRELEASED; urgency=medium
+
+  * Initial packaging. Does not work yet.
+
+ -- Sebastian Bauer <mail@sebastianbauer.info>  Wed, 30 Jul 2014 13:06:05 +0200
