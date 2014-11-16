@@ -41,3 +41,11 @@ The scripts depend on Python.
  to checkout the version 4.9 branch of gcc and apply all adtools patches
  for this branch.
 
+* ```adtgenpatch```: will generate the patches between the base checkout
+ and the current HEAD of the repo. The patches are written to the patches
+ direcotory. For instance, invoke
+ ```
+ $ adtgenpatch gcc 4.9
+ ```
+ to generate the tracked changes for 4.9 branch of gcc. The patches will
+ be located in ```gcc/4.9/patches```.

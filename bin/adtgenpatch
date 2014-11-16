@@ -1,0 +1,46 @@
+#! /usr/bin/python
+#
+# This script generates the patches for a specific branch.
+#
+# (c) 2014 by Sebastian Bauer
+#
+
+import glob
+import os.path
+import sys
+from subprocess import call
+
+script = os.path.realpath(sys.argv[0])
+root = os.path.realpath(os.path.dirname(script) + "/../")
+
+if len(sys.argv) < 2:
+	sys.exit('Component and branch name must be specified!')
+if len(sys.argv) < 3:
+	sys.exit('Branch name must be specified!')
+
+# The base path
+base = os.path.join(root, sys.argv[1])
+
+# The series file relating branches to checkout ids
+series = os.path.join(base, "series")
+
+# The requested branch
+reqbranch = sys.argv[2]
+
+# Open the branch <-> checkout id table
+lines = [line.strip() for line in open(series)]
+
+# Determine branch name
+branchok = False
+for line in lines:
+	branch, checkout = line.split("\t")
+	if branch == reqbranch:
+		branchok = True
+		break
+
+if not branchok:
+	sys.exit("Couldn't find requested branch")
+
+os.chdir(os.path.join(base,"repo"))
+patch_dir = patches = os.path.join("..",branch,"patches")
+call(["git", "format-patch", "--find-copies-harder", branch+"-base","-o", patch_dir])
