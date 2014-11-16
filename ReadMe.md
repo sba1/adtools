@@ -23,8 +23,8 @@ Patch management
 ----------------
 
 A very naive patch management system that should simplify the management
-of patches is included here. The scripts are situated in bin directory.
-The scripts depend on Python.
+of patches is included here. The scripts are situated in the ```bin```
+directory. The scripts depend on Python.
 
 * ```adtclone```: will fetch the external sources of all components into
  the respective ```repo``` directories. The checkout will not be affected.
@@ -42,8 +42,9 @@ The scripts depend on Python.
  for this branch.
 
 * ```adtgenpatch```: will generate the patches between the base checkout
- and the current HEAD of the repo. The patches are written to the patches
- direcotory. For instance, invoke
+ and the current HEAD of the repo. The patches are written to the
+ ```patches``` directory of the respective component. For instance,
+ invoke
  ```
  $ adtgenpatch gcc 4.9
  ```
