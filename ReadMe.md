@@ -11,7 +11,7 @@ not the case for the other systems.
 
 The main repo is still hosted on a SVN repository under
 https://sf.net/projects/adtools. It uses the concept of vendor branches
-but this is making quick progress newly impossible, so a new approach
+but this is making quick progress nearly impossible, so a new approach
 is tested here.
 
 In contrast, in this repository, build products that are based on other
