@@ -5,7 +5,6 @@
 # (c) 2014 by Sebastian Bauer
 #
 
-import glob
 import os.path
 import sys
 from subprocess import call
