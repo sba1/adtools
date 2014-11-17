@@ -10,6 +10,7 @@ prepare-packages: prepare-binutils prepare-gcc
 
 .PHONY: prepare-binutils
 prepare-binutils:
+	rm -Rf adtools-binutils/patches
 	cp -R $(ROOT)/binutils/2.23.2/patches adtools-binutils
 	$(ROOT)/bin/adtget binutils 2.23.2
 	rm -Rf adtools-binutils/binutils-2.23.2
@@ -25,6 +26,7 @@ prepare-binutils:
 
 .PHONY: prepare-gcc
 prepare-gcc:
+	rm -Rf adtools-gcc/patches
 	cp -R $(ROOT)/gcc/4.9/patches adtools-gcc
 	$(ROOT)/bin/adtget gcc 4.9
 	rm -Rf adtools-gcc/gcc-4.9.1
