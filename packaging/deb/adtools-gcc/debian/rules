@@ -8,13 +8,12 @@ export DH_VERBOSE=1
 export DEB_BUILD_MAINT_OPTIONS=hardening=-all
 
 export GCC_VERSION=4.9.1
-export GCC_SRC_DIR=../gcc/repo
+export GCC_SRC_DIR=patched
 
-MAKE_DIR=../../../gcc-build
 PWD=$(shell pwd)
 
 override_dh_auto_build:
-	CFLAGS="-Wno-switch -Wno-unused" ../../$(GCC_SRC_DIR)/configure \
+	CFLAGS="-Wno-switch -Wno-unused" $(GCC_SRC_DIR)/configure \
 		--target=ppc-amigaos \
 		--prefix=/usr \
 		--libexec=/usr/lib \
