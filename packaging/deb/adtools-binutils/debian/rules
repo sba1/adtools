@@ -3,10 +3,10 @@
 top_dir := $(shell pwd)
 
 export BINUTILS_VERSION=2.23.2
-export BINUTILS_SRC_DIR=../binutils/repo
+export BINUTILS_SRC_DIR=patched
 
 override_dh_auto_build:
-	CFLAGS="-Wno-switch -Wno-unused" ../../$(BINUTILS_SRC_DIR)/configure \
+	CFLAGS="-Wno-switch -Wno-unused" $(BINUTILS_SRC_DIR)/configure \
 		--target=ppc-amigaos \
 		--prefix=/usr \
 		--disable-nls
