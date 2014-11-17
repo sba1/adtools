@@ -4,5 +4,6 @@ before_script:
     - cd packaging/deb
 
 script:
-    - make
-
+    - make prepare-packages
+    - cd adtools-sdk && debuild -i -us -uc -b && cd ..
+    - cd adtools-binutils && debuild -i -us -uc -b && cd ..
