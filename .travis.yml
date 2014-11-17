@@ -10,6 +10,7 @@ install:
         libmpc-dev
         texinfo
         bison
+        flex
 
 before_script:
     - cd packaging/deb
