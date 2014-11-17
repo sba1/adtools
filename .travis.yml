@@ -11,6 +11,7 @@ install:
         texinfo
         bison
         flex
+	lha
 
 before_script:
     - cd packaging/deb
