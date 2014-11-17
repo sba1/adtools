@@ -1,0 +1,8 @@
+language: c++
+
+before_script:
+    - cd packaging/deb
+
+script:
+    - make
+
