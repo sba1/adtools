@@ -48,7 +48,7 @@ call(["git", "branch", "-f", branch+"-base"])
 
 # List of all patches
 patches = os.path.join("..",branch,"patches","*.patch")
-all_patches = glob.glob(patches)
+all_patches = sorted(glob.glob(patches))
 
 # Apply them (if any)
 if len(all_patches) > 0:
