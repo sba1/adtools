@@ -1,6 +1,7 @@
 #! /usr/bin/python
 #
-# This script generates the patches for a specific branch.
+# This script gets the baseline distribution archive of a specific
+# component for a specific branch
 #
 # (c) 2014 by Sebastian Bauer
 #
@@ -11,6 +12,7 @@ from subprocess import call
 
 script = os.path.realpath(sys.argv[0])
 root = os.path.realpath(os.path.dirname(script) + "/../")
+cdir = os.getcwd()
 
 if len(sys.argv) < 2:
 	sys.exit('Component and branch name must be specified!')
@@ -40,6 +42,5 @@ for line in lines:
 if not branchok:
 	sys.exit("Couldn't find requested branch")
 
-os.chdir(os.path.join(base,"repo"))
-patch_dir = patches = os.path.join("..",branch,"patches")
-call(["git", "format-patch", "--find-copies-harder", branch+"-base","-o", patch_dir])
+os.chdir(cdir)
+call(["wget", "-N", url])

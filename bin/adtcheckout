@@ -34,7 +34,7 @@ lines = [line.strip() for line in open(series)]
 # Determine branch name
 branchok = False
 for line in lines:
-	branch, checkout = line.split("\t")
+	branch, checkout, url = line.split("\t")
 	if branch == reqbranch:
 		branchok = True
 		break
