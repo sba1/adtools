@@ -5,8 +5,8 @@ ROOT = $(realpath ../../)
 
 all: source-packages
 
-.PHONY: source-packages
-source-packages:
+.PHONY: prepare-packages
+prepare-packages:
 	cp -R $(ROOT)/binutils/2.23.2/patches adtools-binutils
 	$(ROOT)/bin/adtget binutils 2.23.2
 	rm -Rf adtools-binutils/binutils-2.23.2
@@ -19,6 +19,10 @@ source-packages:
 			git add . && \
 			git apply ../patches/*.patch && \
 			rm -Rf .git
+.PHONY: source-packages
+source-packages: prepare-packages
+	dpkg-source -b adtools-sdk
+	dpkg-source -b adtools-binutils
 
 .PHONY: docker
 docker:
