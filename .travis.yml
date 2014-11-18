@@ -13,5 +13,5 @@ script:
 #- cd adtools-gcc && debuild -i -us -uc -b && cd ..
 - mkdir artifacts
 - mv *.deb artifacts
-- cd artifatcs
+- cd artifacts
 - dpkg-scanpackages ./ /dev/null | gzip >Packages.gz
