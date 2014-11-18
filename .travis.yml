@@ -15,3 +15,10 @@ script:
 - mv *.deb artifacts
 - cd artifacts
 - dpkg-scanpackages ./ /dev/null | gzip >Packages.gz
+env:
+  global:
+  - secure: mlPpfQG9RuayWWXLt1tdEI4nb9ElObenj1QDfJ8qGxEqGleout8RE9cIxArB3WJ8jih/9lM3mkUm0y3cMMsf+SGRkfkWLO+YmVHqMslC0dwd3CqPMFjYPSJh7qsxaJC3b0RrZXujlXkwgDP16Yy/+h9RqAQwuTc3AtWepcLEZp0=
+  - secure: viZg+Dmh8k1acvKYBf5yzDdTClekE5fqx84CttWZnljQlwVWbfJEqjSvWoyAvI07UosY69y3vJ5VKjIViDcz1N36LjcV+sxnWIfSwfTa6bCWeYS03cERlKQB6QJPR+RR/UFhloJy5XQyaLzC1TdVQTH4A01OV49uN8uUKjh7hyk=
+after_success:
+ - ls
+ - curl -T adtools-sdk_0.0.1-0_amd64.deb -u${BINTRAY_USER}:${BINTRAY_API_KEY} https://api.bintray.com/content/sba1/adtools-deb/adtools-sdk/0.0.1-0/adtools-sdk_0.0.1-0_amd64.deb
