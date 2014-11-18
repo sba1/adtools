@@ -11,3 +11,7 @@ script:
 - cd adtools-binutils && debuild -i -us -uc -b && cd ..
 - sudo dpkg -i *.deb
 #- cd adtools-gcc && debuild -i -us -uc -b && cd ..
+- mkdir artifacts
+- mv *.deb artifacts
+- cd artifatcs
+- dpkg-scanpackages ./ /dev/null | gzip >Packages.gz
