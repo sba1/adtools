@@ -1,0 +1,30 @@
+#!/usr/bin/python
+#
+# A simple script for deploying the artifacts of
+# the current directory.
+#
+
+from __future__ import print_function
+
+import glob
+import os
+import re
+import sys
+from subprocess import call
+from subprocess import check_output
+
+all_debs = sorted(glob.glob("*.deb"))
+user = os.environ.get('BINTRAY_USER')
+key = os.environ.get('BINTRAY_API_KEY')
+
+for deb in all_debs:
+	deb_info = check_output(['dpkg', '--info', deb])
+
+	m = re.search('Package: ([\w\.-]+)', deb_info)
+	pkg = m.group(1)
+
+	m = re.search('Version: ([\w\.-]+)', deb_info)
+	version = m.group(1)
+
+	url = 'https://api.bintray.com/content/sba1/adtools-deb/' + pkg + '/' + version + '/' + deb
+	call(['curl', '-T', deb, '-u' + user + ':' + key, url])
