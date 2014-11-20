@@ -50,3 +50,37 @@ directory. The scripts depend on Python.
  ```
  to generate the tracked changes for 4.9 branch of gcc. The patches will
  be located in ```gcc/4.9/patches```.
+
+Building
+--------
+
+### Local
+
+The local build is suitable when no packaging should be done. The easiest
+approch involves invoking the ```makefile``` provided in the
+```native-build``` folder. The procedure currently assumes that the sources
+have previously been checked out and that the patches have been applied.
+This can be done by:
+```
+$ bin/adtclone
+$ bin/adtcheckout binutils 2.23.2
+$ bin/adtcheckout gcc 4.9
+```
+Building is then a matter of entering
+```
+$ make -f native-build
+```
+
+The building should succeed, if all dependencies are met (e.g.,
+```libgmp-dev```, ```libmpc-dev```, ```libmpfr-dev```, ```lha | lhasa```).
+If you just need a cross-compiler then call the ```gcc-done``` target like
+that:
+
+```
+$ make -f native-build gcc-done
+```
+
+### Packaging
+
+Debian packaging is provided in ```packaging/deb```. There also some Docker
+scripts, however, they may not work correctly at the moment.
