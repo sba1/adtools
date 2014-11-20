@@ -1,0 +1,43 @@
+From 1f66df116f90af680e5ff3a542d0006248b3fc12 Mon Sep 17 00:00:00 2001
+From: Sebastian Bauer <mail@sebastianbauer.info>
+Date: Thu, 20 Nov 2014 22:09:15 +0100
+Subject: [PATCH 3/3] Define the AMIGAOS_BUILTIN_GETLINEARVA as part of the
+ RS6000 builtin.
+
+This hopefully fixes id clashes.
+---
+ gcc/config/rs6000/amigaos.h | 4 ----
+ gcc/config/rs6000/rs6000.h  | 2 ++
+ 2 files changed, 2 insertions(+), 4 deletions(-)
+
+diff --git a/gcc/config/rs6000/amigaos.h b/gcc/config/rs6000/amigaos.h
+index 71afb1d..4556163 100644
+--- a/gcc/config/rs6000/amigaos.h
++++ b/gcc/config/rs6000/amigaos.h
+@@ -382,10 +382,6 @@ do                                   \
+   }                                  \
+ } while(0)
+ 
+-/* AmigaOS specific builtins */
+-/* TODO: Make sure that there is no clash with this id */
+-#define AMIGAOS_BUILTIN_GETLINEARVA 2000
+-
+ #undef SUBTARGET_EXPAND_BUILTIN
+ #define SUBTARGET_EXPAND_BUILTIN(EXP, TARGET, SUBTARGET, MODE, IGNORE, SUCCESS) \
+   amigaos_expand_builtin (EXP, TARGET, SUBTARGET, MODE, IGNORE, SUCCESS)
+diff --git a/gcc/config/rs6000/rs6000.h b/gcc/config/rs6000/rs6000.h
+index 6669c85..0bb61f8 100644
+--- a/gcc/config/rs6000/rs6000.h
++++ b/gcc/config/rs6000/rs6000.h
+@@ -2573,6 +2573,8 @@ enum rs6000_builtins
+ {
+ #include "rs6000-builtin.def"
+ 
++  /* TODO: Possibly include a subtarget builtin file */
++  AMIGAOS_BUILTIN_GETLINEARVA,
+   RS6000_BUILTIN_COUNT
+ };
+ 
+-- 
+2.1.3
+
