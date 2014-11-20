@@ -1,2 +1,7 @@
 *.swp
 repo
+*.build
+*.deb
+*.tar.gz
+*.tar.bz2
+*.log
