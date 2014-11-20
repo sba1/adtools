@@ -1,4 +1,4 @@
-From 3851af7b8d2926853b97630537cb8a543a113945 Mon Sep 17 00:00:00 2001
+From 9e7b8e0ac6ceb8ede2cec4fb74d892da3cb1b3ca Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 14 Nov 2014 20:03:56 +0100
 Subject: [PATCH 2/2] Added new function attribute "lineartags" and pragma
@@ -306,5 +306,5 @@ index a355b6c..af162a5 100644
  /* Generate code for base relative access */
  
 -- 
-2.1.1
+2.1.3
 

@@ -1,50 +1,49 @@
-From a1deb376d52cd8a2b0944c8b47e28c217151dd23 Mon Sep 17 00:00:00 2001
+From 5a79aee54a61bd0f3ecfe56e4d6ec4f4f4283078 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
-Date: Fri, 14 Nov 2014 20:00:33 +0100
+Date: Thu, 20 Nov 2014 18:30:32 +0100
 Subject: [PATCH 1/2] Changes for AmigaOS version of gcc.
 
 ---
- fixincludes/configure                    |    1 +
- fixincludes/configure.ac                 |    1 +
- gcc/Makefile.in                          |    1 +
- gcc/c-family/c-common.c                  |   26 +
- gcc/c/c-typeck.c                         |   25 +
- gcc/common/config/rs6000/rs6000-common.c |    7 +
- gcc/config.gcc                           |    8 +
- gcc/config.host                          |    6 +
- gcc/config/rs6000/amigaos-protos.h       |   41 +
- gcc/config/rs6000/amigaos.c              |  461 ++++++++
- gcc/config/rs6000/amigaos.h              |  435 +++++++
- gcc/config/rs6000/amigaos.opt            |   37 +
- gcc/config/rs6000/rs6000.c               |  206 +++-
- gcc/config/rs6000/rs6000.h               |    2 +
- gcc/config/rs6000/rs6000.md              |   27 +-
- gcc/config/rs6000/t-amigaos              |   20 +
- gcc/cp/typeck.c                          |   16 +
- gcc/doc/extend.texi                      |  167 +++
- gcc/doc/invoke.texi                      |  136 +++
- gcc/expr.c                               |    1 -
- gcc/gcc.c                                |   12 +-
- gcc/prefix.c                             |    2 +-
- intl/dcigettext.c                        |    2 +
- libcpp/line-map.c                        |    3 +
- libgcc/config.host                       |    3 +
- libgcc/config/rs6000/t-amigaos           |   45 +
- libiberty/Makefile.in                    |    9 +
- libiberty/basename.c                     |   21 +-
- libiberty/configure                      |    1 +
- libiberty/configure.ac                   |    1 +
- libiberty/lrealpath.c                    |    3 +-
- libiberty/make-relative-prefix.c         |   37 +-
- libiberty/make-temp-file.c               |   27 +-
- libiberty/pex-amigaos.c                  |  325 ++++++
- libstdc++-v3/configure                   | 1852 +++++++++++++++++++++++++++++-
- libstdc++-v3/configure.ac                |    3 +
- libstdc++-v3/crossconfig.m4              |    8 +
- libstdc++-v3/include/bits/atomic_base.h  |    2 +
- libstdc++-v3/include/c_global/cstddef    |    3 +
- libstdc++-v3/include/c_std/cstddef       |    3 +
- 40 files changed, 3908 insertions(+), 78 deletions(-)
+ fixincludes/configure                   |    1 +
+ fixincludes/configure.ac                |    1 +
+ gcc/Makefile.in                         |    1 +
+ gcc/c-family/c-common.c                 |   26 +
+ gcc/c/c-typeck.c                        |   25 +
+ gcc/config.gcc                          |    8 +
+ gcc/config.host                         |    6 +
+ gcc/config/rs6000/amigaos-protos.h      |   41 +
+ gcc/config/rs6000/amigaos.c             |  461 ++++++++
+ gcc/config/rs6000/amigaos.h             |  435 ++++++++
+ gcc/config/rs6000/amigaos.opt           |   37 +
+ gcc/config/rs6000/rs6000.c              |  176 ++-
+ gcc/config/rs6000/rs6000.h              |    2 +
+ gcc/config/rs6000/rs6000.md             |   27 +-
+ gcc/config/rs6000/t-amigaos             |   20 +
+ gcc/cp/typeck.c                         |   16 +
+ gcc/doc/extend.texi                     |  167 +++
+ gcc/doc/invoke.texi                     |  136 +++
+ gcc/expr.c                              |    1 -
+ gcc/gcc.c                               |   12 +-
+ gcc/prefix.c                            |    2 +-
+ intl/dcigettext.c                       |    2 +
+ libcpp/line-map.c                       |    3 +
+ libgcc/config.host                      |    3 +
+ libgcc/config/rs6000/t-amigaos          |   45 +
+ libiberty/Makefile.in                   |    9 +
+ libiberty/basename.c                    |   21 +-
+ libiberty/configure                     |    1 +
+ libiberty/configure.ac                  |    1 +
+ libiberty/lrealpath.c                   |    3 +-
+ libiberty/make-relative-prefix.c        |   37 +-
+ libiberty/make-temp-file.c              |   27 +-
+ libiberty/pex-amigaos.c                 |  325 ++++++
+ libstdc++-v3/configure                  | 1852 ++++++++++++++++++++++++++++++-
+ libstdc++-v3/configure.ac               |    3 +
+ libstdc++-v3/crossconfig.m4             |    8 +
+ libstdc++-v3/include/bits/atomic_base.h |    2 +
+ libstdc++-v3/include/c_global/cstddef   |    3 +
+ libstdc++-v3/include/c_std/cstddef      |    3 +
+ 39 files changed, 3872 insertions(+), 77 deletions(-)
  create mode 100644 gcc/config/rs6000/amigaos-protos.h
  create mode 100644 gcc/config/rs6000/amigaos.c
  create mode 100644 gcc/config/rs6000/amigaos.h
@@ -183,24 +182,6 @@ index 5838d6a..0a9b51a 100644
    /* Convert the parameters to the types declared in the
       function prototype, or apply default promotions.  */
  
-diff --git a/gcc/common/config/rs6000/rs6000-common.c b/gcc/common/config/rs6000/rs6000-common.c
-index a3df590..ff4cdca 100644
---- a/gcc/common/config/rs6000/rs6000-common.c
-+++ b/gcc/common/config/rs6000/rs6000-common.c
-@@ -284,6 +284,13 @@ rs6000_handle_option (struct gcc_options *opts, struct gcc_options *opts_set,
-     case OPT_mrecip:
-       opts->x_rs6000_recip_name = (value) ? "default" : "none";
-       break;
-+#if 0
-+#ifdef TARGET_USES_AMIGAOS_OPT
-+    case OPT_mcrt_:
-+      amigaos_crt_string = arg; /* TODO: Use opts-> */
-+      break;
-+#endif
-+#endif
-     }
-   return true;
- }
 diff --git a/gcc/config.gcc b/gcc/config.gcc
 index 63e1222..52d2462 100644
 --- a/gcc/config.gcc
@@ -1236,7 +1217,7 @@ index 0000000..93d74f1
 +Target Driver
 +Generated binary employs the dynamic linker for shared objects.
 diff --git a/gcc/config/rs6000/rs6000.c b/gcc/config/rs6000/rs6000.c
-index bf67e72..5481fec 100644
+index bf67e72..a031942 100644
 --- a/gcc/config/rs6000/rs6000.c
 +++ b/gcc/config/rs6000/rs6000.c
 @@ -134,6 +134,12 @@ typedef struct rs6000_stack {
@@ -1378,7 +1359,7 @@ index bf67e72..5481fec 100644
    if (TARGET_DEBUG_ARG)
      fprintf (stderr, "va_start: words = "HOST_WIDE_INT_PRINT_DEC", n_gpr = "
  	     HOST_WIDE_INT_PRINT_DEC", n_fpr = "HOST_WIDE_INT_PRINT_DEC"\n",
-@@ -10924,6 +10991,40 @@ rs6000_va_start (tree valist, rtx nextarg)
+@@ -10924,6 +10991,12 @@ rs6000_va_start (tree valist, rtx nextarg)
    expand_expr (t, const0_rtx, VOIDmode, EXPAND_NORMAL);
  }
  
@@ -1386,40 +1367,12 @@ index bf67e72..5481fec 100644
 +rs6000_va_start (tree valist, rtx nextarg)
 +{
 +  rs6000_va_start2(valist, nextarg);
-+#if 0
-+	/* For linearvarargs functions, immediately increase the fpr
-+    and gpr count to the maximum value, so that va_arg will look
-+    only at the stack. */
-+  if (crtl->args.info.call_cookie & CALL_LINEARVARARGS)
-+    {
-+      tree f_gpr, f_fpr;
-+      tree gpr, fpr, t;
-+
-+      f_gpr = TYPE_FIELDS (TREE_TYPE (va_list_type_node));
-+      f_fpr = TREE_CHAIN (f_gpr);
-+
-+      valist = build1 (INDIRECT_REF, TREE_TYPE (TREE_TYPE (valist)), valist);
-+      gpr = build3 (COMPONENT_REF, TREE_TYPE (f_gpr), valist, f_gpr, NULL_TREE);
-+      fpr = build3 (COMPONENT_REF, TREE_TYPE (f_fpr), valist, f_fpr, NULL_TREE);
-+
-+      /* Set gpr use count to 8, forcing the overflow area to be used */
-+      t = build2 (MODIFY_EXPR, TREE_TYPE (gpr), gpr, build_int_cst (NULL_TREE, 8));
-+      TREE_SIDE_EFFECTS (t) = 1;
-+      expand_expr (t, const0_rtx, VOIDmode, EXPAND_NORMAL);
-+
-+      /* Likewise for floating point arguments */
-+      t = build2 (MODIFY_EXPR, TREE_TYPE (fpr), fpr, build_int_cst (NULL_TREE, 8));
-+      TREE_SIDE_EFFECTS (t) = 1;
-+      expand_expr (t, const0_rtx, VOIDmode, EXPAND_NORMAL);
-+    }
-+#endif
 +}
-+
 +
  /* Implement va_arg.  */
  
  static tree
-@@ -13629,6 +13730,14 @@ rs6000_expand_builtin (tree exp, rtx target, rtx subtarget ATTRIBUTE_UNUSED,
+@@ -13629,6 +13702,14 @@ rs6000_expand_builtin (tree exp, rtx target, rtx subtarget ATTRIBUTE_UNUSED,
    HOST_WIDE_INT mask = rs6000_builtin_info[uns_fcode].mask;
    bool func_valid_p = ((rs6000_builtin_mask & mask) == mask);
  
@@ -1434,16 +1387,7 @@ index bf67e72..5481fec 100644
    if (TARGET_DEBUG_BUILTIN)
      {
        enum insn_code icode = rs6000_builtin_info[uns_fcode].icode;
-@@ -13788,7 +13897,7 @@ rs6000_expand_builtin (tree exp, rtx target, rtx subtarget ATTRIBUTE_UNUSED,
- 
-       if (success)
- 	return ret;
--    }  
-+    }
- 
-   unsigned attr = rs6000_builtin_info[uns_fcode].attr & RS6000_BTC_TYPE_MASK;
-   gcc_assert (attr == RS6000_BTC_UNARY
-@@ -18445,7 +18554,16 @@ print_operand_address (FILE *file, rtx x)
+@@ -18445,7 +18526,16 @@ print_operand_address (FILE *file, rtx x)
  	   && CONSTANT_P (XEXP (x, 1)))
      {
        output_addr_const (file, XEXP (x, 1));
@@ -1460,7 +1404,7 @@ index bf67e72..5481fec 100644
      }
  #endif
    else if (toc_relative_expr_p (x, false))
-@@ -21042,6 +21160,19 @@ rs6000_stack_info (void)
+@@ -21042,6 +21132,19 @@ rs6000_stack_info (void)
    info_ptr->calls_p = (! crtl->is_leaf 
  		       || cfun->machine->ra_needs_full_frame);
  
@@ -1480,7 +1424,7 @@ index bf67e72..5481fec 100644
    /* Determine if we need to save the condition code registers.  */
    if (df_regs_ever_live_p (CR2_REGNO)
        || df_regs_ever_live_p (CR3_REGNO)
-@@ -21159,7 +21290,13 @@ rs6000_stack_info (void)
+@@ -21159,7 +21262,13 @@ rs6000_stack_info (void)
      case ABI_V4:
        info_ptr->fp_save_offset   = - info_ptr->fp_size;
        info_ptr->gp_save_offset   = info_ptr->fp_save_offset - info_ptr->gp_size;
@@ -1494,7 +1438,7 @@ index bf67e72..5481fec 100644
  
        if (TARGET_SPE_ABI && info_ptr->spe_64bit_regs_used != 0)
  	{
-@@ -21219,6 +21356,10 @@ rs6000_stack_info (void)
+@@ -21219,6 +21328,10 @@ rs6000_stack_info (void)
  					 + info_ptr->vrsave_size,
  					 save_align);
  
@@ -1505,7 +1449,7 @@ index bf67e72..5481fec 100644
    non_fixed_size	 = (info_ptr->vars_size
  			    + info_ptr->parm_size
  			    + info_ptr->save_size);
-@@ -21403,6 +21544,11 @@ debug_stack_info (rs6000_stack_t *info)
+@@ -21403,6 +21516,11 @@ debug_stack_info (rs6000_stack_t *info)
    if (info->cr_save_p)
      fprintf (stderr, "\tcr_save_p           = %5d\n", info->cr_save_p);
  
@@ -1517,7 +1461,7 @@ index bf67e72..5481fec 100644
    if (info->vrsave_mask)
      fprintf (stderr, "\tvrsave_mask         = 0x%x\n", info->vrsave_mask);
  
-@@ -21439,6 +21585,11 @@ debug_stack_info (rs6000_stack_t *info)
+@@ -21439,6 +21557,11 @@ debug_stack_info (rs6000_stack_t *info)
    if (info->varargs_save_offset)
      fprintf (stderr, "\tvarargs_save_offset = %5d\n", info->varargs_save_offset);
  
@@ -1529,7 +1473,7 @@ index bf67e72..5481fec 100644
    if (info->total_size)
      fprintf (stderr, "\ttotal_size          = "HOST_WIDE_INT_PRINT_DEC"\n",
  	     info->total_size);
-@@ -21468,6 +21619,11 @@ debug_stack_info (rs6000_stack_t *info)
+@@ -21468,6 +21591,11 @@ debug_stack_info (rs6000_stack_t *info)
    if (info->vrsave_size)
      fprintf (stderr, "\tvrsave_size         = %5d\n", info->vrsave_size);
  
@@ -1541,7 +1485,7 @@ index bf67e72..5481fec 100644
    if (info->altivec_padding_size)
      fprintf (stderr, "\taltivec_padding_size= %5d\n",
  	     info->altivec_padding_size);
-@@ -23208,6 +23364,22 @@ rs6000_emit_prologue (void)
+@@ -23208,6 +23336,22 @@ rs6000_emit_prologue (void)
  			   sp_off - frame_off);
      }
  
@@ -1564,7 +1508,7 @@ index bf67e72..5481fec 100644
    if (crtl->calls_eh_return)
      {
        unsigned int i;
-@@ -23672,6 +23844,13 @@ rs6000_emit_prologue (void)
+@@ -23672,6 +23816,13 @@ rs6000_emit_prologue (void)
      }
  #endif
  
@@ -1578,7 +1522,7 @@ index bf67e72..5481fec 100644
    /* If we need to, save the TOC register after doing the stack setup.
       Do not emit eh frame info for this save.  The unwinder wants info,
       conceptually attached to instructions in this function, about
-@@ -23773,6 +23952,11 @@ rs6000_output_function_prologue (FILE *file,
+@@ -23773,6 +23924,11 @@ rs6000_output_function_prologue (FILE *file,
  	fprintf (file, "\tbl %s\n", RS6000_MCOUNT);
      }
  
@@ -1590,7 +1534,7 @@ index bf67e72..5481fec 100644
    rs6000_pic_labelno++;
  }
  
-@@ -24525,6 +24709,24 @@ rs6000_emit_epilogue (int sibcall)
+@@ -24525,6 +24681,24 @@ rs6000_emit_epilogue (int sibcall)
  	}
      }
  
@@ -4789,5 +4733,5 @@ index f4845f0..b1aa06e 100644
  #endif
  
 -- 
-2.1.1
+2.1.3
 
