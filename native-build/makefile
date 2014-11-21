@@ -16,8 +16,8 @@ MPC_ARCHIVE=mpc-0.9.tar.gz
 BINUTILS_VERSION=2.23.2
 BINUTILS_SRC_DIR=../binutils/repo
 
-GCC_VERSION=4.9.1
 GCC_SRC_DIR=../gcc/repo
+GCC_VERSION:=$(shell cat $(GCC_SRC_DIR)/gcc/BASE-VER)
 
 CROSS_PREFIX?=$(ROOT_DIR)/root-cross
 # This assumes that cross prefix is absolute

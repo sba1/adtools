@@ -7,8 +7,8 @@ export DH_VERBOSE=1
 # Disable all security flags. The build will not go through otherwise.
 export DEB_BUILD_MAINT_OPTIONS=hardening=-all
 
-export GCC_VERSION=4.9.1
 export GCC_SRC_DIR=patched
+export GCC_VERSION:=$(shell cat $(GCC_SRC_DIR)/gcc/BASE-VER)
 
 PWD=$(shell pwd)
 
