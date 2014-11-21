@@ -29,11 +29,11 @@ prepare-gcc:
 	rm -Rf adtools-gcc/patches
 	cp -R $(ROOT)/gcc/4.9/patches adtools-gcc
 	$(ROOT)/bin/adtget gcc 4.9
-	rm -Rf adtools-gcc/gcc-4.9.1
+	rm -Rf adtools-gcc/gcc-4.9.2
 	rm -Rf adtools-gcc/patched
 	cd adtools-gcc && \
-		tar xjf ../gcc-4.9.1.tar.bz2 && \
-		mv gcc-4.9.1 patched && \
+		tar xjf ../gcc-4.9.2.tar.bz2 && \
+		mv gcc-4.9.2 patched && \
 		cd patched && \
 			git init && \
 			git add . && \
