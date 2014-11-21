@@ -5,3 +5,10 @@ repo
 *.tar.gz
 *.tar.bz2
 *.log
+native-build/binutils-cross-build-*
+native-build/gcc-cross-build-*
+native-build/root-cross
+native-build/downloads
+native-build/*-done*
+packaging/deb/adtools-gcc/patched
+packaging/deb/adtools-binutils/patched
