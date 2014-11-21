@@ -5,19 +5,20 @@ Introduction
 ------------
 
 This is the Amiga developement tools project that host a number of tools
-that can be used to develop applications for Amigaoid systems. Mostly,
-the AmigaOS4 version is in a relatively good shape while this is probably
-not the case for the other systems.
+that can be used to develop applications for AmigaOS and Amigaoid
+systems. At the moment only the version for the latest AmigaOS version
+(4.x) is in a relatively good shape while this is probably not the case
+for the other systems.
 
 The main repo is still hosted on a SVN repository under
 https://sf.net/projects/adtools. It uses the concept of vendor branches
 but this is making quick progress nearly impossible, so a new approach
 is tested here.
 
-In contrast, in this repository, build products that are based on other
-projects (e.g. gcc) are not imported directly. Instead only the patches
-that need to be applied to a given mainline (e.g. gcc 4.9) are directly
-stored and maintained.
+In contrast to the original approch, build products that are based on 
+other projects (e.g. gcc) are not imported directly into this 
+repositotry, Instead only the patches that need to be applied to a given 
+base version (e.g. stock gcc 4.9) are directly stored and maintained.
 
 Patch management
 ----------------
@@ -77,7 +78,7 @@ If you just need a cross-compiler then call the ```gcc-done``` target like
 that:
 
 ```
-$ make -f native-build gcc-done
+$ make -C native-build gcc-done
 ```
 
 ### Packaging
