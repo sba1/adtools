@@ -1,5 +1,5 @@
-adtools-binutils (0.0.1-0) UNRELEASED; urgency=medium
+adtools-binutils (0.0.1-0) unstable; urgency=medium
 
-  * Initial packaging. Does not work yet.
+  * Initial packaging. Based on binutils 2.23.2
 
- -- Sebastian Bauer <mail@sebastianbauer.info>  Wed, 30 Jul 2014 13:06:05 +0200
+ -- Sebastian Bauer <mail@sebastianbauer.info>  Fri, 21 Nov 2014 22:31:39 +0100

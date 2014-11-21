@@ -1,5 +1,5 @@
-adtools-gcc (0.0.1-0) UNRELEASED; urgency=medium
+adtools-gcc (0.0.1-0) unstable; urgency=medium
 
-  * Initial packaging. Does not work yet.
+  * Initial packaging. We bundle GCC 4.9.1.
 
- -- Sebastian Bauer <mail@sebastianbauer.info>  Wed, 30 Jul 2014 13:06:05 +0200
+ -- Sebastian Bauer <mail@sebastianbauer.info>  Fri, 21 Nov 2014 22:30:27 +0100
