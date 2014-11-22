@@ -1,4 +1,4 @@
-From 7db1de630ca3de29a3d4d06bf23802b82bc60375 Mon Sep 17 00:00:00 2001
+From baa55439720a06a70314eeaabd4e9b3f56ff1fc8 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Thu, 20 Nov 2014 18:30:32 +0100
 Subject: [PATCH 1/2] Changes for AmigaOS version of gcc.
@@ -77,7 +77,7 @@ index f8f352f..66a501d 100644
          *-*-*vms*)
  		TARGET=twoprocess
 diff --git a/gcc/Makefile.in b/gcc/Makefile.in
-index d1ab22f..bc495f7 100644
+index b47733c..ca46950 100644
 --- a/gcc/Makefile.in
 +++ b/gcc/Makefile.in
 @@ -1930,6 +1930,7 @@ prefix.o: $(BASEVER)
@@ -89,7 +89,7 @@ index d1ab22f..bc495f7 100644
    -DSTANDARD_EXEC_PREFIX=\"$(libdir)/gcc/\" \
    -DSTANDARD_LIBEXEC_PREFIX=\"$(libexecdir)/gcc/\" \
 diff --git a/gcc/c-family/c-common.c b/gcc/c-family/c-common.c
-index f3c0dea..ebda503 100644
+index 487fb4e..2c73feb 100644
 --- a/gcc/c-family/c-common.c
 +++ b/gcc/c-family/c-common.c
 @@ -363,6 +363,7 @@ static tree handle_nothrow_attribute (tree *, tree, tree, int, bool *);
@@ -112,7 +112,7 @@ index f3c0dea..ebda503 100644
    { "sentinel",               0, 1, false, true, true,
  			      handle_sentinel_attribute, false },
    /* For internal use (marking of builtins) only.  The name contains space
-@@ -8925,6 +8931,26 @@ handle_warn_unused_result_attribute (tree *node, tree name,
+@@ -8927,6 +8933,26 @@ handle_warn_unused_result_attribute (tree *node, tree name,
    return NULL_TREE;
  }
  
@@ -140,7 +140,7 @@ index f3c0dea..ebda503 100644
  
  static tree
 diff --git a/gcc/c/c-typeck.c b/gcc/c/c-typeck.c
-index 5838d6a..0a9b51a 100644
+index d096ad4..766726a 100644
 --- a/gcc/c/c-typeck.c
 +++ b/gcc/c/c-typeck.c
 @@ -2833,6 +2833,8 @@ build_function_call_vec (location_t loc, vec<location_t> arg_loc,
@@ -183,10 +183,10 @@ index 5838d6a..0a9b51a 100644
       function prototype, or apply default promotions.  */
  
 diff --git a/gcc/config.gcc b/gcc/config.gcc
-index 63e1222..52d2462 100644
+index 9d3fa57..755580c 100644
 --- a/gcc/config.gcc
 +++ b/gcc/config.gcc
-@@ -2167,6 +2167,14 @@ picochip-*)
+@@ -2176,6 +2176,14 @@ picochip-*)
  	use_gcc_stdint=wrap
  	tmake_file="picochip/t-picochip t-pnt16-warn"
          ;;
@@ -1213,7 +1213,7 @@ index 0000000..93d74f1
 +Target Driver
 +Generated binary employs the dynamic linker for shared objects.
 diff --git a/gcc/config/rs6000/rs6000.c b/gcc/config/rs6000/rs6000.c
-index bf67e72..a031942 100644
+index e1a226c..873fed2 100644
 --- a/gcc/config/rs6000/rs6000.c
 +++ b/gcc/config/rs6000/rs6000.c
 @@ -134,6 +134,12 @@ typedef struct rs6000_stack {
@@ -1229,7 +1229,7 @@ index bf67e72..a031942 100644
  } rs6000_stack_t;
  
  /* A C structure for machine-specific, per-function data.
-@@ -1348,6 +1354,12 @@ static const struct attribute_spec rs6000_attribute_table[] =
+@@ -1359,6 +1365,12 @@ static const struct attribute_spec rs6000_attribute_table[] =
  #undef TARGET_ASM_FUNCTION_EPILOGUE
  #define TARGET_ASM_FUNCTION_EPILOGUE rs6000_output_function_epilogue
  
@@ -1242,7 +1242,7 @@ index bf67e72..a031942 100644
  #undef TARGET_ASM_OUTPUT_ADDR_CONST_EXTRA
  #define TARGET_ASM_OUTPUT_ADDR_CONST_EXTRA rs6000_output_addr_const_extra
  
-@@ -6610,6 +6622,14 @@ rs6000_legitimize_address (rtx x, rtx oldx ATTRIBUTE_UNUSED,
+@@ -6677,6 +6689,14 @@ rs6000_legitimize_address (rtx x, rtx oldx ATTRIBUTE_UNUSED,
  	return rs6000_legitimize_tls_address (x, model);
      }
  
@@ -1257,7 +1257,7 @@ index bf67e72..a031942 100644
    extra = 0;
    switch (mode)
      {
-@@ -8235,6 +8255,15 @@ rs6000_emit_move (rtx dest, rtx source, enum machine_mode mode)
+@@ -8302,6 +8322,15 @@ rs6000_emit_move (rtx dest, rtx source, enum machine_mode mode)
        operands[1] = tmp;
      }
  
@@ -1273,7 +1273,7 @@ index bf67e72..a031942 100644
    /* Handle the case where reload calls us with an invalid address.  */
    if (reload_in_progress && mode == Pmode
        && (! general_operand (operands[1], mode)
-@@ -8488,6 +8517,14 @@ rs6000_emit_move (rtx dest, rtx source, enum machine_mode mode)
+@@ -8555,6 +8584,14 @@ rs6000_emit_move (rtx dest, rtx source, enum machine_mode mode)
  	      return;
  	    }
  
@@ -1288,7 +1288,7 @@ index bf67e72..a031942 100644
  	  emit_insn (gen_elf_high (target, operands[1]));
  	  emit_insn (gen_elf_low (operands[0], target, operands[1]));
  	  return;
-@@ -9008,6 +9045,12 @@ init_cumulative_args (CUMULATIVE_ARGS *cum, tree fntype,
+@@ -9075,6 +9112,12 @@ init_cumulative_args (CUMULATIVE_ARGS *cum, tree fntype,
  	  && !lookup_attribute ("shortcall", TYPE_ATTRIBUTES (fntype))))
      cum->call_cookie |= CALL_LONG;
  
@@ -1301,7 +1301,7 @@ index bf67e72..a031942 100644
    if (TARGET_DEBUG_ARG)
      {
        fprintf (stderr, "\ninit_cumulative_args:");
-@@ -9602,6 +9645,15 @@ rs6000_function_arg_advance_1 (CUMULATIVE_ARGS *cum, enum machine_mode mode,
+@@ -9706,6 +9749,15 @@ rs6000_function_arg_advance_1 (CUMULATIVE_ARGS *cum, enum machine_mode mode,
  		   named, align_words - start_words, depth);
  	}
      }
@@ -1317,7 +1317,7 @@ index bf67e72..a031942 100644
  }
  
  static void
-@@ -10711,6 +10763,12 @@ setup_incoming_varargs (cumulative_args_t cum, enum machine_mode mode,
+@@ -10847,6 +10899,12 @@ setup_incoming_varargs (cumulative_args_t cum, enum machine_mode mode,
  	first_reg_offset += rs6000_arg_size (TYPE_MODE (type), type);
      }
  
@@ -1330,7 +1330,7 @@ index bf67e72..a031942 100644
    set = get_varargs_alias_set ();
    if (! no_rtl && first_reg_offset < GP_ARG_NUM_REG
        && cfun->va_list_gpr_size)
-@@ -10838,7 +10896,7 @@ rs6000_build_builtin_va_list (void)
+@@ -10974,7 +11032,7 @@ rs6000_build_builtin_va_list (void)
  /* Implement va_start.  */
  
  static void
@@ -1339,7 +1339,7 @@ index bf67e72..a031942 100644
  {
    HOST_WIDE_INT words, n_gpr, n_fpr;
    tree f_gpr, f_fpr, f_res, f_ovf, f_sav;
-@@ -10873,6 +10931,15 @@ rs6000_va_start (tree valist, rtx nextarg)
+@@ -11009,6 +11067,15 @@ rs6000_va_start (tree valist, rtx nextarg)
    n_fpr = MIN (crtl->args.info.fregno - FP_ARG_MIN_REG,
  	       FP_ARG_NUM_REG);
  
@@ -1355,7 +1355,7 @@ index bf67e72..a031942 100644
    if (TARGET_DEBUG_ARG)
      fprintf (stderr, "va_start: words = "HOST_WIDE_INT_PRINT_DEC", n_gpr = "
  	     HOST_WIDE_INT_PRINT_DEC", n_fpr = "HOST_WIDE_INT_PRINT_DEC"\n",
-@@ -10924,6 +10991,12 @@ rs6000_va_start (tree valist, rtx nextarg)
+@@ -11060,6 +11127,12 @@ rs6000_va_start (tree valist, rtx nextarg)
    expand_expr (t, const0_rtx, VOIDmode, EXPAND_NORMAL);
  }
  
@@ -1368,7 +1368,7 @@ index bf67e72..a031942 100644
  /* Implement va_arg.  */
  
  static tree
-@@ -13629,6 +13702,14 @@ rs6000_expand_builtin (tree exp, rtx target, rtx subtarget ATTRIBUTE_UNUSED,
+@@ -13765,6 +13838,14 @@ rs6000_expand_builtin (tree exp, rtx target, rtx subtarget ATTRIBUTE_UNUSED,
    HOST_WIDE_INT mask = rs6000_builtin_info[uns_fcode].mask;
    bool func_valid_p = ((rs6000_builtin_mask & mask) == mask);
  
@@ -1383,7 +1383,7 @@ index bf67e72..a031942 100644
    if (TARGET_DEBUG_BUILTIN)
      {
        enum insn_code icode = rs6000_builtin_info[uns_fcode].icode;
-@@ -18445,7 +18526,16 @@ print_operand_address (FILE *file, rtx x)
+@@ -18587,7 +18668,16 @@ print_operand_address (FILE *file, rtx x)
  	   && CONSTANT_P (XEXP (x, 1)))
      {
        output_addr_const (file, XEXP (x, 1));
@@ -1400,7 +1400,7 @@ index bf67e72..a031942 100644
      }
  #endif
    else if (toc_relative_expr_p (x, false))
-@@ -21042,6 +21132,19 @@ rs6000_stack_info (void)
+@@ -21184,6 +21274,19 @@ rs6000_stack_info (void)
    info_ptr->calls_p = (! crtl->is_leaf 
  		       || cfun->machine->ra_needs_full_frame);
  
@@ -1420,7 +1420,7 @@ index bf67e72..a031942 100644
    /* Determine if we need to save the condition code registers.  */
    if (df_regs_ever_live_p (CR2_REGNO)
        || df_regs_ever_live_p (CR3_REGNO)
-@@ -21159,7 +21262,13 @@ rs6000_stack_info (void)
+@@ -21301,7 +21404,13 @@ rs6000_stack_info (void)
      case ABI_V4:
        info_ptr->fp_save_offset   = - info_ptr->fp_size;
        info_ptr->gp_save_offset   = info_ptr->fp_save_offset - info_ptr->gp_size;
@@ -1434,7 +1434,7 @@ index bf67e72..a031942 100644
  
        if (TARGET_SPE_ABI && info_ptr->spe_64bit_regs_used != 0)
  	{
-@@ -21219,6 +21328,10 @@ rs6000_stack_info (void)
+@@ -21361,6 +21470,10 @@ rs6000_stack_info (void)
  					 + info_ptr->vrsave_size,
  					 save_align);
  
@@ -1445,7 +1445,7 @@ index bf67e72..a031942 100644
    non_fixed_size	 = (info_ptr->vars_size
  			    + info_ptr->parm_size
  			    + info_ptr->save_size);
-@@ -21403,6 +21516,11 @@ debug_stack_info (rs6000_stack_t *info)
+@@ -21545,6 +21658,11 @@ debug_stack_info (rs6000_stack_t *info)
    if (info->cr_save_p)
      fprintf (stderr, "\tcr_save_p           = %5d\n", info->cr_save_p);
  
@@ -1457,7 +1457,7 @@ index bf67e72..a031942 100644
    if (info->vrsave_mask)
      fprintf (stderr, "\tvrsave_mask         = 0x%x\n", info->vrsave_mask);
  
-@@ -21439,6 +21557,11 @@ debug_stack_info (rs6000_stack_t *info)
+@@ -21581,6 +21699,11 @@ debug_stack_info (rs6000_stack_t *info)
    if (info->varargs_save_offset)
      fprintf (stderr, "\tvarargs_save_offset = %5d\n", info->varargs_save_offset);
  
@@ -1469,7 +1469,7 @@ index bf67e72..a031942 100644
    if (info->total_size)
      fprintf (stderr, "\ttotal_size          = "HOST_WIDE_INT_PRINT_DEC"\n",
  	     info->total_size);
-@@ -21468,6 +21591,11 @@ debug_stack_info (rs6000_stack_t *info)
+@@ -21610,6 +21733,11 @@ debug_stack_info (rs6000_stack_t *info)
    if (info->vrsave_size)
      fprintf (stderr, "\tvrsave_size         = %5d\n", info->vrsave_size);
  
@@ -1481,7 +1481,7 @@ index bf67e72..a031942 100644
    if (info->altivec_padding_size)
      fprintf (stderr, "\taltivec_padding_size= %5d\n",
  	     info->altivec_padding_size);
-@@ -23208,6 +23336,22 @@ rs6000_emit_prologue (void)
+@@ -23350,6 +23478,22 @@ rs6000_emit_prologue (void)
  			   sp_off - frame_off);
      }
  
@@ -1504,7 +1504,7 @@ index bf67e72..a031942 100644
    if (crtl->calls_eh_return)
      {
        unsigned int i;
-@@ -23672,6 +23816,13 @@ rs6000_emit_prologue (void)
+@@ -23814,6 +23958,13 @@ rs6000_emit_prologue (void)
      }
  #endif
  
@@ -1518,7 +1518,7 @@ index bf67e72..a031942 100644
    /* If we need to, save the TOC register after doing the stack setup.
       Do not emit eh frame info for this save.  The unwinder wants info,
       conceptually attached to instructions in this function, about
-@@ -23773,6 +23924,11 @@ rs6000_output_function_prologue (FILE *file,
+@@ -23915,6 +24066,11 @@ rs6000_output_function_prologue (FILE *file,
  	fprintf (file, "\tbl %s\n", RS6000_MCOUNT);
      }
  
@@ -1530,7 +1530,7 @@ index bf67e72..a031942 100644
    rs6000_pic_labelno++;
  }
  
-@@ -24525,6 +24681,24 @@ rs6000_emit_epilogue (int sibcall)
+@@ -24667,6 +24823,24 @@ rs6000_emit_epilogue (int sibcall)
  	}
      }
  
@@ -1556,10 +1556,10 @@ index bf67e72..a031942 100644
       the load-multiple instructions.  */
    if (TARGET_SPE_ABI
 diff --git a/gcc/config/rs6000/rs6000.h b/gcc/config/rs6000/rs6000.h
-index 2b5d033..0bb61f8 100644
+index f363867..fb67b61 100644
 --- a/gcc/config/rs6000/rs6000.h
 +++ b/gcc/config/rs6000/rs6000.h
-@@ -2573,6 +2573,8 @@ enum rs6000_builtins
+@@ -2662,6 +2662,8 @@ enum rs6000_builtins
  {
  #include "rs6000-builtin.def"
  
@@ -1568,17 +1568,17 @@ index 2b5d033..0bb61f8 100644
    RS6000_BUILTIN_COUNT
  };
  
-@@ -2698,3 +2700,5 @@ enum rs6000_builtin_type_index
+@@ -2787,3 +2789,5 @@ enum rs6000_builtin_type_index
  extern GTY(()) tree rs6000_builtin_types[RS6000_BTI_MAX];
  extern GTY(()) tree rs6000_builtin_decls[RS6000_BUILTIN_COUNT];
  
 +/* Used by amigaos port */
 +void rs6000_va_start (tree valist, rtx nextarg);
 diff --git a/gcc/config/rs6000/rs6000.md b/gcc/config/rs6000/rs6000.md
-index 26d0d15..dc39ea1 100644
+index 46837e1..9acbc5c 100644
 --- a/gcc/config/rs6000/rs6000.md
 +++ b/gcc/config/rs6000/rs6000.md
-@@ -12150,6 +12150,31 @@
+@@ -12172,6 +12172,31 @@
    [(set (match_dup 0) (high:P (match_dup 1)))
     (set (match_dup 0) (lo_sum:P (match_dup 0) (match_dup 1)))])
  
@@ -1610,7 +1610,7 @@ index 26d0d15..dc39ea1 100644
  ;; Elf specific ways of loading addresses for non-PIC code.
  ;; The output of this could be r0, but we make a very strong
  ;; preference for a base register because it will usually
-@@ -12164,7 +12189,7 @@
+@@ -12186,7 +12211,7 @@
    [(set (match_operand:SI 0 "gpc_reg_operand" "=r,r")
  	(lo_sum:SI (match_operand:SI 1 "gpc_reg_operand" "b,!*r")
  		   (match_operand 2 "" "")))]
@@ -1646,7 +1646,7 @@ index 0000000..15d9d3f
 +MULTILIB_DIRNAMES = newlib clib2
 +#MULTILIB_REUSE = =mcrt=newlib
 diff --git a/gcc/cp/typeck.c b/gcc/cp/typeck.c
-index 9a80727..feffb78 100644
+index 03d7ab8..9153094 100644
 --- a/gcc/cp/typeck.c
 +++ b/gcc/cp/typeck.c
 @@ -3500,6 +3500,22 @@ cp_build_function_call_vec (tree function, vec<tree, va_gc> **params,
@@ -1858,10 +1858,10 @@ index 10ad6e4..9976b21 100644
  
  Three attributes currently are defined for PowerPC configurations:
 diff --git a/gcc/doc/invoke.texi b/gcc/doc/invoke.texi
-index 9d8ffc0..b87c7e1 100644
+index bea8be2..9a4f2cc 100644
 --- a/gcc/doc/invoke.texi
 +++ b/gcc/doc/invoke.texi
-@@ -1066,6 +1066,10 @@ See i386 and x86-64 Options.
+@@ -1067,6 +1067,10 @@ See i386 and x86-64 Options.
  @emph{zSeries Options}
  See S/390 and zSeries Options.
  
@@ -1872,7 +1872,7 @@ index 9d8ffc0..b87c7e1 100644
  @item Code Generation Options
  @xref{Code Gen Options,,Options for Code Generation Conventions}.
  @gccoptlist{-fcall-saved-@var{reg}  -fcall-used-@var{reg} @gol
-@@ -11331,6 +11335,7 @@ platform.
+@@ -11343,6 +11347,7 @@ platform.
  * x86-64 Options::
  * Xstormy16 Options::
  * Xtensa Options::
@@ -1880,7 +1880,7 @@ index 9d8ffc0..b87c7e1 100644
  * zSeries Options::
  @end menu
  
-@@ -21794,6 +21799,137 @@ These options are defined for Xstormy16:
+@@ -21909,6 +21914,137 @@ These options are defined for Xstormy16:
  Choose startup files and linker script suitable for the simulator.
  @end table
  
@@ -2019,7 +2019,7 @@ index 9d8ffc0..b87c7e1 100644
  @subsection Xtensa Options
  @cindex Xtensa Options
 diff --git a/gcc/expr.c b/gcc/expr.c
-index 72e4401..225839a 100644
+index bf14114..a580681 100644
 --- a/gcc/expr.c
 +++ b/gcc/expr.c
 @@ -8067,7 +8067,6 @@ expand_expr_real_2 (sepops ops, rtx target, enum machine_mode tmode,
@@ -2031,10 +2031,10 @@ index 72e4401..225839a 100644
    mode = TYPE_MODE (type);
    unsignedp = TYPE_UNSIGNED (type);
 diff --git a/gcc/gcc.c b/gcc/gcc.c
-index 5cb485a..67e85d5 100644
+index c7ce64d..cbda3f0 100644
 --- a/gcc/gcc.c
 +++ b/gcc/gcc.c
-@@ -2649,7 +2649,7 @@ execute (void)
+@@ -2655,7 +2655,7 @@ execute (void)
    for (n_commands = 1, i = 0; argbuf.iterate (i, &arg); i++)
      if (arg && strcmp (arg, "|") == 0)
        {				/* each command.  */
@@ -2043,7 +2043,7 @@ index 5cb485a..67e85d5 100644
  	fatal_error ("-pipe not supported");
  #endif
  	argbuf[i] = 0; /* Termination of
-@@ -4048,7 +4048,6 @@ process_command (unsigned int decoded_options_count,
+@@ -4054,7 +4054,6 @@ process_command (unsigned int decoded_options_count,
        add_prefix (&startfile_prefixes, standard_exec_prefix, "BINUTILS",
  		  PREFIX_PRIORITY_LAST, 1, 0);
      }
@@ -2051,7 +2051,7 @@ index 5cb485a..67e85d5 100644
    gcc_assert (!IS_ABSOLUTE_PATH (tooldir_base_prefix));
    tooldir_prefix2 = concat (tooldir_base_prefix, spec_machine,
  			    dir_separator_str, NULL);
-@@ -6091,6 +6090,11 @@ give_switch (int switchnum, int omit_first_word)
+@@ -6097,6 +6096,11 @@ give_switch (int switchnum, int omit_first_word)
  	    }
  	  else
  	    do_spec_1 (arg, 1, NULL);
@@ -2063,7 +2063,7 @@ index 5cb485a..67e85d5 100644
  	}
      }
  
-@@ -6128,7 +6132,9 @@ is_directory (const char *path1, bool linker)
+@@ -6134,7 +6138,9 @@ is_directory (const char *path1, bool linker)
    cp = path + len1;
    if (!IS_DIR_SEPARATOR (cp[-1]))
      *cp++ = DIR_SEPARATOR;
@@ -2073,7 +2073,7 @@ index 5cb485a..67e85d5 100644
    *cp = '\0';
  
    /* Exclude directories that the linker is known to search.  */
-@@ -6588,6 +6594,7 @@ main (int argc, char **argv)
+@@ -6594,6 +6600,7 @@ main (int argc, char **argv)
  		      NULL, PREFIX_PRIORITY_LAST, 0, 1);
  	}
  
@@ -2081,7 +2081,7 @@ index 5cb485a..67e85d5 100644
        /* Sysrooted prefixes are relocated because target_system_root is
  	 also relocated by gcc_exec_prefix.  */
        if (*standard_startfile_prefix_1)
-@@ -6598,6 +6605,7 @@ main (int argc, char **argv)
+@@ -6604,6 +6611,7 @@ main (int argc, char **argv)
  	add_sysrooted_prefix (&startfile_prefixes,
  			      standard_startfile_prefix_2, "BINUTILS",
  			      PREFIX_PRIORITY_LAST, 0, 1);
@@ -4692,7 +4692,7 @@ index 15d876e..c5d2e5f 100644
      AC_MSG_ERROR([No support for this host/target combination.])
     ;;
 diff --git a/libstdc++-v3/include/bits/atomic_base.h b/libstdc++-v3/include/bits/atomic_base.h
-index 242459a..df0f8be 100644
+index 1fc0ebb..bfd792b 100644
 --- a/libstdc++-v3/include/bits/atomic_base.h
 +++ b/libstdc++-v3/include/bits/atomic_base.h
 @@ -33,7 +33,9 @@
