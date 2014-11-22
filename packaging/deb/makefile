@@ -24,16 +24,19 @@ prepare-binutils:
 			git apply ../patches/*.patch && \
 			rm -Rf .git
 
+GCC_ARCHIVE_NAME = $(shell basename $(shell $(ROOT)/bin/adtget gcc 4.9 --print-url-only))
+GCC_DIR = $(basename $(basename $(GCC_ARCHIVE_NAME)))
+
 .PHONY: prepare-gcc
 prepare-gcc:
 	rm -Rf adtools-gcc/patches
 	cp -R $(ROOT)/gcc/4.9/patches adtools-gcc
 	$(ROOT)/bin/adtget gcc 4.9
-	rm -Rf adtools-gcc/gcc-4.9.2
+	rm -Rf adtools-gcc/$(GCC_DIR)
 	rm -Rf adtools-gcc/patched
 	cd adtools-gcc && \
-		tar xjf ../gcc-4.9.2.tar.bz2 && \
-		mv gcc-4.9.2 patched && \
+		tar xjf ../$(GCC_ARCHIVE_NAME) && \
+		mv $(GCC_DIR) patched && \
 		cd patched && \
 			git init && \
 			git add . && \
