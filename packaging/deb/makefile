@@ -20,7 +20,6 @@ prepare-binutils:
 		mv binutils-2.23.2 patched && \
 		cd patched && \
 			git init && \
-			git add . && \
 			git apply ../patches/*.patch && \
 			rm -Rf .git
 
@@ -39,7 +38,6 @@ prepare-gcc:
 		mv $(GCC_DIR) patched && \
 		cd patched && \
 			git init && \
-			git add . && \
 			git apply ../patches/*.patch && \
 			rm -Rf .git
 
