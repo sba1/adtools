@@ -14,6 +14,9 @@ from subprocess import call
 parser = argparse.ArgumentParser(description='Download the baseline distribution')
 parser.add_argument('component')
 parser.add_argument('branch')
+parser.add_argument('--print-url-only', dest='print_url_only', action='store_true', help="""
+  just print the URL, but don't download anything
+  """)
 args = parser.parse_args()
 
 script = os.path.realpath(sys.argv[0])
@@ -43,5 +46,8 @@ for line in lines:
 if not branchok:
 	sys.exit("Couldn't find requested branch")
 
-os.chdir(cdir)
-call(["wget", "-N", url])
+if args.print_url_only:
+	print(url)
+else:
+	os.chdir(cdir)
+	call(["wget", "-N", url])
