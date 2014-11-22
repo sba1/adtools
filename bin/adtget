@@ -8,25 +8,26 @@
 
 import os.path
 import sys
+import argparse
 from subprocess import call
+
+parser = argparse.ArgumentParser(description='Download the baseline distribution')
+parser.add_argument('component')
+parser.add_argument('branch')
+args = parser.parse_args()
 
 script = os.path.realpath(sys.argv[0])
 root = os.path.realpath(os.path.dirname(script) + "/../")
 cdir = os.getcwd()
 
-if len(sys.argv) < 2:
-	sys.exit('Component and branch name must be specified!')
-if len(sys.argv) < 3:
-	sys.exit('Branch name must be specified!')
-
 # The base path
-base = os.path.join(root, sys.argv[1])
+base = os.path.join(root, args.component)
 
 # The series file relating branches to checkout ids
 series = os.path.join(base, "series")
 
 # The requested branch
-reqbranch = sys.argv[2]
+reqbranch = args.branch
 
 # Open the branch <-> checkout id table
 lines = [line.strip() for line in open(series)]
