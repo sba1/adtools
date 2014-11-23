@@ -7,12 +7,16 @@
 
 import os
 import sys
+import argparse
 from subprocess import call
 
 script = os.path.realpath(sys.argv[0])
 root = os.path.realpath(os.path.dirname(script) + "/../")
 
 components = ['binutils', 'gcc']
+
+parser = argparse.ArgumentParser(description='Clone or fetch all baseline repositories')
+args = parser.parse_args()
 
 for component in components:
 	os.chdir(os.path.join(root,component))
