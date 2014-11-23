@@ -5,6 +5,7 @@
 # (c) 2014 by Sebastian Bauer
 #
 
+from __future__ import print_function
 import os
 import sys
 import argparse
@@ -22,8 +23,10 @@ for component in components:
 	os.chdir(os.path.join(root,component))
 	if os.path.exists("repo"):
 		os.chdir("repo")
+		print(component + ': Fetching updates')
 		call(['git', 'fetch', 'origin'])
 	else:
 		repo = open("repo.url").readline().strip()
+		print(component + ': Cloning repo')
 		call(['git', 'clone', repo, 'repo'])
 
