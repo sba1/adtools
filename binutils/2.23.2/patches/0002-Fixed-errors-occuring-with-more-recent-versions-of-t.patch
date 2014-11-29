@@ -1,0 +1,334 @@
+From e2874b47617cdeefa62152340b8beaddc9cb2bfe Mon Sep 17 00:00:00 2001
+From: Sebastian Bauer <mail@sebastianbauer.info>
+Date: Sat, 29 Nov 2014 11:32:22 +0100
+Subject: [PATCH 2/2] Fixed errors occuring with more recent versions of
+ texinfo.
+
+---
+ bfd/doc/bfd.texinfo        |  4 ++--
+ binutils/doc/binutils.texi | 12 ++++++------
+ gas/doc/c-arc.texi         |  4 ++--
+ gas/doc/c-arm.texi         | 18 +++++++++---------
+ gas/doc/c-cr16.texi        | 47 ++++++++++++++++++++++++++--------------------
+ gas/doc/c-mips.texi        |  2 +-
+ gas/doc/c-score.texi       |  8 ++++----
+ gas/doc/c-tic54x.texi      | 10 +++++-----
+ ld/ld.texinfo              |  4 ++--
+ 9 files changed, 58 insertions(+), 51 deletions(-)
+
+diff --git a/bfd/doc/bfd.texinfo b/bfd/doc/bfd.texinfo
+index 7b9774b..d3b14c5 100644
+--- a/bfd/doc/bfd.texinfo
++++ b/bfd/doc/bfd.texinfo
+@@ -327,7 +327,7 @@ All of BFD lives in one directory.
+ @printindex cp
+ 
+ @tex
+-% I think something like @colophon should be in texinfo.  In the
++% I think something like @ colophon should be in texinfo.  In the
+ % meantime:
+ \long\def\colophon{\hbox to0pt{}\vfill
+ \centerline{The body of this manual is set in}
+@@ -338,7 +338,7 @@ All of BFD lives in one directory.
+ \centerline{{\sl\fontname\tensl\/}}
+ \centerline{are used for emphasis.}\vfill}
+ \page\colophon
+-% Blame: doc@cygnus.com, 28mar91.
++% Blame: doc at cygnus.com, 28mar91.
+ @end tex
+ 
+ @bye
+diff --git a/binutils/doc/binutils.texi b/binutils/doc/binutils.texi
+index 45174b7..ce7746c 100644
+--- a/binutils/doc/binutils.texi
++++ b/binutils/doc/binutils.texi
+@@ -4413,7 +4413,7 @@ equivalent. At least one of the @option{--output-mach},
+ 
+ @table @env
+ 
+-@itemx --input-mach=@var{machine}
++@item --input-mach=@var{machine}
+ Set the matching input ELF machine type to @var{machine}.  If
+ @option{--input-mach} isn't specified, it will match any ELF
+ machine types.
+@@ -4421,21 +4421,21 @@ machine types.
+ The supported ELF machine types are, @var{L1OM}, @var{K1OM} and
+ @var{x86-64}.
+ 
+-@itemx --output-mach=@var{machine}
++@item --output-mach=@var{machine}
+ Change the ELF machine type in the ELF header to @var{machine}.  The
+ supported ELF machine types are the same as @option{--input-mach}.
+ 
+-@itemx --input-type=@var{type}
++@item --input-type=@var{type}
+ Set the matching input ELF file type to @var{type}.  If
+ @option{--input-type} isn't specified, it will match any ELF file types.
+ 
+ The supported ELF file types are, @var{rel}, @var{exec} and @var{dyn}.
+ 
+-@itemx --output-type=@var{type}
++@item --output-type=@var{type}
+ Change the ELF file type in the ELF header to @var{type}.  The
+ supported ELF types are the same as @option{--input-type}.
+ 
+-@itemx --input-osabi=@var{osabi}
++@item --input-osabi=@var{osabi}
+ Set the matching input ELF file OSABI to @var{osabi}.  If
+ @option{--input-osabi} isn't specified, it will match any ELF OSABIs.
+ 
+@@ -4445,7 +4445,7 @@ The supported ELF OSABIs are, @var{none}, @var{HPUX}, @var{NetBSD},
+ @var{FreeBSD}, @var{TRU64}, @var{Modesto}, @var{OpenBSD}, @var{OpenVMS},
+ @var{NSK}, @var{AROS} and @var{FenixOS}.
+ 
+-@itemx --output-osabi=@var{osabi}
++@item --output-osabi=@var{osabi}
+ Change the ELF OSABI in the ELF header to @var{osabi}.  The
+ supported ELF OSABI are the same as @option{--input-osabi}.
+ 
+diff --git a/gas/doc/c-arc.texi b/gas/doc/c-arc.texi
+index ea0fa4e..f27b327 100644
+--- a/gas/doc/c-arc.texi
++++ b/gas/doc/c-arc.texi
+@@ -220,7 +220,7 @@ The extension instructions are not macros.  The assembler creates
+ encodings for use of these instructions according to the specification
+ by the user.  The parameters are:
+ 
+-@table @bullet
++@itemize @bullet
+ @item @var{name}
+ Name of the extension instruction 
+ 
+@@ -279,7 +279,7 @@ code were: inst 0,r1,r2.  You use OP1_IMM_IMPLIED by bitwise ORing it
+ with SYNTAX_20P.
+ 
+ @end itemize 
+-@end table
++@end itemize
+ 
+ For example, defining 64-bit multiplier with immediate operands:
+ 
+diff --git a/gas/doc/c-arm.texi b/gas/doc/c-arm.texi
+index a46e08f..1944862 100644
+--- a/gas/doc/c-arm.texi
++++ b/gas/doc/c-arm.texi
+@@ -390,7 +390,7 @@ ARM and THUMB instructions had their own, separate syntaxes.  The new,
+ @code{unified} syntax, which can be selected via the @code{.syntax}
+ directive, and has the following main features:
+ 
+-@table @bullet
++@itemize @bullet
+ @item
+ Immediate operands do not require a @code{#} prefix.
+ 
+@@ -415,7 +415,7 @@ The @code{.N} and @code{.W} suffixes are recognized and honored.
+ @item
+ All instructions set the flags if and only if they have an @code{s}
+ affix.
+-@end table
++@end itemize
+ 
+ @node ARM-Chars
+ @subsection Special Characters
+@@ -466,13 +466,6 @@ so @samp{: @var{align}} is used instead.  For example:
+         vld1.8 @{q0@}, [r0, :128]
+ @end smallexample
+ 
+-@node ARM Floating Point
+-@section Floating Point
+-
+-@cindex floating point, ARM (@sc{ieee})
+-@cindex ARM floating point (@sc{ieee})
+-The ARM family uses @sc{ieee} floating-point numbers.
+-
+ @node ARM-Relocations
+ @subsection ARM relocation generation
+ 
+@@ -519,6 +512,13 @@ respectively.  For example to load the 32-bit address of foo into r0:
+         MOVT r0, #:upper16:foo
+ @end smallexample
+ 
++@node ARM Floating Point
++@section Floating Point
++
++@cindex floating point, ARM (@sc{ieee})
++@cindex ARM floating point (@sc{ieee})
++The ARM family uses @sc{ieee} floating-point numbers.
++
+ @node ARM Directives
+ @section ARM Machine Directives
+ 
+diff --git a/gas/doc/c-cr16.texi b/gas/doc/c-cr16.texi
+index 19f859f..592dc5a 100644
+--- a/gas/doc/c-cr16.texi
++++ b/gas/doc/c-cr16.texi
+@@ -44,26 +44,33 @@ Operand expression type qualifier is an optional field in the instruction operan
+ CR16 target operand qualifiers and its size (in bits):
+ 
+ @table @samp
+-@item Immediate Operand
+-- s ---- 4 bits
+-@item 
+-- m ---- 16 bits, for movb and movw instructions.
+-@item 
+-- m ---- 20 bits, movd instructions.
+-@item 
+-- l ---- 32 bits
+-
+-@item Absolute Operand
+-- s ---- Illegal specifier for this operand.
+-@item  
+-- m ---- 20 bits, movd instructions.
+-
+-@item Displacement Operand
+-- s ---- 8 bits
+-@item
+-- m ---- 16 bits
+-@item 
+-- l ---- 24 bits
++@item Immediate Operand: s
++4 bits.
++
++@item Immediate Operand: m
++16 bits, for movb and movw instructions.
++
++@item Immediate Operand: m
++20 bits, movd instructions.
++
++@item Immediate Operand: l
++32 bits
++
++@item Absolute Operand: s
++Illegal specifier for this operand.
++
++@item Absolute Operand: m
++20 bits, movd instructions.
++
++@item Displacement Operand: s
++8 bits
++
++@item Displacement Operand: m
++16 bits
++
++@item  Displacement Operand: l
++24 bits
++
+ @end table
+ 
+ For example:
+diff --git a/gas/doc/c-mips.texi b/gas/doc/c-mips.texi
+index 9ed0420..6054ab9 100644
+--- a/gas/doc/c-mips.texi
++++ b/gas/doc/c-mips.texi
+@@ -234,7 +234,7 @@ the @samp{mad} and @samp{madu} instruction, and to not schedule @samp{nop}
+ instructions around accesses to the @samp{HI} and @samp{LO} registers.
+ @samp{-no-m4650} turns off this option.
+ 
+-@itemx -m3900
++@item -m3900
+ @itemx -no-m3900
+ @itemx -m4100
+ @itemx -no-m4100
+diff --git a/gas/doc/c-score.texi b/gas/doc/c-score.texi
+index 3af20a3..40959f5 100644
+--- a/gas/doc/c-score.texi
++++ b/gas/doc/c-score.texi
+@@ -37,7 +37,7 @@ implicitly with the @code{gp} register. The default value is 8.
+ @item -EB
+ Assemble code for a big-endian cpu
+ 
+-@itemx -EL
++@item -EL
+ Assemble code for a little-endian cpu
+ 
+ @item -FIXDD 
+@@ -49,13 +49,13 @@ Assemble code for no warning message for fix data dependency
+ @item -SCORE5
+ Assemble code for target is SCORE5
+ 
+-@itemx -SCORE5U
++@item -SCORE5U
+ Assemble code for target is SCORE5U
+ 
+-@itemx -SCORE7
++@item -SCORE7
+ Assemble code for target is SCORE7, this is default setting
+ 
+-@itemx -SCORE3
++@item -SCORE3
+ Assemble code for target is SCORE3
+ 
+ @item -march=score7
+diff --git a/gas/doc/c-tic54x.texi b/gas/doc/c-tic54x.texi
+index d61ec3a..2c3b0f2 100644
+--- a/gas/doc/c-tic54x.texi
++++ b/gas/doc/c-tic54x.texi
+@@ -109,7 +109,7 @@ In this example, x is replaced with SYM2; SYM2 is replaced with SYM1, and SYM1
+ is replaced with x.  At this point, x has already been encountered
+ and the substitution stops.
+ 
+-@smallexample @code
++@smallexample
+  .asg   "x",SYM1 
+  .asg   "SYM1",SYM2
+  .asg   "SYM2",x
+@@ -126,14 +126,14 @@ Substitution may be forced in situations where replacement might be
+ ambiguous by placing colons on either side of the subsym.  The following
+ code: 
+ 
+-@smallexample @code
++@smallexample
+  .eval  "10",x
+ LAB:X:  add     #x, a
+ @end smallexample
+ 
+ When assembled becomes:
+ 
+-@smallexample @code
++@smallexample
+ LAB10  add     #10, a
+ @end smallexample
+ 
+@@ -309,7 +309,7 @@ The @code{LDX} pseudo-op is provided for loading the extended addressing bits
+ of a label or address.  For example, if an address @code{_label} resides
+ in extended program memory, the value of @code{_label} may be loaded as
+ follows:
+-@smallexample @code
++@smallexample
+  ldx     #_label,16,a    ; loads extended bits of _label
+  or      #_label,a       ; loads lower 16 bits of _label
+  bacc    a               ; full address is in accumulator A
+@@ -345,7 +345,7 @@ Assign @var{name} the string @var{string}.  String replacement is
+ performed on @var{string} before assignment.
+ 
+ @cindex @code{eval} directive, TIC54X
+-@itemx .eval @var{string}, @var{name}
++@item .eval @var{string}, @var{name}
+ Evaluate the contents of string @var{string} and assign the result as a
+ string to the subsym @var{name}.  String replacement is performed on
+ @var{string} before assignment. 
+diff --git a/ld/ld.texinfo b/ld/ld.texinfo
+index 71e909e..81d538b 100644
+--- a/ld/ld.texinfo
++++ b/ld/ld.texinfo
+@@ -7863,7 +7863,7 @@ If you have more than one @code{SECT} statement for the same
+ @printindex cp
+ 
+ @tex
+-% I think something like @colophon should be in texinfo.  In the
++% I think something like @ colophon should be in texinfo.  In the
+ % meantime:
+ \long\def\colophon{\hbox to0pt{}\vfill
+ \centerline{The body of this manual is set in}
+@@ -7874,7 +7874,7 @@ If you have more than one @code{SECT} statement for the same
+ \centerline{{\sl\fontname\tensl\/}}
+ \centerline{are used for emphasis.}\vfill}
+ \page\colophon
+-% Blame: doc@cygnus.com, 28mar91.
++% Blame: doc @ cygnus.com, 28mar91.
+ @end tex
+ 
+ @bye
+-- 
+2.1.3
+
