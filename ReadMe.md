@@ -1,6 +1,8 @@
 The adtools project
 ===================
 
+[![Build Status](https://travis-ci.org/sba1/adtools.svg?branch=master)](https://travis-ci.org/sba1/adtools)
+
 Introduction
 ------------
 
