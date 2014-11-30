@@ -27,4 +27,6 @@ for deb in all_debs:
 	version = m.group(1)
 
 	url = 'https://api.bintray.com/content/sba1/adtools-deb/' + pkg + '/' + version + '/' + deb + ';publish=1;override=1'
+
+	print('Uploading ' + deb);
 	call(['curl', '-T', deb, '-u' + user + ':' + key, url])
