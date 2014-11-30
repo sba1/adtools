@@ -16,7 +16,7 @@ is tested here.
 
 In contrast to the original approch, build products that are based on 
 other projects (e.g. gcc) are not imported directly into this 
-repository, Instead only the patches that need to be applied to a given 
+repository. Instead only the patches that need to be applied to a given 
 base version (e.g. stock gcc 4.9) are directly stored and maintained.
 
 Installation
