@@ -3,9 +3,6 @@ The adtools project
 
 [![Build Status](https://travis-ci.org/sba1/adtools.svg?branch=master)](https://travis-ci.org/sba1/adtools)
 
-Introduction
-------------
-
 This is the Amiga developement tools project that host a number of tools
 that can be used to develop applications for AmigaOS and Amigaoid
 systems. At the moment only the version for the latest AmigaOS version
