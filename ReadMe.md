@@ -19,6 +19,36 @@ other projects (e.g. gcc) are not imported directly into this
 repository, Instead only the patches that need to be applied to a given 
 base version (e.g. stock gcc 4.9) are directly stored and maintained.
 
+Installation
+------------
+
+### AmigaOS
+No binaries for AmigaOS are currently provided. Refer to the Building section how to build one yourself.
+
+### Debian-based Linux distributions
+
+Debian packages are generated automatically for the amd64 architecture. You can integrate them in
+your Debian installation by adding
+
+```
+ deb http://dl.bintray.com/sba1/adtools-deb /
+```
+
+to your ```/etc/apt/sources.list``` file. E.g., by 
+
+```
+$ echo "deb http://dl.bintray.com/sba1/adtools-deb /" | sudo tee -a /etc/apt/sources.list
+```
+
+Note that the packages are currently not signed. Installation is then as easy as typing
+
+```
+$ aptitude install adtools-gcc
+```
+
+This will also install the SDK and binutils due to the dependencies.
+
+
 Patch management
 ----------------
 
