@@ -6,6 +6,7 @@
 #
 
 from __future__ import print_function
+import glob
 import os
 import sys
 import argparse
@@ -14,9 +15,11 @@ from subprocess import call
 script = os.path.realpath(sys.argv[0])
 root = os.path.realpath(os.path.dirname(script) + "/../")
 
-components = ['binutils', 'gcc']
+components = [os.path.dirname(p) for p in glob.glob("*/*.url")]
 
-parser = argparse.ArgumentParser(description='Clone or fetch all baseline repositories')
+parser = argparse.ArgumentParser(description="""
+	Clone or fetch baselines for all components. Available components:
+	""" + ", ".join(components))
 args = parser.parse_args()
 
 for component in components:
