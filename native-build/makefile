@@ -6,6 +6,11 @@
 #
 # The user running this script must have write access to /gcc
 #
+# Define CROSS_IS_PRESENT=1 if a suitable cross compiler is already
+# present, in which case the cross compiler build is skipped, e.g.:
+#
+#  make CROSS_IS_PRESENT=1
+#
 
 ROOT_DIR=$(realpath .)
 
@@ -94,10 +99,17 @@ additionals-libs:
 	cp -Rf /tmp/abcd/SDK_Install/Local/* $(CROSS_PREFIX)/ppc-amigaos/SDK/local
 	rm -Rf /tmp/abcd
 
+
+ifeq ($(CROSS_IS_PRESENT),1)
+NATIVE_LIBRARY_DEPENDENCIES=
+else
+NATIVE_LIBRARY_DEPENDENCIES=gcc-cross-done-$(GCC_VERSION)
+endif
+
 #
 # Build and install the libraries
 #
-libraries-done: gcc-cross-done-$(GCC_VERSION)
+libraries-done: $(NATIVE_LIBRARY_DEPENDENCIES)
 	cd downloads && tar -xjf $(notdir $(GMP_ARCHIVE))
 	cd downloads && tar -xjf $(notdir $(MPFR_ARCHIVE))
 	cd downloads && tar -xzf $(notdir $(MPC_ARCHIVE))
