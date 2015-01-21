@@ -5,20 +5,20 @@ RUN echo deb http://ftp.debian.org/debian wheezy-backports main >>/etc/apt/sourc
 RUN apt-get update
 RUN apt-get install -t wheezy-backports -y --no-install-recommends \
 	binutils \
-	patch \
-	gcc \
-	subversion \
 	build-essential \
-	wget \
 	debhelper \
 	devscripts \
-	texinfo \
+	fakeroot \
+	flex \
+	gcc \
 	lhasa \
 	libgmp-dev \
-	libmpfr-dev \
 	libmpc-dev \
-	fakeroot \
-	flex
+	libmpfr-dev \
+	patch \
+	subversion \
+	texinfo \
+	wget
 
 # Download original gcc archives
 RUN mkdir /build
