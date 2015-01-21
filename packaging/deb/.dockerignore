@@ -1,0 +1,6 @@
+adtools-binutils
+adtools-gcc
+adtools-sdk
+makefile
+gcc-*
+binutils-*
