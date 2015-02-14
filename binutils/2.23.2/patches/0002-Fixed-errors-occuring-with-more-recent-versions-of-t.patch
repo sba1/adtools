@@ -1,4 +1,4 @@
-From e2874b47617cdeefa62152340b8beaddc9cb2bfe Mon Sep 17 00:00:00 2001
+From e5811195ee1007420de6150b593fd6b3654c4921 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Sat, 29 Nov 2014 11:32:22 +0100
 Subject: [PATCH 2/2] Fixed errors occuring with more recent versions of
@@ -330,5 +330,5 @@ index 71e909e..81d538b 100644
  
  @bye
 -- 
-2.1.3
+2.1.4
 

@@ -1,119 +1,119 @@
-From 1d8f57f81e8ae387931eae2ca68ebf4cae57ea55 Mon Sep 17 00:00:00 2001
+From 1678a95339b8893195b307a953a0053ceeca0133 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
-Date: Sat, 29 Nov 2014 11:31:17 +0100
+Date: Sat, 14 Feb 2015 14:54:44 +0100
 Subject: [PATCH 1/2] Changes for various Amiga targets.
 
 ---
- bfd/ChangeLog-9697                    |   64 +
- bfd/ChangeLog-9899                    |    5 +
- bfd/Makefile.am                       |   18 +-
- bfd/Makefile.in                       |   24 +-
- bfd/amigaos.c                         | 3189 +++++++++++++++
- bfd/amigaoslink.c                     | 1032 +++++
- bfd/aout-amiga.c                      |  152 +
- bfd/aoutx.h                           |   26 +-
- bfd/bfd-in2.h                         |   12 +
- bfd/bfd.c                             |    1 +
- bfd/bfdio.c                           |   25 +
- bfd/config.bfd                        |   28 +-
- bfd/configure                         |    5 +
- bfd/configure.host                    |    1 +
- bfd/configure.in                      |    5 +
- bfd/doc/Makefile.am                   |   15 +-
- bfd/doc/Makefile.in                   |   15 +-
- bfd/doc/bfd.texinfo                   |    9 +-
- bfd/elf32-amiga.c                     | 3844 ++++++++++++++++++
- bfd/{elf32-ppc.c => elf32-amigaos.c}  |  347 +-
- bfd/elf32-i386-amithlon.c             |  198 +
- bfd/elf32-i386.c                      |   17 +-
- bfd/elf32-morphos.c                   | 7137 +++++++++++++++++++++++++++++++++
- bfd/elf32-ppc.c                       |    4 +
- bfd/hosts/amigaos.h                   |    5 +
- bfd/hosts/morphos.h                   |    5 +
- bfd/libamiga.h                        |  187 +
- bfd/libbfd.h                          |    8 +
- bfd/linker.c                          |   26 +-
- bfd/reloc.c                           |   19 +
- bfd/targets.c                         |   11 +
- binutils/objcopy.c                    |   50 +-
- binutils/readelf.c                    |    5 +
- binutils/rename.c                     |    4 +-
- config.sub                            |   11 +-
- config/mh-amigaos                     |   13 +
- config/mh-morphos                     |   13 +
- configure                             |    6 +
- configure.ac                          |    6 +
- gas/ChangeLog-9697                    |   12 +
- gas/ChangeLog-9899                    |    4 +
- gas/Makefile.am                       |    5 +-
- gas/Makefile.in                       |   20 +-
- gas/as.c                              |   14 +
- gas/config/m68k-parse.h               |    3 +
- gas/config/m68k-parse.y               |   10 +-
- gas/config/obj-amigahunk.c            |  212 +
- gas/config/obj-amigahunk.h            |   54 +
- gas/config/obj-elf.c                  |    4 +-
- gas/config/tc-i386.h                  |   15 +-
- gas/config/tc-m68k.c                  |  312 +-
- gas/config/tc-m68k.h                  |   15 +
- gas/config/tc-ppc.c                   |   36 +-
- gas/config/tc-sh.c                    |   28 +-
- gas/config/te-amiga.h                 |   24 +
- gas/config/te-amigaos.h               |   14 +
- gas/config/te-amithlon.h              |   26 +
- gas/config/te-morphos.h               |   14 +
- gas/configure                         |   20 +
- gas/configure.in                      |   18 +
- gas/configure.tgt                     |    8 +-
- gas/read.c                            |   21 +-
- gas/read.h                            |    4 +
- gas/write.c                           |   31 +-
- gas/write.h                           |    4 +-
- gprof/Makefile.am                     |    2 +-
- gprof/Makefile.in                     |    2 +-
- gprof/configure                       |   13 +
- gprof/configure.in                    |   11 +
- gprof/gconfig.in                      |    4 -
- include/elf/amigaos.h                 |   27 +
- include/elf/ppc.h                     |   12 +
- include/libiberty.h                   |    2 +-
- ld/ChangeLog-9197                     |   15 +
- ld/ChangeLog-9899                     |    5 +
- ld/Makefile.am                        |   38 +
- ld/Makefile.in                        |   46 +
- ld/configure.host                     |    4 +
- ld/configure.tgt                      |    9 +
- ld/emulparams/amiga.sh                |    6 +
- ld/emulparams/amiga_bss.sh            |    6 +
- ld/emulparams/amigaos.sh              |   26 +
- ld/emulparams/amithlon.sh             |   11 +
- ld/emulparams/morphos.sh              |    6 +
- ld/emulparams/morphos_baserel.sh      |    6 +
- ld/emulparams/ppcamiga.sh             |    8 +
- ld/emulparams/ppcamiga_bss.sh         |    8 +
- ld/emultempl/amiga.em                 |  288 ++
- ld/emultempl/{elf32.em => amigaos.em} |    0
- ld/emultempl/amithlon.em              | 1698 ++++++++
- ld/emultempl/morphos.em               | 1104 +++++
- ld/emultempl/ppc32elf.em              |   12 +
- ld/ldctor.c                           |   18 +-
- ld/ldfile.c                           |   54 +-
- ld/ldfile.h                           |    5 +
- ld/ldlang.c                           |    7 +
- ld/ldlang.h                           |    2 +
- ld/ldlex.c                            |  127 +-
- ld/ldmain.c                           |    7 +
- ld/scripttempl/amiga.sc               |   49 +
- ld/scripttempl/amiga_bss.sc           |   41 +
- ld/scripttempl/amigaos.sc             |  527 +++
- ld/scripttempl/amithlon.sc            |  412 ++
- ld/scripttempl/morphos.sc             |  232 ++
- ld/scripttempl/morphos_baserel.sc     |  199 +
- libiberty/config/mh-amigaos           |   12 +
- libiberty/config/mh-morphos           |   12 +
- libiberty/lrealpath.c                 |    6 +
- opcodes/m68k-dis.c                    |    2 +-
- 109 files changed, 22192 insertions(+), 359 deletions(-)
+ bfd/ChangeLog-9697                                |   64 +
+ bfd/ChangeLog-9899                                |    5 +
+ bfd/Makefile.am                                   |   18 +-
+ bfd/Makefile.in                                   |   24 +-
+ bfd/amigaos.c                                     | 3189 +++++++++
+ bfd/amigaoslink.c                                 | 1032 +++
+ bfd/aout-amiga.c                                  |  152 +
+ bfd/aoutx.h                                       |   26 +-
+ bfd/bfd-in2.h                                     |   12 +
+ bfd/bfd.c                                         |    1 +
+ bfd/bfdio.c                                       |   25 +
+ bfd/config.bfd                                    |   28 +-
+ bfd/configure                                     |    5 +
+ bfd/configure.host                                |    1 +
+ bfd/configure.in                                  |    5 +
+ bfd/doc/Makefile.am                               |   15 +-
+ bfd/doc/Makefile.in                               |   15 +-
+ bfd/doc/bfd.texinfo                               |    9 +-
+ bfd/elf32-amiga.c                                 | 3844 +++++++++++
+ bfd/{elf32-ppc.c => elf32-amigaos.c}              |  341 +-
+ bfd/elf32-i386-amithlon.c                         |  198 +
+ bfd/elf32-i386.c                                  |   17 +-
+ bfd/elf32-morphos.c                               | 7137 +++++++++++++++++++++
+ bfd/elf32-ppc.c                                   |    4 +
+ bfd/hosts/amigaos.h                               |    5 +
+ bfd/hosts/morphos.h                               |    5 +
+ bfd/libamiga.h                                    |  187 +
+ bfd/libbfd.h                                      |    8 +
+ bfd/linker.c                                      |   26 +-
+ bfd/reloc.c                                       |   19 +
+ bfd/targets.c                                     |   11 +
+ binutils/objcopy.c                                |   50 +-
+ binutils/readelf.c                                |    5 +
+ binutils/rename.c                                 |    4 +-
+ config.sub                                        |   11 +-
+ config/mh-amigaos                                 |   13 +
+ config/mh-morphos                                 |   13 +
+ configure                                         |    6 +
+ configure.ac                                      |    6 +
+ gas/ChangeLog-9697                                |   12 +
+ gas/ChangeLog-9899                                |    4 +
+ gas/Makefile.am                                   |    5 +-
+ gas/Makefile.in                                   |   20 +-
+ gas/as.c                                          |   14 +
+ gas/config/m68k-parse.h                           |    3 +
+ gas/config/m68k-parse.y                           |   10 +-
+ gas/config/obj-amigahunk.c                        |  212 +
+ gas/config/obj-amigahunk.h                        |   54 +
+ gas/config/obj-elf.c                              |    4 +-
+ gas/config/tc-i386.h                              |   15 +-
+ gas/config/tc-m68k.c                              |  312 +-
+ gas/config/tc-m68k.h                              |   15 +
+ gas/config/tc-ppc.c                               |   36 +-
+ gas/config/tc-sh.c                                |   28 +-
+ gas/config/te-amiga.h                             |   24 +
+ gas/config/te-amigaos.h                           |   14 +
+ gas/config/{te-nbsd.h => te-amithlon.h}           |   16 +-
+ gas/config/te-morphos.h                           |   14 +
+ gas/configure                                     |   20 +
+ gas/configure.in                                  |   18 +
+ gas/configure.tgt                                 |    8 +-
+ gas/read.c                                        |   21 +-
+ gas/read.h                                        |    4 +
+ gas/write.c                                       |   31 +-
+ gas/write.h                                       |    4 +-
+ gprof/Makefile.am                                 |    2 +-
+ gprof/Makefile.in                                 |    2 +-
+ gprof/configure                                   |   13 +
+ gprof/configure.in                                |   11 +
+ gprof/gconfig.in                                  |    4 -
+ include/elf/amigaos.h                             |   27 +
+ include/elf/ppc.h                                 |   12 +
+ include/libiberty.h                               |    2 +-
+ ld/ChangeLog-9197                                 |   15 +
+ ld/ChangeLog-9899                                 |    5 +
+ ld/Makefile.am                                    |   38 +
+ ld/Makefile.in                                    |   46 +
+ ld/configure.host                                 |    4 +
+ ld/configure.tgt                                  |    9 +
+ ld/emulparams/amiga.sh                            |    6 +
+ ld/emulparams/amiga_bss.sh                        |    6 +
+ ld/emulparams/amigaos.sh                          |   26 +
+ ld/emulparams/amithlon.sh                         |   11 +
+ ld/emulparams/morphos.sh                          |    6 +
+ ld/emulparams/morphos_baserel.sh                  |    6 +
+ ld/emulparams/ppcamiga.sh                         |    8 +
+ ld/emulparams/ppcamiga_bss.sh                     |    8 +
+ ld/emultempl/amiga.em                             |  288 +
+ ld/emultempl/{elf32.em => amigaos.em}             |    0
+ ld/emultempl/amithlon.em                          | 1698 +++++
+ ld/emultempl/morphos.em                           | 1104 ++++
+ ld/emultempl/ppc32elf.em                          |   12 +
+ ld/ldctor.c                                       |   18 +-
+ ld/ldfile.c                                       |   54 +-
+ ld/ldfile.h                                       |    5 +
+ ld/ldlang.c                                       |    7 +
+ ld/ldlang.h                                       |    2 +
+ ld/ldlex.c                                        |  127 +-
+ ld/ldmain.c                                       |    7 +
+ ld/scripttempl/amiga.sc                           |   49 +
+ ld/scripttempl/amiga_bss.sc                       |   41 +
+ ld/scripttempl/{elf64hppa.sc => amigaos.sc}       |  132 +-
+ ld/scripttempl/{mep.sc => amithlon.sc}            |  145 +-
+ ld/scripttempl/{elfi370.sc => morphos.sc}         |   57 +-
+ ld/scripttempl/{elfi370.sc => morphos_baserel.sc} |  108 +-
+ libiberty/config/mh-amigaos                       |   12 +
+ libiberty/config/mh-morphos                       |   12 +
+ libiberty/lrealpath.c                             |    6 +
+ opcodes/m68k-dis.c                                |    2 +-
+ 109 files changed, 20966 insertions(+), 641 deletions(-)
  create mode 100644 bfd/amigaos.c
  create mode 100644 bfd/amigaoslink.c
  create mode 100644 bfd/aout-amiga.c
@@ -130,7 +130,7 @@ Subject: [PATCH 1/2] Changes for various Amiga targets.
  create mode 100644 gas/config/obj-amigahunk.h
  create mode 100644 gas/config/te-amiga.h
  create mode 100644 gas/config/te-amigaos.h
- create mode 100644 gas/config/te-amithlon.h
+ copy gas/config/{te-nbsd.h => te-amithlon.h} (65%)
  create mode 100644 gas/config/te-morphos.h
  create mode 100644 include/elf/amigaos.h
  create mode 100644 ld/emulparams/amiga.sh
@@ -147,10 +147,10 @@ Subject: [PATCH 1/2] Changes for various Amiga targets.
  create mode 100644 ld/emultempl/morphos.em
  create mode 100644 ld/scripttempl/amiga.sc
  create mode 100644 ld/scripttempl/amiga_bss.sc
- create mode 100644 ld/scripttempl/amigaos.sc
- create mode 100644 ld/scripttempl/amithlon.sc
- create mode 100644 ld/scripttempl/morphos.sc
- create mode 100644 ld/scripttempl/morphos_baserel.sc
+ copy ld/scripttempl/{elf64hppa.sc => amigaos.sc} (88%)
+ copy ld/scripttempl/{mep.sc => amithlon.sc} (76%)
+ copy ld/scripttempl/{elfi370.sc => morphos.sc} (88%)
+ copy ld/scripttempl/{elfi370.sc => morphos_baserel.sc} (69%)
  create mode 100644 libiberty/config/mh-amigaos
  create mode 100644 libiberty/config/mh-morphos
 
@@ -9155,7 +9155,7 @@ diff --git a/bfd/elf32-ppc.c b/bfd/elf32-amigaos.c
 similarity index 97%
 copy from bfd/elf32-ppc.c
 copy to bfd/elf32-amigaos.c
-index 6454a83..68bd40d 100644
+index 6454a83..9bf9535 100644
 --- a/bfd/elf32-ppc.c
 +++ b/bfd/elf32-amigaos.c
 @@ -34,10 +34,13 @@
@@ -9310,12 +9310,8 @@ index 6454a83..68bd40d 100644
  
    s = bfd_get_section_by_name (abfd, ".sbss2");
    if (s != NULL && (s->flags & SEC_ALLOC) != 0)
-@@ -2353,10 +2441,10 @@ ppc_elf_additional_program_headers (bfd *abfd,
-   return ret;
- }
- 
--/* Modify the segment map for VLE executables.  */ 
-+/* Modify the segment map for VLE executables.  */
+@@ -2356,7 +2444,7 @@ ppc_elf_additional_program_headers (bfd *abfd,
+ /* Modify the segment map for VLE executables.  */ 
  
  bfd_boolean
 -ppc_elf_modify_segment_map (bfd *abfd,
@@ -9451,15 +9447,6 @@ index 6454a83..68bd40d 100644
     }
  #undef add_dynamic_entry
  
-@@ -6482,7 +6589,7 @@ ppc_elf_hash_symbol (struct elf_link_hash_entry *h)
- 
-   return _bfd_elf_hash_symbol (h);
- }
--
-+
- #define ARRAY_SIZE(a) (sizeof (a) / sizeof ((a)[0]))
- 
- /* Relaxation trampolines.  r12 is available for clobbering (r11, is
 @@ -7175,7 +7282,7 @@ is_static_defined (struct elf_link_hash_entry *h)
     REG is non-zero only match an insn with RB or RA equal to REG.  */
  
@@ -9594,15 +9581,6 @@ index 6454a83..68bd40d 100644
    fprintf (stderr, "\n");
  #endif
  
-@@ -9301,7 +9464,7 @@ ppc_elf_reloc_type_class (const Elf_Internal_Rela *rela)
-       return reloc_class_normal;
-     }
- }
--
-+
- /* Finish up the dynamic sections.  */
- 
- static bfd_boolean
 @@ -9738,10 +9901,8 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
    return ret;
  }
@@ -19528,38 +19506,45 @@ index 0000000..8bd15a3
 +#else
 +#include "obj-format.h"
 +#endif
-diff --git a/gas/config/te-amithlon.h b/gas/config/te-amithlon.h
-new file mode 100644
-index 0000000..2fbd885
---- /dev/null
+diff --git a/gas/config/te-nbsd.h b/gas/config/te-amithlon.h
+similarity index 65%
+copy from gas/config/te-nbsd.h
+copy to gas/config/te-amithlon.h
+index ce29101..2fbd885 100644
+--- a/gas/config/te-nbsd.h
 +++ b/gas/config/te-amithlon.h
-@@ -0,0 +1,26 @@
+@@ -1,12 +1,11 @@
+-/* te-nbsd.h -- NetBSD target environment declarations.
+-   Copyright 1987, 1990, 1991, 1992, 1994, 1998, 2000, 2005, 2007
+-   Free Software Foundation, Inc.
 +/* te-amithlon.h -- Amithlon target environment declarations.
 +   Copyright 2000 Free Software Foundation, Inc.
-+
-+   This file is part of GAS, the GNU Assembler.
-+
-+   GAS is free software; you can redistribute it and/or modify
-+   it under the terms of the GNU General Public License as published by
+ 
+    This file is part of GAS, the GNU Assembler.
+ 
+    GAS is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+-   the Free Software Foundation; either version 3, or (at your option)
 +   the Free Software Foundation; either version 2, or (at your option)
-+   any later version.
-+
-+   GAS is distributed in the hope that it will be useful,
-+   but WITHOUT ANY WARRANTY; without even the implied warranty of
-+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+   GNU General Public License for more details.
-+
-+   You should have received a copy of the GNU General Public License
-+   along with GAS; see the file COPYING.  If not, write to the Free
+    any later version.
+ 
+    GAS is distributed in the hope that it will be useful,
+@@ -16,9 +15,12 @@
+ 
+    You should have received a copy of the GNU General Public License
+    along with GAS; see the file COPYING.  If not, write to the Free
+-   Software Foundation, 51 Franklin Street - Fifth Floor, Boston, MA
+-   02110-1301, USA.  */
 +   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 +   02111-1307, USA.  */
-+
+ 
+-#define TE_NetBSD	1
 +#define TE_Amithlon 1
 +
 +#define LOCAL_LABELS_DOLLAR 1
-+#define LOCAL_LABELS_FB 1
+ #define LOCAL_LABELS_FB 1
 +
-+#include "obj-format.h"
+ #include "obj-format.h"
 diff --git a/gas/config/te-morphos.h b/gas/config/te-morphos.h
 new file mode 100644
 index 0000000..43b0826
@@ -24302,410 +24287,235 @@ index 0000000..668ce7c
 +  ${RELOCATING+___bss_size = 0x0;}
 +}
 +EOF
-diff --git a/ld/scripttempl/amigaos.sc b/ld/scripttempl/amigaos.sc
-new file mode 100644
-index 0000000..865c9ba
---- /dev/null
+diff --git a/ld/scripttempl/elf64hppa.sc b/ld/scripttempl/amigaos.sc
+similarity index 88%
+copy from ld/scripttempl/elf64hppa.sc
+copy to ld/scripttempl/amigaos.sc
+index 18090e6..865c9ba 100644
+--- a/ld/scripttempl/elf64hppa.sc
 +++ b/ld/scripttempl/amigaos.sc
-@@ -0,0 +1,527 @@
-+#
-+# Unusual variables checked by this code:
-+#	NOP - four byte opcode for no-op (defaults to 0)
-+#	NO_SMALL_DATA - no .sbss/.sbss2/.sdata/.sdata2 sections if not
-+#		empty.
-+#	SMALL_DATA_CTOR - .ctors contains small data.
-+#	SMALL_DATA_DTOR - .dtors contains small data.
-+#	DATA_ADDR - if end-of-text-plus-one-page isn't right for data start
-+#	INITIAL_READONLY_SECTIONS - at start of text segment
-+#	OTHER_READONLY_SECTIONS - other than .text .init .rodata ...
-+#		(e.g., .PARISC.milli)
-+#	OTHER_TEXT_SECTIONS - these get put in .text when relocating
-+#	OTHER_READWRITE_SECTIONS - other than .data .bss .ctors .sdata ...
-+#		(e.g., .PARISC.global)
-+#	OTHER_RELRO_SECTIONS - other than .data.rel.ro ...
-+#		(e.g. PPC32 .fixup, .got[12])
-+#	OTHER_BSS_SECTIONS - other than .bss .sbss ...
-+#	ATTRS_SECTIONS - at the end
-+#	OTHER_SECTIONS - at the end
-+#	EXECUTABLE_SYMBOLS - symbols that must be defined for an
-+#		executable (e.g., _DYNAMIC_LINK)
-+#       TEXT_START_ADDR - the first byte of the text segment, after any
-+#               headers.
-+#       TEXT_BASE_ADDRESS - the first byte of the text segment.
-+#	TEXT_START_SYMBOLS - symbols that appear at the start of the
-+#		.text section.
-+#	DATA_START_SYMBOLS - symbols that appear at the start of the
-+#		.data section.
-+#	DATA_END_SYMBOLS - symbols that appear at the end of the
-+#		writeable data sections.
-+#	OTHER_GOT_SYMBOLS - symbols defined just before .got.
-+#	OTHER_GOT_SECTIONS - sections just after .got.
-+#	OTHER_SDATA_SECTIONS - sections just after .sdata.
-+#	OTHER_BSS_SYMBOLS - symbols that appear at the start of the
-+#		.bss section besides __bss_start.
-+#	DATA_PLT - .plt should be in data segment, not text segment.
-+#	PLT_BEFORE_GOT - .plt just before .got when .plt is in data segement.
-+#	BSS_PLT - .plt should be in bss segment
-+#	TEXT_DYNAMIC - .dynamic in text segment, not data segment.
+@@ -36,11 +36,8 @@
+ #	DATA_PLT - .plt should be in data segment, not text segment.
+ #	PLT_BEFORE_GOT - .plt just before .got when .plt is in data segement.
+ #	BSS_PLT - .plt should be in bss segment
+-#	NO_REL_RELOCS - Don't include .rel.* sections in script
+-#	NO_RELA_RELOCS - Don't include .rela.* sections in script
+-#	NON_ALLOC_DYN - Place dynamic sections after data segment.
+ #	TEXT_DYNAMIC - .dynamic in text segment, not data segment.
+-#	EMBEDDED - whether this is for an embedded system. 
 +#	EMBEDDED - whether this is for an embedded system.
-+#	SHLIB_TEXT_START_ADDR - if set, add to SIZEOF_HEADERS to set
-+#		start address of shared library.
-+#	INPUT_FILES - INPUT command of files to always include
-+#	WRITABLE_RODATA - if set, the .rodata section should be writable
-+#	INIT_START, INIT_END -  statements just before and just after
-+# 	combination of .init sections.
-+#	FINI_START, FINI_END - statements just before and just after
-+# 	combination of .fini sections.
-+#	STACK_ADDR - start of a .stack section.
-+#	OTHER_SYMBOLS - symbols to place right at the end of the script.
-+#	ETEXT_NAME - name of a symbol for the end of the text section,
-+#		normally etext.
-+#	SEPARATE_GOTPLT - if set, .got.plt should be separate output section,
-+#		so that .got can be in the RELRO area.  It should be set to
-+#		the number of bytes in the beginning of .got.plt which can be
-+#		in the RELRO area as well.
-+#	USER_LABEL_PREFIX - prefix to add to user-visible symbols.
-+#
-+# When adding sections, do note that the names of some sections are used
-+# when specifying the start address of the next.
-+#
-+
-+#  Many sections come in three flavours.  There is the 'real' section,
-+#  like ".data".  Then there are the per-procedure or per-variable
-+#  sections, generated by -ffunction-sections and -fdata-sections in GCC,
-+#  and useful for --gc-sections, which for a variable "foo" might be
-+#  ".data.foo".  Then there are the linkonce sections, for which the linker
-+#  eliminates duplicates, which are named like ".gnu.linkonce.d.foo".
-+#  The exact correspondences are:
-+#
-+#  Section	Linkonce section
-+#  .text	.gnu.linkonce.t.foo
-+#  .rodata	.gnu.linkonce.r.foo
-+#  .data	.gnu.linkonce.d.foo
-+#  .bss		.gnu.linkonce.b.foo
-+#  .sdata	.gnu.linkonce.s.foo
-+#  .sbss	.gnu.linkonce.sb.foo
-+#  .sdata2	.gnu.linkonce.s2.foo
-+#  .sbss2	.gnu.linkonce.sb2.foo
-+#  .debug_info	.gnu.linkonce.wi.foo
-+#  .tdata	.gnu.linkonce.td.foo
-+#  .tbss	.gnu.linkonce.tb.foo
-+#  .lrodata	.gnu.linkonce.lr.foo
-+#  .ldata	.gnu.linkonce.l.foo
-+#  .lbss	.gnu.linkonce.lb.foo
-+#
-+#  Each of these can also have corresponding .rel.* and .rela.* sections.
-+
-+test -z "$ENTRY" && ENTRY=_start
-+test -z "${BIG_OUTPUT_FORMAT}" && BIG_OUTPUT_FORMAT=${OUTPUT_FORMAT}
-+test -z "${LITTLE_OUTPUT_FORMAT}" && LITTLE_OUTPUT_FORMAT=${OUTPUT_FORMAT}
-+if [ -z "$MACHINE" ]; then OUTPUT_ARCH=${ARCH}; else OUTPUT_ARCH=${ARCH}:${MACHINE}; fi
-+test -z "${ELFSIZE}" && ELFSIZE=32
-+test -z "${ALIGNMENT}" && ALIGNMENT="${ELFSIZE} / 8"
-+test "$LD_FLAG" = "N" && DATA_ADDR=.
-+test -z "${ETEXT_NAME}" && ETEXT_NAME=etext
-+test -n "$CREATE_SHLIB$CREATE_PIE" && test -n "$SHLIB_DATA_ADDR" && COMMONPAGESIZE=""
-+test -z "$CREATE_SHLIB$CREATE_PIE" && test -n "$DATA_ADDR" && COMMONPAGESIZE=""
-+test -n "$RELRO_NOW" && unset SEPARATE_GOTPLT
-+test -z "$ATTRS_SECTIONS" && ATTRS_SECTIONS=".gnu.attributes 0 : { KEEP (*(.gnu.attributes)) }"
+ #	SHLIB_TEXT_START_ADDR - if set, add to SIZEOF_HEADERS to set
+ #		start address of shared library.
+ #	INPUT_FILES - INPUT command of files to always include
+@@ -101,7 +98,8 @@ test -n "$CREATE_SHLIB$CREATE_PIE" && test -n "$SHLIB_DATA_ADDR" && COMMONPAGESI
+ test -z "$CREATE_SHLIB$CREATE_PIE" && test -n "$DATA_ADDR" && COMMONPAGESIZE=""
+ test -n "$RELRO_NOW" && unset SEPARATE_GOTPLT
+ test -z "$ATTRS_SECTIONS" && ATTRS_SECTIONS=".gnu.attributes 0 : { KEEP (*(.gnu.attributes)) }"
+-DATA_SEGMENT_ALIGN="ALIGN(${SEGMENT_SIZE}) + (. & (${MAXPAGESIZE} - 1))"
 +DATA_SEGMENT_ALIGN="ALIGN(${SEGMENT_SIZE})"
 +#DATA_SEGMENT_ALIGN="ALIGN(${SEGMENT_SIZE}) + (. & (${MAXPAGESIZE} - 1))"
-+DATA_SEGMENT_RELRO_END=""
-+DATA_SEGMENT_END=""
-+if test -n "${COMMONPAGESIZE}"; then
-+  DATA_SEGMENT_ALIGN="ALIGN (${SEGMENT_SIZE}) - ((${MAXPAGESIZE} - .) & (${MAXPAGESIZE} - 1)); . = DATA_SEGMENT_ALIGN (${MAXPAGESIZE}, ${COMMONPAGESIZE})"
-+  DATA_SEGMENT_END=". = DATA_SEGMENT_END (.);"
-+  DATA_SEGMENT_RELRO_END=". = DATA_SEGMENT_RELRO_END (${SEPARATE_GOTPLT-0}, .);"
-+fi
-+if test -z "${INITIAL_READONLY_SECTIONS}${CREATE_SHLIB}"; then
-+  INITIAL_READONLY_SECTIONS=".interp       ${RELOCATING-0} : { *(.interp) }"
-+fi
-+if test -z "$PLT"; then
-+  PLT=".plt          ${RELOCATING-0} : { *(.plt) }"
-+fi
-+test -n "${DATA_PLT-${BSS_PLT-text}}" && TEXT_PLT=yes
-+if test -z "$GOT"; then
-+  if test -z "$SEPARATE_GOTPLT"; then
-+    GOT=".got          ${RELOCATING-0} : { *(.got.plt) *(.got) }"
-+  else
-+    GOT=".got          ${RELOCATING-0} : { *(.got) }"
-+    GOTPLT=".got.plt      ${RELOCATING-0} : { *(.got.plt) }"
-+  fi
-+fi
-+DYNAMIC=".dynamic      ${RELOCATING-0} : { *(.dynamic) }"
-+RODATA=".rodata       ${RELOCATING-0} : { *(.rodata${RELOCATING+ .rodata.* .gnu.linkonce.r.*}) }"
+ DATA_SEGMENT_RELRO_END=""
+ DATA_SEGMENT_END=""
+ if test -n "${COMMONPAGESIZE}"; then
+@@ -126,8 +124,8 @@ if test -z "$GOT"; then
+ fi
+ DYNAMIC=".dynamic      ${RELOCATING-0} : { *(.dynamic) }"
+ RODATA=".rodata       ${RELOCATING-0} : { *(.rodata${RELOCATING+ .rodata.* .gnu.linkonce.r.*}) }"
+-DATARELRO=".data.rel.ro : { *(.data.rel.ro.local* .gnu.linkonce.d.rel.ro.local.*) *(.data.rel.ro .data.rel.ro.* .gnu.linkonce.d.rel.ro.*) }"
+-DISCARDED="/DISCARD/ : { *(.note.GNU-stack) *(.gnu_debuglink)  *(.gnu.lto_*) }"
 +DATARELRO=".data.rel.ro : { *(.data.rel.ro.local* .gnu.linkonce.d.rel.ro.local.*) *(.data.rel.ro* .gnu.linkonce.d.rel.ro.*) }"
 +DISCARDED="/DISCARD/ : { *(.note.GNU-stack) *(.gnu_debuglink) }"
-+if test -z "${NO_SMALL_DATA}"; then
-+  SBSS=".sbss         ${RELOCATING-0} :
-+  {
-+    ${RELOCATING+${SBSS_START_SYMBOLS}}
-+    ${CREATE_SHLIB+*(.sbss2 .sbss2.* .gnu.linkonce.sb2.*)}
-+    *(.dynsbss)
-+    *(.sbss${RELOCATING+ .sbss.* .gnu.linkonce.sb.*})
-+    *(.scommon)
-+    ${RELOCATING+${SBSS_END_SYMBOLS}}
-+  }"
-+  SBSS2=".sbss2        ${RELOCATING-0} : { *(.sbss2${RELOCATING+ .sbss2.* .gnu.linkonce.sb2.*}) }"
-+  SDATA="/* We want the small data sections together, so single-instruction offsets
-+     can access them all, and initialized data all before uninitialized, so
-+     we can shorten the on-disk segment size.  */
+ if test -z "${NO_SMALL_DATA}"; then
+   SBSS=".sbss         ${RELOCATING-0} :
+   {
+@@ -142,7 +140,7 @@ if test -z "${NO_SMALL_DATA}"; then
+   SDATA="/* We want the small data sections together, so single-instruction offsets
+      can access them all, and initialized data all before uninitialized, so
+      we can shorten the on-disk segment size.  */
+-  .sdata        ${RELOCATING-0} : 
 +  .sdata        ${RELOCATING-0} :
-+  {
-+    ${RELOCATING+${SDATA_START_SYMBOLS}}
-+    ${CREATE_SHLIB+*(.sdata2 .sdata2.* .gnu.linkonce.s2.*)}
-+    *(.sdata${RELOCATING+ .sdata.* .gnu.linkonce.s.*})
-+  }"
-+  SDATA2=".sdata2       ${RELOCATING-0} :
-+  {
-+    ${RELOCATING+${SDATA2_START_SYMBOLS}}
-+    *(.sdata2${RELOCATING+ .sdata2.* .gnu.linkonce.s2.*})
-+  }"
-+  REL_SDATA=".rel.sdata    ${RELOCATING-0} : { *(.rel.sdata${RELOCATING+ .rel.sdata.* .rel.gnu.linkonce.s.*}) }
-+  .rela.sdata   ${RELOCATING-0} : { *(.rela.sdata${RELOCATING+ .rela.sdata.* .rela.gnu.linkonce.s.*}) }"
-+  REL_SBSS=".rel.sbss     ${RELOCATING-0} : { *(.rel.sbss${RELOCATING+ .rel.sbss.* .rel.gnu.linkonce.sb.*}) }
-+  .rela.sbss    ${RELOCATING-0} : { *(.rela.sbss${RELOCATING+ .rela.sbss.* .rela.gnu.linkonce.sb.*}) }"
-+  REL_SDATA2=".rel.sdata2   ${RELOCATING-0} : { *(.rel.sdata2${RELOCATING+ .rel.sdata2.* .rel.gnu.linkonce.s2.*}) }
-+  .rela.sdata2  ${RELOCATING-0} : { *(.rela.sdata2${RELOCATING+ .rela.sdata2.* .rela.gnu.linkonce.s2.*}) }"
-+  REL_SBSS2=".rel.sbss2    ${RELOCATING-0} : { *(.rel.sbss2${RELOCATING+ .rel.sbss2.* .rel.gnu.linkonce.sb2.*}) }
-+  .rela.sbss2   ${RELOCATING-0} : { *(.rela.sbss2${RELOCATING+ .rela.sbss2.* .rela.gnu.linkonce.sb2.*}) }"
-+else
-+  NO_SMALL_DATA=" "
-+fi
-+if test -z "${DATA_GOT}"; then
-+  if test -n "${NO_SMALL_DATA}"; then
-+    DATA_GOT=" "
-+  fi
-+fi
-+if test -z "${SDATA_GOT}"; then
-+  if test -z "${NO_SMALL_DATA}"; then
-+    SDATA_GOT=" "
-+  fi
-+fi
-+test -n "$SEPARATE_GOTPLT" && SEPARATE_GOTPLT=" "
-+test "${LARGE_SECTIONS}" = "yes" && REL_LARGE="
-+  .rel.ldata    ${RELOCATING-0} : { *(.rel.ldata${RELOCATING+ .rel.ldata.* .rel.gnu.linkonce.l.*}) }
-+  .rela.ldata   ${RELOCATING-0} : { *(.rela.ldata${RELOCATING+ .rela.ldata.* .rela.gnu.linkonce.l.*}) }
-+  .rel.lbss     ${RELOCATING-0} : { *(.rel.lbss${RELOCATING+ .rel.lbss.* .rel.gnu.linkonce.lb.*}) }
-+  .rela.lbss    ${RELOCATING-0} : { *(.rela.lbss${RELOCATING+ .rela.lbss.* .rela.gnu.linkonce.lb.*}) }
-+  .rel.lrodata  ${RELOCATING-0} : { *(.rel.lrodata${RELOCATING+ .rel.lrodata.* .rel.gnu.linkonce.lr.*}) }
-+  .rela.lrodata ${RELOCATING-0} : { *(.rela.lrodata${RELOCATING+ .rela.lrodata.* .rela.gnu.linkonce.lr.*}) }"
-+test "${LARGE_SECTIONS}" = "yes" && OTHER_BSS_SECTIONS="
-+  ${OTHER_BSS_SECTIONS}
-+  .lbss ${RELOCATING-0} :
-+  {
-+    *(.dynlbss)
-+    *(.lbss${RELOCATING+ .lbss.* .gnu.linkonce.lb.*})
-+    *(LARGE_COMMON)
-+  }"
-+test "${LARGE_SECTIONS}" = "yes" && LARGE_SECTIONS="
-+  .lrodata ${RELOCATING-0} ${RELOCATING+ALIGN(${MAXPAGESIZE}) + (. & (${MAXPAGESIZE} - 1))} :
-+  {
-+    *(.lrodata${RELOCATING+ .lrodata.* .gnu.linkonce.lr.*})
-+  }
-+  .ldata ${RELOCATING-0} ${RELOCATING+ALIGN(${MAXPAGESIZE}) + (. & (${MAXPAGESIZE} - 1))} :
-+  {
-+    *(.ldata${RELOCATING+ .ldata.* .gnu.linkonce.l.*})
-+    ${RELOCATING+. = ALIGN(. != 0 ? ${ALIGNMENT} : 1);}
-+  }"
+   {
+     ${RELOCATING+${SDATA_START_SYMBOLS}}
+     ${CREATE_SHLIB+*(.sdata2 .sdata2.* .gnu.linkonce.s2.*)}
+@@ -200,21 +198,7 @@ test "${LARGE_SECTIONS}" = "yes" && LARGE_SECTIONS="
+     *(.ldata${RELOCATING+ .ldata.* .gnu.linkonce.l.*})
+     ${RELOCATING+. = ALIGN(. != 0 ? ${ALIGNMENT} : 1);}
+   }"
+-INIT_ARRAY=".init_array   ${RELOCATING-0} :
+-  {
+-     ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (${USER_LABEL_PREFIX}__init_array_start = .);}}
+-     KEEP (*(SORT(.init_array.*)))
+-     KEEP (*(.init_array))
+-     ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (${USER_LABEL_PREFIX}__init_array_end = .);}}
+-  }"
+-FINI_ARRAY=".fini_array   ${RELOCATING-0} :
+-  {
+-    ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (${USER_LABEL_PREFIX}__fini_array_start = .);}}
+-    KEEP (*(SORT(.fini_array.*)))
+-    KEEP (*(.fini_array))
+-    ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (${USER_LABEL_PREFIX}__fini_array_end = .);}}
+-  }"
+-CTOR=".ctors        ${CONSTRUCTING-0} : 
 +CTOR=".ctors        ${CONSTRUCTING-0} :
-+  {
-+    ${CONSTRUCTING+${CTOR_START}}
-+    /* gcc uses crtbegin.o to find the start of
-+       the constructors, so we make sure it is
-+       first.  Because this is a wildcard, it
-+       doesn't matter if the user does not
-+       actually link against crtbegin.o; the
-+       linker won't look for a file to match a
-+       wildcard.  The wildcard also means that it
-+       doesn't matter which directory crtbegin.o
-+       is in.  */
-+
-+    KEEP (*crtbegin.o(.ctors))
-+    KEEP (*crtbegin?.o(.ctors))
-+
-+    /* We don't want to include the .ctor section from
-+       the crtend.o file until after the sorted ctors.
-+       The .ctor section from the crtend file contains the
-+       end of ctors marker and it must be last */
-+
-+    KEEP (*(EXCLUDE_FILE (*crtend.o *crtend?.o $OTHER_EXCLUDE_FILES) .ctors))
-+    KEEP (*(SORT(.ctors.*)))
-+    KEEP (*(.ctors))
-+    ${CONSTRUCTING+${CTOR_END}}
-+  }"
-+DTOR=".dtors        ${CONSTRUCTING-0} :
-+  {
-+    ${CONSTRUCTING+${DTOR_START}}
-+    KEEP (*crtbegin.o(.dtors))
-+    KEEP (*crtbegin?.o(.dtors))
-+    KEEP (*(EXCLUDE_FILE (*crtend.o *crtend?.o $OTHER_EXCLUDE_FILES) .dtors))
-+    KEEP (*(SORT(.dtors.*)))
-+    KEEP (*(.dtors))
-+    ${CONSTRUCTING+${DTOR_END}}
-+  }"
-+STACK="  .stack        ${RELOCATING-0}${RELOCATING+${STACK_ADDR}} :
-+  {
-+    ${RELOCATING+_stack = .;}
-+    *(.stack)
-+  }"
-+
-+# if this is for an embedded system, don't add SIZEOF_HEADERS.
-+if [ -z "$EMBEDDED" ]; then
-+   test -z "${TEXT_BASE_ADDRESS}" && TEXT_BASE_ADDRESS="${TEXT_START_ADDR} + SIZEOF_HEADERS"
-+else
-+   test -z "${TEXT_BASE_ADDRESS}" && TEXT_BASE_ADDRESS="${TEXT_START_ADDR}"
-+fi
-+
-+cat <<EOF
-+OUTPUT_FORMAT("${OUTPUT_FORMAT}", "${BIG_OUTPUT_FORMAT}",
-+	      "${LITTLE_OUTPUT_FORMAT}")
-+OUTPUT_ARCH(${OUTPUT_ARCH})
+   {
+     ${CONSTRUCTING+${CTOR_START}}
+     /* gcc uses crtbegin.o to find the start of
+@@ -256,9 +240,6 @@ STACK="  .stack        ${RELOCATING-0}${RELOCATING+${STACK_ADDR}} :
+     *(.stack)
+   }"
+ 
+-TEXT_START_ADDR="SEGMENT_START(\"text-segment\", ${TEXT_START_ADDR})"
+-SHLIB_TEXT_START_ADDR="SEGMENT_START(\"text-segment\", ${SHLIB_TEXT_START_ADDR:-0})"
+-
+ # if this is for an embedded system, don't add SIZEOF_HEADERS.
+ if [ -z "$EMBEDDED" ]; then
+    test -z "${TEXT_BASE_ADDRESS}" && TEXT_BASE_ADDRESS="${TEXT_START_ADDR} + SIZEOF_HEADERS"
+@@ -270,7 +251,7 @@ cat <<EOF
+ OUTPUT_FORMAT("${OUTPUT_FORMAT}", "${BIG_OUTPUT_FORMAT}",
+ 	      "${LITTLE_OUTPUT_FORMAT}")
+ OUTPUT_ARCH(${OUTPUT_ARCH})
+-${RELOCATING+ENTRY(${ENTRY})}
 +ENTRY(${ENTRY})
-+
-+${RELOCATING+${LIB_SEARCH_DIRS}}
-+${RELOCATING+${EXECUTABLE_SYMBOLS}}
-+${RELOCATING+${INPUT_FILES}}
-+${RELOCATING- /* For some reason, the Solaris linker makes bad executables
-+  if gld -r is used and the intermediate file has sections starting
-+  at non-zero addresses.  Could be a Solaris ld bug, could be a GNU ld
-+  bug.  But for now assigning the zero vmas works.  */}
-+
-+SECTIONS
-+{
-+  /* Read-only sections, merged into text segment: */
-+  ${CREATE_SHLIB-${CREATE_PIE-${RELOCATING+PROVIDE (__executable_start = ${TEXT_START_ADDR}); . = ${TEXT_BASE_ADDRESS};}}}
+ 
+ ${RELOCATING+${LIB_SEARCH_DIRS}}
+ ${RELOCATING+${EXECUTABLE_SYMBOLS}}
+@@ -284,15 +265,10 @@ SECTIONS
+ {
+   /* Read-only sections, merged into text segment: */
+   ${CREATE_SHLIB-${CREATE_PIE-${RELOCATING+PROVIDE (__executable_start = ${TEXT_START_ADDR}); . = ${TEXT_BASE_ADDRESS};}}}
+-  ${CREATE_SHLIB+${RELOCATING+. = ${SHLIB_TEXT_START_ADDR} + SIZEOF_HEADERS;}}
+-  ${CREATE_PIE+${RELOCATING+. = ${SHLIB_TEXT_START_ADDR} + SIZEOF_HEADERS;}}
 +  ${CREATE_SHLIB+${RELOCATING+. = ${SHLIB_TEXT_START_ADDR:-0} + SIZEOF_HEADERS;}}
 +  ${CREATE_PIE+${RELOCATING+. = ${SHLIB_TEXT_START_ADDR:-0} + SIZEOF_HEADERS;}}
-+  ${INITIAL_READONLY_SECTIONS}
-+  .note.gnu.build-id : { *(.note.gnu.build-id) }
-+  ${TEXT_DYNAMIC+${DYNAMIC}}
-+  .hash         ${RELOCATING-0} : { *(.hash) }
-+  .gnu.hash     ${RELOCATING-0} : { *(.gnu.hash) }
-+  .dynsym       ${RELOCATING-0} : { *(.dynsym) }
-+  .dynstr       ${RELOCATING-0} : { *(.dynstr) }
-+  .gnu.version  ${RELOCATING-0} : { *(.gnu.version) }
-+  .gnu.version_d ${RELOCATING-0}: { *(.gnu.version_d) }
-+  .gnu.version_r ${RELOCATING-0}: { *(.gnu.version_r) }
-+
+   ${INITIAL_READONLY_SECTIONS}
+   .note.gnu.build-id : { *(.note.gnu.build-id) }
+-EOF
+-
+-test -n "${RELOCATING+0}" || unset NON_ALLOC_DYN
+-test -z "${NON_ALLOC_DYN}" || TEXT_DYNAMIC=
+-cat > ldscripts/dyntmp.$$ <<EOF
+   ${TEXT_DYNAMIC+${DYNAMIC}}
+   .hash         ${RELOCATING-0} : { *(.hash) }
+   .gnu.hash     ${RELOCATING-0} : { *(.gnu.hash) }
+@@ -301,10 +277,10 @@ cat > ldscripts/dyntmp.$$ <<EOF
+   .gnu.version  ${RELOCATING-0} : { *(.gnu.version) }
+   .gnu.version_d ${RELOCATING-0}: { *(.gnu.version_d) }
+   .gnu.version_r ${RELOCATING-0}: { *(.gnu.version_r) }
+-EOF
+ 
 +EOF
-+if [ "x$COMBRELOC" = x ]; then
+ if [ "x$COMBRELOC" = x ]; then
+-  COMBRELOCCAT="cat >> ldscripts/dyntmp.$$"
 +  COMBRELOCCAT=cat
-+else
-+  COMBRELOCCAT="cat > $COMBRELOC"
-+fi
-+eval $COMBRELOCCAT <<EOF
-+  .rel.init     ${RELOCATING-0} : { *(.rel.init) }
-+  .rela.init    ${RELOCATING-0} : { *(.rela.init) }
-+  .rel.text     ${RELOCATING-0} : { *(.rel.text${RELOCATING+ .rel.text.* .rel.gnu.linkonce.t.*}) }
-+  .rela.text    ${RELOCATING-0} : { *(.rela.text${RELOCATING+ .rela.text.* .rela.gnu.linkonce.t.*}) }
-+  .rel.fini     ${RELOCATING-0} : { *(.rel.fini) }
-+  .rela.fini    ${RELOCATING-0} : { *(.rela.fini) }
-+  .rel.rodata   ${RELOCATING-0} : { *(.rel.rodata${RELOCATING+ .rel.rodata.* .rel.gnu.linkonce.r.*}) }
-+  .rela.rodata  ${RELOCATING-0} : { *(.rela.rodata${RELOCATING+ .rela.rodata.* .rela.gnu.linkonce.r.*}) }
-+  ${OTHER_READONLY_RELOC_SECTIONS}
+ else
+   COMBRELOCCAT="cat > $COMBRELOC"
+ fi
+@@ -318,8 +294,8 @@ eval $COMBRELOCCAT <<EOF
+   .rel.rodata   ${RELOCATING-0} : { *(.rel.rodata${RELOCATING+ .rel.rodata.* .rel.gnu.linkonce.r.*}) }
+   .rela.rodata  ${RELOCATING-0} : { *(.rela.rodata${RELOCATING+ .rela.rodata.* .rela.gnu.linkonce.r.*}) }
+   ${OTHER_READONLY_RELOC_SECTIONS}
+-  .rel.data.rel.ro ${RELOCATING-0} : { *(.rel.data.rel.ro${RELOCATING+ .rel.data.rel.ro.* .rel.gnu.linkonce.d.rel.ro.*}) }
+-  .rela.data.rel.ro ${RELOCATING-0} : { *(.rela.data.rel.ro${RELOCATING+ .rela.data.rel.ro.* .rela.gnu.linkonce.d.rel.ro.*}) }
 +  .rel.data.rel.ro ${RELOCATING-0} : { *(.rel.data.rel.ro${RELOCATING+* .rel.gnu.linkonce.d.rel.ro.*}) }
 +  .rela.data.rel.ro ${RELOCATING-0} : { *(.rela.data.rel.ro${RELOCATING+* .rela.gnu.linkonce.d.rel.ro.*}) }
-+  .rel.data     ${RELOCATING-0} : { *(.rel.data${RELOCATING+ .rel.data.* .rel.gnu.linkonce.d.*}) }
-+  .rela.data    ${RELOCATING-0} : { *(.rela.data${RELOCATING+ .rela.data.* .rela.gnu.linkonce.d.*}) }
-+  .rel.tdata	${RELOCATING-0} : { *(.rel.tdata${RELOCATING+ .rel.tdata.* .rel.gnu.linkonce.td.*}) }
-+  .rela.tdata	${RELOCATING-0} : { *(.rela.tdata${RELOCATING+ .rela.tdata.* .rela.gnu.linkonce.td.*}) }
-+  .rel.tbss	${RELOCATING-0} : { *(.rel.tbss${RELOCATING+ .rel.tbss.* .rel.gnu.linkonce.tb.*}) }
-+  .rela.tbss	${RELOCATING-0} : { *(.rela.tbss${RELOCATING+ .rela.tbss.* .rela.gnu.linkonce.tb.*}) }
-+  .rel.ctors    ${RELOCATING-0} : { *(.rel.ctors) }
-+  .rela.ctors   ${RELOCATING-0} : { *(.rela.ctors) }
-+  .rel.dtors    ${RELOCATING-0} : { *(.rel.dtors) }
-+  .rela.dtors   ${RELOCATING-0} : { *(.rela.dtors) }
-+  .rel.got      ${RELOCATING-0} : { *(.rel.got) }
-+  .rela.got     ${RELOCATING-0} : { *(.rela.got) }
-+  ${OTHER_GOT_RELOC_SECTIONS}
-+  ${REL_SDATA}
-+  ${REL_SBSS}
-+  ${REL_SDATA2}
-+  ${REL_SBSS2}
-+  .rel.bss      ${RELOCATING-0} : { *(.rel.bss${RELOCATING+ .rel.bss.* .rel.gnu.linkonce.b.*}) }
-+  .rela.bss     ${RELOCATING-0} : { *(.rela.bss${RELOCATING+ .rela.bss.* .rela.gnu.linkonce.b.*}) }
-+  ${REL_LARGE}
-+EOF
-+if [ -n "$COMBRELOC" ]; then
+   .rel.data     ${RELOCATING-0} : { *(.rel.data${RELOCATING+ .rel.data.* .rel.gnu.linkonce.d.*}) }
+   .rela.data    ${RELOCATING-0} : { *(.rela.data${RELOCATING+ .rela.data.* .rela.gnu.linkonce.d.*}) }
+   .rel.tdata	${RELOCATING-0} : { *(.rel.tdata${RELOCATING+ .rel.tdata.* .rel.gnu.linkonce.td.*}) }
+@@ -341,53 +317,27 @@ eval $COMBRELOCCAT <<EOF
+   .rela.bss     ${RELOCATING-0} : { *(.rela.bss${RELOCATING+ .rela.bss.* .rela.gnu.linkonce.b.*}) }
+   ${REL_LARGE}
+ EOF
+-
+ if [ -n "$COMBRELOC" ]; then
+-cat >> ldscripts/dyntmp.$$ <<EOF
 +cat <<EOF
-+  .rel.dyn      ${RELOCATING-0} :
-+    {
-+EOF
+   .rel.dyn      ${RELOCATING-0} :
+     {
+ EOF
+-sed -e '/^[ 	]*[{}][ 	]*$/d;/:[ 	]*$/d;/\.rela\./d;s/^.*: { *\(.*\)}$/      \1/' $COMBRELOC >> ldscripts/dyntmp.$$
+-cat >> ldscripts/dyntmp.$$ <<EOF
+-    }
+-  .rel.ifunc.dyn      ${RELOCATING-0} :
+-    {
+-      *(.rel.ifunc.*)
 +sed -e '/^[ 	]*[{}][ 	]*$/d;/:[ 	]*$/d;/\.rela\./d;s/^.*: { *\(.*\)}$/      \1/' $COMBRELOC
 +cat <<EOF
-+    }
-+  .rela.dyn     ${RELOCATING-0} :
-+    {
-+EOF
+     }
+   .rela.dyn     ${RELOCATING-0} :
+     {
+ EOF
+-sed -e '/^[ 	]*[{}][ 	]*$/d;/:[ 	]*$/d;/\.rel\./d;s/^.*: { *\(.*\)}/      \1/' $COMBRELOC >> ldscripts/dyntmp.$$
+-cat >> ldscripts/dyntmp.$$ <<EOF
+-    }
+-  .rela.ifunc.dyn     ${RELOCATING-0} :
+-    {
+-      *(.rela.ifunc.*)
 +sed -e '/^[ 	]*[{}][ 	]*$/d;/:[ 	]*$/d;/\.rel\./d;s/^.*: { *\(.*\)}/      \1/' $COMBRELOC
 +cat <<EOF
-+    }
-+EOF
-+fi
+     }
+ EOF
+ fi
+-
+-cat >> ldscripts/dyntmp.$$ <<EOF
 +cat <<EOF
-+  .rel.plt      ${RELOCATING-0} : { *(.rel.plt) }
-+  .rela.plt     ${RELOCATING-0} : { *(.rela.plt) }
-+  ${OTHER_PLT_RELOC_SECTIONS}
-+
-+  .init         ${RELOCATING-0} : 
-+  { 
-+    ${RELOCATING+${INIT_START}}
-+    KEEP (*(.init))
-+    ${RELOCATING+${INIT_END}}
-+  } =${NOP-0}
-+
-+  ${TINY_READONLY_SECTION}
-+  .text         ${RELOCATING-0} :
-+  {
-+    ${RELOCATING+${TEXT_START_SYMBOLS}}
-+    *(.text .stub${RELOCATING+ .text.* .gnu.linkonce.t.*})
+   .rel.plt      ${RELOCATING-0} : { *(.rel.plt) }
+   .rela.plt     ${RELOCATING-0} : { *(.rela.plt) }
+   ${OTHER_PLT_RELOC_SECTIONS}
+-EOF
+ 
+-if test -z "${NON_ALLOC_DYN}"; then
+-  if test -z "${NO_REL_RELOCS}${NO_RELA_RELOCS}"; then
+-    cat ldscripts/dyntmp.$$
+-  else
+-    if test -z "${NO_REL_RELOCS}"; then
+-      sed -e '/^[ 	]*\.rela\.[^}]*$/,/}/d' -e '/^[ 	]*\.rela\./d' ldscripts/dyntmp.$$
+-    fi
+-    if test -z "${NO_RELA_RELOCS}"; then
+-      sed -e '/^[ 	]*\.rel\.[^}]*$/,/}/d' -e '/^[ 	]*\.rel\./d' ldscripts/dyntmp.$$
+-    fi
+-  fi
+-  rm -f ldscripts/dyntmp.$$
+-fi
+-
+-cat <<EOF
+   .init         ${RELOCATING-0} : 
+   { 
+     ${RELOCATING+${INIT_START}}
+@@ -395,16 +345,19 @@ cat <<EOF
+     ${RELOCATING+${INIT_END}}
+   } =${NOP-0}
+ 
+-  ${TEXT_PLT+${PLT}}
+   ${TINY_READONLY_SECTION}
+   .text         ${RELOCATING-0} :
+   {
+     ${RELOCATING+${TEXT_START_SYMBOLS}}
+     *(.text .stub${RELOCATING+ .text.* .gnu.linkonce.t.*})
 +    KEEP (*(.text.*personality*))
-+    /* .gnu.warning sections are handled specially by elf32.em.  */
-+    *(.gnu.warning)
-+    ${RELOCATING+${OTHER_TEXT_SECTIONS}}
-+  } =${NOP-0}
+     /* .gnu.warning sections are handled specially by elf32.em.  */
+     *(.gnu.warning)
+     ${RELOCATING+${OTHER_TEXT_SECTIONS}}
+   } =${NOP-0}
 +  . = ALIGN(4096);
 +  ${TEXT_PLT+${PLT}}
 +  . = ALIGN(4096);
-+  .fini         ${RELOCATING-0} :
-+  {
-+    ${RELOCATING+${FINI_START}}
-+    KEEP (*(.fini))
-+    ${RELOCATING+${FINI_END}}
-+  } =${NOP-0}
-+  ${RELOCATING+PROVIDE (__${ETEXT_NAME} = .);}
-+  ${RELOCATING+PROVIDE (_${ETEXT_NAME} = .);}
-+  ${RELOCATING+PROVIDE (${ETEXT_NAME} = .);}
-+  ${WRITABLE_RODATA-${RODATA}}
-+  .rodata1      ${RELOCATING-0} : { *(.rodata1) }
-+  ${CREATE_SHLIB-${SDATA2}}
-+  ${CREATE_SHLIB-${SBSS2}}
-+  ${OTHER_READONLY_SECTIONS}
-+  .eh_frame_hdr : { *(.eh_frame_hdr) }
-+  .eh_frame     ${RELOCATING-0} : ONLY_IF_RO { KEEP (*(.eh_frame)) }
-+  .gcc_except_table ${RELOCATING-0} : ONLY_IF_RO { *(.gcc_except_table .gcc_except_table.*) }
-+
-+  /* Adjust the address for the data segment.  We want to adjust up to
-+     the same address within the page on the next page up.  */
-+  ${CREATE_SHLIB-${CREATE_PIE-${RELOCATING+. = ${DATA_ADDR-${DATA_SEGMENT_ALIGN}};}}}
-+  ${CREATE_SHLIB+${RELOCATING+. = ${SHLIB_DATA_ADDR-${DATA_SEGMENT_ALIGN}};}}
-+  ${CREATE_PIE+${RELOCATING+. = ${SHLIB_DATA_ADDR-${DATA_SEGMENT_ALIGN}};}}
-+
-+  /* Exception handling  */
-+  .eh_frame     ${RELOCATING-0} : ONLY_IF_RW { KEEP (*(.eh_frame)) }
-+  .gcc_except_table ${RELOCATING-0} : ONLY_IF_RW { *(.gcc_except_table .gcc_except_table.*) }
-+
-+  /* Thread Local Storage sections  */
-+  .tdata	${RELOCATING-0} : { *(.tdata${RELOCATING+ .tdata.* .gnu.linkonce.td.*}) }
+   .fini         ${RELOCATING-0} :
+   {
+     ${RELOCATING+${FINI_START}}
+@@ -435,6 +388,7 @@ cat <<EOF
+ 
+   /* Thread Local Storage sections  */
+   .tdata	${RELOCATING-0} : { *(.tdata${RELOCATING+ .tdata.* .gnu.linkonce.td.*}) }
 +  .tbss		${RELOCATING-0} : { *(.tbss${RELOCATING+ .tbss.* .gnu.linkonce.tb.*})${RELOCATING+ *(.tcommon)} }
-+
-+  .preinit_array   ${RELOCATING-0} :
-+  {
-+    ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (${USER_LABEL_PREFIX}__preinit_array_start = .);}}
-+    KEEP (*(.preinit_array))
-+    ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (${USER_LABEL_PREFIX}__preinit_array_end = .);}}
-+  }
+ 
+   .preinit_array   ${RELOCATING-0} :
+   {
+@@ -442,8 +396,20 @@ cat <<EOF
+     KEEP (*(.preinit_array))
+     ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (${USER_LABEL_PREFIX}__preinit_array_end = .);}}
+   }
+-  ${RELOCATING+${INIT_ARRAY}}
+-  ${RELOCATING+${FINI_ARRAY}}
 +  .init_array   ${RELOCATING-0} :
 +  {
 +     ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (${USER_LABEL_PREFIX}__init_array_start = .);}}
@@ -24720,423 +24530,286 @@ index 0000000..865c9ba
 +    KEEP (*(SORT(.fini_array.*)))
 +    ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (${USER_LABEL_PREFIX}__fini_array_end = .);}}
 +  }
-+  ${SMALL_DATA_CTOR-${RELOCATING+${CTOR}}}
-+  ${SMALL_DATA_DTOR-${RELOCATING+${DTOR}}}
-+  .jcr          ${RELOCATING-0} : { KEEP (*(.jcr)) }
-+
-+  ${RELOCATING+${DATARELRO}}
-+  ${OTHER_RELRO_SECTIONS}
-+  ${TEXT_DYNAMIC-${DYNAMIC}}
-+  ${DATA_GOT+${RELRO_NOW+${GOT}}}
-+  ${DATA_GOT+${RELRO_NOW+${GOTPLT}}}
-+  ${DATA_GOT+${RELRO_NOW-${SEPARATE_GOTPLT+${GOT}}}}
-+  ${RELOCATING+${DATA_SEGMENT_RELRO_END}}
-+  ${DATA_GOT+${RELRO_NOW-${SEPARATE_GOTPLT-${GOT}}}}
-+  ${DATA_GOT+${RELRO_NOW-${GOTPLT}}}
-+
-+  ${DATA_PLT+${PLT_BEFORE_GOT-${PLT}}}
-+
-+  .data         ${RELOCATING-0} :
-+  {
-+    ${RELOCATING+${DATA_START_SYMBOLS}}
-+    *(.data${RELOCATING+ .data.* .gnu.linkonce.d.*})
+   ${SMALL_DATA_CTOR-${RELOCATING+${CTOR}}}
+   ${SMALL_DATA_DTOR-${RELOCATING+${DTOR}}}
+   .jcr          ${RELOCATING-0} : { KEEP (*(.jcr)) }
+@@ -464,6 +430,7 @@ cat <<EOF
+   {
+     ${RELOCATING+${DATA_START_SYMBOLS}}
+     *(.data${RELOCATING+ .data.* .gnu.linkonce.d.*})
 +    ${RELOCATING+KEEP (*(.gnu.linkonce.d.*personality*))}
-+    ${CONSTRUCTING+SORT(CONSTRUCTORS)}
-+  }
-+  .data1        ${RELOCATING-0} : { *(.data1) }
-+  ${WRITABLE_RODATA+${RODATA}}
-+  ${OTHER_READWRITE_SECTIONS}
-+  ${SMALL_DATA_CTOR+${RELOCATING+${CTOR}}}
-+  ${SMALL_DATA_DTOR+${RELOCATING+${DTOR}}}
-+  ${DATA_PLT+${PLT_BEFORE_GOT+${PLT}}}
-+  ${SDATA_GOT+${RELOCATING+${OTHER_GOT_SYMBOLS}}}
-+  ${SDATA_GOT+${GOT}}
-+  ${SDATA_GOT+${OTHER_GOT_SECTIONS}}
-+  ${SDATA}
-+  ${OTHER_SDATA_SECTIONS}
-+  ${RELOCATING+${DATA_END_SYMBOLS-${USER_LABEL_PREFIX}_edata = .; PROVIDE (${USER_LABEL_PREFIX}edata = .);}}
-+  ${RELOCATING+__bss_start = .;}
-+  ${RELOCATING+${OTHER_BSS_SYMBOLS}}
-+  ${SBSS}
-+  ${BSS_PLT+${PLT}}
-+  .bss          ${RELOCATING-0} :
-+  {
-+   *(.dynbss)
-+   *(.bss${RELOCATING+ .bss.* .gnu.linkonce.b.*})
-+   *(COMMON)
-+   /* Align here to ensure that the .bss section occupies space up to
-+      _end.  Align after .bss to ensure correct alignment even if the
-+      .bss section disappears because there are no input sections.
-+      FIXME: Why do we need it? When there is no .bss section, we don't
-+      pad the .data section.  */
-+   ${RELOCATING+. = ALIGN(. != 0 ? ${ALIGNMENT} : 1);}
-+  }
-+  ${OTHER_BSS_SECTIONS}
-+  ${RELOCATING+${OTHER_BSS_END_SYMBOLS}}
-+  ${RELOCATING+. = ALIGN(${ALIGNMENT});}
-+  ${LARGE_SECTIONS}
-+  ${RELOCATING+. = ALIGN(${ALIGNMENT});}
-+  ${RELOCATING+${OTHER_END_SYMBOLS}}
-+  ${RELOCATING+${END_SYMBOLS-${USER_LABEL_PREFIX}_end = .; PROVIDE (${USER_LABEL_PREFIX}end = .);}}
-+  ${RELOCATING+${DATA_SEGMENT_END}}
-+
-+  /* Stabs debugging sections.  */
-+  .stab          0 : { *(.stab) }
-+  .stabstr       0 : { *(.stabstr) }
-+  .stab.excl     0 : { *(.stab.excl) }
-+  .stab.exclstr  0 : { *(.stab.exclstr) }
-+  .stab.index    0 : { *(.stab.index) }
-+  .stab.indexstr 0 : { *(.stab.indexstr) }
-+
-+  .comment       0 : { *(.comment) }
-+
-+  /* DWARF debug sections.
-+     Symbols in the DWARF debugging sections are relative to the beginning
-+     of the section so we begin them at 0.  */
-+
-+  /* DWARF 1 */
-+  .debug          0 : { *(.debug) }
-+  .line           0 : { *(.line) }
-+
-+  /* GNU DWARF 1 extensions */
-+  .debug_srcinfo  0 : { *(.debug_srcinfo) }
-+  .debug_sfnames  0 : { *(.debug_sfnames) }
-+
-+  /* DWARF 1.1 and DWARF 2 */
-+  .debug_aranges  0 : { *(.debug_aranges) }
-+  .debug_pubnames 0 : { *(.debug_pubnames) }
-+
-+  /* DWARF 2 */
-+  .debug_info     0 : { *(.debug_info${RELOCATING+ .gnu.linkonce.wi.*}) }
-+  .debug_abbrev   0 : { *(.debug_abbrev) }
-+  .debug_line     0 : { *(.debug_line) }
-+  .debug_frame    0 : { *(.debug_frame) }
-+  .debug_str      0 : { *(.debug_str) }
-+  .debug_loc      0 : { *(.debug_loc) }
-+  .debug_macinfo  0 : { *(.debug_macinfo) }
-+
-+  /* SGI/MIPS DWARF 2 extensions */
-+  .debug_weaknames 0 : { *(.debug_weaknames) }
-+  .debug_funcnames 0 : { *(.debug_funcnames) }
-+  .debug_typenames 0 : { *(.debug_typenames) }
-+  .debug_varnames  0 : { *(.debug_varnames) }
-+
-+  /* DWARF 3 */
-+  .debug_pubtypes 0 : { *(.debug_pubtypes) }
-+  .debug_ranges   0 : { *(.debug_ranges) }
-+
-+  ${TINY_DATA_SECTION}
-+  ${TINY_BSS_SECTION}
-+
-+  ${STACK_ADDR+${STACK}}
-+  ${ATTRS_SECTIONS}
-+  ${OTHER_SECTIONS}
-+  ${RELOCATING+${OTHER_SYMBOLS}}
-+  ${RELOCATING+${DISCARDED}}
-+}
-+EOF
-diff --git a/ld/scripttempl/amithlon.sc b/ld/scripttempl/amithlon.sc
-new file mode 100644
-index 0000000..b8248cd
---- /dev/null
+     ${CONSTRUCTING+SORT(CONSTRUCTORS)}
+   }
+   .data1        ${RELOCATING-0} : { *(.data1) }
+@@ -502,23 +469,7 @@ cat <<EOF
+   ${RELOCATING+${OTHER_END_SYMBOLS}}
+   ${RELOCATING+${END_SYMBOLS-${USER_LABEL_PREFIX}_end = .; PROVIDE (${USER_LABEL_PREFIX}end = .);}}
+   ${RELOCATING+${DATA_SEGMENT_END}}
+-EOF
+-
+-if test -n "${NON_ALLOC_DYN}"; then
+-  if test -z "${NO_REL_RELOCS}${NO_RELA_RELOCS}"; then
+-    cat ldscripts/dyntmp.$$
+-  else
+-    if test -z "${NO_REL_RELOCS}"; then
+-      sed -e '/^[ 	]*\.rela\.[^}]*$/,/}/d' -e '/^[ 	]*\.rela\./d' ldscripts/dyntmp.$$
+-    fi
+-    if test -z "${NO_RELA_RELOCS}"; then
+-      sed -e '/^[ 	]*\.rel\.[^}]*$/,/}/d' -e '/^[ 	]*\.rel\./d' ldscripts/dyntmp.$$
+-    fi
+-  fi
+-  rm -f ldscripts/dyntmp.$$
+-fi
+ 
+-cat <<EOF
+   /* Stabs debugging sections.  */
+   .stab          0 : { *(.stab) }
+   .stabstr       0 : { *(.stabstr) }
+@@ -564,9 +515,6 @@ cat <<EOF
+   .debug_pubtypes 0 : { *(.debug_pubtypes) }
+   .debug_ranges   0 : { *(.debug_ranges) }
+ 
+-  /* DWARF Extension.  */
+-  .debug_macro    0 : { *(.debug_macro) } 
+-  
+   ${TINY_DATA_SECTION}
+   ${TINY_BSS_SECTION}
+ 
+diff --git a/ld/scripttempl/mep.sc b/ld/scripttempl/amithlon.sc
+similarity index 76%
+copy from ld/scripttempl/mep.sc
+copy to ld/scripttempl/amithlon.sc
+index 3fc1352..b8248cd 100644
+--- a/ld/scripttempl/mep.sc
 +++ b/ld/scripttempl/amithlon.sc
-@@ -0,0 +1,412 @@
-+#
-+# Unusual variables checked by this code:
-+#	NOP - four byte opcode for no-op (defaults to 0)
-+#	NO_SMALL_DATA - no .sbss/.sbss2/.sdata/.sdata2 sections if not
-+#		empty.
-+#	DATA_ADDR - if end-of-text-plus-one-page isn't right for data start
-+#	INITIAL_READONLY_SECTIONS - at start of text segment
-+#	OTHER_READONLY_SECTIONS - other than .text .init .rodata ...
-+#		(e.g., .PARISC.milli)
-+#	OTHER_TEXT_SECTIONS - these get put in .text when relocating
-+#	OTHER_READWRITE_SECTIONS - other than .data .bss .ctors .sdata ...
-+#		(e.g., .PARISC.global)
-+#	OTHER_BSS_SECTIONS - other than .bss .sbss ...
-+#	OTHER_SECTIONS - at the end
-+#	EXECUTABLE_SYMBOLS - symbols that must be defined for an
-+#		executable (e.g., _DYNAMIC_LINK)
-+#	TEXT_START_SYMBOLS - symbols that appear at the start of the
-+#		.text section.
-+#	DATA_START_SYMBOLS - symbols that appear at the start of the
-+#		.data section.
-+#	OTHER_GOT_SYMBOLS - symbols defined just before .got.
-+#	OTHER_GOT_SECTIONS - sections just after .got.
-+#	OTHER_SDATA_SECTIONS - sections just after .sdata.
-+#	OTHER_BSS_SYMBOLS - symbols that appear at the start of the
-+#		.bss section besides __bss_start.
-+#	DATA_PLT - .plt should be in data segment, not text segment.
-+#	BSS_PLT - .plt should be in bss segment
-+#	TEXT_DYNAMIC - .dynamic in text segment, not data segment.
+@@ -3,8 +3,6 @@
+ #	NOP - four byte opcode for no-op (defaults to 0)
+ #	NO_SMALL_DATA - no .sbss/.sbss2/.sdata/.sdata2 sections if not
+ #		empty.
+-#	SMALL_DATA_CTOR - .ctors contains small data.
+-#	SMALL_DATA_DTOR - .dtors contains small data.
+ #	DATA_ADDR - if end-of-text-plus-one-page isn't right for data start
+ #	INITIAL_READONLY_SECTIONS - at start of text segment
+ #	OTHER_READONLY_SECTIONS - other than .text .init .rodata ...
+@@ -12,15 +10,10 @@
+ #	OTHER_TEXT_SECTIONS - these get put in .text when relocating
+ #	OTHER_READWRITE_SECTIONS - other than .data .bss .ctors .sdata ...
+ #		(e.g., .PARISC.global)
+-#	OTHER_RELRO_SECTIONS - other than .data.rel.ro ...
+-#		(e.g. PPC32 .fixup, .got[12])
+ #	OTHER_BSS_SECTIONS - other than .bss .sbss ...
+ #	OTHER_SECTIONS - at the end
+ #	EXECUTABLE_SYMBOLS - symbols that must be defined for an
+ #		executable (e.g., _DYNAMIC_LINK)
+-#       TEXT_START_ADDR - the first byte of the text segment, after any
+-#               headers.
+-#       TEXT_BASE_ADDRESS - the first byte of the text segment.
+ #	TEXT_START_SYMBOLS - symbols that appear at the start of the
+ #		.text section.
+ #	DATA_START_SYMBOLS - symbols that appear at the start of the
+@@ -31,10 +24,9 @@
+ #	OTHER_BSS_SYMBOLS - symbols that appear at the start of the
+ #		.bss section besides __bss_start.
+ #	DATA_PLT - .plt should be in data segment, not text segment.
+-#	PLT_BEFORE_GOT - .plt just before .got when .plt is in data segement.
+ #	BSS_PLT - .plt should be in bss segment
+ #	TEXT_DYNAMIC - .dynamic in text segment, not data segment.
+-#	EMBEDDED - whether this is for an embedded system. 
 +#	EMBEDDED - whether this is for an embedded system.
-+#	SHLIB_TEXT_START_ADDR - if set, add to SIZEOF_HEADERS to set
-+#		start address of shared library.
-+#	INPUT_FILES - INPUT command of files to always include
-+#	WRITABLE_RODATA - if set, the .rodata section should be writable
-+#	INIT_START, INIT_END -  statements just before and just after
-+# 	combination of .init sections.
-+#	FINI_START, FINI_END - statements just before and just after
-+# 	combination of .fini sections.
-+#	STACK_ADDR - start of a .stack section.
-+#	OTHER_END_SYMBOLS - symbols to place right at the end of the script.
-+#
-+# When adding sections, do note that the names of some sections are used
-+# when specifying the start address of the next.
-+#
-+
-+#  Many sections come in three flavours.  There is the 'real' section,
-+#  like ".data".  Then there are the per-procedure or per-variable
-+#  sections, generated by -ffunction-sections and -fdata-sections in GCC,
-+#  and useful for --gc-sections, which for a variable "foo" might be
-+#  ".data.foo".  Then there are the linkonce sections, for which the linker
-+#  eliminates duplicates, which are named like ".gnu.linkonce.d.foo".
-+#  The exact correspondences are:
-+#
-+#  Section	Linkonce section
-+#  .text	.gnu.linkonce.t.foo
-+#  .rodata	.gnu.linkonce.r.foo
-+#  .data	.gnu.linkonce.d.foo
-+#  .bss		.gnu.linkonce.b.foo
-+#  .sdata	.gnu.linkonce.s.foo
-+#  .sbss	.gnu.linkonce.sb.foo
-+#  .sdata2	.gnu.linkonce.s2.foo
-+#  .sbss2	.gnu.linkonce.sb2.foo
-+#  .debug_info	.gnu.linkonce.wi.foo
-+#  .tdata	.gnu.linkonce.td.foo
-+#  .tbss	.gnu.linkonce.tb.foo
-+#
-+#  Each of these can also have corresponding .rel.* and .rela.* sections.
-+
-+test -z "$ENTRY" && ENTRY=_start
-+test -z "${BIG_OUTPUT_FORMAT}" && BIG_OUTPUT_FORMAT=${OUTPUT_FORMAT}
-+test -z "${LITTLE_OUTPUT_FORMAT}" && LITTLE_OUTPUT_FORMAT=${OUTPUT_FORMAT}
-+if [ -z "$MACHINE" ]; then OUTPUT_ARCH=${ARCH}; else OUTPUT_ARCH=${ARCH}:${MACHINE}; fi
-+test -z "${ELFSIZE}" && ELFSIZE=32
-+test -z "${ALIGNMENT}" && ALIGNMENT="${ELFSIZE} / 8"
-+test "$LD_FLAG" = "N" && DATA_ADDR=.
+ #	SHLIB_TEXT_START_ADDR - if set, add to SIZEOF_HEADERS to set
+ #		start address of shared library.
+ #	INPUT_FILES - INPUT command of files to always include
+@@ -45,10 +37,6 @@
+ # 	combination of .fini sections.
+ #	STACK_ADDR - start of a .stack section.
+ #	OTHER_END_SYMBOLS - symbols to place right at the end of the script.
+-#	SEPARATE_GOTPLT - if set, .got.plt should be separate output section,
+-#		so that .got can be in the RELRO area.  It should be set to
+-#		the number of bytes in the beginning of .got.plt which can be
+-#		in the RELRO area as well.
+ #
+ # When adding sections, do note that the names of some sections are used
+ # when specifying the start address of the next.
+@@ -84,43 +72,24 @@ if [ -z "$MACHINE" ]; then OUTPUT_ARCH=${ARCH}; else OUTPUT_ARCH=${ARCH}:${MACHI
+ test -z "${ELFSIZE}" && ELFSIZE=32
+ test -z "${ALIGNMENT}" && ALIGNMENT="${ELFSIZE} / 8"
+ test "$LD_FLAG" = "N" && DATA_ADDR=.
+-test -n "$CREATE_SHLIB$CREATE_PIE" && test -n "$SHLIB_DATA_ADDR" && COMMONPAGESIZE=""
+-test -z "$CREATE_SHLIB$CREATE_PIE" && test -n "$DATA_ADDR" && COMMONPAGESIZE=""
+-test -n "$RELRO_NOW" && unset SEPARATE_GOTPLT
+-DATA_SEGMENT_ALIGN="ALIGN(${SEGMENT_SIZE}) + (. & (${MAXPAGESIZE} - 1))"
+-DATA_SEGMENT_RELRO_END=""
+-DATA_SEGMENT_RELRO_GOTPLT_END=""
 +test -n "$CREATE_SHLIB" && test -n "$SHLIB_DATA_ADDR" && COMMONPAGESIZE=""
 +test -z "$CREATE_SHLIB" && test -n "$DATA_ADDR" && COMMONPAGESIZE=""
 +#DATA_SEGMENT_ALIGN="ALIGN(${MAXPAGESIZE}) + (. & (${MAXPAGESIZE} - 1))"
 +DATA_SEGMENT_ALIGN="ALIGN(${MAXPAGESIZE}) + ${MAXPAGESIZE}"
-+DATA_SEGMENT_END=""
-+if test -n "${COMMONPAGESIZE}"; then
+ DATA_SEGMENT_END=""
+ if test -n "${COMMONPAGESIZE}"; then
+-  DATA_SEGMENT_ALIGN="ALIGN (${SEGMENT_SIZE}) - ((${MAXPAGESIZE} - .) & (${MAXPAGESIZE} - 1)); . = DATA_SEGMENT_ALIGN (${MAXPAGESIZE}, ${COMMONPAGESIZE})"
 +  DATA_SEGMENT_ALIGN="DATA_SEGMENT_ALIGN(${MAXPAGESIZE}, ${COMMONPAGESIZE})"
-+  DATA_SEGMENT_END=". = DATA_SEGMENT_END (.);"
-+fi
-+INTERP=".interp       ${RELOCATING-0} : { *(.interp) }"
-+PLT=".plt          ${RELOCATING-0} : { *(.plt) }"
-+DYNAMIC=".dynamic      ${RELOCATING-0} : { *(.dynamic) }"
-+RODATA=".rodata       ${RELOCATING-0} : { *(.rodata${RELOCATING+ .rodata.* .gnu.linkonce.r.*}) }"
-+if test -z "${NO_SMALL_DATA}"; then
-+  SBSS=".sbss         ${RELOCATING-0} :
-+  {
-+    ${RELOCATING+PROVIDE (__sbss_start = .);}
-+    ${RELOCATING+PROVIDE (___sbss_start = .);}
-+    *(.dynsbss)
-+    *(.sbss${RELOCATING+ .sbss.* .gnu.linkonce.sb.*})
-+    *(.scommon)
-+    ${RELOCATING+PROVIDE (__sbss_end = .);}
-+    ${RELOCATING+PROVIDE (___sbss_end = .);}
-+  }"
-+  SBSS2=".sbss2        ${RELOCATING-0} : { *(.sbss2${RELOCATING+ .sbss2.* .gnu.linkonce.sb2.*}) }"
-+  SDATA="/* We want the small data sections together, so single-instruction offsets
-+     can access them all, and initialized data all before uninitialized, so
-+     we can shorten the on-disk segment size.  */
+   DATA_SEGMENT_END=". = DATA_SEGMENT_END (.);"
+-  if test -n "${SEPARATE_GOTPLT}"; then
+-    DATA_SEGMENT_RELRO_GOTPLT_END=". = DATA_SEGMENT_RELRO_END (${SEPARATE_GOTPLT}, .);"
+-  else
+-    DATA_SEGMENT_RELRO_END=". = DATA_SEGMENT_RELRO_END (0, .);"
+-  fi
+ fi
+ INTERP=".interp       ${RELOCATING-0} : { *(.interp) }"
+ PLT=".plt          ${RELOCATING-0} : { *(.plt) }"
+-if test -z "$GOT"; then
+-  if test -z "$SEPARATE_GOTPLT"; then
+-    GOT=".got          ${RELOCATING-0} : { *(.got.plt) *(.got) }"
+-  else
+-    GOT=".got          ${RELOCATING-0} : { *(.got) }"
+-    GOTPLT="${RELOCATING+${DATA_SEGMENT_RELRO_GOTPLT_END}}
+-  .got.plt      ${RELOCATING-0} : { *(.got.plt) }"
+-  fi
+-fi
+ DYNAMIC=".dynamic      ${RELOCATING-0} : { *(.dynamic) }"
+ RODATA=".rodata       ${RELOCATING-0} : { *(.rodata${RELOCATING+ .rodata.* .gnu.linkonce.r.*}) }"
+-DATARELRO=".data.rel.ro : { *(.data.rel.ro.local) *(.data.rel.ro .data.rel.ro.*) }"
+-DISCARDED="/DISCARD/ : { *(.note.GNU-stack) *(.gnu_debuglink)  *(.gnu.lto_*) }"
+ if test -z "${NO_SMALL_DATA}"; then
+   SBSS=".sbss         ${RELOCATING-0} :
+   {
+     ${RELOCATING+PROVIDE (__sbss_start = .);}
+     ${RELOCATING+PROVIDE (___sbss_start = .);}
+-    ${CREATE_SHLIB+*(.sbss2 .sbss2.* .gnu.linkonce.sb2.*)}
+     *(.dynsbss)
+     *(.sbss${RELOCATING+ .sbss.* .gnu.linkonce.sb.*})
+     *(.scommon)
+@@ -131,10 +100,9 @@ if test -z "${NO_SMALL_DATA}"; then
+   SDATA="/* We want the small data sections together, so single-instruction offsets
+      can access them all, and initialized data all before uninitialized, so
+      we can shorten the on-disk segment size.  */
+-  .sdata        ${RELOCATING-0} : 
 +  .sdata        ${RELOCATING-0} :
-+  {
-+    ${RELOCATING+${SDATA_START_SYMBOLS}}
-+    *(.sdata${RELOCATING+ .sdata.* .gnu.linkonce.s.*})
-+  }"
-+  SDATA2=".sdata2       ${RELOCATING-0} : { *(.sdata2${RELOCATING+ .sdata2.* .gnu.linkonce.s2.*}) }"
-+  REL_SDATA=".rel.sdata    ${RELOCATING-0} : { *(.rel.sdata${RELOCATING+ .rel.sdata.* .rel.gnu.linkonce.s.*}) }
-+  .rela.sdata   ${RELOCATING-0} : { *(.rela.sdata${RELOCATING+ .rela.sdata.* .rela.gnu.linkonce.s.*}) }"
-+  REL_SBSS=".rel.sbss     ${RELOCATING-0} : { *(.rel.sbss${RELOCATING+ .rel.sbss.* .rel.gnu.linkonce.sb.*}) }
-+  .rela.sbss    ${RELOCATING-0} : { *(.rela.sbss${RELOCATING+ .rela.sbss.* .rela.gnu.linkonce.sb.*}) }"
-+  REL_SDATA2=".rel.sdata2   ${RELOCATING-0} : { *(.rel.sdata2${RELOCATING+ .rel.sdata2.* .rel.gnu.linkonce.s2.*}) }
-+  .rela.sdata2  ${RELOCATING-0} : { *(.rela.sdata2${RELOCATING+ .rela.sdata2.* .rela.gnu.linkonce.s2.*}) }"
-+  REL_SBSS2=".rel.sbss2    ${RELOCATING-0} : { *(.rel.sbss2${RELOCATING+ .rel.sbss2.* .rel.gnu.linkonce.sb2.*}) }
-+  .rela.sbss2   ${RELOCATING-0} : { *(.rela.sbss2${RELOCATING+ .rela.sbss2.* .rela.gnu.linkonce.sb2.*}) }"
-+fi
+   {
+     ${RELOCATING+${SDATA_START_SYMBOLS}}
+-    ${CREATE_SHLIB+*(.sdata2 .sdata2.* .gnu.linkonce.s2.*)}
+     *(.sdata${RELOCATING+ .sdata.* .gnu.linkonce.s.*})
+   }"
+   SDATA2=".sdata2       ${RELOCATING-0} : { *(.sdata2${RELOCATING+ .sdata2.* .gnu.linkonce.s2.*}) }"
+@@ -146,11 +114,8 @@ if test -z "${NO_SMALL_DATA}"; then
+   .rela.sdata2  ${RELOCATING-0} : { *(.rela.sdata2${RELOCATING+ .rela.sdata2.* .rela.gnu.linkonce.s2.*}) }"
+   REL_SBSS2=".rel.sbss2    ${RELOCATING-0} : { *(.rel.sbss2${RELOCATING+ .rel.sbss2.* .rel.gnu.linkonce.sb2.*}) }
+   .rela.sbss2   ${RELOCATING-0} : { *(.rela.sbss2${RELOCATING+ .rela.sbss2.* .rela.gnu.linkonce.sb2.*}) }"
+-else
+-  NO_SMALL_DATA=" "
+ fi
+-test -n "$SEPARATE_GOTPLT" && SEPARATE_GOTPLT=" "
+-CTOR=".ctors        ${CONSTRUCTING-0} : 
 +CTOR=".ctors        ${CONSTRUCTING-0} :
-+  {
-+    ${CONSTRUCTING+${CTOR_START}}
-+    /* gcc uses crtbegin.o to find the start of
-+       the constructors, so we make sure it is
-+       first.  Because this is a wildcard, it
-+       doesn't matter if the user does not
-+       actually link against crtbegin.o; the
-+       linker won't look for a file to match a
-+       wildcard.  The wildcard also means that it
-+       doesn't matter which directory crtbegin.o
-+       is in.  */
-+
+   {
+     ${CONSTRUCTING+${CTOR_START}}
+     /* gcc uses crtbegin.o to find the start of
+@@ -163,14 +128,14 @@ CTOR=".ctors        ${CONSTRUCTING-0} :
+        doesn't matter which directory crtbegin.o
+        is in.  */
+ 
+-    KEEP (*crtbegin*.o(.ctors))
 +    KEEP (*crtbegin.o(.ctors))
-+
-+    /* We don't want to include the .ctor section from
-+       from the crtend.o file until after the sorted ctors.
-+       The .ctor section from the crtend file contains the
-+       end of ctors marker and it must be last */
-+
+ 
+     /* We don't want to include the .ctor section from
+        from the crtend.o file until after the sorted ctors.
+        The .ctor section from the crtend file contains the
+        end of ctors marker and it must be last */
+ 
+-    KEEP (*(EXCLUDE_FILE (*crtend*.o $OTHER_EXCLUDE_FILES) .ctors))
 +    KEEP (*(EXCLUDE_FILE (*crtend.o $OTHER_EXCLUDE_FILES) .ctors))
-+    KEEP (*(SORT(.ctors.*)))
-+    KEEP (*(.ctors))
-+    ${CONSTRUCTING+${CTOR_END}}
-+  }"
-+DTOR=".dtors        ${CONSTRUCTING-0} :
-+  {
-+    ${CONSTRUCTING+${DTOR_START}}
+     KEEP (*(SORT(.ctors.*)))
+     KEEP (*(.ctors))
+     ${CONSTRUCTING+${CTOR_END}}
+@@ -178,8 +143,8 @@ CTOR=".ctors        ${CONSTRUCTING-0} :
+ DTOR=".dtors        ${CONSTRUCTING-0} :
+   {
+     ${CONSTRUCTING+${DTOR_START}}
+-    KEEP (*crtbegin*.o(.dtors))
+-    KEEP (*(EXCLUDE_FILE (*crtend*.o $OTHER_EXCLUDE_FILES) .dtors))
 +    KEEP (*crtbegin.o(.dtors))
 +    KEEP (*(EXCLUDE_FILE (*crtend.o $OTHER_EXCLUDE_FILES) .dtors))
-+    KEEP (*(SORT(.dtors.*)))
-+    KEEP (*(.dtors))
-+    ${CONSTRUCTING+${DTOR_END}}
-+  }"
-+STACK="  .stack        ${RELOCATING-0}${RELOCATING+${STACK_ADDR}} :
-+  {
-+    ${RELOCATING+_stack = .;}
-+    *(.stack)
-+  }"
-+
-+# if this is for an embedded system, don't add SIZEOF_HEADERS.
-+if [ -z "$EMBEDDED" ]; then
-+   test -z "${TEXT_BASE_ADDRESS}" && TEXT_BASE_ADDRESS="${TEXT_START_ADDR} + SIZEOF_HEADERS"
-+else
-+   test -z "${TEXT_BASE_ADDRESS}" && TEXT_BASE_ADDRESS="${TEXT_START_ADDR}"
-+fi
-+
-+cat <<EOF
-+OUTPUT_FORMAT("${OUTPUT_FORMAT}", "${BIG_OUTPUT_FORMAT}",
-+	      "${LITTLE_OUTPUT_FORMAT}")
-+OUTPUT_ARCH(${OUTPUT_ARCH})
+     KEEP (*(SORT(.dtors.*)))
+     KEEP (*(.dtors))
+     ${CONSTRUCTING+${DTOR_END}}
+@@ -201,7 +166,7 @@ cat <<EOF
+ OUTPUT_FORMAT("${OUTPUT_FORMAT}", "${BIG_OUTPUT_FORMAT}",
+ 	      "${LITTLE_OUTPUT_FORMAT}")
+ OUTPUT_ARCH(${OUTPUT_ARCH})
+-${RELOCATING+ENTRY(${ENTRY})}
 +ENTRY(${ENTRY})
-+
-+${RELOCATING+${LIB_SEARCH_DIRS}}
-+${RELOCATING+/* Do we need any of these for elf?
-+   __DYNAMIC = 0; ${STACKZERO+${STACKZERO}} ${SHLIB_PATH+${SHLIB_PATH}}  */}
-+${RELOCATING+${EXECUTABLE_SYMBOLS}}
-+${RELOCATING+${INPUT_FILES}}
-+${RELOCATING- /* For some reason, the Solaris linker makes bad executables
-+  if gld -r is used and the intermediate file has sections starting
-+  at non-zero addresses.  Could be a Solaris ld bug, could be a GNU ld
-+  bug.  But for now assigning the zero vmas works.  */}
-+
-+SECTIONS
-+{
-+  /* Read-only sections, merged into text segment: */
+ 
+ ${RELOCATING+${LIB_SEARCH_DIRS}}
+ ${RELOCATING+/* Do we need any of these for elf?
+@@ -216,9 +181,8 @@ ${RELOCATING- /* For some reason, the Solaris linker makes bad executables
+ SECTIONS
+ {
+   /* Read-only sections, merged into text segment: */
+-  ${CREATE_SHLIB-${CREATE_PIE-${RELOCATING+PROVIDE (__executable_start = ${TEXT_START_ADDR}); . = ${TEXT_BASE_ADDRESS};}}}
 +  ${CREATE_SHLIB-${RELOCATING+. = ${TEXT_BASE_ADDRESS};}}
-+  ${CREATE_SHLIB+${RELOCATING+. = ${SHLIB_TEXT_START_ADDR:-0} + SIZEOF_HEADERS;}}
-+  ${CREATE_SHLIB-${INTERP}}
-+  ${INITIAL_READONLY_SECTIONS}
-+  ${TEXT_DYNAMIC+${DYNAMIC}}
-+  .hash         ${RELOCATING-0} : { *(.hash) }
-+  .dynsym       ${RELOCATING-0} : { *(.dynsym) }
-+  .dynstr       ${RELOCATING-0} : { *(.dynstr) }
-+  .gnu.version  ${RELOCATING-0} : { *(.gnu.version) }
-+  .gnu.version_d ${RELOCATING-0}: { *(.gnu.version_d) }
-+  .gnu.version_r ${RELOCATING-0}: { *(.gnu.version_r) }
+   ${CREATE_SHLIB+${RELOCATING+. = ${SHLIB_TEXT_START_ADDR:-0} + SIZEOF_HEADERS;}}
+-  ${CREATE_PIE+${RELOCATING+. = ${SHLIB_TEXT_START_ADDR:-0} + SIZEOF_HEADERS;}}
+   ${CREATE_SHLIB-${INTERP}}
+   ${INITIAL_READONLY_SECTIONS}
+   ${TEXT_DYNAMIC+${DYNAMIC}}
+@@ -245,8 +209,6 @@ eval $COMBRELOCCAT <<EOF
+   .rel.rodata   ${RELOCATING-0} : { *(.rel.rodata${RELOCATING+ .rel.rodata.* .rel.gnu.linkonce.r.*}) }
+   .rela.rodata  ${RELOCATING-0} : { *(.rela.rodata${RELOCATING+ .rela.rodata.* .rela.gnu.linkonce.r.*}) }
+   ${OTHER_READONLY_RELOC_SECTIONS}
+-  .rel.data.rel.ro ${RELOCATING-0} : { *(.rel.data.rel.ro${RELOCATING+ .rel.data.rel.ro.*}) }
+-  .rela.data.rel.ro ${RELOCATING-0} : { *(.rela.data.rel.ro${RELOCATING+ .rela.data.rel.ro.*}) }
+   .rel.data     ${RELOCATING-0} : { *(.rel.data${RELOCATING+ .rel.data.* .rel.gnu.linkonce.d.*}) }
+   .rela.data    ${RELOCATING-0} : { *(.rela.data${RELOCATING+ .rela.data.* .rela.gnu.linkonce.d.*}) }
+   .rel.tdata	${RELOCATING-0} : { *(.rel.tdata${RELOCATING+ .rel.tdata.* .rel.gnu.linkonce.td.*}) }
+@@ -288,6 +250,9 @@ cat <<EOF
+   .rela.plt     ${RELOCATING-0} : { *(.rela.plt) }
+   ${OTHER_PLT_RELOC_SECTIONS}
+ 
++  /* Force a new section by skipping a page */
++  . = ALIGN(${MAXPAGESIZE}) + ${MAXPAGESIZE};
 +
-+EOF
-+if [ "x$COMBRELOC" = x ]; then
-+  COMBRELOCCAT=cat
-+else
-+  COMBRELOCCAT="cat > $COMBRELOC"
-+fi
-+eval $COMBRELOCCAT <<EOF
-+  .rel.init     ${RELOCATING-0} : { *(.rel.init) }
-+  .rela.init    ${RELOCATING-0} : { *(.rela.init) }
-+  .rel.text     ${RELOCATING-0} : { *(.rel.text${RELOCATING+ .rel.text.* .rel.gnu.linkonce.t.*}) }
-+  .rela.text    ${RELOCATING-0} : { *(.rela.text${RELOCATING+ .rela.text.* .rela.gnu.linkonce.t.*}) }
-+  .rel.fini     ${RELOCATING-0} : { *(.rel.fini) }
-+  .rela.fini    ${RELOCATING-0} : { *(.rela.fini) }
-+  .rel.rodata   ${RELOCATING-0} : { *(.rel.rodata${RELOCATING+ .rel.rodata.* .rel.gnu.linkonce.r.*}) }
-+  .rela.rodata  ${RELOCATING-0} : { *(.rela.rodata${RELOCATING+ .rela.rodata.* .rela.gnu.linkonce.r.*}) }
-+  ${OTHER_READONLY_RELOC_SECTIONS}
-+  .rel.data     ${RELOCATING-0} : { *(.rel.data${RELOCATING+ .rel.data.* .rel.gnu.linkonce.d.*}) }
-+  .rela.data    ${RELOCATING-0} : { *(.rela.data${RELOCATING+ .rela.data.* .rela.gnu.linkonce.d.*}) }
-+  .rel.tdata	${RELOCATING-0} : { *(.rel.tdata${RELOCATING+ .rel.tdata.* .rel.gnu.linkonce.td.*}) }
-+  .rela.tdata	${RELOCATING-0} : { *(.rela.tdata${RELOCATING+ .rela.tdata.* .rela.gnu.linkonce.td.*}) }
-+  .rel.tbss	${RELOCATING-0} : { *(.rel.tbss${RELOCATING+ .rel.tbss.* .rel.gnu.linkonce.tb.*}) }
-+  .rela.tbss	${RELOCATING-0} : { *(.rela.tbss${RELOCATING+ .rela.tbss.* .rela.gnu.linkonce.tb.*}) }
-+  .rel.ctors    ${RELOCATING-0} : { *(.rel.ctors) }
-+  .rela.ctors   ${RELOCATING-0} : { *(.rela.ctors) }
-+  .rel.dtors    ${RELOCATING-0} : { *(.rel.dtors) }
-+  .rela.dtors   ${RELOCATING-0} : { *(.rela.dtors) }
-+  .rel.got      ${RELOCATING-0} : { *(.rel.got) }
-+  .rela.got     ${RELOCATING-0} : { *(.rela.got) }
-+  ${OTHER_GOT_RELOC_SECTIONS}
-+  ${REL_SDATA}
-+  ${REL_SBSS}
-+  ${REL_SDATA2}
-+  ${REL_SBSS2}
-+  .rel.bss      ${RELOCATING-0} : { *(.rel.bss${RELOCATING+ .rel.bss.* .rel.gnu.linkonce.b.*}) }
-+  .rela.bss     ${RELOCATING-0} : { *(.rela.bss${RELOCATING+ .rela.bss.* .rela.gnu.linkonce.b.*}) }
-+EOF
-+if [ -n "$COMBRELOC" ]; then
-+cat <<EOF
-+  .rel.dyn      ${RELOCATING-0} :
-+    {
-+EOF
-+sed -e '/^[ 	]*[{}][ 	]*$/d;/:[ 	]*$/d;/\.rela\./d;s/^.*: { *\(.*\)}$/      \1/' $COMBRELOC
-+cat <<EOF
-+    }
-+  .rela.dyn     ${RELOCATING-0} :
-+    {
-+EOF
-+sed -e '/^[ 	]*[{}][ 	]*$/d;/:[ 	]*$/d;/\.rel\./d;s/^.*: { *\(.*\)}/      \1/' $COMBRELOC
-+cat <<EOF
-+    }
-+EOF
-+fi
-+cat <<EOF
-+  .rel.plt      ${RELOCATING-0} : { *(.rel.plt) }
-+  .rela.plt     ${RELOCATING-0} : { *(.rela.plt) }
-+  ${OTHER_PLT_RELOC_SECTIONS}
+   .init         ${RELOCATING-0} : 
+   { 
+     ${RELOCATING+${INIT_START}}
+@@ -313,47 +278,38 @@ cat <<EOF
+   ${RELOCATING+PROVIDE (__etext = .);}
+   ${RELOCATING+PROVIDE (_etext = .);}
+   ${RELOCATING+PROVIDE (etext = .);}
 +
 +  /* Force a new section by skipping a page */
 +  . = ALIGN(${MAXPAGESIZE}) + ${MAXPAGESIZE};
 +
-+  .init         ${RELOCATING-0} : 
-+  { 
-+    ${RELOCATING+${INIT_START}}
-+    KEEP (*(.init))
-+    ${RELOCATING+${INIT_END}}
-+  } =${NOP-0}
-+
-+  ${DATA_PLT-${BSS_PLT-${PLT}}}
-+  .text         ${RELOCATING-0} :
-+  {
-+    ${RELOCATING+${TEXT_START_SYMBOLS}}
-+    *(.text .stub${RELOCATING+ .text.* .gnu.linkonce.t.*})
-+    /* .gnu.warning sections are handled specially by elf32.em.  */
-+    *(.gnu.warning)
-+    ${RELOCATING+${OTHER_TEXT_SECTIONS}}
-+  } =${NOP-0}
-+  .fini         ${RELOCATING-0} :
-+  {
-+    ${RELOCATING+${FINI_START}}
-+    KEEP (*(.fini))
-+    ${RELOCATING+${FINI_END}}
-+  } =${NOP-0}
-+  ${RELOCATING+PROVIDE (__etext = .);}
-+  ${RELOCATING+PROVIDE (_etext = .);}
-+  ${RELOCATING+PROVIDE (etext = .);}
-+
-+  /* Force a new section by skipping a page */
-+  . = ALIGN(${MAXPAGESIZE}) + ${MAXPAGESIZE};
-+
-+  ${WRITABLE_RODATA-${RODATA}}
-+  .rodata1      ${RELOCATING-0} : { *(.rodata1) }
-+  ${CREATE_SHLIB-${SDATA2}}
-+  ${CREATE_SHLIB-${SBSS2}}
-+  ${OTHER_READONLY_SECTIONS}
-+  .eh_frame_hdr : { *(.eh_frame_hdr) }
-+
-+  /* Adjust the address for the data segment.  We want to adjust up to
-+     the same address within the page on the next page up.  */
+   ${WRITABLE_RODATA-${RODATA}}
+   .rodata1      ${RELOCATING-0} : { *(.rodata1) }
+   ${CREATE_SHLIB-${SDATA2}}
+   ${CREATE_SHLIB-${SBSS2}}
+   ${OTHER_READONLY_SECTIONS}
+   .eh_frame_hdr : { *(.eh_frame_hdr) }
+-  .eh_frame     ${RELOCATING-0} : ONLY_IF_RO { KEEP (*(.eh_frame)) }
+-  .gcc_except_table ${RELOCATING-0} : ONLY_IF_RO { KEEP (*(.gcc_except_table)) *(.gcc_except_table.*) }
+ 
+   /* Adjust the address for the data segment.  We want to adjust up to
+      the same address within the page on the next page up.  */
+-  ${CREATE_SHLIB-${CREATE_PIE-${RELOCATING+. = ${DATA_ADDR-${DATA_SEGMENT_ALIGN}};}}}
 +  ${CREATE_SHLIB-${RELOCATING+. = ${DATA_ADDR-${DATA_SEGMENT_ALIGN}};}}
-+  ${CREATE_SHLIB+${RELOCATING+. = ${SHLIB_DATA_ADDR-${DATA_SEGMENT_ALIGN}};}}
-+
+   ${CREATE_SHLIB+${RELOCATING+. = ${SHLIB_DATA_ADDR-${DATA_SEGMENT_ALIGN}};}}
+-  ${CREATE_PIE+${RELOCATING+. = ${SHLIB_DATA_ADDR-${DATA_SEGMENT_ALIGN}};}}
+-
+-  /* Exception handling  */
+-  .eh_frame     ${RELOCATING-0} : ONLY_IF_RW { KEEP (*(.eh_frame)) }
+-  .gcc_except_table ${RELOCATING-0} : ONLY_IF_RW { KEEP (*(.gcc_except_table)) *(.gcc_except_table.*) }
+-
+-  /* Thread Local Storage sections  */
+-  .tdata	${RELOCATING-0} : { *(.tdata${RELOCATING+ .tdata.* .gnu.linkonce.td.*}) }
+-  .tbss		${RELOCATING-0} : { *(.tbss${RELOCATING+ .tbss.* .gnu.linkonce.tb.*})${RELOCATING+ *(.tcommon)} }
+-
+-  .preinit_array   ${RELOCATING-0} : { KEEP (*(.preinit_array)) }
+-  .init_array   ${RELOCATING-0} : { KEEP (*(.init_array)) }
+-  .fini_array   ${RELOCATING-0} : { KEEP (*(.fini_array)) }
+ 
+-  ${SMALL_DATA_CTOR-${RELOCATING+${CTOR}}}
+-  ${SMALL_DATA_DTOR-${RELOCATING+${DTOR}}}
+-  .jcr          ${RELOCATING-0} : { KEEP (*(.jcr)) }
 +  /* Ensure the __preinit_array_start label is properly aligned.  We
 +     could instead move the label definition inside the section, but
 +     the linker would then create the section even if it turns out to
@@ -25145,278 +24818,173 @@ index 0000000..b8248cd
 +  ${RELOCATING+${CREATE_SHLIB-PROVIDE (__preinit_array_start = .);}}
 +  .preinit_array   ${RELOCATING-0} : { *(.preinit_array) }
 +  ${RELOCATING+${CREATE_SHLIB-PROVIDE (__preinit_array_end = .);}}
-+
+ 
+-  ${RELOCATING+${DATARELRO}}
+-  ${OTHER_RELRO_SECTIONS}
+-  ${TEXT_DYNAMIC-${DYNAMIC}}
+-  ${NO_SMALL_DATA+${RELRO_NOW+${GOT}}}
+-  ${NO_SMALL_DATA+${RELRO_NOW-${SEPARATE_GOTPLT+${GOT}}}}
+-  ${NO_SMALL_DATA+${RELRO_NOW-${SEPARATE_GOTPLT+${GOTPLT}}}}
+-  ${RELOCATING+${DATA_SEGMENT_RELRO_END}}
+-  ${NO_SMALL_DATA+${RELRO_NOW-${SEPARATE_GOTPLT-${GOT}}}}
 +  ${RELOCATING+${CREATE_SHLIB-PROVIDE (__init_array_start = .);}}
 +  .init_array   ${RELOCATING-0} : { *(.init_array) }
 +  ${RELOCATING+${CREATE_SHLIB-PROVIDE (__init_array_end = .);}}
-+
+ 
+-  ${DATA_PLT+${PLT_BEFORE_GOT-${PLT}}}
 +  ${RELOCATING+${CREATE_SHLIB-PROVIDE (__fini_array_start = .);}}
 +  .fini_array   ${RELOCATING-0} : { *(.fini_array) }
 +  ${RELOCATING+${CREATE_SHLIB-PROVIDE (__fini_array_end = .);}}
-+
-+  .data         ${RELOCATING-0} :
-+  {
-+    ${RELOCATING+${DATA_START_SYMBOLS}}
-+    *(.data${RELOCATING+ .data.* .gnu.linkonce.d.*})
-+    ${CONSTRUCTING+SORT(CONSTRUCTORS)}
-+  }
-+  .data1        ${RELOCATING-0} : { *(.data1) }
+ 
+   .data         ${RELOCATING-0} :
+   {
+@@ -362,14 +318,22 @@ cat <<EOF
+     ${CONSTRUCTING+SORT(CONSTRUCTORS)}
+   }
+   .data1        ${RELOCATING-0} : { *(.data1) }
 +  .tdata	${RELOCATING-0} : { *(.tdata${RELOCATING+ .tdata.* .gnu.linkonce.td.*}) }
 +  .tbss		${RELOCATING-0} : { *(.tbss${RELOCATING+ .tbss.* .gnu.linkonce.tb.*})${RELOCATING+ *(.tcommon)} }
 +  .eh_frame     ${RELOCATING-0} : { KEEP (*(.eh_frame)) }
 +  .gcc_except_table ${RELOCATING-0} : { *(.gcc_except_table) }
-+  ${WRITABLE_RODATA+${RODATA}}
-+  ${OTHER_READWRITE_SECTIONS}
+   ${WRITABLE_RODATA+${RODATA}}
+   ${OTHER_READWRITE_SECTIONS}
+-  ${SMALL_DATA_CTOR+${RELOCATING+${CTOR}}}
+-  ${SMALL_DATA_DTOR+${RELOCATING+${DTOR}}}
+-  ${DATA_PLT+${PLT_BEFORE_GOT+${PLT}}}
 +  ${TEXT_DYNAMIC-${DYNAMIC}}
 +  ${RELOCATING+${CTOR}}
 +  ${RELOCATING+${DTOR}}
 +  .jcr          ${RELOCATING-0} : { KEEP (*(.jcr)) }
 +  ${DATA_PLT+${PLT}}
-+  ${RELOCATING+${OTHER_GOT_SYMBOLS}}
+   ${RELOCATING+${OTHER_GOT_SYMBOLS}}
+-  ${NO_SMALL_DATA-${GOT}}
 +  .got          ${RELOCATING-0} : { *(.got.plt) *(.got) }
-+  ${OTHER_GOT_SECTIONS}
+   ${OTHER_GOT_SECTIONS}
 +  ${CREATE_SHLIB+${SDATA2}}
 +  ${CREATE_SHLIB+${SBSS2}}
-+  ${SDATA}
-+  ${OTHER_SDATA_SECTIONS}
-+  ${RELOCATING+_edata = .;}
-+  ${RELOCATING+PROVIDE (edata = .);}
-+  ${RELOCATING+__bss_start = .;}
-+  ${RELOCATING+${OTHER_BSS_SYMBOLS}}
-+  ${SBSS}
-+  ${BSS_PLT+${PLT}}
-+  .bss          ${RELOCATING-0} :
-+  {
-+   *(.dynbss)
-+   *(.bss${RELOCATING+ .bss.* .gnu.linkonce.b.*})
-+   *(COMMON)
-+   /* Align here to ensure that the .bss section occupies space up to
-+      _end.  Align after .bss to ensure correct alignment even if the
-+      .bss section disappears because there are no input sections.  */
-+   ${RELOCATING+. = ALIGN(${ALIGNMENT});}
-+  }
-+  ${OTHER_BSS_SECTIONS}
-+  ${RELOCATING+. = ALIGN(${ALIGNMENT});}
-+  ${RELOCATING+_end = .;}
-+  ${RELOCATING+${OTHER_BSS_END_SYMBOLS}}
-+  ${RELOCATING+PROVIDE (end = .);}
-+  ${RELOCATING+${DATA_SEGMENT_END}}
-+
-+  /* Stabs debugging sections.  */
-+  .stab          0 : { *(.stab) }
-+  .stabstr       0 : { *(.stabstr) }
-+  .stab.excl     0 : { *(.stab.excl) }
-+  .stab.exclstr  0 : { *(.stab.exclstr) }
-+  .stab.index    0 : { *(.stab.index) }
-+  .stab.indexstr 0 : { *(.stab.indexstr) }
-+
-+  .comment       0 : { *(.comment) }
-+
-+  /* DWARF debug sections.
-+     Symbols in the DWARF debugging sections are relative to the beginning
-+     of the section so we begin them at 0.  */
-+
-+  /* DWARF 1 */
-+  .debug          0 : { *(.debug) }
-+  .line           0 : { *(.line) }
-+
-+  /* GNU DWARF 1 extensions */
-+  .debug_srcinfo  0 : { *(.debug_srcinfo) }
-+  .debug_sfnames  0 : { *(.debug_sfnames) }
-+
-+  /* DWARF 1.1 and DWARF 2 */
-+  .debug_aranges  0 : { *(.debug_aranges) }
-+  .debug_pubnames 0 : { *(.debug_pubnames) }
-+
-+  /* DWARF 2 */
-+  .debug_info     0 : { *(.debug_info .gnu.linkonce.wi.*) }
-+  .debug_abbrev   0 : { *(.debug_abbrev) }
-+  .debug_line     0 : { *(.debug_line) }
-+  .debug_frame    0 : { *(.debug_frame) }
-+  .debug_str      0 : { *(.debug_str) }
-+  .debug_loc      0 : { *(.debug_loc) }
-+  .debug_macinfo  0 : { *(.debug_macinfo) }
-+
-+  /* SGI/MIPS DWARF 2 extensions */
-+  .debug_weaknames 0 : { *(.debug_weaknames) }
-+  .debug_funcnames 0 : { *(.debug_funcnames) }
-+  .debug_typenames 0 : { *(.debug_typenames) }
-+  .debug_varnames  0 : { *(.debug_varnames) }
-+
-+  ${STACK_ADDR+${STACK}}
-+  ${OTHER_SECTIONS}
-+  ${RELOCATING+${OTHER_END_SYMBOLS}}
+   ${SDATA}
+   ${OTHER_SDATA_SECTIONS}
+   ${RELOCATING+_edata = .;}
+@@ -436,16 +400,13 @@ cat <<EOF
+   .debug_typenames 0 : { *(.debug_typenames) }
+   .debug_varnames  0 : { *(.debug_varnames) }
+ 
+-  /* DWARF 3 */
+-  .debug_pubtypes 0 : { *(.debug_pubtypes) }
+-  .debug_ranges   0 : { *(.debug_ranges) }
+-
+-  /* DWARF Extension.  */
+-  .debug_macro    0 : { *(.debug_macro) } 
+-
+   ${STACK_ADDR+${STACK}}
+   ${OTHER_SECTIONS}
+   ${RELOCATING+${OTHER_END_SYMBOLS}}
+-  ${RELOCATING+${DISCARDED}}
 +
 +  /* Libnix sections */
 +  .libnix___INIT_LIST__ ${RELOCATING-0} : { *(.libnix___INIT_LIST__) }
 +  .libnix___EXIT_LIST__ ${RELOCATING-0} : { *(.libnix___EXIT_LIST__) }
 +  .libnix___LIB_LIST__  ${RELOCATING-0} : { *(.libnix___LIB_LIST__)  }
-+}
-+EOF
-diff --git a/ld/scripttempl/morphos.sc b/ld/scripttempl/morphos.sc
-new file mode 100644
-index 0000000..469a8f5
---- /dev/null
+ }
+ EOF
+diff --git a/ld/scripttempl/elfi370.sc b/ld/scripttempl/morphos.sc
+similarity index 88%
+copy from ld/scripttempl/elfi370.sc
+copy to ld/scripttempl/morphos.sc
+index a845b29..469a8f5 100644
+--- a/ld/scripttempl/elfi370.sc
 +++ b/ld/scripttempl/morphos.sc
-@@ -0,0 +1,232 @@
-+#
-+# Unusual variables checked by this code:
+@@ -1,14 +1,11 @@
+ #
+-# This is just a raw copy of elfppc.sc and has not been otherwise modified
+-#
+ # Unusual variables checked by this code:
+-#	NOP - four byte opcode for no-op (defaults to 0)
 +#	NOP - two byte opcode for no-op (defaults to 0)
-+#	DATA_ADDR - if end-of-text-plus-one-page isn't right for data start
-+#	OTHER_READONLY_SECTIONS - other than .text .init .rodata ...
-+#		(e.g., .PARISC.milli)
-+#	OTHER_READWRITE_SECTIONS - other than .data .bss .ctors .sdata ...
-+#		(e.g., .PARISC.global)
-+#	OTHER_SECTIONS - at the end
-+#	EXECUTABLE_SYMBOLS - symbols that must be defined for an
-+#		executable (e.g., _DYNAMIC_LINK)
-+#	TEXT_START_SYMBOLS - symbols that appear at the start of the
-+#		.text section.
-+#	DATA_START_SYMBOLS - symbols that appear at the start of the
-+#		.data section.
-+#	OTHER_BSS_SYMBOLS - symbols that appear at the start of the
-+#		.bss section besides __bss_start.
-+#
-+# When adding sections, do note that the names of some sections are used
-+# when specifying the start address of the next.
-+#
-+test -z "${BIG_OUTPUT_FORMAT}" && BIG_OUTPUT_FORMAT=${OUTPUT_FORMAT}
-+test -z "${LITTLE_OUTPUT_FORMAT}" && LITTLE_OUTPUT_FORMAT=${OUTPUT_FORMAT}
-+test "$LD_FLAG" = "N" && DATA_ADDR=.
-+SBSS2=".sbss2 ${RELOCATING-0} : { *(.sbss2) }"
-+SDATA2=".sdata2 ${RELOCATING-0} : { *(.sdata2) }"
-+INTERP=".interp ${RELOCATING-0} : { *(.interp) }"
-+PLT=".plt ${RELOCATING-0} : { *(.plt) }"
-+cat <<EOF
-+OUTPUT_FORMAT("${OUTPUT_FORMAT}", "${BIG_OUTPUT_FORMAT}",
-+	      "${LITTLE_OUTPUT_FORMAT}")
-+OUTPUT_ARCH(${ARCH})
-+
-+${RELOCATING+${LIB_SEARCH_DIRS}}
-+${RELOCATING+/* Do we need any of these for elf?
-+   __DYNAMIC = 0; ${STACKZERO+${STACKZERO}} ${SHLIB_PATH+${SHLIB_PATH}}  */}
-+${RELOCATING+${EXECUTABLE_SYMBOLS}}
-+${RELOCATING- /* For some reason, the Solaris linker makes bad executables
-+  if gld -r is used and the intermediate file has sections starting
-+  at non-zero addresses.  Could be a Solaris ld bug, could be a GNU ld
-+  bug.  But for now assigning the zero vmas works.  */}
-+
-+${RELOCATING+PROVIDE (__stack = 0);}
+ #	DATA_ADDR - if end-of-text-plus-one-page isn't right for data start
+ #	OTHER_READONLY_SECTIONS - other than .text .init .rodata ...
+ #		(e.g., .PARISC.milli)
+ #	OTHER_READWRITE_SECTIONS - other than .data .bss .ctors .sdata ...
+ #		(e.g., .PARISC.global)
+-#	ATTRS_SECTIONS - at the end
+ #	OTHER_SECTIONS - at the end
+ #	EXECUTABLE_SYMBOLS - symbols that must be defined for an
+ #		executable (e.g., _DYNAMIC_LINK)
+@@ -22,10 +19,8 @@
+ # When adding sections, do note that the names of some sections are used
+ # when specifying the start address of the next.
+ #
+-test -z "$ENTRY" && ENTRY=_start
+ test -z "${BIG_OUTPUT_FORMAT}" && BIG_OUTPUT_FORMAT=${OUTPUT_FORMAT}
+ test -z "${LITTLE_OUTPUT_FORMAT}" && LITTLE_OUTPUT_FORMAT=${OUTPUT_FORMAT}
+-test -z "$ATTRS_SECTIONS" && ATTRS_SECTIONS=".gnu.attributes 0 : { KEEP (*(.gnu.attributes)) }"
+ test "$LD_FLAG" = "N" && DATA_ADDR=.
+ SBSS2=".sbss2 ${RELOCATING-0} : { *(.sbss2) }"
+ SDATA2=".sdata2 ${RELOCATING-0} : { *(.sdata2) }"
+@@ -35,7 +30,6 @@ cat <<EOF
+ OUTPUT_FORMAT("${OUTPUT_FORMAT}", "${BIG_OUTPUT_FORMAT}",
+ 	      "${LITTLE_OUTPUT_FORMAT}")
+ OUTPUT_ARCH(${ARCH})
+-${RELOCATING+ENTRY(${ENTRY})}
+ 
+ ${RELOCATING+${LIB_SEARCH_DIRS}}
+ ${RELOCATING+/* Do we need any of these for elf?
+@@ -47,6 +41,7 @@ ${RELOCATING- /* For some reason, the Solaris linker makes bad executables
+   bug.  But for now assigning the zero vmas works.  */}
+ 
+ ${RELOCATING+PROVIDE (__stack = 0);}
 +PROVIDE (__machtype = 0x1);
-+SECTIONS
-+{
-+  /* Read-only sections, merged into text segment: */
-+  ${CREATE_SHLIB-${RELOCATING+. = ${TEXT_START_ADDR} + SIZEOF_HEADERS;}}
-+  ${CREATE_SHLIB+${RELOCATING+. = SIZEOF_HEADERS;}}
-+  ${CREATE_SHLIB-${INTERP}}
-+  .hash		${RELOCATING-0} : { *(.hash)		}
-+  .dynsym	${RELOCATING-0} : { *(.dynsym)		}
-+  .dynstr	${RELOCATING-0} : { *(.dynstr)		}
-+  .gnu.version ${RELOCATING-0} : { *(.gnu.version)      }
-+  .gnu.version_d ${RELOCATING-0} : { *(.gnu.version_d)  }
-+  .gnu.version_r ${RELOCATING-0} : { *(.gnu.version_r)  }
-+  .rela.text   ${RELOCATING-0} :
-+    { *(.rela.text) *(.rela.gnu.linkonce.t*) }
-+  .rela.data   ${RELOCATING-0} :
-+    { *(.rela.data) *(.rela.gnu.linkonce.d*) }
-+  .rela.rodata ${RELOCATING-0} :
-+    { *(.rela.rodata) *(.rela.gnu.linkonce.r*) }
-+  .rela.got	${RELOCATING-0} : { *(.rela.got)	}
-+  .rela.got1	${RELOCATING-0} : { *(.rela.got1)	}
-+  .rela.got2	${RELOCATING-0} : { *(.rela.got2)	}
-+  .rela.ctors	${RELOCATING-0} : { *(.rela.ctors)	}
-+  .rela.dtors	${RELOCATING-0} : { *(.rela.dtors)	}
-+  .rela.init	${RELOCATING-0} : { *(.rela.init)	}
-+  .rela.fini	${RELOCATING-0} : { *(.rela.fini)	}
-+  .rela.bss	${RELOCATING-0} : { *(.rela.bss)	}
-+  .rela.plt	${RELOCATING-0} : { *(.rela.plt)	}
-+  .rela.sdata	${RELOCATING-0} : { *(.rela.sdata)	}
-+  .rela.sbss	${RELOCATING-0} : { *(.rela.sbss)	}
-+  .rela.sdata2	${RELOCATING-0} : { *(.rela.sdata2)	}
-+  .rela.sbss2	${RELOCATING-0} : { *(.rela.sbss2)	}
-+  .text    ${RELOCATING-0} :
-+  {
+ SECTIONS
+ {
+   /* Read-only sections, merged into text segment: */
+@@ -80,12 +75,15 @@ SECTIONS
+   .rela.sbss2	${RELOCATING-0} : { *(.rela.sbss2)	}
+   .text    ${RELOCATING-0} :
+   {
 +    PROVIDE (__text_start = .);
-+    ${RELOCATING+${TEXT_START_SYMBOLS}}
-+    *(.text)
-+    /* .gnu.warning sections are handled specially by elf32.em.  */
-+    *(.gnu.warning)
-+    *(.gnu.linkonce.t*)
+     ${RELOCATING+${TEXT_START_SYMBOLS}}
+     *(.text)
+     /* .gnu.warning sections are handled specially by elf32.em.  */
+     *(.gnu.warning)
+     *(.gnu.linkonce.t*)
 +    PROVIDE (__text_end = .);
-+  } =${NOP-0}
+   } =${NOP-0}
 +  PROVIDE (__text_size = SIZEOF(.text));
-+  .init		${RELOCATING-0} : { *(.init)		} =${NOP-0}
-+  .fini		${RELOCATING-0} : { *(.fini)		} =${NOP-0}
-+  .rodata	${RELOCATING-0} : { *(.rodata) *(.gnu.linkonce.r*) }
-+  .rodata1	${RELOCATING-0} : { *(.rodata1) }
-+  ${RELOCATING+_etext = .;}
-+  ${RELOCATING+PROVIDE (etext = .);}
-+  ${CREATE_SHLIB-${SDATA2}}
-+  ${CREATE_SHLIB-${SBSS2}}
+   .init		${RELOCATING-0} : { *(.init)		} =${NOP-0}
+   .fini		${RELOCATING-0} : { *(.fini)		} =${NOP-0}
+   .rodata	${RELOCATING-0} : { *(.rodata) *(.gnu.linkonce.r*) }
+@@ -94,7 +92,7 @@ SECTIONS
+   ${RELOCATING+PROVIDE (etext = .);}
+   ${CREATE_SHLIB-${SDATA2}}
+   ${CREATE_SHLIB-${SBSS2}}
+-  ${OTHER_READONLY_SECTIONS}
 +  ${RELOCATING+${OTHER_READONLY_SECTIONS}}
-+
-+  /* Adjust the address for the data segment.  We want to adjust up to
-+     the same address within the page on the next page up.  It would
-+     be more correct to do this:
-+       ${RELOCATING+. = ${DATA_ADDR-ALIGN(${MAXPAGESIZE}) + (ALIGN(8) & (${MAXPAGESIZE} - 1))};}
-+     The current expression does not correctly handle the case of a
-+     text segment ending precisely at the end of a page; it causes the
-+     data segment to skip a page.  The above expression does not have
-+     this problem, but it will currently (2/95) cause BFD to allocate
-+     a single segment, combining both text and data, for this case.
-+     This will prevent the text segment from being shared among
-+     multiple executions of the program; I think that is more
-+     important than losing a page of the virtual address space (note
-+     that no actual memory is lost; the page which is skipped can not
-+     be referenced).  */
-+  ${RELOCATING+. = ${DATA_ADDR- ALIGN(8) + ${MAXPAGESIZE}};}
-+
-+  .data  ${RELOCATING-0} :
-+  {
+ 
+   /* Adjust the address for the data segment.  We want to adjust up to
+      the same address within the page on the next page up.  It would
+@@ -114,13 +112,16 @@ SECTIONS
+ 
+   .data  ${RELOCATING-0} :
+   {
 +    PROVIDE (__data_start = .);
-+    ${RELOCATING+${DATA_START_SYMBOLS}}
-+    *(.data)
-+    *(.gnu.linkonce.d*)
-+    ${CONSTRUCTING+CONSTRUCTORS}
+     ${RELOCATING+${DATA_START_SYMBOLS}}
+     *(.data)
+     *(.gnu.linkonce.d*)
+     ${CONSTRUCTING+CONSTRUCTORS}
 +    PROVIDE (__data_end = .);
-+  }
+   }
 +  PROVIDE (__data_size = SIZEOF(.data));
-+  .data1 ${RELOCATING-0} : { *(.data1) }
+   .data1 ${RELOCATING-0} : { *(.data1) }
+-  ${OTHER_READWRITE_SECTIONS}
 +  ${RELOCATING+${OTHER_READWRITE_SECTIONS}}
-+
-+  .got1		${RELOCATING-0} : { *(.got1) }
-+  .dynamic	${RELOCATING-0} : { *(.dynamic) }
-+
-+  /* Put .ctors and .dtors next to the .got2 section, so that the pointers
-+     get relocated with -mrelocatable. Also put in the .fixup pointers.
-+     The current compiler no longer needs this, but keep it around for 2.7.2  */
-+
-+		${RELOCATING+PROVIDE (_GOT2_START_ = .);}
-+  .got2		${RELOCATING-0} :  { *(.got2) }
-+
-+		${RELOCATING+PROVIDE (__CTOR_LIST__ = .);}
-+  .ctors	${RELOCATING-0} : { *(.ctors) }
-+		${RELOCATING+PROVIDE (__CTOR_END__ = .);}
-+
-+		${RELOCATING+PROVIDE (__DTOR_LIST__ = .);}
-+  .dtors	${RELOCATING-0} : { *(.dtors) }
-+		${RELOCATING+PROVIDE (__DTOR_END__ = .);}
-+
-+		${RELOCATING+PROVIDE (_FIXUP_START_ = .);}
-+  .fixup	${RELOCATING-0} : { *(.fixup) }
-+		${RELOCATING+PROVIDE (_FIXUP_END_ = .);}
-+		${RELOCATING+PROVIDE (_GOT2_END_ = .);}
-+
-+		${RELOCATING+PROVIDE (_GOT_START_ = .);}
-+  .got		${RELOCATING-0} : { *(.got) }
-+  .got.plt	${RELOCATING-0} : { *(.got.plt) }
-+  ${CREATE_SHLIB+${SDATA2}}
-+  ${CREATE_SHLIB+${SBSS2}}
-+		${RELOCATING+PROVIDE (_GOT_END_ = .);}
-+
-+  /* We want the small data sections together, so single-instruction offsets
-+     can access them all, and initialized data all before uninitialized, so
-+     we can shorten the on-disk segment size.  */
+ 
+   .got1		${RELOCATING-0} : { *(.got1) }
+   .dynamic	${RELOCATING-0} : { *(.dynamic) }
+@@ -155,26 +156,37 @@ SECTIONS
+   /* We want the small data sections together, so single-instruction offsets
+      can access them all, and initialized data all before uninitialized, so
+      we can shorten the on-disk segment size.  */
+-  .sdata	${RELOCATING-0} : { *(.sdata) }
 +  .sdata	${RELOCATING-0} :
 +  {
 +    PROVIDE (__sdata_start = .);
@@ -25425,20 +24993,27 @@ index 0000000..469a8f5
 +    PROVIDE (__sdata_end = .);
 +  }
 +  PROVIDE (__sdata_size = SIZEOF(.sdata));
-+  ${RELOCATING+_edata  =  .;}
-+  ${RELOCATING+PROVIDE (edata = .);}
-+  .sbss    ${RELOCATING-0} :
-+  {
+   ${RELOCATING+_edata  =  .;}
+   ${RELOCATING+PROVIDE (edata = .);}
+   .sbss    ${RELOCATING-0} :
+   {
+-    ${RELOCATING+PROVIDE (__sbss_start = .);}
 +    PROVIDE (__sbss_start = .);
-+    *(.sbss)
-+    *(.scommon)
-+    *(.dynsbss)
+     *(.sbss)
+     *(.scommon)
+     *(.dynsbss)
+-    ${RELOCATING+PROVIDE (__sbss_end = .);}
 +    PROVIDE (__sbss_end = .);
-+  }
+   }
 +  PROVIDE (__sbss_size = SIZEOF(.sbss));
-+  ${PLT}
-+  .bss     ${RELOCATING-0} :
-+  {
+   ${PLT}
+   .bss     ${RELOCATING-0} :
+   {
+-   ${RELOCATING+${OTHER_BSS_SYMBOLS}}
+-   ${RELOCATING+PROVIDE (__bss_start = .);}
+-   *(.dynbss)
+-   *(.bss)
+-   *(COMMON)
 +    PROVIDE (__bss_start = .);
 +    ${RELOCATING+${OTHER_BSS_SYMBOLS}}
 +    ${RELOCATING+PROVIDE (__bss_start = .);}
@@ -25446,123 +25021,105 @@ index 0000000..469a8f5
 +    *(.bss)
 +    *(COMMON)
 +    PROVIDE (__bss_end = .);
-+  }
+   }
 +  PROVIDE (__bss_size = SIZEOF(.bss));
-+  ${RELOCATING+_end = . ;}
-+  ${RELOCATING+PROVIDE (end = .);}
-+
-+  /* These are needed for ELF backends which have not yet been
-+     converted to the new style linker.  */
-+  .stab 0 : { *(.stab) }
-+  .stabstr 0 : { *(.stabstr) }
-+
-+  /* DWARF debug sections.
-+     Symbols in the DWARF debugging sections are relative to the beginning
-+     of the section so we begin them at 0.  */
-+
-+  /* DWARF 1 */
-+  .debug          0 : { *(.debug) }
-+  .line           0 : { *(.line) }
-+
-+  /* GNU DWARF 1 extensions */
-+  .debug_srcinfo  0 : { *(.debug_srcinfo) }
-+  .debug_sfnames  0 : { *(.debug_sfnames) }
-+
-+  /* DWARF 1.1 and DWARF 2 */
-+  .debug_aranges  0 : { *(.debug_aranges) }
-+  .debug_pubnames 0 : { *(.debug_pubnames) }
-+
-+  /* DWARF 2 */
+   ${RELOCATING+_end = . ;}
+   ${RELOCATING+PROVIDE (end = .);}
+ 
+@@ -200,7 +212,7 @@ SECTIONS
+   .debug_pubnames 0 : { *(.debug_pubnames) }
+ 
+   /* DWARF 2 */
+-  .debug_info     0 : { *(.debug_info) *(.gnu.linkonce.wi.*) }
 +  .debug_info     0 : { *(.debug_info) }
-+  .debug_abbrev   0 : { *(.debug_abbrev) }
-+  .debug_line     0 : { *(.debug_line) }
-+  .debug_frame    0 : { *(.debug_frame) }
-+  .debug_str      0 : { *(.debug_str) }
-+  .debug_loc      0 : { *(.debug_loc) }
-+  .debug_macinfo  0 : { *(.debug_macinfo) }
-+
-+  /* SGI/MIPS DWARF 2 extensions */
-+  .debug_weaknames 0 : { *(.debug_weaknames) }
-+  .debug_funcnames 0 : { *(.debug_funcnames) }
-+  .debug_typenames 0 : { *(.debug_typenames) }
-+  .debug_varnames  0 : { *(.debug_varnames) }
-+
+   .debug_abbrev   0 : { *(.debug_abbrev) }
+   .debug_line     0 : { *(.debug_line) }
+   .debug_frame    0 : { *(.debug_frame) }
+@@ -214,14 +226,7 @@ SECTIONS
+   .debug_typenames 0 : { *(.debug_typenames) }
+   .debug_varnames  0 : { *(.debug_varnames) }
+ 
+-  /* DWARF 3 */
+-  .debug_pubtypes 0 : { *(.debug_pubtypes) }
+-  .debug_ranges   0 : { *(.debug_ranges) }
+-
+-  /* DWARF Extension.  */
+-  .debug_macro    0 : { *(.debug_macro) } 
+-  
+-  ${ATTRS_SECTIONS}
 +  /* These must appear regardless of ${RELOCATING}.  */
-+  ${OTHER_SECTIONS}
-+}
-+EOF
-diff --git a/ld/scripttempl/morphos_baserel.sc b/ld/scripttempl/morphos_baserel.sc
-new file mode 100644
-index 0000000..4f0f4ab
---- /dev/null
+   ${OTHER_SECTIONS}
+ }
+ EOF
+diff --git a/ld/scripttempl/elfi370.sc b/ld/scripttempl/morphos_baserel.sc
+similarity index 69%
+copy from ld/scripttempl/elfi370.sc
+copy to ld/scripttempl/morphos_baserel.sc
+index a845b29..4f0f4ab 100644
+--- a/ld/scripttempl/elfi370.sc
 +++ b/ld/scripttempl/morphos_baserel.sc
-@@ -0,0 +1,199 @@
-+#
-+# Unusual variables checked by this code:
+@@ -1,14 +1,11 @@
+ #
+-# This is just a raw copy of elfppc.sc and has not been otherwise modified
+-#
+ # Unusual variables checked by this code:
+-#	NOP - four byte opcode for no-op (defaults to 0)
 +#	NOP - two byte opcode for no-op (defaults to 0)
-+#	DATA_ADDR - if end-of-text-plus-one-page isn't right for data start
-+#	OTHER_READONLY_SECTIONS - other than .text .init .rodata ...
-+#		(e.g., .PARISC.milli)
-+#	OTHER_READWRITE_SECTIONS - other than .data .bss .ctors .sdata ...
-+#		(e.g., .PARISC.global)
-+#	OTHER_SECTIONS - at the end
-+#	EXECUTABLE_SYMBOLS - symbols that must be defined for an
-+#		executable (e.g., _DYNAMIC_LINK)
-+#	TEXT_START_SYMBOLS - symbols that appear at the start of the
-+#		.text section.
-+#	DATA_START_SYMBOLS - symbols that appear at the start of the
-+#		.data section.
-+#	OTHER_BSS_SYMBOLS - symbols that appear at the start of the
-+#		.bss section besides __bss_start.
-+#
-+# When adding sections, do note that the names of some sections are used
-+# when specifying the start address of the next.
-+#
-+test -z "${BIG_OUTPUT_FORMAT}" && BIG_OUTPUT_FORMAT=${OUTPUT_FORMAT}
-+test -z "${LITTLE_OUTPUT_FORMAT}" && LITTLE_OUTPUT_FORMAT=${OUTPUT_FORMAT}
-+test "$LD_FLAG" = "N" && DATA_ADDR=.
-+SBSS2=".sbss2 ${RELOCATING-0} : { *(.sbss2) }"
-+SDATA2=".sdata2 ${RELOCATING-0} : { *(.sdata2) }"
-+INTERP=".interp ${RELOCATING-0} : { *(.interp) }"
-+PLT=".plt ${RELOCATING-0} : { *(.plt) }"
-+cat <<EOF
-+OUTPUT_FORMAT("${OUTPUT_FORMAT}", "${BIG_OUTPUT_FORMAT}",
-+	      "${LITTLE_OUTPUT_FORMAT}")
-+OUTPUT_ARCH(${ARCH})
-+
-+${RELOCATING+${LIB_SEARCH_DIRS}}
-+${RELOCATING+/* Do we need any of these for elf?
-+   __DYNAMIC = 0; ${STACKZERO+${STACKZERO}} ${SHLIB_PATH+${SHLIB_PATH}}  */}
-+${RELOCATING+${EXECUTABLE_SYMBOLS}}
-+${RELOCATING- /* For some reason, the Solaris linker makes bad executables
-+  if gld -r is used and the intermediate file has sections starting
-+  at non-zero addresses.  Could be a Solaris ld bug, could be a GNU ld
-+  bug.  But for now assigning the zero vmas works.  */}
-+
-+${RELOCATING+PROVIDE (__stack = 0);}
+ #	DATA_ADDR - if end-of-text-plus-one-page isn't right for data start
+ #	OTHER_READONLY_SECTIONS - other than .text .init .rodata ...
+ #		(e.g., .PARISC.milli)
+ #	OTHER_READWRITE_SECTIONS - other than .data .bss .ctors .sdata ...
+ #		(e.g., .PARISC.global)
+-#	ATTRS_SECTIONS - at the end
+ #	OTHER_SECTIONS - at the end
+ #	EXECUTABLE_SYMBOLS - symbols that must be defined for an
+ #		executable (e.g., _DYNAMIC_LINK)
+@@ -22,10 +19,8 @@
+ # When adding sections, do note that the names of some sections are used
+ # when specifying the start address of the next.
+ #
+-test -z "$ENTRY" && ENTRY=_start
+ test -z "${BIG_OUTPUT_FORMAT}" && BIG_OUTPUT_FORMAT=${OUTPUT_FORMAT}
+ test -z "${LITTLE_OUTPUT_FORMAT}" && LITTLE_OUTPUT_FORMAT=${OUTPUT_FORMAT}
+-test -z "$ATTRS_SECTIONS" && ATTRS_SECTIONS=".gnu.attributes 0 : { KEEP (*(.gnu.attributes)) }"
+ test "$LD_FLAG" = "N" && DATA_ADDR=.
+ SBSS2=".sbss2 ${RELOCATING-0} : { *(.sbss2) }"
+ SDATA2=".sdata2 ${RELOCATING-0} : { *(.sdata2) }"
+@@ -35,7 +30,6 @@ cat <<EOF
+ OUTPUT_FORMAT("${OUTPUT_FORMAT}", "${BIG_OUTPUT_FORMAT}",
+ 	      "${LITTLE_OUTPUT_FORMAT}")
+ OUTPUT_ARCH(${ARCH})
+-${RELOCATING+ENTRY(${ENTRY})}
+ 
+ ${RELOCATING+${LIB_SEARCH_DIRS}}
+ ${RELOCATING+/* Do we need any of these for elf?
+@@ -47,6 +41,7 @@ ${RELOCATING- /* For some reason, the Solaris linker makes bad executables
+   bug.  But for now assigning the zero vmas works.  */}
+ 
+ ${RELOCATING+PROVIDE (__stack = 0);}
 +PROVIDE (__machtype = 0x1);
-+SECTIONS
-+{
-+  /* Read-only sections, merged into text segment: */
-+  ${CREATE_SHLIB-${RELOCATING+. = ${TEXT_START_ADDR} + SIZEOF_HEADERS;}}
-+  ${CREATE_SHLIB+${RELOCATING+. = SIZEOF_HEADERS;}}
-+  ${CREATE_SHLIB-${INTERP}}
-+  .hash		${RELOCATING-0} : { *(.hash)		}
-+  .dynsym	${RELOCATING-0} : { *(.dynsym)		}
-+  .dynstr	${RELOCATING-0} : { *(.dynstr)		}
-+  .gnu.version ${RELOCATING-0} : { *(.gnu.version)      }
-+  .gnu.version_d ${RELOCATING-0} : { *(.gnu.version_d)  }
-+  .gnu.version_r ${RELOCATING-0} : { *(.gnu.version_r)  }
-+  .rela.text   ${RELOCATING-0} :
-+    { *(.rela.text) *(.rela.gnu.linkonce.t*) }
-+  .rela.got	${RELOCATING-0} : { *(.rela.got)	}
-+  .rela.got1	${RELOCATING-0} : { *(.rela.got1)	}
-+  .rela.got2	${RELOCATING-0} : { *(.rela.got2)	}
-+  .rela.ctors	${RELOCATING-0} : { *(.rela.ctors)	}
-+  .rela.dtors	${RELOCATING-0} : { *(.rela.dtors)	}
-+  .rela.init	${RELOCATING-0} : { *(.rela.init)	}
-+  .rela.fini	${RELOCATING-0} : { *(.rela.fini)	}
-+  .rela.plt	${RELOCATING-0} : { *(.rela.plt)	}
+ SECTIONS
+ {
+   /* Read-only sections, merged into text segment: */
+@@ -61,10 +56,6 @@ SECTIONS
+   .gnu.version_r ${RELOCATING-0} : { *(.gnu.version_r)  }
+   .rela.text   ${RELOCATING-0} :
+     { *(.rela.text) *(.rela.gnu.linkonce.t*) }
+-  .rela.data   ${RELOCATING-0} :
+-    { *(.rela.data) *(.rela.gnu.linkonce.d*) }
+-  .rela.rodata ${RELOCATING-0} :
+-    { *(.rela.rodata) *(.rela.gnu.linkonce.r*) }
+   .rela.got	${RELOCATING-0} : { *(.rela.got)	}
+   .rela.got1	${RELOCATING-0} : { *(.rela.got1)	}
+   .rela.got2	${RELOCATING-0} : { *(.rela.got2)	}
+@@ -72,55 +63,40 @@ SECTIONS
+   .rela.dtors	${RELOCATING-0} : { *(.rela.dtors)	}
+   .rela.init	${RELOCATING-0} : { *(.rela.init)	}
+   .rela.fini	${RELOCATING-0} : { *(.rela.fini)	}
+-  .rela.bss	${RELOCATING-0} : { *(.rela.bss)	}
+   .rela.plt	${RELOCATING-0} : { *(.rela.plt)	}
+-  .rela.sdata	${RELOCATING-0} : { *(.rela.sdata)	}
+-  .rela.sbss	${RELOCATING-0} : { *(.rela.sbss)	}
 +  .rela.rodata  ${RELOCATING-0} :
 +    { *(.rela.rodata) *(.rela.gnu.linkonce.r*) }
 +  .rela.sdata	${RELOCATING-0} :
@@ -25576,60 +25133,69 @@ index 0000000..4f0f4ab
 +    *(.rela.sbss)
 +    *(.rela.bss)
 +  }
-+  .rela.sdata2	${RELOCATING-0} : { *(.rela.sdata2)	}
-+  .rela.sbss2	${RELOCATING-0} : { *(.rela.sbss2)	}
-+  .text    ${RELOCATING-0} :
-+  {
+   .rela.sdata2	${RELOCATING-0} : { *(.rela.sdata2)	}
+   .rela.sbss2	${RELOCATING-0} : { *(.rela.sbss2)	}
+   .text    ${RELOCATING-0} :
+   {
 +    PROVIDE (__text_start = .);
-+    ${RELOCATING+${TEXT_START_SYMBOLS}}
-+    *(.text)
-+    /* .gnu.warning sections are handled specially by elf32.em.  */
-+    *(.gnu.warning)
-+    *(.gnu.linkonce.t*)
+     ${RELOCATING+${TEXT_START_SYMBOLS}}
+     *(.text)
+     /* .gnu.warning sections are handled specially by elf32.em.  */
+     *(.gnu.warning)
+     *(.gnu.linkonce.t*)
 +    PROVIDE (__text_end = .);
-+  } =${NOP-0}
+   } =${NOP-0}
 +  PROVIDE (__text_size = SIZEOF(.text));
-+  .init		${RELOCATING-0} : { *(.init)		} =${NOP-0}
-+  .fini		${RELOCATING-0} : { *(.fini)		} =${NOP-0}
-+  ${RELOCATING+_etext = .;}
-+  ${RELOCATING+PROVIDE (etext = .);}
-+  ${CREATE_SHLIB-${SDATA2}}
-+  ${CREATE_SHLIB-${SBSS2}}
+   .init		${RELOCATING-0} : { *(.init)		} =${NOP-0}
+   .fini		${RELOCATING-0} : { *(.fini)		} =${NOP-0}
+-  .rodata	${RELOCATING-0} : { *(.rodata) *(.gnu.linkonce.r*) }
+-  .rodata1	${RELOCATING-0} : { *(.rodata1) }
+   ${RELOCATING+_etext = .;}
+   ${RELOCATING+PROVIDE (etext = .);}
+   ${CREATE_SHLIB-${SDATA2}}
+   ${CREATE_SHLIB-${SBSS2}}
+-  ${OTHER_READONLY_SECTIONS}
+-
+-  /* Adjust the address for the data segment.  We want to adjust up to
+-     the same address within the page on the next page up.  It would
+-     be more correct to do this:
+-       ${RELOCATING+. = ${DATA_ADDR-ALIGN(${MAXPAGESIZE}) + (ALIGN(8) & (${MAXPAGESIZE} - 1))};}
+-     The current expression does not correctly handle the case of a
+-     text segment ending precisely at the end of a page; it causes the
+-     data segment to skip a page.  The above expression does not have
+-     this problem, but it will currently (2/95) cause BFD to allocate
+-     a single segment, combining both text and data, for this case.
+-     This will prevent the text segment from being shared among
+-     multiple executions of the program; I think that is more
+-     important than losing a page of the virtual address space (note
+-     that no actual memory is lost; the page which is skipped can not
+-     be referenced).  */
+-  ${RELOCATING+. = ${DATA_ADDR- ALIGN(8) + ${MAXPAGESIZE}};}
+-
+-  .data  ${RELOCATING-0} :
+-  {
+-    ${RELOCATING+${DATA_START_SYMBOLS}}
+-    *(.data)
+-    *(.gnu.linkonce.d*)
+-    ${CONSTRUCTING+CONSTRUCTORS}
+-  }
+-  .data1 ${RELOCATING-0} : { *(.data1) }
+-  ${OTHER_READWRITE_SECTIONS}
 +  ${RELOCATING+${OTHER_READONLY_SECTIONS}}
-+
-+  .got1		${RELOCATING-0} : { *(.got1) }
-+  .dynamic	${RELOCATING-0} : { *(.dynamic) }
-+
-+  /* Put .ctors and .dtors next to the .got2 section, so that the pointers
-+     get relocated with -mrelocatable. Also put in the .fixup pointers.
-+     The current compiler no longer needs this, but keep it around for 2.7.2  */
-+
-+		${RELOCATING+PROVIDE (_GOT2_START_ = .);}
-+  .got2		${RELOCATING-0} :  { *(.got2) }
-+
-+		${RELOCATING+PROVIDE (__CTOR_LIST__ = .);}
-+  .ctors	${RELOCATING-0} : { *(.ctors) }
-+		${RELOCATING+PROVIDE (__CTOR_END__ = .);}
-+
-+		${RELOCATING+PROVIDE (__DTOR_LIST__ = .);}
-+  .dtors	${RELOCATING-0} : { *(.dtors) }
-+		${RELOCATING+PROVIDE (__DTOR_END__ = .);}
-+
-+		${RELOCATING+PROVIDE (_FIXUP_START_ = .);}
-+  .fixup	${RELOCATING-0} : { *(.fixup) }
-+		${RELOCATING+PROVIDE (_FIXUP_END_ = .);}
-+		${RELOCATING+PROVIDE (_GOT2_END_ = .);}
-+
-+		${RELOCATING+PROVIDE (_GOT_START_ = .);}
-+  .got		${RELOCATING-0} : { *(.got) }
-+  .got.plt	${RELOCATING-0} : { *(.got.plt) }
-+  ${CREATE_SHLIB+${SDATA2}}
-+  ${CREATE_SHLIB+${SBSS2}}
-+		${RELOCATING+PROVIDE (_GOT_END_ = .);}
+ 
+   .got1		${RELOCATING-0} : { *(.got1) }
+   .dynamic	${RELOCATING-0} : { *(.dynamic) }
+@@ -151,32 +127,35 @@ SECTIONS
+   ${CREATE_SHLIB+${SDATA2}}
+   ${CREATE_SHLIB+${SBSS2}}
+ 		${RELOCATING+PROVIDE (_GOT_END_ = .);}
+-
+-  /* We want the small data sections together, so single-instruction offsets
 +  .rodata	${RELOCATING-0} : { *(.rodata) }
 + /* We want the small data sections together, so single-instruction offsets
-+     can access them all, and initialized data all before uninitialized, so
-+     we can shorten the on-disk segment size.  */
+      can access them all, and initialized data all before uninitialized, so
+      we can shorten the on-disk segment size.  */
+-  .sdata	${RELOCATING-0} : { *(.sdata) }
 +  .sdata	${RELOCATING-0} : 
 +  { 
 +    /*PROVIDE (__sdata_start = .);*/
@@ -25642,60 +25208,60 @@ index 0000000..4f0f4ab
 +    PROVIDE (__sdata_end = .);
 +  }
 +  PROVIDE (__sdata_size = SIZEOF(.sdata));
-+  ${RELOCATING+_edata  =  .;}
-+  ${RELOCATING+PROVIDE (edata = .);}
-+  .sbss    ${RELOCATING-0} :
-+  {
+   ${RELOCATING+_edata  =  .;}
+   ${RELOCATING+PROVIDE (edata = .);}
+   .sbss    ${RELOCATING-0} :
+   {
+-    ${RELOCATING+PROVIDE (__sbss_start = .);}
 +    PROVIDE (__sbss_start = .);
-+    *(.sbss)
-+    *(.scommon)
-+    *(.dynsbss)
+     *(.sbss)
+     *(.scommon)
+     *(.dynsbss)
+-    ${RELOCATING+PROVIDE (__sbss_end = .);}
+-  }
+-  ${PLT}
+-  .bss     ${RELOCATING-0} :
+-  {
+-   ${RELOCATING+${OTHER_BSS_SYMBOLS}}
+-   ${RELOCATING+PROVIDE (__bss_start = .);}
+-   *(.dynbss)
+-   *(.bss)
+-   *(COMMON)
 +    *(.bss)
 +    *(COMMON)
 +    PROVIDE (__sbss_end = .);
-+  }
+   }
+-  ${RELOCATING+_end = . ;}
+-  ${RELOCATING+PROVIDE (end = .);}
 +  PROVIDE (__sbss_size = SIZEOF(.sbss));
-+
-+  /* These are needed for ELF backends which have not yet been
-+     converted to the new style linker.  */
-+  .stab 0 : { *(.stab) }
-+  .stabstr 0 : { *(.stabstr) }
-+
-+  /* DWARF debug sections.
-+     Symbols in the DWARF debugging sections are relative to the beginning
-+     of the section so we begin them at 0.  */
-+
-+  /* DWARF 1 */
-+  .debug          0 : { *(.debug) }
-+  .line           0 : { *(.line) }
-+
-+  /* GNU DWARF 1 extensions */
-+  .debug_srcinfo  0 : { *(.debug_srcinfo) }
-+  .debug_sfnames  0 : { *(.debug_sfnames) }
-+
-+  /* DWARF 1.1 and DWARF 2 */
-+  .debug_aranges  0 : { *(.debug_aranges) }
-+  .debug_pubnames 0 : { *(.debug_pubnames) }
-+
-+  /* DWARF 2 */
+ 
+   /* These are needed for ELF backends which have not yet been
+      converted to the new style linker.  */
+@@ -200,7 +179,7 @@ SECTIONS
+   .debug_pubnames 0 : { *(.debug_pubnames) }
+ 
+   /* DWARF 2 */
+-  .debug_info     0 : { *(.debug_info) *(.gnu.linkonce.wi.*) }
 +  .debug_info     0 : { *(.debug_info) }
-+  .debug_abbrev   0 : { *(.debug_abbrev) }
-+  .debug_line     0 : { *(.debug_line) }
-+  .debug_frame    0 : { *(.debug_frame) }
-+  .debug_str      0 : { *(.debug_str) }
-+  .debug_loc      0 : { *(.debug_loc) }
-+  .debug_macinfo  0 : { *(.debug_macinfo) }
-+
-+  /* SGI/MIPS DWARF 2 extensions */
-+  .debug_weaknames 0 : { *(.debug_weaknames) }
-+  .debug_funcnames 0 : { *(.debug_funcnames) }
-+  .debug_typenames 0 : { *(.debug_typenames) }
-+  .debug_varnames  0 : { *(.debug_varnames) }
-+
+   .debug_abbrev   0 : { *(.debug_abbrev) }
+   .debug_line     0 : { *(.debug_line) }
+   .debug_frame    0 : { *(.debug_frame) }
+@@ -214,14 +193,7 @@ SECTIONS
+   .debug_typenames 0 : { *(.debug_typenames) }
+   .debug_varnames  0 : { *(.debug_varnames) }
+ 
+-  /* DWARF 3 */
+-  .debug_pubtypes 0 : { *(.debug_pubtypes) }
+-  .debug_ranges   0 : { *(.debug_ranges) }
+-
+-  /* DWARF Extension.  */
+-  .debug_macro    0 : { *(.debug_macro) } 
+-  
+-  ${ATTRS_SECTIONS}
 +  /* These must appear regardless of ${RELOCATING}.  */
-+  ${OTHER_SECTIONS}
-+}
-+EOF
+   ${OTHER_SECTIONS}
+ }
+ EOF
 diff --git a/libiberty/config/mh-amigaos b/libiberty/config/mh-amigaos
 new file mode 100644
 index 0000000..495fa7e
@@ -25763,5 +25329,5 @@ index bc2dd49..bc40541 100644
  };
  
 -- 
-2.1.3
+2.1.4
 
