@@ -1,7 +1,7 @@
-From 5df5d1ed8155527d8ff0a0ff8ed9e16230a6391d Mon Sep 17 00:00:00 2001
+From 3a4bf8e586931e415a07f6c0ec68d3a844c2a5a1 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 14 Nov 2014 20:03:56 +0100
-Subject: [PATCH 2/2] Added new function attribute "lineartags" and pragma
+Subject: [PATCH 2/3] Added new function attribute "lineartags" and pragma
  "amigaos tagtype".
 
 Functions that have the lineartags attribute are assumed to be functions
@@ -30,11 +30,11 @@ It is not very robust yet wrt to catching misuses of the new feature.
 For instance, no check is done that the attribute is applied to varargs
 functions.
 ---
- gcc/c-family/c-pragma.c            |  10 +++
- gcc/c/c-parser.c                   | 129 +++++++++++++++++++++++++++++++++++++
- gcc/c/c-typeck.c                   |  24 +++++++
- gcc/config/rs6000/amigaos-protos.h |   1 +
- gcc/config/rs6000/amigaos.c        |   7 ++
+ gcc/c-family/c-pragma.c            |   10 +++
+ gcc/c/c-parser.c                   |  129 ++++++++++++++++++++++++++++++++++++
+ gcc/c/c-typeck.c                   |   24 +++++++
+ gcc/config/rs6000/amigaos-protos.h |    1 +
+ gcc/config/rs6000/amigaos.c        |    7 ++
  5 files changed, 171 insertions(+)
 
 diff --git a/gcc/c-family/c-pragma.c b/gcc/c-family/c-pragma.c
@@ -306,5 +306,5 @@ index a355b6c..af162a5 100644
  /* Generate code for base relative access */
  
 -- 
-2.1.3
+1.7.10.4
 
