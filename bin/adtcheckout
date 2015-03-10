@@ -53,5 +53,5 @@ all_patches = sorted(glob.glob(patches))
 
 # Apply them (if any)
 if len(all_patches) > 0:
-	call(["git", "am"] + all_patches)
+	call(["git", "am", "--3way"] + all_patches)
 
