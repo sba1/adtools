@@ -17,7 +17,7 @@ Subject: [PATCH 2/2] Fixed errors occuring with more recent versions of
  9 files changed, 58 insertions(+), 51 deletions(-)
 
 diff --git a/bfd/doc/bfd.texinfo b/bfd/doc/bfd.texinfo
-index 7b9774b..d3b14c5 100644
+index 7b9774b71a3cb9b3c154c8c75a41de29a6813146..d3b14c56449321b5dfe33206b2c5cfcd87eb0b91 100644
 --- a/bfd/doc/bfd.texinfo
 +++ b/bfd/doc/bfd.texinfo
 @@ -327,7 +327,7 @@ All of BFD lives in one directory.
@@ -39,7 +39,7 @@ index 7b9774b..d3b14c5 100644
  
  @bye
 diff --git a/binutils/doc/binutils.texi b/binutils/doc/binutils.texi
-index 45174b7..ce7746c 100644
+index 45174b739e568d8f7f01fc373035e010ffeced3d..ce7746c103d9f6a5770b43a850a2e26b68b4b58d 100644
 --- a/binutils/doc/binutils.texi
 +++ b/binutils/doc/binutils.texi
 @@ -4413,7 +4413,7 @@ equivalent. At least one of the @option{--output-mach},
@@ -87,7 +87,7 @@ index 45174b7..ce7746c 100644
  supported ELF OSABI are the same as @option{--input-osabi}.
  
 diff --git a/gas/doc/c-arc.texi b/gas/doc/c-arc.texi
-index ea0fa4e..f27b327 100644
+index ea0fa4eb522c265700bdc3b6712894ec2ad61d7c..f27b3270abce6c40a7ff1b068313a14572c79b56 100644
 --- a/gas/doc/c-arc.texi
 +++ b/gas/doc/c-arc.texi
 @@ -220,7 +220,7 @@ The extension instructions are not macros.  The assembler creates
@@ -109,7 +109,7 @@ index ea0fa4e..f27b327 100644
  For example, defining 64-bit multiplier with immediate operands:
  
 diff --git a/gas/doc/c-arm.texi b/gas/doc/c-arm.texi
-index a46e08f..1944862 100644
+index a46e08f4400ef64851828be4ab4df1046678699e..1944862d1caeb8f2aca57902f4ec1be55b68eb7e 100644
 --- a/gas/doc/c-arm.texi
 +++ b/gas/doc/c-arm.texi
 @@ -390,7 +390,7 @@ ARM and THUMB instructions had their own, separate syntaxes.  The new,
@@ -159,7 +159,7 @@ index a46e08f..1944862 100644
  @section ARM Machine Directives
  
 diff --git a/gas/doc/c-cr16.texi b/gas/doc/c-cr16.texi
-index 19f859f..592dc5a 100644
+index 19f859f71d8f8712e8250fda07ee5b148d2d13ac..592dc5a5459d0e48ba1ca2e2846dc5e380f18e63 100644
 --- a/gas/doc/c-cr16.texi
 +++ b/gas/doc/c-cr16.texi
 @@ -44,26 +44,33 @@ Operand expression type qualifier is an optional field in the instruction operan
@@ -217,7 +217,7 @@ index 19f859f..592dc5a 100644
  
  For example:
 diff --git a/gas/doc/c-mips.texi b/gas/doc/c-mips.texi
-index 9ed0420..6054ab9 100644
+index 9ed0420549220079a9c44d2eed0b9daca7805af5..6054ab90442b3de4622743ef73720b5c891334e4 100644
 --- a/gas/doc/c-mips.texi
 +++ b/gas/doc/c-mips.texi
 @@ -234,7 +234,7 @@ the @samp{mad} and @samp{madu} instruction, and to not schedule @samp{nop}
@@ -230,7 +230,7 @@ index 9ed0420..6054ab9 100644
  @itemx -m4100
  @itemx -no-m4100
 diff --git a/gas/doc/c-score.texi b/gas/doc/c-score.texi
-index 3af20a3..40959f5 100644
+index 3af20a381dccc9738b4e6f5152a0f83edba9892e..40959f5b9cb2aef21b5e55289b6b9c981d57ce79 100644
 --- a/gas/doc/c-score.texi
 +++ b/gas/doc/c-score.texi
 @@ -37,7 +37,7 @@ implicitly with the @code{gp} register. The default value is 8.
@@ -260,7 +260,7 @@ index 3af20a3..40959f5 100644
  
  @item -march=score7
 diff --git a/gas/doc/c-tic54x.texi b/gas/doc/c-tic54x.texi
-index d61ec3a..2c3b0f2 100644
+index d61ec3af1a7de0b52e9a8230e65d8b55992c8540..2c3b0f2c111461debe9d4ea20d0219a04764c734 100644
 --- a/gas/doc/c-tic54x.texi
 +++ b/gas/doc/c-tic54x.texi
 @@ -109,7 +109,7 @@ In this example, x is replaced with SYM2; SYM2 is replaced with SYM1, and SYM1
@@ -308,7 +308,7 @@ index d61ec3a..2c3b0f2 100644
  string to the subsym @var{name}.  String replacement is performed on
  @var{string} before assignment. 
 diff --git a/ld/ld.texinfo b/ld/ld.texinfo
-index 71e909e..81d538b 100644
+index 71e909e4b61606d4ca8d1f855d9cd10a3ae1947b..81d538bad91eee08ae24dc88f589b6d07719fff0 100644
 --- a/ld/ld.texinfo
 +++ b/ld/ld.texinfo
 @@ -7863,7 +7863,7 @@ If you have more than one @code{SECT} statement for the same

@@ -54,7 +54,7 @@ Subject: [PATCH 1/2] Changes for AmigaOS version of gcc.
  create mode 100644 libiberty/pex-amigaos.c
 
 diff --git a/fixincludes/configure b/fixincludes/configure
-index 4836cd8..6bee1a3 100755
+index 4836cd886537e9cdf73ef2bb064bfa581fc1068a..6bee1a37ee30a1c12a8f41f05c21d956d1be1a09 100755
 --- a/fixincludes/configure
 +++ b/fixincludes/configure
 @@ -4715,6 +4715,7 @@ else
@@ -66,7 +66,7 @@ index 4836cd8..6bee1a3 100755
          *-*-*vms*)
  		TARGET=twoprocess
 diff --git a/fixincludes/configure.ac b/fixincludes/configure.ac
-index f8f352f..66a501d 100644
+index f8f352fb7153445782727eb3311d4305f33fa260..66a501d80528fdd50b4cd2f9f3282e3c562bf2e2 100644
 --- a/fixincludes/configure.ac
 +++ b/fixincludes/configure.ac
 @@ -53,6 +53,7 @@ fi],
@@ -78,7 +78,7 @@ index f8f352f..66a501d 100644
          *-*-*vms*)
  		TARGET=twoprocess
 diff --git a/gcc/Makefile.in b/gcc/Makefile.in
-index b47733c..ca46950 100644
+index b47733cef501f92a2eee2c7c35f055cb4caedad6..ca469503c8ea6731c3feb9f71ebf7964ba2dd0ac 100644
 --- a/gcc/Makefile.in
 +++ b/gcc/Makefile.in
 @@ -1930,6 +1930,7 @@ prefix.o: $(BASEVER)
@@ -90,7 +90,7 @@ index b47733c..ca46950 100644
    -DSTANDARD_EXEC_PREFIX=\"$(libdir)/gcc/\" \
    -DSTANDARD_LIBEXEC_PREFIX=\"$(libexecdir)/gcc/\" \
 diff --git a/gcc/c-family/c-common.c b/gcc/c-family/c-common.c
-index 487fb4e..2c73feb 100644
+index 487fb4ee277471989e4e08679efdd7959453da0e..2c73febbe0f8fb3af5ea37775fd8e75afb48f143 100644
 --- a/gcc/c-family/c-common.c
 +++ b/gcc/c-family/c-common.c
 @@ -363,6 +363,7 @@ static tree handle_nothrow_attribute (tree *, tree, tree, int, bool *);
@@ -141,7 +141,7 @@ index 487fb4e..2c73feb 100644
  
  static tree
 diff --git a/gcc/c/c-typeck.c b/gcc/c/c-typeck.c
-index d096ad4..766726a 100644
+index d096ad405dc5d4e175f29e91d40dfda3c793dd8f..766726a941ce1053c504364ad3c9554c662d94b6 100644
 --- a/gcc/c/c-typeck.c
 +++ b/gcc/c/c-typeck.c
 @@ -2833,6 +2833,8 @@ build_function_call_vec (location_t loc, vec<location_t> arg_loc,
@@ -184,7 +184,7 @@ index d096ad4..766726a 100644
       function prototype, or apply default promotions.  */
  
 diff --git a/gcc/config.gcc b/gcc/config.gcc
-index 9d3fa57..755580c 100644
+index 9d3fa57699ca65046f1942ef2790972567c9eb60..755580c028a581d2e2acba0a480c59de0bae1784 100644
 --- a/gcc/config.gcc
 +++ b/gcc/config.gcc
 @@ -2176,6 +2176,14 @@ picochip-*)
@@ -203,7 +203,7 @@ index 9d3fa57..755580c 100644
  #powerpc-*-openbsd*)
  #	tmake_file="${tmake_file} rs6000/t-fprules"
 diff --git a/gcc/config.host b/gcc/config.host
-index bea17bc..6d5edeb 100644
+index bea17bcdd10111d6a3a43fdf0f20800212801485..6d5edebaa27b6e15aa2561306e59b924b1d7f85a 100644
 --- a/gcc/config.host
 +++ b/gcc/config.host
 @@ -245,6 +245,12 @@ case ${host} in
@@ -221,7 +221,7 @@ index bea17bc..6d5edeb 100644
      ;;
 diff --git a/gcc/config/rs6000/amigaos-protos.h b/gcc/config/rs6000/amigaos-protos.h
 new file mode 100644
-index 0000000..eb5f8fc
+index 0000000000000000000000000000000000000000..eb5f8fc5f3d546b8d8e1cdd8118a3085079df50e
 --- /dev/null
 +++ b/gcc/config/rs6000/amigaos-protos.h
 @@ -0,0 +1,41 @@
@@ -268,7 +268,7 @@ index 0000000..eb5f8fc
 +//#endif /* RTX_CODE */
 diff --git a/gcc/config/rs6000/amigaos.c b/gcc/config/rs6000/amigaos.c
 new file mode 100644
-index 0000000..a355b6c
+index 0000000000000000000000000000000000000000..a355b6c7263444ad83f0b421a6e9f534eceea601
 --- /dev/null
 +++ b/gcc/config/rs6000/amigaos.c
 @@ -0,0 +1,461 @@
@@ -735,7 +735,7 @@ index 0000000..a355b6c
 +}
 diff --git a/gcc/config/rs6000/amigaos.h b/gcc/config/rs6000/amigaos.h
 new file mode 100644
-index 0000000..4556163
+index 0000000000000000000000000000000000000000..4556163c22a8fadc51c9ed7401c7e6c414e58c0e
 --- /dev/null
 +++ b/gcc/config/rs6000/amigaos.h
 @@ -0,0 +1,431 @@
@@ -1172,7 +1172,7 @@ index 0000000..4556163
 +#define TARGET_USES_AMIGAOS_OPT 1
 diff --git a/gcc/config/rs6000/amigaos.opt b/gcc/config/rs6000/amigaos.opt
 new file mode 100644
-index 0000000..93d74f1
+index 0000000000000000000000000000000000000000..93d74f10bea8c1b23c82a9650bb0c3c153464ba7
 --- /dev/null
 +++ b/gcc/config/rs6000/amigaos.opt
 @@ -0,0 +1,37 @@
@@ -1214,7 +1214,7 @@ index 0000000..93d74f1
 +Target Driver
 +Generated binary employs the dynamic linker for shared objects.
 diff --git a/gcc/config/rs6000/rs6000-builtin.def b/gcc/config/rs6000/rs6000-builtin.def
-index 220d1e9..667d780 100644
+index 220d1e9706541a209fe3b5f3e73b576641ebea22..667d7801fc5d89bf45c5b11391fb5c5dcd9ba30b 100644
 --- a/gcc/config/rs6000/rs6000-builtin.def
 +++ b/gcc/config/rs6000/rs6000-builtin.def
 @@ -1963,3 +1963,10 @@ RS6000_BUILTIN_X (RS6000_BUILTIN_MTFSF, "__builtin_mtfsf",
@@ -1229,7 +1229,7 @@ index 220d1e9..667d780 100644
 +		    RS6000_BTC_MISC,		/* ATTR */	\
 +		    CODE_FOR_nothing)		/* ICODE */
 diff --git a/gcc/config/rs6000/rs6000.c b/gcc/config/rs6000/rs6000.c
-index e1a226c..873fed2 100644
+index e1a226c5ecdc206f9625888ec6e8b8fb89040e28..873fed241ab6cd01908778fd896b160073610cfd 100644
 --- a/gcc/config/rs6000/rs6000.c
 +++ b/gcc/config/rs6000/rs6000.c
 @@ -134,6 +134,12 @@ typedef struct rs6000_stack {
@@ -1572,7 +1572,7 @@ index e1a226c..873fed2 100644
       the load-multiple instructions.  */
    if (TARGET_SPE_ABI
 diff --git a/gcc/config/rs6000/rs6000.h b/gcc/config/rs6000/rs6000.h
-index f363867..52a5027 100644
+index f36386770d7ece0ee9f552517f91f1ce57e3f894..52a50274c6657d348bc2dd8096b682d9e4a14aec 100644
 --- a/gcc/config/rs6000/rs6000.h
 +++ b/gcc/config/rs6000/rs6000.h
 @@ -2787,3 +2787,5 @@ enum rs6000_builtin_type_index
@@ -1582,7 +1582,7 @@ index f363867..52a5027 100644
 +/* Used by amigaos port */
 +void rs6000_va_start (tree valist, rtx nextarg);
 diff --git a/gcc/config/rs6000/rs6000.md b/gcc/config/rs6000/rs6000.md
-index 46837e1..9acbc5c 100644
+index 46837e1538973833a7187af8757513fadcaa36a9..9acbc5c4cda838900d8c4c6c908d1eeb533b15e5 100644
 --- a/gcc/config/rs6000/rs6000.md
 +++ b/gcc/config/rs6000/rs6000.md
 @@ -12172,6 +12172,31 @@
@@ -1628,7 +1628,7 @@ index 46837e1..9acbc5c 100644
      addic %0,%1,%K2")
 diff --git a/gcc/config/rs6000/t-amigaos b/gcc/config/rs6000/t-amigaos
 new file mode 100644
-index 0000000..15d9d3f
+index 0000000000000000000000000000000000000000..15d9d3fd5a5f0c8109cd158242745fa52b19257e
 --- /dev/null
 +++ b/gcc/config/rs6000/t-amigaos
 @@ -0,0 +1,20 @@
@@ -1653,7 +1653,7 @@ index 0000000..15d9d3f
 +MULTILIB_DIRNAMES = newlib clib2
 +#MULTILIB_REUSE = =mcrt=newlib
 diff --git a/gcc/cp/typeck.c b/gcc/cp/typeck.c
-index 03d7ab8..9153094 100644
+index 03d7ab807d7cb152d76d4d6eb215cb0fb5ebd450..91530944972cf9db34dd323b956b9ea0b275a2d7 100644
 --- a/gcc/cp/typeck.c
 +++ b/gcc/cp/typeck.c
 @@ -3500,6 +3500,22 @@ cp_build_function_call_vec (tree function, vec<tree, va_gc> **params,
@@ -1680,7 +1680,7 @@ index 03d7ab8..9153094 100644
  
    if (params == NULL)
 diff --git a/gcc/doc/extend.texi b/gcc/doc/extend.texi
-index 10ad6e4..9976b21 100644
+index 10ad6e4faf81927178107ee03c177c6442a9facf..9976b216cfda7bf162311fcf670f30145674b5dd 100644
 --- a/gcc/doc/extend.texi
 +++ b/gcc/doc/extend.texi
 @@ -4452,6 +4452,157 @@ also be used with non-function declarations.  Weak symbols are supported
@@ -1865,7 +1865,7 @@ index 10ad6e4..9976b21 100644
  
  Three attributes currently are defined for PowerPC configurations:
 diff --git a/gcc/doc/invoke.texi b/gcc/doc/invoke.texi
-index bea8be2..9a4f2cc 100644
+index bea8be20aff5bd60e6fdf2cea5e6832cb19b406b..9a4f2ccf129ac9baf09e99a870f1ffbfe1fca9af 100644
 --- a/gcc/doc/invoke.texi
 +++ b/gcc/doc/invoke.texi
 @@ -1067,6 +1067,10 @@ See i386 and x86-64 Options.
@@ -2026,7 +2026,7 @@ index bea8be2..9a4f2cc 100644
  @subsection Xtensa Options
  @cindex Xtensa Options
 diff --git a/gcc/expr.c b/gcc/expr.c
-index bf14114..a580681 100644
+index bf14114d12686d8d63a4685181efc35de855348b..a5806819a486d24b863b83f73986d82d3a68d920 100644
 --- a/gcc/expr.c
 +++ b/gcc/expr.c
 @@ -8067,7 +8067,6 @@ expand_expr_real_2 (sepops ops, rtx target, enum machine_mode tmode,
@@ -2038,7 +2038,7 @@ index bf14114..a580681 100644
    mode = TYPE_MODE (type);
    unsignedp = TYPE_UNSIGNED (type);
 diff --git a/gcc/gcc.c b/gcc/gcc.c
-index c7ce64d..cbda3f0 100644
+index c7ce64d8fc864c2f8cf46269e020b86b637437ff..cbda3f0689e53c3a559e381ac22131c59e5268d7 100644
 --- a/gcc/gcc.c
 +++ b/gcc/gcc.c
 @@ -2655,7 +2655,7 @@ execute (void)
@@ -2097,7 +2097,7 @@ index c7ce64d..cbda3f0 100644
  
    /* Process any user specified specs in the order given on the command
 diff --git a/gcc/prefix.c b/gcc/prefix.c
-index 71ddf5d..e22b89a 100644
+index 71ddf5d233e62aff80e9bbf2fe9658c00083cb2c..e22b89a263026e344c35b9400b62cb3cf1c3d1b5 100644
 --- a/gcc/prefix.c
 +++ b/gcc/prefix.c
 @@ -329,7 +329,7 @@ update_path (const char *path, const char *key)
@@ -2110,7 +2110,7 @@ index 71ddf5d..e22b89a 100644
    if (DIR_SEPARATOR_2 != DIR_SEPARATOR)
      tr (result, DIR_SEPARATOR_2, DIR_SEPARATOR);
 diff --git a/intl/dcigettext.c b/intl/dcigettext.c
-index a8d4a14..a9cc106 100644
+index a8d4a14d273b153b117b507ec76356635ccd876e..a9cc1066050e10b539149027a5c159f21accfaca 100644
 --- a/intl/dcigettext.c
 +++ b/intl/dcigettext.c
 @@ -148,7 +148,9 @@ extern int errno;
@@ -2124,7 +2124,7 @@ index a8d4a14..a9cc106 100644
  # ifndef HAVE_STPCPY
  static char *stpcpy PARAMS ((char *dest, const char *src));
 diff --git a/libcpp/line-map.c b/libcpp/line-map.c
-index f9a7658..8a4222f 100644
+index f9a7658cbdbe4ffcc70773911a2efa9d6d41ce85..8a4222febf257dffdcfdbbd6f24a4c7836699a91 100644
 --- a/libcpp/line-map.c
 +++ b/libcpp/line-map.c
 @@ -666,6 +666,9 @@ linemap_ordinary_map_lookup (struct line_maps *set, source_location line)
@@ -2138,7 +2138,7 @@ index f9a7658..8a4222f 100644
      {
        if (mn + 1 == mx || line < MAP_START_LOCATION (&cached[1]))
 diff --git a/libgcc/config.host b/libgcc/config.host
-index f4a7428..dc64594 100644
+index f4a742872937924209ff593bb1d18b4d0362e6ca..dc64594da18c894e93571db1a53cd8b728760be5 100644
 --- a/libgcc/config.host
 +++ b/libgcc/config.host
 @@ -917,6 +917,9 @@ pdp11-*-*)
@@ -2153,7 +2153,7 @@ index f4a7428..dc64594 100644
  	*-*-darwin9* | *-*-darwin[12][0-9]*)
 diff --git a/libgcc/config/rs6000/t-amigaos b/libgcc/config/rs6000/t-amigaos
 new file mode 100644
-index 0000000..da1e303
+index 0000000000000000000000000000000000000000..da1e303eed7e60df883971a610e8904db0df3e23
 --- /dev/null
 +++ b/libgcc/config/rs6000/t-amigaos
 @@ -0,0 +1,45 @@
@@ -2203,7 +2203,7 @@ index 0000000..da1e303
 +	$(INSTALL_DATA) $(SHLIB_DIR)/$(SHLIB_SONAME) \
 +	  $(DESTDIR)$(inst_libdir)/libgcc$(SHLIB_EXT);
 diff --git a/libiberty/Makefile.in b/libiberty/Makefile.in
-index 75ff82d..16b6250 100644
+index 75ff82d984a930b4747feb6bfabf743731468656..16b62506438e6febb931f843e9730f06d6a83ff0 100644
 --- a/libiberty/Makefile.in
 +++ b/libiberty/Makefile.in
 @@ -142,6 +142,7 @@ CFILES = alloca.c argv.c asprintf.c atexit.c				\
@@ -2237,7 +2237,7 @@ index 75ff82d..16b6250 100644
  	$(INCDIR)/libiberty.h
  	if [ x"$(PICFLAG)" != x ]; then \
 diff --git a/libiberty/basename.c b/libiberty/basename.c
-index 0f2c069..6ba5c4a 100644
+index 0f2c069f0ccf5a7d91e4913548e068c247e12efb..6ba5c4aa4f814fbc28f03127d22e91253c980c1b 100644
 --- a/libiberty/basename.c
 +++ b/libiberty/basename.c
 @@ -18,26 +18,7 @@ Behavior is undefined if the pathname ends in a directory separator.
@@ -2269,7 +2269,7 @@ index 0f2c069..6ba5c4a 100644
  char *
  basename (const char *name)
 diff --git a/libiberty/configure b/libiberty/configure
-index 7bde9b3..5bfda76 100755
+index 7bde9b38f19e3ddf13ad78f1964be3ac8c6b8f5b..5bfda76cb840a5c3fcd70fce0ff59ddd0773c582 100755
 --- a/libiberty/configure
 +++ b/libiberty/configure
 @@ -6640,6 +6640,7 @@ case "${host}" in
@@ -2281,7 +2281,7 @@ index 7bde9b3..5bfda76 100755
  esac
  
 diff --git a/libiberty/configure.ac b/libiberty/configure.ac
-index d6180bc..ba3b25a 100644
+index d6180bcddd95710463323eb161b002afd85f5784..ba3b25afe6835dd9193ff2b83afe13cc01f7d63e 100644
 --- a/libiberty/configure.ac
 +++ b/libiberty/configure.ac
 @@ -673,6 +673,7 @@ case "${host}" in
@@ -2293,7 +2293,7 @@ index d6180bc..ba3b25a 100644
  esac
  AC_SUBST(pexecute)
 diff --git a/libiberty/lrealpath.c b/libiberty/lrealpath.c
-index b27c8de..1491511 100644
+index b27c8de990e974c7294dfc4024ef44fbd3844a52..1491511553f865caaf8effc67a3ea42319edd3cf 100644
 --- a/libiberty/lrealpath.c
 +++ b/libiberty/lrealpath.c
 @@ -49,6 +49,7 @@ components will be simplified.  The returned value will be allocated using
@@ -2314,7 +2314,7 @@ index b27c8de..1491511 100644
      /* Find out the max path size.  */
      long path_max = pathconf ("/", _PC_PATH_MAX);
 diff --git a/libiberty/make-relative-prefix.c b/libiberty/make-relative-prefix.c
-index fe639d1..0b5691a 100644
+index fe639d18bd2815a5ec33aef28720386725ab1bd5..0b5691adc3f6ed9013472568d9d001495205673b 100644
 --- a/libiberty/make-relative-prefix.c
 +++ b/libiberty/make-relative-prefix.c
 @@ -66,6 +66,7 @@ relative prefix can be found, return @code{NULL}.
@@ -2375,7 +2375,7 @@ index fe639d1..0b5691a 100644
  static char *save_string (const char *, int);
  static char **split_directories	(const char *, int *);
 diff --git a/libiberty/make-temp-file.c b/libiberty/make-temp-file.c
-index 7b74f81..0a8d02e 100644
+index 7b74f8179b101e9c37c6bb8683b3cc588ed1fc27..0a8d02e5208b11ca230603e21035909aa5ff32ac 100644
 --- a/libiberty/make-temp-file.c
 +++ b/libiberty/make-temp-file.c
 @@ -41,6 +41,10 @@ Boston, MA 02110-1301, USA.  */
@@ -2452,7 +2452,7 @@ index 7b74f81..0a8d02e 100644
        DWORD len;
 diff --git a/libiberty/pex-amigaos.c b/libiberty/pex-amigaos.c
 new file mode 100644
-index 0000000..873ea97
+index 0000000000000000000000000000000000000000..873ea977f383d19a424c81ef5f8522e6ade18da8
 --- /dev/null
 +++ b/libiberty/pex-amigaos.c
 @@ -0,0 +1,325 @@
@@ -2782,7 +2782,7 @@ index 0000000..873ea97
 +  return 0;
 +}
 diff --git a/libstdc++-v3/configure b/libstdc++-v3/configure
-index 16e09f0..c70253c 100755
+index 16e09f097acde5c35fb4e88186cd3367c9a51884..c70253c47e94c14a1daeae5717d144e152820ffc 100755
 --- a/libstdc++-v3/configure
 +++ b/libstdc++-v3/configure
 @@ -77063,6 +77063,165 @@ done
@@ -4666,7 +4666,7 @@ index 16e09f0..c70253c 100755
  
  
 diff --git a/libstdc++-v3/configure.ac b/libstdc++-v3/configure.ac
-index 1de0f6c..aa2e3ce 100644
+index 1de0f6c1cbf2e21cd64a15686d32bdb0bd602b70..aa2e3cebb3f9c9a64261e6e5847f63a890be9c54 100644
 --- a/libstdc++-v3/configure.ac
 +++ b/libstdc++-v3/configure.ac
 @@ -483,6 +483,9 @@ GLIBCXX_EXPORT_INSTALL_INFO
@@ -4680,7 +4680,7 @@ index 1de0f6c..aa2e3ce 100644
  dnl which can all be called multiple times as needed, plus one (different)
  dnl AC_OUTPUT macro.  This one lists the files to be created:
 diff --git a/libstdc++-v3/crossconfig.m4 b/libstdc++-v3/crossconfig.m4
-index 15d876e..c5d2e5f 100644
+index 15d876eab8c1237790579fc855bccc9faf7be7b1..c5d2e5fbd51afce82a0f0c6d6418324c0f3ceb29 100644
 --- a/libstdc++-v3/crossconfig.m4
 +++ b/libstdc++-v3/crossconfig.m4
 @@ -277,6 +277,14 @@ case "${host}" in
@@ -4699,7 +4699,7 @@ index 15d876e..c5d2e5f 100644
      AC_MSG_ERROR([No support for this host/target combination.])
     ;;
 diff --git a/libstdc++-v3/include/bits/atomic_base.h b/libstdc++-v3/include/bits/atomic_base.h
-index 1fc0ebb..bfd792b 100644
+index 1fc0ebb7e40e071184bb45aa432ad2bdad7211ba..bfd792bf11480acb1d026613b7c66d8158afe478 100644
 --- a/libstdc++-v3/include/bits/atomic_base.h
 +++ b/libstdc++-v3/include/bits/atomic_base.h
 @@ -33,7 +33,9 @@
@@ -4713,7 +4713,7 @@ index 1fc0ebb..bfd792b 100644
  #include <bits/atomic_lockfree_defines.h>
  
 diff --git a/libstdc++-v3/include/c_global/cstddef b/libstdc++-v3/include/c_global/cstddef
-index 1a87dd6..71a776e 100644
+index 1a87dd6488ba4f4d63e82810360eaeca80721c6d..71a776e245d355f512dee3e29a97cda59769e9f8 100644
 --- a/libstdc++-v3/include/c_global/cstddef
 +++ b/libstdc++-v3/include/c_global/cstddef
 @@ -47,8 +47,11 @@
@@ -4729,7 +4729,7 @@ index 1a87dd6..71a776e 100644
  #endif
  
 diff --git a/libstdc++-v3/include/c_std/cstddef b/libstdc++-v3/include/c_std/cstddef
-index f4845f0..b1aa06e 100644
+index f4845f0243290fe29ede76161d6b7a8138edde7b..b1aa06ef87ab88f41b3344f4e2c48318e0bd0886 100644
 --- a/libstdc++-v3/include/c_std/cstddef
 +++ b/libstdc++-v3/include/c_std/cstddef
 @@ -47,8 +47,11 @@
