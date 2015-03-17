@@ -12,9 +12,10 @@ all: binutils-cross-build-done-$(BINUTILS_VERSION)
 
 binutils-cross-build-done-$(BINUTILS_VERSION):
 	mkdir -p $(OUTPUT)/$@
-	cd $(OUTPUT)/$@ && $(ROOT_DIR)/../binutils/repo/configure \
+	cd $(OUTPUT)/$@ &&  CFLAGS="-Wno-switch -Wno-unused" $(ROOT_DIR)/../binutils/repo/configure \
 		--target=m68k-unknown-elf \
 		--disable-nls \
 		--enable-gold=no \
-		--enable-ld=yes
+		--enable-ld=yes \
+		--prefix=$(OUTPUT)/root-cross
 	cd $(OUTPUT)/$@ && $(MAKE)
