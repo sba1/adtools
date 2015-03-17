@@ -8,7 +8,8 @@ GCC_VERSION:=$(shell cat $(GCC_SRC_DIR)/gcc/BASE-VER)
 
 OUTPUT = $(ROOT_DIR)/output
 
-all: binutils-cross-build-done-$(BINUTILS_VERSION)
+all: binutils-cross-build-done-$(BINUTILS_VERSION) \
+	gcc-cross-build-done-$(GCC_VERSION)
 
 binutils-cross-build-done-$(BINUTILS_VERSION):
 	mkdir -p $(OUTPUT)/$@
@@ -22,3 +23,14 @@ binutils-cross-build-done-$(BINUTILS_VERSION):
 	cd $(OUTPUT)/$@ && $(MAKE) install
 	touch $@
 
+gcc-cross-build-done-$(GCC_VERSION):
+	mkdir -p $(OUTPUT)/$@
+	cd $(OUTPUT)/$@ && $(ROOT_DIR)/../gcc/repo/configure \
+		--target=m68k-unknown-elf \
+		--enable-languages=c \
+		--disable-tls \
+		--disable-libssp \
+		--prefix=$(OUTPUT)/root-cross
+	cd $(OUTPUT)/$@ && $(MAKE)
+	cd $(OUTPUT)/$@ && $(MAKE) install
+	touch $@
