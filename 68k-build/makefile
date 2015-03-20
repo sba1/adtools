@@ -34,3 +34,8 @@ gcc-cross-build-done-$(GCC_VERSION): binutils-cross-build-done-$(BINUTILS_VERSIO
 	cd $(OUTPUT)/$@ && $(MAKE)
 	cd $(OUTPUT)/$@ && $(MAKE) install
 	touch $@
+
+clib2-done: gcc-cross-build-done-$(GCC_VERSION)
+	mkdir -p sources
+	(cd sources/clib2 && git pull) || git clone https://github.com/sba1/clib2 sources/clib2
+	(cd sources/clib2 && PATH=$(OUTPUT)/root-cross/bin:$$PATH $(MAKE) -f GNUmakefile.68k CC=m68k-unknown-elf-gcc)
