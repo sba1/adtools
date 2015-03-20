@@ -23,7 +23,7 @@ binutils-cross-build-done-$(BINUTILS_VERSION):
 	cd $(OUTPUT)/$@ && $(MAKE) install
 	touch $@
 
-gcc-cross-build-done-$(GCC_VERSION):
+gcc-cross-build-done-$(GCC_VERSION): binutils-cross-build-done-$(BINUTILS_VERSION)
 	mkdir -p $(OUTPUT)/$@
 	cd $(OUTPUT)/$@ && $(ROOT_DIR)/../gcc/repo/configure \
 		--target=m68k-unknown-elf \
