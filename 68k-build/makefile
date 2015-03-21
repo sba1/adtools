@@ -35,7 +35,15 @@ gcc-cross-build-done-$(GCC_VERSION): binutils-cross-build-done-$(BINUTILS_VERSIO
 	cd $(OUTPUT)/$@ && $(MAKE) install
 	touch $@
 
-clib2-done: gcc-cross-build-done-$(GCC_VERSION)
+includes-done: gcc-cross-build-done-$(GCC_VERSION)
+	mkdir -p sources
+	(cd sources && wget -N http://www.haage-partner.de/download/AmigaOS/NDK39.lha)
+	(cd sources && lha xf NDK39.lha)
+	rm -Rf $(OUTPUT)/root-cross/m68k-unknown-elf/include
+	mv -f $(ROOT_DIR)/sources/NDK_3.9/Include/include_h $(OUTPUT)/root-cross/m68k-unknown-elf/include
+	touch $@
+
+clib2-done: gcc-cross-build-done-$(GCC_VERSION) includes-done
 	mkdir -p sources
 	(cd sources/clib2 && git pull) || git clone https://github.com/sba1/clib2 sources/clib2
 	(cd sources/clib2 && PATH=$(OUTPUT)/root-cross/bin:$$PATH $(MAKE) -f GNUmakefile.68k CC=m68k-unknown-elf-gcc)
