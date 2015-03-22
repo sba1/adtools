@@ -51,4 +51,4 @@ includes-done: gcc-cross-build-done-$(GCC_VERSION)
 clib2-done: gcc-cross-build-done-$(GCC_VERSION) includes-done
 	mkdir -p sources
 	(cd sources/clib2 && git pull) || git clone https://github.com/sba1/clib2 sources/clib2
-	(cd sources/clib2 && PATH=$(OUTPUT)/root-cross/bin:$$PATH $(MAKE) -f GNUmakefile.68k CC=m68k-unknown-elf-gcc)
+	(cd sources/clib2 && PATH=$(OUTPUT)/root-cross/bin:$$PATH $(MAKE) -f GNUmakefile.68k CC=m68k-unknown-elf-gcc AR="m68k-unknown-elf-ar -q" RANLIB=m68k-unknown-elf-ranlib)
