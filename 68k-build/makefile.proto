@@ -1,0 +1,18 @@
+FD2PRAGMA = ./sources/sditools/fd2pragma/fd2pragma
+FDDIR = sources/NDK_3.9/Include/fd
+FDS = $(sort $(filter-out $(FDDIR)/dtclass_lib.fd, $(wildcard $(FDDIR)/*.fd)))
+
+INCLUDEDIR = output/root-cross/m68k-unknown-elf/include
+
+PROTOS= $(FDS:$(FDDIR)/%_lib.fd=proto/%.h)
+INLINES = $(FDS:$(FDDIR)/%_lib.fd=inline/%.h)
+
+all: $(PROTOS) $(INLINES)
+
+proto/%.h: $(FDDIR)/%_lib.fd
+	mkdir -p $(INCLUDEDIR)/proto
+	$(FD2PRAGMA) -i $< -s 38 --clib output/root-cross/m68k-unknown-elf/include/clib/$(<:$(FDDIR)/%_lib.fd=%_protos.h)  -t $(INCLUDEDIR)/proto
+
+inline/%.h: $(FDDIR)/%_lib.fd
+	mkdir -p $(INCLUDEDIR)/inline
+	$(FD2PRAGMA) -i $< -s 42 --clib output/root-cross/m68k-unknown-elf/include/clib/$(<:$(FDDIR)/%_lib.fd=%_protos.h)  -t $(INCLUDEDIR)/inline

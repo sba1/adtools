@@ -41,6 +41,11 @@ includes-done: gcc-cross-build-done-$(GCC_VERSION)
 	(cd sources && lha xf NDK39.lha)
 	rm -Rf $(OUTPUT)/root-cross/m68k-unknown-elf/include
 	mv -f $(ROOT_DIR)/sources/NDK_3.9/Include/include_h $(OUTPUT)/root-cross/m68k-unknown-elf/include
+	(rm sources/sditools/fd2pragma/fd2pragma.c || true)
+	(cd sources && cvs -z3 -d:pserver:anonymous@sditools.cvs.sourceforge.net:/cvsroot/sditools co -P sditools/fd2pragma)
+	(cd sources/sditools/fd2pragma && patch -p0 <../../../fd2pragma.diff)
+	(cd sources/sditools/fd2pragma && $(MAKE))
+	$(MAKE) -f makefile.proto
 	touch $@
 
 clib2-done: gcc-cross-build-done-$(GCC_VERSION) includes-done
