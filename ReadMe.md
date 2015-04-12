@@ -98,7 +98,7 @@ $ bin/adtcheckout gcc 4.9
 ```
 Building is then a matter of entering
 ```
-$ make -f native-build
+$ make -C native-build
 ```
 
 The building should succeed, if all dependencies are met (e.g.,
