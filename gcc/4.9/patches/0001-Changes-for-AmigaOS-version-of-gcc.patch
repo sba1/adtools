@@ -57,7 +57,10 @@ diff --git a/fixincludes/configure b/fixincludes/configure
 index 4836cd886537e9cdf73ef2bb064bfa581fc1068a..6bee1a37ee30a1c12a8f41f05c21d956d1be1a09 100755
 --- a/fixincludes/configure
 +++ b/fixincludes/configure
-@@ -4715,6 +4715,7 @@ else
+@@ -4712,12 +4712,13 @@ else
+ fi
+ else
+   case $host in
  	i?86-*-msdosdjgpp* | \
  	i?86-*-mingw32* | \
  	x86_64-*-mingw32* | \
@@ -65,11 +68,17 @@ index 4836cd886537e9cdf73ef2bb064bfa581fc1068a..6bee1a37ee30a1c12a8f41f05c21d956
  	*-*-beos* | \
          *-*-*vms*)
  		TARGET=twoprocess
+ 		;;
+ 
+ 	* )
 diff --git a/fixincludes/configure.ac b/fixincludes/configure.ac
 index f8f352fb7153445782727eb3311d4305f33fa260..66a501d80528fdd50b4cd2f9f3282e3c562bf2e2 100644
 --- a/fixincludes/configure.ac
 +++ b/fixincludes/configure.ac
-@@ -53,6 +53,7 @@ fi],
+@@ -50,12 +50,13 @@ else
+ 	TARGET=oneprocess
+ fi],
+ [case $host in
  	i?86-*-msdosdjgpp* | \
  	i?86-*-mingw32* | \
  	x86_64-*-mingw32* | \
@@ -77,11 +86,17 @@ index f8f352fb7153445782727eb3311d4305f33fa260..66a501d80528fdd50b4cd2f9f3282e3c
  	*-*-beos* | \
          *-*-*vms*)
  		TARGET=twoprocess
+ 		;;
+ 
+ 	* )
 diff --git a/gcc/Makefile.in b/gcc/Makefile.in
 index b47733cef501f92a2eee2c7c35f055cb4caedad6..ca469503c8ea6731c3feb9f71ebf7964ba2dd0ac 100644
 --- a/gcc/Makefile.in
 +++ b/gcc/Makefile.in
-@@ -1930,6 +1930,7 @@ prefix.o: $(BASEVER)
+@@ -1927,12 +1927,13 @@ default-c.o: config/default-c.c
+ CFLAGS-prefix.o += -DPREFIX=\"$(prefix)\" -DBASEVER=$(BASEVER_s)
+ prefix.o: $(BASEVER)
+ 
  # Language-independent files.
  
  DRIVER_DEFINES = \
@@ -89,11 +104,17 @@ index b47733cef501f92a2eee2c7c35f055cb4caedad6..ca469503c8ea6731c3feb9f71ebf7964
    -DSTANDARD_STARTFILE_PREFIX=\"$(unlibsubdir)/\" \
    -DSTANDARD_EXEC_PREFIX=\"$(libdir)/gcc/\" \
    -DSTANDARD_LIBEXEC_PREFIX=\"$(libexecdir)/gcc/\" \
+   -DDEFAULT_TARGET_VERSION=\"$(version)\" \
+   -DDEFAULT_TARGET_MACHINE=\"$(target_noncanonical)\" \
+   -DSTANDARD_BINDIR_PREFIX=\"$(bindir)/\" \
 diff --git a/gcc/c-family/c-common.c b/gcc/c-family/c-common.c
 index 8856701850274bed70a9939e33640d12e015acd4..eee12b41f07bc3a046647e024e762f63b34f30f7 100644
 --- a/gcc/c-family/c-common.c
 +++ b/gcc/c-family/c-common.c
-@@ -363,6 +363,7 @@ static tree handle_nothrow_attribute (tree *, tree, tree, int, bool *);
+@@ -360,12 +360,13 @@ static tree handle_vector_size_attribute (tree *, tree, tree, int,
+ 					  bool *);
+ static tree handle_nonnull_attribute (tree *, tree, tree, int, bool *);
+ static tree handle_nothrow_attribute (tree *, tree, tree, int, bool *);
  static tree handle_cleanup_attribute (tree *, tree, tree, int, bool *);
  static tree handle_warn_unused_result_attribute (tree *, tree, tree, int,
  						 bool *);
@@ -101,7 +122,13 @@ index 8856701850274bed70a9939e33640d12e015acd4..eee12b41f07bc3a046647e024e762f63
  static tree handle_sentinel_attribute (tree *, tree, tree, int, bool *);
  static tree handle_type_generic_attribute (tree *, tree, tree, int, bool *);
  static tree handle_alloc_size_attribute (tree *, tree, tree, int, bool *);
-@@ -718,6 +719,11 @@ const struct attribute_spec c_common_attribute_table[] =
+ static tree handle_alloc_align_attribute (tree *, tree, tree, int, bool *);
+ static tree handle_assume_aligned_attribute (tree *, tree, tree, int, bool *);
+ static tree handle_target_attribute (tree *, tree, tree, int, bool *);
+@@ -715,12 +716,17 @@ const struct attribute_spec c_common_attribute_table[] =
+ 			      handle_nothrow_attribute, false },
+   { "may_alias",	      0, 0, false, true, false, NULL, false },
+   { "cleanup",		      1, 1, true, false, false,
  			      handle_cleanup_attribute, false },
    { "warn_unused_result",     0, 0, false, true, true,
  			      handle_warn_unused_result_attribute, false },
@@ -113,7 +140,13 @@ index 8856701850274bed70a9939e33640d12e015acd4..eee12b41f07bc3a046647e024e762f63
    { "sentinel",               0, 1, false, true, true,
  			      handle_sentinel_attribute, false },
    /* For internal use (marking of builtins) only.  The name contains space
-@@ -8927,6 +8933,26 @@ handle_warn_unused_result_attribute (tree *node, tree name,
+      to prevent its usage in source code.  */
+   { "type generic",           0, 0, false, true, true,
+ 			      handle_type_generic_attribute, false },
+@@ -8924,12 +8930,32 @@ handle_warn_unused_result_attribute (tree *node, tree name,
+       *no_add_attrs = true;
+     }
+ 
    return NULL_TREE;
  }
  
@@ -140,11 +173,17 @@ index 8856701850274bed70a9939e33640d12e015acd4..eee12b41f07bc3a046647e024e762f63
  /* Handle a "sentinel" attribute.  */
  
  static tree
+ handle_sentinel_attribute (tree *node, tree name, tree args,
+ 			   int ARG_UNUSED (flags), bool *no_add_attrs)
+ {
 diff --git a/gcc/c/c-typeck.c b/gcc/c/c-typeck.c
 index 2a335ae33bf1bad1d9bf1a86eca0bead56c36845..206ccbec6bffc9284e7624638c43ba90b8facb3d 100644
 --- a/gcc/c/c-typeck.c
 +++ b/gcc/c/c-typeck.c
-@@ -2833,6 +2833,8 @@ build_function_call_vec (location_t loc, vec<location_t> arg_loc,
+@@ -2830,12 +2830,14 @@ build_function_call_vec (location_t loc, vec<location_t> arg_loc,
+   tree fntype, fundecl = 0;
+   tree name = NULL_TREE, result;
+   tree tem;
    int nargs;
    tree *argarray;
  
@@ -153,7 +192,13 @@ index 2a335ae33bf1bad1d9bf1a86eca0bead56c36845..206ccbec6bffc9284e7624638c43ba90
  
    /* Strip NON_LVALUE_EXPRs, etc., since we aren't using as an lvalue.  */
    STRIP_TYPE_NOPS (function);
-@@ -2895,6 +2897,29 @@ build_function_call_vec (location_t loc, vec<location_t> arg_loc,
+ 
+   /* Convert anything with function type to a pointer-to-function.  */
+   if (TREE_CODE (function) == FUNCTION_DECL)
+@@ -2892,12 +2894,35 @@ build_function_call_vec (location_t loc, vec<location_t> arg_loc,
+   if (fundecl && TREE_THIS_VOLATILE (fundecl))
+     current_function_returns_abnormally = 1;
+ 
    /* fntype now gets the type of function pointed to.  */
    fntype = TREE_TYPE (fntype);
  
@@ -183,11 +228,17 @@ index 2a335ae33bf1bad1d9bf1a86eca0bead56c36845..206ccbec6bffc9284e7624638c43ba90
    /* Convert the parameters to the types declared in the
       function prototype, or apply default promotions.  */
  
+   nargs = convert_arguments (loc, arg_loc, TYPE_ARG_TYPES (fntype), params,
+ 			     origtypes, function, fundecl);
+   if (nargs < 0)
 diff --git a/gcc/config.gcc b/gcc/config.gcc
 index 7ade8e5d5f69d9572cef558949339a4d518bd9b9..457d1f3c2461780da7ddcd65fad802a4a90b3ba9 100644
 --- a/gcc/config.gcc
 +++ b/gcc/config.gcc
-@@ -2176,6 +2176,14 @@ picochip-*)
+@@ -2173,12 +2173,20 @@ pdp11-*-*)
+ 	;;
+ picochip-*)
+ 	tm_file="${tm_file} newlib-stdint.h"
  	use_gcc_stdint=wrap
  	tmake_file="picochip/t-picochip t-pnt16-warn"
          ;;
@@ -202,11 +253,17 @@ index 7ade8e5d5f69d9572cef558949339a4d518bd9b9..457d1f3c2461780da7ddcd65fad802a4
  # port not yet contributed
  #powerpc-*-openbsd*)
  #	tmake_file="${tmake_file} rs6000/t-fprules"
+ #	extra_headers=
+ #	;;
+ powerpc-*-darwin*)
 diff --git a/gcc/config.host b/gcc/config.host
 index bea17bcdd10111d6a3a43fdf0f20800212801485..6d5edebaa27b6e15aa2561306e59b924b1d7f85a 100644
 --- a/gcc/config.host
 +++ b/gcc/config.host
-@@ -245,6 +245,12 @@ case ${host} in
+@@ -242,12 +242,18 @@ case ${host} in
+     exit 1
+     ;;
+   i[34567]86-*-darwin* | x86_64-*-darwin*)
      out_host_hook_obj="${out_host_hook_obj} host-i386-darwin.o"
      host_xmake_file="${host_xmake_file} i386/x-darwin"
      ;;
@@ -219,6 +276,9 @@ index bea17bcdd10111d6a3a43fdf0f20800212801485..6d5edebaa27b6e15aa2561306e59b924
    powerpc-*-beos*)
      host_can_use_collect2=no
      ;;
+   powerpc-*-darwin*)
+     out_host_hook_obj="${out_host_hook_obj} host-ppc-darwin.o"
+     host_xmake_file="${host_xmake_file} rs6000/x-darwin"
 diff --git a/gcc/config/rs6000/amigaos-protos.h b/gcc/config/rs6000/amigaos-protos.h
 new file mode 100644
 index 0000000000000000000000000000000000000000..eb5f8fc5f3d546b8d8e1cdd8118a3085079df50e
@@ -1217,7 +1277,10 @@ diff --git a/gcc/config/rs6000/rs6000-builtin.def b/gcc/config/rs6000/rs6000-bui
 index 031b964e7013848dc3a08931aca7be8199bcd70b..edc4c126b256e089d9238887f5c1131d61b554ea 100644
 --- a/gcc/config/rs6000/rs6000-builtin.def
 +++ b/gcc/config/rs6000/rs6000-builtin.def
-@@ -1988,3 +1988,10 @@ RS6000_BUILTIN_X (RS6000_BUILTIN_MTFSF, "__builtin_mtfsf",
+@@ -1985,6 +1985,13 @@ RS6000_BUILTIN_X (RS6000_BUILTIN_MTFSF, "__builtin_mtfsf",
+ 	          RS6000_BTC_MISC | RS6000_BTC_UNARY | RS6000_BTC_VOID,
+ 		  CODE_FOR_rs6000_mtfsf)
+ 
  /* Darwin CfString builtin.  */
  BU_SPECIAL_X (RS6000_BUILTIN_CFSTRING, "__builtin_cfstring", RS6000_BTM_ALWAYS,
  	      RS6000_BTC_MISC)
@@ -1232,7 +1295,10 @@ diff --git a/gcc/config/rs6000/rs6000.c b/gcc/config/rs6000/rs6000.c
 index e2277e5217268fb2631d2040a4339b253846ade7..bc7576eb0c26f6c62c58b8923aed25de2aaad010 100644
 --- a/gcc/config/rs6000/rs6000.c
 +++ b/gcc/config/rs6000/rs6000.c
-@@ -137,6 +137,12 @@ typedef struct rs6000_stack {
+@@ -134,12 +134,18 @@ typedef struct rs6000_stack {
+ 				   not in save_size */
+   int spe_gp_size;		/* size of 64-bit GPR save size for SPE */
+   int spe_padding_size;
    HOST_WIDE_INT total_size;	/* total bytes allocated for stack */
    int spe_64bit_regs_used;
    int savres_strategy;
@@ -1245,7 +1311,13 @@ index e2277e5217268fb2631d2040a4339b253846ade7..bc7576eb0c26f6c62c58b8923aed25de
  } rs6000_stack_t;
  
  /* A C structure for machine-specific, per-function data.
-@@ -1363,6 +1369,12 @@ static const struct attribute_spec rs6000_attribute_table[] =
+    This is added to the cfun structure.  */
+ typedef struct GTY(()) machine_function
+ {
+@@ -1360,12 +1366,18 @@ static const struct attribute_spec rs6000_attribute_table[] =
+ 
+ #undef TARGET_ASM_FUNCTION_PROLOGUE
+ #define TARGET_ASM_FUNCTION_PROLOGUE rs6000_output_function_prologue
  #undef TARGET_ASM_FUNCTION_EPILOGUE
  #define TARGET_ASM_FUNCTION_EPILOGUE rs6000_output_function_epilogue
  
@@ -1258,7 +1330,13 @@ index e2277e5217268fb2631d2040a4339b253846ade7..bc7576eb0c26f6c62c58b8923aed25de
  #undef TARGET_ASM_OUTPUT_ADDR_CONST_EXTRA
  #define TARGET_ASM_OUTPUT_ADDR_CONST_EXTRA rs6000_output_addr_const_extra
  
-@@ -6748,6 +6760,14 @@ rs6000_legitimize_address (rtx x, rtx oldx ATTRIBUTE_UNUSED,
+ #undef TARGET_LEGITIMIZE_ADDRESS
+ #define TARGET_LEGITIMIZE_ADDRESS rs6000_legitimize_address
+ 
+@@ -6745,12 +6757,20 @@ rs6000_legitimize_address (rtx x, rtx oldx ATTRIBUTE_UNUSED,
+     {
+       enum tls_model model = SYMBOL_REF_TLS_MODEL (x);
+       if (model != 0)
  	return rs6000_legitimize_tls_address (x, model);
      }
  
@@ -1273,7 +1351,13 @@ index e2277e5217268fb2631d2040a4339b253846ade7..bc7576eb0c26f6c62c58b8923aed25de
    extra = 0;
    switch (mode)
      {
-@@ -8360,6 +8380,15 @@ rs6000_emit_move (rtx dest, rtx source, enum machine_mode mode)
+     case TFmode:
+     case TDmode:
+     case TImode:
+@@ -8357,12 +8377,21 @@ rs6000_emit_move (rtx dest, rtx source, enum machine_mode mode)
+ 	  tmp = gen_rtx_PLUS (mode, tmp, addend);
+ 	  tmp = force_operand (tmp, operands[0]);
+ 	}
        operands[1] = tmp;
      }
  
@@ -1289,7 +1373,13 @@ index e2277e5217268fb2631d2040a4339b253846ade7..bc7576eb0c26f6c62c58b8923aed25de
    /* Handle the case where reload calls us with an invalid address.  */
    if (reload_in_progress && mode == Pmode
        && (! general_operand (operands[1], mode)
-@@ -8613,6 +8642,14 @@ rs6000_emit_move (rtx dest, rtx source, enum machine_mode mode)
+ 	  || ! nonimmediate_operand (operands[0], mode)))
+     goto emit_set;
+ 
+@@ -8610,12 +8639,20 @@ rs6000_emit_move (rtx dest, rtx source, enum machine_mode mode)
+ #endif
+ 	      emit_insn (gen_macho_high (target, operands[1]));
+ 	      emit_insn (gen_macho_low (operands[0], target, operands[1]));
  	      return;
  	    }
  
@@ -1304,7 +1394,13 @@ index e2277e5217268fb2631d2040a4339b253846ade7..bc7576eb0c26f6c62c58b8923aed25de
  	  emit_insn (gen_elf_high (target, operands[1]));
  	  emit_insn (gen_elf_low (operands[0], target, operands[1]));
  	  return;
-@@ -9133,6 +9170,12 @@ init_cumulative_args (CUMULATIVE_ARGS *cum, tree fntype,
+ 	}
+ 
+       /* If this is a SYMBOL_REF that refers to a constant pool entry,
+@@ -9130,12 +9167,18 @@ init_cumulative_args (CUMULATIVE_ARGS *cum, tree fntype,
+   if ((!fntype && rs6000_default_long_calls)
+       || (fntype
+ 	  && lookup_attribute ("longcall", TYPE_ATTRIBUTES (fntype))
  	  && !lookup_attribute ("shortcall", TYPE_ATTRIBUTES (fntype))))
      cum->call_cookie |= CALL_LONG;
  
@@ -1317,7 +1413,13 @@ index e2277e5217268fb2631d2040a4339b253846ade7..bc7576eb0c26f6c62c58b8923aed25de
    if (TARGET_DEBUG_ARG)
      {
        fprintf (stderr, "\ninit_cumulative_args:");
-@@ -9764,6 +9807,15 @@ rs6000_function_arg_advance_1 (CUMULATIVE_ARGS *cum, enum machine_mode mode,
+       if (fntype)
+ 	{
+ 	  tree ret_type = TREE_TYPE (fntype);
+@@ -9761,12 +9804,21 @@ rs6000_function_arg_advance_1 (CUMULATIVE_ARGS *cum, enum machine_mode mode,
+ 	  fprintf (stderr, "nargs = %4d, proto = %d, mode = %4s, ",
+ 		   cum->nargs_prototype, cum->prototype, GET_MODE_NAME (mode));
+ 	  fprintf (stderr, "named = %d, align = %d, depth = %d\n",
  		   named, align_words - start_words, depth);
  	}
      }
@@ -1333,7 +1435,13 @@ index e2277e5217268fb2631d2040a4339b253846ade7..bc7576eb0c26f6c62c58b8923aed25de
  }
  
  static void
-@@ -10905,6 +10957,12 @@ setup_incoming_varargs (cumulative_args_t cum, enum machine_mode mode,
+ rs6000_function_arg_advance (cumulative_args_t cum, enum machine_mode mode,
+ 			     const_tree type, bool named)
+ {
+@@ -10902,12 +10954,18 @@ setup_incoming_varargs (cumulative_args_t cum, enum machine_mode mode,
+       save_area = virtual_incoming_args_rtx;
+ 
+       if (targetm.calls.must_pass_in_stack (mode, type))
  	first_reg_offset += rs6000_arg_size (TYPE_MODE (type), type);
      }
  
@@ -1346,7 +1454,13 @@ index e2277e5217268fb2631d2040a4339b253846ade7..bc7576eb0c26f6c62c58b8923aed25de
    set = get_varargs_alias_set ();
    if (! no_rtl && first_reg_offset < GP_ARG_NUM_REG
        && cfun->va_list_gpr_size)
-@@ -11032,7 +11090,7 @@ rs6000_build_builtin_va_list (void)
+     {
+       int n_gpr, nregs = GP_ARG_NUM_REG - first_reg_offset;
+ 
+@@ -11029,13 +11087,13 @@ rs6000_build_builtin_va_list (void)
+   return build_array_type (record, build_index_type (size_zero_node));
+ }
+ 
  /* Implement va_start.  */
  
  static void
@@ -1355,7 +1469,13 @@ index e2277e5217268fb2631d2040a4339b253846ade7..bc7576eb0c26f6c62c58b8923aed25de
  {
    HOST_WIDE_INT words, n_gpr, n_fpr;
    tree f_gpr, f_fpr, f_res, f_ovf, f_sav;
-@@ -11067,6 +11125,15 @@ rs6000_va_start (tree valist, rtx nextarg)
+   tree gpr, fpr, ovf, sav, t;
+ 
+   /* Only SVR4 needs something special.  */
+@@ -11064,12 +11122,21 @@ rs6000_va_start (tree valist, rtx nextarg)
+   words = crtl->args.info.words;
+   n_gpr = MIN (crtl->args.info.sysv_gregno - GP_ARG_MIN_REG,
+ 	       GP_ARG_NUM_REG);
    n_fpr = MIN (crtl->args.info.fregno - FP_ARG_MIN_REG,
  	       FP_ARG_NUM_REG);
  
@@ -1371,7 +1491,13 @@ index e2277e5217268fb2631d2040a4339b253846ade7..bc7576eb0c26f6c62c58b8923aed25de
    if (TARGET_DEBUG_ARG)
      fprintf (stderr, "va_start: words = "HOST_WIDE_INT_PRINT_DEC", n_gpr = "
  	     HOST_WIDE_INT_PRINT_DEC", n_fpr = "HOST_WIDE_INT_PRINT_DEC"\n",
-@@ -11118,6 +11185,12 @@ rs6000_va_start (tree valist, rtx nextarg)
+ 	     words, n_gpr, n_fpr);
+ 
+   if (cfun->va_list_gpr_size)
+@@ -11115,12 +11182,18 @@ rs6000_va_start (tree valist, rtx nextarg)
+     t = fold_build_pointer_plus_hwi (t, cfun->machine->varargs_save_offset);
+   t = build2 (MODIFY_EXPR, TREE_TYPE (sav), sav, t);
+   TREE_SIDE_EFFECTS (t) = 1;
    expand_expr (t, const0_rtx, VOIDmode, EXPAND_NORMAL);
  }
  
@@ -1384,7 +1510,13 @@ index e2277e5217268fb2631d2040a4339b253846ade7..bc7576eb0c26f6c62c58b8923aed25de
  /* Implement va_arg.  */
  
  static tree
-@@ -13872,6 +13945,14 @@ rs6000_expand_builtin (tree exp, rtx target, rtx subtarget ATTRIBUTE_UNUSED,
+ rs6000_gimplify_va_arg (tree valist, tree type, gimple_seq *pre_p,
+ 			gimple_seq *post_p)
+ {
+@@ -13869,12 +13942,20 @@ rs6000_expand_builtin (tree exp, rtx target, rtx subtarget ATTRIBUTE_UNUSED,
+   size_t i;
+   rtx ret;
+   bool success;
    HOST_WIDE_INT mask = rs6000_builtin_info[uns_fcode].mask;
    bool func_valid_p = ((rs6000_builtin_mask & mask) == mask);
  
@@ -1399,7 +1531,13 @@ index e2277e5217268fb2631d2040a4339b253846ade7..bc7576eb0c26f6c62c58b8923aed25de
    if (TARGET_DEBUG_BUILTIN)
      {
        enum insn_code icode = rs6000_builtin_info[uns_fcode].icode;
-@@ -18720,7 +18801,16 @@ print_operand_address (FILE *file, rtx x)
+       const char *name1 = rs6000_builtin_info[uns_fcode].name;
+       const char *name2 = ((icode != CODE_FOR_nothing)
+ 			   ? get_insn_name ((int)icode)
+@@ -18717,13 +18798,22 @@ print_operand_address (FILE *file, rtx x)
+ #endif
+ #if TARGET_ELF
+   else if (GET_CODE (x) == LO_SUM && REG_P (XEXP (x, 0))
  	   && CONSTANT_P (XEXP (x, 1)))
      {
        output_addr_const (file, XEXP (x, 1));
@@ -1416,7 +1554,13 @@ index e2277e5217268fb2631d2040a4339b253846ade7..bc7576eb0c26f6c62c58b8923aed25de
      }
  #endif
    else if (toc_relative_expr_p (x, false))
-@@ -21320,6 +21410,19 @@ rs6000_stack_info (void)
+     {
+       /* This hack along with a corresponding hack in
+ 	 rs6000_output_addr_const_extra arranges to output addends
+@@ -21317,12 +21407,25 @@ rs6000_stack_info (void)
+ 				 - info_ptr->first_altivec_reg_save);
+ 
+   /* Does this function call anything?  */
    info_ptr->calls_p = (! crtl->is_leaf 
  		       || cfun->machine->ra_needs_full_frame);
  
@@ -1436,7 +1580,13 @@ index e2277e5217268fb2631d2040a4339b253846ade7..bc7576eb0c26f6c62c58b8923aed25de
    /* Determine if we need to save the condition code registers.  */
    if (df_regs_ever_live_p (CR2_REGNO)
        || df_regs_ever_live_p (CR3_REGNO)
-@@ -21437,7 +21540,13 @@ rs6000_stack_info (void)
+       || df_regs_ever_live_p (CR4_REGNO))
+     {
+       info_ptr->cr_save_p = 1;
+@@ -21434,13 +21537,19 @@ rs6000_stack_info (void)
+       info_ptr->lr_save_offset   = 2*reg_size;
+       break;
+ 
      case ABI_V4:
        info_ptr->fp_save_offset   = - info_ptr->fp_size;
        info_ptr->gp_save_offset   = info_ptr->fp_save_offset - info_ptr->gp_size;
@@ -1450,7 +1600,13 @@ index e2277e5217268fb2631d2040a4339b253846ade7..bc7576eb0c26f6c62c58b8923aed25de
  
        if (TARGET_SPE_ABI && info_ptr->spe_64bit_regs_used != 0)
  	{
-@@ -21497,6 +21606,10 @@ rs6000_stack_info (void)
+ 	  /* Align stack so SPE GPR save area is aligned on a
+ 	     double-word boundary.  */
+ 	  if (info_ptr->spe_gp_size != 0 && info_ptr->cr_save_offset != 0)
+@@ -21494,12 +21603,16 @@ rs6000_stack_info (void)
+ 					 + ehrd_size
+ 					 + ehcr_size
+ 					 + info_ptr->cr_size
  					 + info_ptr->vrsave_size,
  					 save_align);
  
@@ -1461,7 +1617,13 @@ index e2277e5217268fb2631d2040a4339b253846ade7..bc7576eb0c26f6c62c58b8923aed25de
    non_fixed_size	 = (info_ptr->vars_size
  			    + info_ptr->parm_size
  			    + info_ptr->save_size);
-@@ -21681,6 +21794,11 @@ debug_stack_info (rs6000_stack_t *info)
+ 
+   info_ptr->total_size = RS6000_ALIGN (non_fixed_size + info_ptr->fixed_size,
+ 				       ABI_STACK_BOUNDARY / BITS_PER_UNIT);
+@@ -21678,12 +21791,17 @@ debug_stack_info (rs6000_stack_t *info)
+   if (info->lr_save_p)
+     fprintf (stderr, "\tlr_save_p           = %5d\n", info->lr_save_p);
+ 
    if (info->cr_save_p)
      fprintf (stderr, "\tcr_save_p           = %5d\n", info->cr_save_p);
  
@@ -1473,7 +1635,13 @@ index e2277e5217268fb2631d2040a4339b253846ade7..bc7576eb0c26f6c62c58b8923aed25de
    if (info->vrsave_mask)
      fprintf (stderr, "\tvrsave_mask         = 0x%x\n", info->vrsave_mask);
  
-@@ -21717,6 +21835,11 @@ debug_stack_info (rs6000_stack_t *info)
+   if (info->push_p)
+     fprintf (stderr, "\tpush_p              = %5d\n", info->push_p);
+ 
+@@ -21714,12 +21832,17 @@ debug_stack_info (rs6000_stack_t *info)
+   if (info->cr_save_offset)
+     fprintf (stderr, "\tcr_save_offset      = %5d\n", info->cr_save_offset);
+ 
    if (info->varargs_save_offset)
      fprintf (stderr, "\tvarargs_save_offset = %5d\n", info->varargs_save_offset);
  
@@ -1485,7 +1653,13 @@ index e2277e5217268fb2631d2040a4339b253846ade7..bc7576eb0c26f6c62c58b8923aed25de
    if (info->total_size)
      fprintf (stderr, "\ttotal_size          = "HOST_WIDE_INT_PRINT_DEC"\n",
  	     info->total_size);
-@@ -21746,6 +21869,11 @@ debug_stack_info (rs6000_stack_t *info)
+ 
+   if (info->vars_size)
+     fprintf (stderr, "\tvars_size           = "HOST_WIDE_INT_PRINT_DEC"\n",
+@@ -21743,12 +21866,17 @@ debug_stack_info (rs6000_stack_t *info)
+   if (info->altivec_size)
+     fprintf (stderr, "\taltivec_size        = %5d\n", info->altivec_size);
+ 
    if (info->vrsave_size)
      fprintf (stderr, "\tvrsave_size         = %5d\n", info->vrsave_size);
  
@@ -1497,7 +1671,13 @@ index e2277e5217268fb2631d2040a4339b253846ade7..bc7576eb0c26f6c62c58b8923aed25de
    if (info->altivec_padding_size)
      fprintf (stderr, "\taltivec_padding_size= %5d\n",
  	     info->altivec_padding_size);
-@@ -23481,6 +23609,22 @@ rs6000_emit_prologue (void)
+ 
+   if (info->spe_padding_size)
+     fprintf (stderr, "\tspe_padding_size    = %5d\n",
+@@ -23478,12 +23606,28 @@ rs6000_emit_prologue (void)
+ 	  emit_frame_save (frame_reg_rtx, reg_mode,
+ 			   info->first_gp_reg_save + i,
+ 			   info->gp_save_offset + frame_off + reg_size * i,
  			   sp_off - frame_off);
      }
  
@@ -1520,7 +1700,13 @@ index e2277e5217268fb2631d2040a4339b253846ade7..bc7576eb0c26f6c62c58b8923aed25de
    if (crtl->calls_eh_return)
      {
        unsigned int i;
-@@ -23938,6 +24082,13 @@ rs6000_emit_prologue (void)
+       rtvec p;
+ 
+       for (i = 0; ; ++i)
+@@ -23935,12 +24079,19 @@ rs6000_emit_prologue (void)
+ 
+       if (!info->lr_save_p)
+ 	emit_move_insn (lr, gen_rtx_REG (Pmode, 0));
      }
  #endif
  
@@ -1534,7 +1720,13 @@ index e2277e5217268fb2631d2040a4339b253846ade7..bc7576eb0c26f6c62c58b8923aed25de
    /* If we need to, save the TOC register after doing the stack setup.
       Do not emit eh frame info for this save.  The unwinder wants info,
       conceptually attached to instructions in this function, about
-@@ -24048,6 +24199,11 @@ rs6000_output_function_prologue (FILE *file,
+      register values in the caller of this function.  This R2 may have
+      already been changed from the value in the caller.
+      We don't attempt to write accurate DWARF EH frame info for R2
+@@ -24045,12 +24196,17 @@ rs6000_output_function_prologue (FILE *file,
+ 		       reg_names[STATIC_CHAIN_REGNUM], reg_names[1]);
+ 	}
+       else
  	fprintf (file, "\tbl %s\n", RS6000_MCOUNT);
      }
  
@@ -1546,7 +1738,13 @@ index e2277e5217268fb2631d2040a4339b253846ade7..bc7576eb0c26f6c62c58b8923aed25de
    rs6000_pic_labelno++;
  }
  
-@@ -24806,6 +24962,24 @@ rs6000_emit_epilogue (int sibcall)
+ /* Non-zero if vmx regs are restored before the frame pop, zero if
+    we restore after the pop when possible.  */
+ #define ALWAYS_RESTORE_ALTIVEC_BEFORE_POP 0
+@@ -24803,12 +24959,30 @@ rs6000_emit_epilogue (int sibcall)
+ 				      + reg_size * (int) i);
+ 
+ 	  emit_move_insn (gen_rtx_REG (reg_mode, regno), mem);
  	}
      }
  
@@ -1571,11 +1769,17 @@ index e2277e5217268fb2631d2040a4339b253846ade7..bc7576eb0c26f6c62c58b8923aed25de
    /* Restore GPRs.  This is done as a PARALLEL if we are using
       the load-multiple instructions.  */
    if (TARGET_SPE_ABI
+       && info->spe_64bit_regs_used
+       && info->first_gp_reg_save != 32)
+     {
 diff --git a/gcc/config/rs6000/rs6000.h b/gcc/config/rs6000/rs6000.h
 index bd33ba8e773533579da6aad37bfc5bcb461e8a9e..75be33cb86aa4b106caa3cb88de549cea4453eaa 100644
 --- a/gcc/config/rs6000/rs6000.h
 +++ b/gcc/config/rs6000/rs6000.h
-@@ -2787,3 +2787,5 @@ enum rs6000_builtin_type_index
+@@ -2784,6 +2784,8 @@ enum rs6000_builtin_type_index
+ #define dfloat128_type_internal_node	 (rs6000_builtin_types[RS6000_BTI_dfloat128])
+ #define void_type_internal_node		 (rs6000_builtin_types[RS6000_BTI_void])
+ 
  extern GTY(()) tree rs6000_builtin_types[RS6000_BTI_MAX];
  extern GTY(()) tree rs6000_builtin_decls[RS6000_BUILTIN_COUNT];
  
@@ -1585,7 +1789,10 @@ diff --git a/gcc/config/rs6000/rs6000.md b/gcc/config/rs6000/rs6000.md
 index 94637f72187e6d8b49df2eb69b229323b3ccf9a3..c154af775ec4be18309397db30a00c86b174442e 100644
 --- a/gcc/config/rs6000/rs6000.md
 +++ b/gcc/config/rs6000/rs6000.md
-@@ -12178,6 +12178,31 @@
+@@ -12175,12 +12175,37 @@
+    "TARGET_TOC"
+    "la %0,%a1"
+    "&& TARGET_CMODEL != CMODEL_SMALL && reload_completed"
    [(set (match_dup 0) (high:P (match_dup 1)))
     (set (match_dup 0) (lo_sum:P (match_dup 0) (match_dup 1)))])
  
@@ -1617,7 +1824,13 @@ index 94637f72187e6d8b49df2eb69b229323b3ccf9a3..c154af775ec4be18309397db30a00c86
  ;; Elf specific ways of loading addresses for non-PIC code.
  ;; The output of this could be r0, but we make a very strong
  ;; preference for a base register because it will usually
-@@ -12192,7 +12217,7 @@
+ ;; be needed there.
+ (define_insn "elf_high"
+   [(set (match_operand:SI 0 "gpc_reg_operand" "=b*r")
+@@ -12189,13 +12214,13 @@
+   "lis %0,%1@ha")
+ 
+ (define_insn "elf_low"
    [(set (match_operand:SI 0 "gpc_reg_operand" "=r,r")
  	(lo_sum:SI (match_operand:SI 1 "gpc_reg_operand" "b,!*r")
  		   (match_operand 2 "" "")))]
@@ -1626,6 +1839,9 @@ index 94637f72187e6d8b49df2eb69b229323b3ccf9a3..c154af775ec4be18309397db30a00c86
     "@
      la %0,%2@l(%1)
      addic %0,%1,%K2")
+ 
+ ;; Call and call_value insns
+ (define_expand "call"
 diff --git a/gcc/config/rs6000/t-amigaos b/gcc/config/rs6000/t-amigaos
 new file mode 100644
 index 0000000000000000000000000000000000000000..15d9d3fd5a5f0c8109cd158242745fa52b19257e
@@ -1656,7 +1872,10 @@ diff --git a/gcc/cp/typeck.c b/gcc/cp/typeck.c
 index cd8318d92c644adf81b0ed5149490c157f5475d5..7275f21c3954a590227cfb23351a807696f48e3b 100644
 --- a/gcc/cp/typeck.c
 +++ b/gcc/cp/typeck.c
-@@ -3500,6 +3500,22 @@ cp_build_function_call_vec (tree function, vec<tree, va_gc> **params,
+@@ -3497,12 +3497,28 @@ cp_build_function_call_vec (tree function, vec<tree, va_gc> **params,
+ 
+       return error_mark_node;
+     }
  
    /* fntype now gets the type of function pointed to.  */
    fntype = TREE_TYPE (fntype);
@@ -1679,11 +1898,17 @@ index cd8318d92c644adf81b0ed5149490c157f5475d5..7275f21c3954a590227cfb23351a8076
    parm_types = TYPE_ARG_TYPES (fntype);
  
    if (params == NULL)
+     {
+       allocated = make_tree_vector ();
+       params = &allocated;
 diff --git a/gcc/doc/extend.texi b/gcc/doc/extend.texi
 index 07a7721f933881dc500656a8c071f9cc4fc3dc03..a58a7787f20e59d7e728dc65a57132d422fd9c58 100644
 --- a/gcc/doc/extend.texi
 +++ b/gcc/doc/extend.texi
-@@ -4455,6 +4455,157 @@ also be used with non-function declarations.  Weak symbols are supported
+@@ -4452,12 +4452,163 @@ The @code{weak} attribute causes the declaration to be emitted as a weak
+ symbol rather than a global.  This is primarily useful in defining
+ library functions that can be overridden in user code, though it can
+ also be used with non-function declarations.  Weak symbols are supported
  for ELF targets, and also for a.out targets when using the GNU assembler
  and linker.
  
@@ -1841,7 +2066,13 @@ index 07a7721f933881dc500656a8c071f9cc4fc3dc03..a58a7787f20e59d7e728dc65a57132d4
  @item weakref
  @itemx weakref ("@var{target}")
  @cindex @code{weakref} attribute
-@@ -5463,6 +5614,22 @@ Here, @code{t5} takes up 2 bytes.
+ The @code{weakref} attribute marks a declaration as a weak reference.
+ Without arguments, it should be accompanied by an @code{alias} attribute
+ naming the target symbol.  Optionally, the @var{target} may be given as
+@@ -5460,12 +5611,28 @@ struct
+ 
+ @noindent
+ Here, @code{t5} takes up 2 bytes.
  @end enumerate
  @end table
  
@@ -1864,11 +2095,17 @@ index 07a7721f933881dc500656a8c071f9cc4fc3dc03..a58a7787f20e59d7e728dc65a57132d4
  @subsection PowerPC Variable Attributes
  
  Three attributes currently are defined for PowerPC configurations:
+ @code{altivec}, @code{ms_struct} and @code{gcc_struct}.
+ 
+ For full documentation of the struct attributes please see the
 diff --git a/gcc/doc/invoke.texi b/gcc/doc/invoke.texi
 index c9b86abd7fa74b107671f635680b616c908f05c4..321c0fe724b6c3f30cecfaa32197913189d57100 100644
 --- a/gcc/doc/invoke.texi
 +++ b/gcc/doc/invoke.texi
-@@ -1068,6 +1068,10 @@ See i386 and x86-64 Options.
+@@ -1065,12 +1065,16 @@ See i386 and x86-64 Options.
+ -mtarget-align  -mno-target-align @gol
+ -mlongcalls  -mno-longcalls}
+ 
  @emph{zSeries Options}
  See S/390 and zSeries Options.
  
@@ -1879,7 +2116,13 @@ index c9b86abd7fa74b107671f635680b616c908f05c4..321c0fe724b6c3f30cecfaa321979131
  @item Code Generation Options
  @xref{Code Gen Options,,Options for Code Generation Conventions}.
  @gccoptlist{-fcall-saved-@var{reg}  -fcall-used-@var{reg} @gol
-@@ -11354,6 +11358,7 @@ platform.
+ -ffixed-@var{reg}  -fexceptions @gol
+ -fnon-call-exceptions  -fdelete-dead-exceptions  -funwind-tables @gol
+ -fasynchronous-unwind-tables @gol
+@@ -11351,12 +11355,13 @@ platform.
+ * VAX Options::
+ * VMS Options::
+ * VxWorks Options::
  * x86-64 Options::
  * Xstormy16 Options::
  * Xtensa Options::
@@ -1887,7 +2130,13 @@ index c9b86abd7fa74b107671f635680b616c908f05c4..321c0fe724b6c3f30cecfaa321979131
  * zSeries Options::
  @end menu
  
-@@ -21929,6 +21934,137 @@ These options are defined for Xstormy16:
+ @node AArch64 Options
+ @subsection AArch64 Options
+ @cindex AArch64 Options
+@@ -21926,12 +21931,143 @@ These options are defined for Xstormy16:
+ @table @gcctabopt
+ @item -msim
+ @opindex msim
  Choose startup files and linker script suitable for the simulator.
  @end table
  
@@ -2025,11 +2274,17 @@ index c9b86abd7fa74b107671f635680b616c908f05c4..321c0fe724b6c3f30cecfaa321979131
  @node Xtensa Options
  @subsection Xtensa Options
  @cindex Xtensa Options
+ 
+ These options are supported for Xtensa targets:
+ 
 diff --git a/gcc/expr.c b/gcc/expr.c
 index de2bc720721834b0042c15280476956e0313fe9b..b68caf9381534f36380f96bd2935c94a1c4ef9a8 100644
 --- a/gcc/expr.c
 +++ b/gcc/expr.c
-@@ -8070,7 +8070,6 @@ expand_expr_real_2 (sepops ops, rtx target, enum machine_mode tmode,
+@@ -8067,13 +8067,12 @@ expand_expr_real_2 (sepops ops, rtx target, enum machine_mode tmode,
+   tree treeop0, treeop1, treeop2;
+ #define REDUCE_BIT_FIELD(expr)	(reduce_bit_field			  \
+ 				 ? reduce_to_bit_field_precision ((expr), \
  								  target, \
  								  type)	  \
  				 : (expr))
@@ -2037,11 +2292,17 @@ index de2bc720721834b0042c15280476956e0313fe9b..b68caf9381534f36380f96bd2935c94a
    type = ops->type;
    mode = TYPE_MODE (type);
    unsignedp = TYPE_UNSIGNED (type);
+ 
+   treeop0 = ops->op0;
+   treeop1 = ops->op1;
 diff --git a/gcc/gcc.c b/gcc/gcc.c
 index adbf0c4eb83d69bd2748fcca068f2e41e6728023..880b5a2031d97d82ec1199906289a74822043dca 100644
 --- a/gcc/gcc.c
 +++ b/gcc/gcc.c
-@@ -2655,7 +2655,7 @@ execute (void)
+@@ -2652,13 +2652,13 @@ execute (void)
+       commands[0].argv[0] = (string) ? string : commands[0].argv[0];
+     }
+ 
    for (n_commands = 1, i = 0; argbuf.iterate (i, &arg); i++)
      if (arg && strcmp (arg, "|") == 0)
        {				/* each command.  */
@@ -2050,7 +2311,13 @@ index adbf0c4eb83d69bd2748fcca068f2e41e6728023..880b5a2031d97d82ec1199906289a748
  	fatal_error ("-pipe not supported");
  #endif
  	argbuf[i] = 0; /* Termination of
-@@ -4054,7 +4054,6 @@ process_command (unsigned int decoded_options_count,
+ 						     command args.  */
+ 	commands[n_commands].prog = argbuf[i + 1];
+ 	commands[n_commands].argv
+@@ -4051,13 +4051,12 @@ process_command (unsigned int decoded_options_count,
+       add_prefix (&exec_prefixes, standard_exec_prefix, "BINUTILS",
+ 		  PREFIX_PRIORITY_LAST, 2, 0);
+ #endif
        add_prefix (&startfile_prefixes, standard_exec_prefix, "BINUTILS",
  		  PREFIX_PRIORITY_LAST, 1, 0);
      }
@@ -2058,7 +2325,13 @@ index adbf0c4eb83d69bd2748fcca068f2e41e6728023..880b5a2031d97d82ec1199906289a748
    gcc_assert (!IS_ABSOLUTE_PATH (tooldir_base_prefix));
    tooldir_prefix2 = concat (tooldir_base_prefix, spec_machine,
  			    dir_separator_str, NULL);
-@@ -6097,6 +6096,11 @@ give_switch (int switchnum, int omit_first_word)
+ 
+   /* Look for tools relative to the location from which the driver is
+      running, or, if that is not available, the configured prefix.  */
+@@ -6094,12 +6093,17 @@ give_switch (int switchnum, int omit_first_word)
+ 	      if (dot)
+ 		(CONST_CAST (char *, arg))[length] = '.';
+ 	      do_spec_1 (suffix_subst, 1, NULL);
  	    }
  	  else
  	    do_spec_1 (arg, 1, NULL);
@@ -2070,7 +2343,13 @@ index adbf0c4eb83d69bd2748fcca068f2e41e6728023..880b5a2031d97d82ec1199906289a748
  	}
      }
  
-@@ -6134,7 +6138,9 @@ is_directory (const char *path1, bool linker)
+   do_spec_1 (" ", 0, NULL);
+   switches[switchnum].validated = true;
+ }
+@@ -6131,13 +6135,15 @@ is_directory (const char *path1, bool linker)
+   len1 = strlen (path1);
+   path = (char *) alloca (3 + len1);
+   memcpy (path, path1, len1);
    cp = path + len1;
    if (!IS_DIR_SEPARATOR (cp[-1]))
      *cp++ = DIR_SEPARATOR;
@@ -2080,7 +2359,13 @@ index adbf0c4eb83d69bd2748fcca068f2e41e6728023..880b5a2031d97d82ec1199906289a748
    *cp = '\0';
  
    /* Exclude directories that the linker is known to search.  */
-@@ -6594,6 +6600,7 @@ main (int argc, char **argv)
+   if (linker
+       && IS_DIR_SEPARATOR (path[0])
+       && ((cp - path == 6
+@@ -6591,22 +6597,24 @@ main (int argc, char **argv)
+ 			      ? gcc_exec_prefix : standard_exec_prefix,
+ 			      machine_suffix,
+ 			      standard_startfile_prefix, NULL),
  		      NULL, PREFIX_PRIORITY_LAST, 0, 1);
  	}
  
@@ -2088,7 +2373,10 @@ index adbf0c4eb83d69bd2748fcca068f2e41e6728023..880b5a2031d97d82ec1199906289a748
        /* Sysrooted prefixes are relocated because target_system_root is
  	 also relocated by gcc_exec_prefix.  */
        if (*standard_startfile_prefix_1)
-@@ -6604,6 +6611,7 @@ main (int argc, char **argv)
+  	add_sysrooted_prefix (&startfile_prefixes,
+ 			      standard_startfile_prefix_1, "BINUTILS",
+ 			      PREFIX_PRIORITY_LAST, 0, 1);
+       if (*standard_startfile_prefix_2)
  	add_sysrooted_prefix (&startfile_prefixes,
  			      standard_startfile_prefix_2, "BINUTILS",
  			      PREFIX_PRIORITY_LAST, 0, 1);
@@ -2096,11 +2384,17 @@ index adbf0c4eb83d69bd2748fcca068f2e41e6728023..880b5a2031d97d82ec1199906289a748
      }
  
    /* Process any user specified specs in the order given on the command
+      line.  */
+   for (uptr = user_specs_head; uptr; uptr = uptr->next)
+     {
 diff --git a/gcc/prefix.c b/gcc/prefix.c
 index 71ddf5d233e62aff80e9bbf2fe9658c00083cb2c..e22b89a263026e344c35b9400b62cb3cf1c3d1b5 100644
 --- a/gcc/prefix.c
 +++ b/gcc/prefix.c
-@@ -329,7 +329,7 @@ update_path (const char *path, const char *key)
+@@ -326,13 +326,13 @@ update_path (const char *path, const char *key)
+ 
+ #ifdef UPDATE_PATH_HOST_CANONICALIZE
+   /* Perform host dependent canonicalization when needed.  */
    UPDATE_PATH_HOST_CANONICALIZE (result);
  #endif
  
@@ -2109,11 +2403,17 @@ index 71ddf5d233e62aff80e9bbf2fe9658c00083cb2c..e22b89a263026e344c35b9400b62cb3c
    /* Convert DIR_SEPARATOR_2 to DIR_SEPARATOR.  */
    if (DIR_SEPARATOR_2 != DIR_SEPARATOR)
      tr (result, DIR_SEPARATOR_2, DIR_SEPARATOR);
+ #endif
+ 
+ #if defined (DIR_SEPARATOR) && !defined (DIR_SEPARATOR_2)
 diff --git a/intl/dcigettext.c b/intl/dcigettext.c
 index a8d4a14d273b153b117b507ec76356635ccd876e..a9cc1066050e10b539149027a5c159f21accfaca 100644
 --- a/intl/dcigettext.c
 +++ b/intl/dcigettext.c
-@@ -148,7 +148,9 @@ extern int errno;
+@@ -145,13 +145,15 @@ extern int errno;
+ # define tfind __tfind
+ #else
+ # if !defined HAVE_GETCWD
  char *getwd ();
  #  define getcwd(buf, max) getwd (buf)
  # else
@@ -2123,11 +2423,17 @@ index a8d4a14d273b153b117b507ec76356635ccd876e..a9cc1066050e10b539149027a5c159f2
  # endif
  # ifndef HAVE_STPCPY
  static char *stpcpy PARAMS ((char *dest, const char *src));
+ # endif
+ # ifndef HAVE_MEMPCPY
+ static void *mempcpy PARAMS ((void *dest, const void *src, size_t n));
 diff --git a/libcpp/line-map.c b/libcpp/line-map.c
 index 78c43933d836bb6782228c2b73417d641d12bb0d..58c1cf4be3f5cd598687119f3c95cd8fcc1e709d 100644
 --- a/libcpp/line-map.c
 +++ b/libcpp/line-map.c
-@@ -666,6 +666,9 @@ linemap_ordinary_map_lookup (struct line_maps *set, source_location line)
+@@ -663,12 +663,15 @@ linemap_ordinary_map_lookup (struct line_maps *set, source_location line)
+ 
+   mn = LINEMAPS_ORDINARY_CACHE (set);
+   mx = LINEMAPS_ORDINARY_USED (set);
    
    cached = LINEMAPS_ORDINARY_MAP_AT (set, mn);
    /* We should get a segfault if no line_maps have been added yet.  */
@@ -2137,11 +2443,17 @@ index 78c43933d836bb6782228c2b73417d641d12bb0d..58c1cf4be3f5cd598687119f3c95cd8f
    if (line >= MAP_START_LOCATION (cached))
      {
        if (mn + 1 == mx || line < MAP_START_LOCATION (&cached[1]))
+ 	return cached;
+     }
+   else
 diff --git a/libgcc/config.host b/libgcc/config.host
 index f4a742872937924209ff593bb1d18b4d0362e6ca..dc64594da18c894e93571db1a53cd8b728760be5 100644
 --- a/libgcc/config.host
 +++ b/libgcc/config.host
-@@ -917,6 +917,9 @@ pdp11-*-*)
+@@ -914,12 +914,15 @@ nios2-*-*)
+ pdp11-*-*)
+ 	tmake_file="pdp11/t-pdp11 t-fdpbit"
+ 	;;
  picochip-*-*)
  	tmake_file="picochip/t-picochip t-fpbit"
          ;;
@@ -2151,6 +2463,9 @@ index f4a742872937924209ff593bb1d18b4d0362e6ca..dc64594da18c894e93571db1a53cd8b7
  powerpc-*-darwin*)
  	case ${host} in
  	*-*-darwin9* | *-*-darwin[12][0-9]*)
+ 	  # libSystem contains unwind information for signal frames since
+ 	  # Darwin 9.
+ 	  ;;
 diff --git a/libgcc/config/rs6000/t-amigaos b/libgcc/config/rs6000/t-amigaos
 new file mode 100644
 index 0000000000000000000000000000000000000000..da1e303eed7e60df883971a610e8904db0df3e23
@@ -2206,7 +2521,10 @@ diff --git a/libiberty/Makefile.in b/libiberty/Makefile.in
 index 75ff82d984a930b4747feb6bfabf743731468656..16b62506438e6febb931f843e9730f06d6a83ff0 100644
 --- a/libiberty/Makefile.in
 +++ b/libiberty/Makefile.in
-@@ -142,6 +142,7 @@ CFILES = alloca.c argv.c asprintf.c atexit.c				\
+@@ -139,12 +139,13 @@ CFILES = alloca.c argv.c asprintf.c atexit.c				\
+ 	make-temp-file.c md5.c memchr.c memcmp.c memcpy.c memmem.c	\
+ 	 memmove.c mempcpy.c memset.c mkstemps.c			\
+ 	objalloc.c obstack.c						\
  	partition.c pexecute.c						\
  	 pex-common.c pex-djgpp.c pex-msdos.c pex-one.c			\
  	 pex-unix.c pex-win32.c						\
@@ -2214,7 +2532,13 @@ index 75ff82d984a930b4747feb6bfabf743731468656..16b62506438e6febb931f843e9730f06
           physmem.c putenv.c						\
  	random.c regex.c rename.c rindex.c				\
  	safe-ctype.c setenv.c setproctitle.c sha1.c sigsetmask.c        \
-@@ -207,6 +208,7 @@ CONFIGURED_OFILES = ./asprintf.$(objext) ./atexit.$(objext)		\
+ 	 simple-object.c simple-object-coff.c simple-object-elf.c	\
+ 	 simple-object-mach-o.c simple-object-xcoff.c			\
+          snprintf.c sort.c						\
+@@ -204,12 +205,13 @@ CONFIGURED_OFILES = ./asprintf.$(objext) ./atexit.$(objext)		\
+ 	./getcwd.$(objext) ./getpagesize.$(objext)			\
+ 	 ./gettimeofday.$(objext)					\
+ 	./index.$(objext) ./insque.$(objext)				\
  	./memchr.$(objext) ./memcmp.$(objext) ./memcpy.$(objext) 	\
  	./memmem.$(objext) ./memmove.$(objext)				\
  	 ./mempcpy.$(objext) ./memset.$(objext) ./mkstemps.$(objext)	\
@@ -2222,7 +2546,13 @@ index 75ff82d984a930b4747feb6bfabf743731468656..16b62506438e6febb931f843e9730f06
  	./pex-djgpp.$(objext) ./pex-msdos.$(objext)			\
  	 ./pex-unix.$(objext) ./pex-win32.$(objext)			\
  	 ./putenv.$(objext)						\
-@@ -910,6 +912,13 @@ $(CONFIGURED_OFILES): stamp-picdir
+ 	./random.$(objext) ./rename.$(objext) ./rindex.$(objext)	\
+ 	./setenv.$(objext) 						\
+ 	 ./setproctitle.$(objext)					\
+@@ -907,12 +909,19 @@ $(CONFIGURED_OFILES): stamp-picdir
+ 	$(INCDIR)/libiberty.h $(srcdir)/pex-common.h
+ 	if [ x"$(PICFLAG)" != x ]; then \
+ 	  $(COMPILE.c) $(PICFLAG) $(srcdir)/pex-win32.c -o pic/$@; \
  	else true; fi
  	$(COMPILE.c) $(srcdir)/pex-win32.c $(OUTPUT_OPTION)
  
@@ -2236,11 +2566,17 @@ index 75ff82d984a930b4747feb6bfabf743731468656..16b62506438e6febb931f843e9730f06
  ./pexecute.$(objext): $(srcdir)/pexecute.c config.h $(INCDIR)/ansidecl.h \
  	$(INCDIR)/libiberty.h
  	if [ x"$(PICFLAG)" != x ]; then \
+ 	  $(COMPILE.c) $(PICFLAG) $(srcdir)/pexecute.c -o pic/$@; \
+ 	else true; fi
+ 	$(COMPILE.c) $(srcdir)/pexecute.c $(OUTPUT_OPTION)
 diff --git a/libiberty/basename.c b/libiberty/basename.c
 index 0f2c069f0ccf5a7d91e4913548e068c247e12efb..6ba5c4aa4f814fbc28f03127d22e91253c980c1b 100644
 --- a/libiberty/basename.c
 +++ b/libiberty/basename.c
-@@ -18,26 +18,7 @@ Behavior is undefined if the pathname ends in a directory separator.
+@@ -15,32 +15,13 @@ Behavior is undefined if the pathname ends in a directory separator.
+ #ifdef HAVE_CONFIG_H
+ #include "config.h"
+ #endif
  #include "ansidecl.h"
  #include "libiberty.h"
  #include "safe-ctype.h"
@@ -2268,11 +2604,17 @@ index 0f2c069f0ccf5a7d91e4913548e068c247e12efb..6ba5c4aa4f814fbc28f03127d22e9125
  
  char *
  basename (const char *name)
+ {
+   const char *base;
+ 
 diff --git a/libiberty/configure b/libiberty/configure
 index 7bde9b38f19e3ddf13ad78f1964be3ac8c6b8f5b..5bfda76cb840a5c3fcd70fce0ff59ddd0773c582 100755
 --- a/libiberty/configure
 +++ b/libiberty/configure
-@@ -6640,6 +6640,7 @@ case "${host}" in
+@@ -6637,12 +6637,13 @@ fi
+ 
+ # Figure out which version of pexecute to use.
+ case "${host}" in
       *-*-mingw* | *-*-winnt*)	pexecute=pex-win32  ;;
       *-*-msdosdjgpp*)		pexecute=pex-djgpp  ;;
       *-*-msdos*)		pexecute=pex-msdos  ;;
@@ -2280,11 +2622,17 @@ index 7bde9b38f19e3ddf13ad78f1964be3ac8c6b8f5b..5bfda76cb840a5c3fcd70fce0ff59ddd
       *)				pexecute=pex-unix   ;;
  esac
  
+ 
+ if test x$gcc_no_link = xyes; then
+   if test "x${ac_cv_func_mmap_fixed_mapped+set}" != xset; then
 diff --git a/libiberty/configure.ac b/libiberty/configure.ac
 index d6180bcddd95710463323eb161b002afd85f5784..ba3b25afe6835dd9193ff2b83afe13cc01f7d63e 100644
 --- a/libiberty/configure.ac
 +++ b/libiberty/configure.ac
-@@ -673,6 +673,7 @@ case "${host}" in
+@@ -670,12 +670,13 @@ fi
+ 
+ # Figure out which version of pexecute to use.
+ case "${host}" in
       *-*-mingw* | *-*-winnt*)	pexecute=pex-win32  ;;
       *-*-msdosdjgpp*)		pexecute=pex-djgpp  ;;
       *-*-msdos*)		pexecute=pex-msdos  ;;
@@ -2292,11 +2640,17 @@ index d6180bcddd95710463323eb161b002afd85f5784..ba3b25afe6835dd9193ff2b83afe13cc
       *)				pexecute=pex-unix   ;;
  esac
  AC_SUBST(pexecute)
+ 
+ libiberty_AC_FUNC_STRNCMP
+ 
 diff --git a/libiberty/lrealpath.c b/libiberty/lrealpath.c
 index b27c8de990e974c7294dfc4024ef44fbd3844a52..1491511553f865caaf8effc67a3ea42319edd3cf 100644
 --- a/libiberty/lrealpath.c
 +++ b/libiberty/lrealpath.c
-@@ -49,6 +49,7 @@ components will be simplified.  The returned value will be allocated using
+@@ -46,12 +46,13 @@ components will be simplified.  The returned value will be allocated using
+ #ifdef HAVE_UNISTD_H
+ #include <unistd.h>
+ #endif
  #ifdef HAVE_STRING_H
  #include <string.h>
  #endif
@@ -2304,7 +2658,13 @@ index b27c8de990e974c7294dfc4024ef44fbd3844a52..1491511553f865caaf8effc67a3ea423
  
  /* On GNU libc systems the declaration is only visible with _GNU_SOURCE.  */
  #if defined(HAVE_CANONICALIZE_FILE_NAME) \
-@@ -109,7 +110,7 @@ lrealpath (const char *filename)
+     && defined(NEED_DECLARATION_CANONICALIZE_FILE_NAME)
+ extern char *canonicalize_file_name (const char *);
+ #endif
+@@ -106,13 +107,13 @@ lrealpath (const char *filename)
+      compile time buffer size and no alternative function.  Query the
+      OS, using pathconf(), for the buffer limit.  Care is needed
+      though, some systems do not limit PATH_MAX (return -1 for
       pathconf()) making it impossible to pass a correctly sized buffer
       to realpath() (it could always overflow).  On those systems, we
       skip this.  */
@@ -2313,11 +2673,17 @@ index b27c8de990e974c7294dfc4024ef44fbd3844a52..1491511553f865caaf8effc67a3ea423
    {
      /* Find out the max path size.  */
      long path_max = pathconf ("/", _PC_PATH_MAX);
+     if (path_max > 0)
+       {
+ 	/* PATH_MAX is bounded.  */
 diff --git a/libiberty/make-relative-prefix.c b/libiberty/make-relative-prefix.c
 index fe639d18bd2815a5ec33aef28720386725ab1bd5..0b5691adc3f6ed9013472568d9d001495205673b 100644
 --- a/libiberty/make-relative-prefix.c
 +++ b/libiberty/make-relative-prefix.c
-@@ -66,6 +66,7 @@ relative prefix can be found, return @code{NULL}.
+@@ -63,44 +63,43 @@ relative prefix can be found, return @code{NULL}.
+ #endif
+ 
+ #include <string.h>
  
  #include "ansidecl.h"
  #include "libiberty.h"
@@ -2325,7 +2691,7 @@ index fe639d18bd2815a5ec33aef28720386725ab1bd5..0b5691adc3f6ed9013472568d9d00149
  
  #ifndef R_OK
  #define R_OK 4
-@@ -73,31 +74,29 @@ relative prefix can be found, return @code{NULL}.
+ #define W_OK 2
  #define X_OK 1
  #endif
  
@@ -2374,11 +2740,17 @@ index fe639d18bd2815a5ec33aef28720386725ab1bd5..0b5691adc3f6ed9013472568d9d00149
  
  static char *save_string (const char *, int);
  static char **split_directories	(const char *, int *);
+ static void free_split_directories (char **);
+ 
+ static char *
 diff --git a/libiberty/make-temp-file.c b/libiberty/make-temp-file.c
 index 7b74f8179b101e9c37c6bb8683b3cc588ed1fc27..0a8d02e5208b11ca230603e21035909aa5ff32ac 100644
 --- a/libiberty/make-temp-file.c
 +++ b/libiberty/make-temp-file.c
-@@ -41,6 +41,10 @@ Boston, MA 02110-1301, USA.  */
+@@ -38,25 +38,26 @@ Boston, MA 02110-1301, USA.  */
+ #include <sys/file.h>   /* May get R_OK, etc. on some systems.  */
+ #endif
+ #if defined(_WIN32) && !defined(__CYGWIN__)
  #include <windows.h>
  #endif
  
@@ -2389,7 +2761,7 @@ index 7b74f8179b101e9c37c6bb8683b3cc588ed1fc27..0a8d02e5208b11ca230603e21035909a
  #ifndef R_OK
  #define R_OK 4
  #define W_OK 2
-@@ -48,12 +52,9 @@ Boston, MA 02110-1301, USA.  */
+ #define X_OK 1
  #endif
  
  #include "libiberty.h"
@@ -2404,7 +2776,13 @@ index 7b74f8179b101e9c37c6bb8683b3cc588ed1fc27..0a8d02e5208b11ca230603e21035909a
  
  /* Name of temporary file.
     mktemp requires 6 trailing X's.  */
-@@ -81,11 +82,13 @@ try_dir (const char *dir, const char *base)
+ #define TEMP_FILE "ccXXXXXX"
+ #define TEMP_FILE_LEN (sizeof(TEMP_FILE) - 1)
+ 
+@@ -78,17 +79,19 @@ try_dir (const char *dir, const char *base)
+   if (dir != 0
+       && access (dir, R_OK | W_OK | X_OK) == 0)
+     return dir;
    return 0;
  }
  
@@ -2418,7 +2796,13 @@ index 7b74f8179b101e9c37c6bb8683b3cc588ed1fc27..0a8d02e5208b11ca230603e21035909a
  
  #endif
  
-@@ -130,10 +133,14 @@ choose_tmpdir (void)
+ static char *memoized_tmpdir;
+ 
+ /*
+@@ -127,27 +130,37 @@ choose_tmpdir (void)
+       if (strcmp (P_tmpdir, "\\") == 0)
+ 	base = try_dir ("\\.", base);
+       else
  	base = try_dir (P_tmpdir, base);
  #endif
  
@@ -2433,7 +2817,9 @@ index 7b74f8179b101e9c37c6bb8683b3cc588ed1fc27..0a8d02e5208b11ca230603e21035909a
        
        /* If all else fails, use the current directory!  */
        if (base == 0)
-@@ -143,8 +150,14 @@ choose_tmpdir (void)
+ 	base = ".";
+       /* Append DIR_SEPARATOR to the directory we've chosen
+ 	 and return it.  */
        len = strlen (base);
        tmpdir = XNEWVEC (char, len + 2);
        strcpy (tmpdir, base);
@@ -2450,6 +2836,9 @@ index 7b74f8179b101e9c37c6bb8683b3cc588ed1fc27..0a8d02e5208b11ca230603e21035909a
        memoized_tmpdir = tmpdir;
  #else /* defined(_WIN32) && !defined(__CYGWIN__) */
        DWORD len;
+ 
+       /* Figure out how much space we need.  */
+       len = GetTempPath(0, NULL);
 diff --git a/libiberty/pex-amigaos.c b/libiberty/pex-amigaos.c
 new file mode 100644
 index 0000000000000000000000000000000000000000..873ea977f383d19a424c81ef5f8522e6ade18da8
@@ -2785,7 +3174,10 @@ diff --git a/libstdc++-v3/configure b/libstdc++-v3/configure
 index 16e09f097acde5c35fb4e88186cd3367c9a51884..c70253c47e94c14a1daeae5717d144e152820ffc 100755
 --- a/libstdc++-v3/configure
 +++ b/libstdc++-v3/configure
-@@ -77063,6 +77063,165 @@ done
+@@ -77060,12 +77060,171 @@ done
+ 
+     $as_echo "#define HAVE_TANF 1" >>confdefs.h
+ 
      $as_echo "#define HAVE_TANHF 1" >>confdefs.h
  
      ;;
@@ -2951,7 +3343,13 @@ index 16e09f097acde5c35fb4e88186cd3367c9a51884..c70253c47e94c14a1daeae5717d144e1
    *)
      as_fn_error "No support for this host/target combination." "$LINENO" 5
     ;;
-@@ -79530,37 +79689,1681 @@ $as_echo "$gxx_include_dir" >&6; }
+ esac
+ 
+   fi
+@@ -79527,43 +79686,1687 @@ $as_echo "$gxx_include_dir" >&6; }
+ 
+ 
+   WARN_FLAGS='-Wall -Wextra -Wwrite-strings -Wcast-qual -Wabi'
  
  
  
@@ -4657,7 +5055,13 @@ index 16e09f097acde5c35fb4e88186cd3367c9a51884..c70253c47e94c14a1daeae5717d144e1
  # the --recheck option to rerun configure.
  #
  # `ac_cv_env_foo' variables (set or unset) will be overridden when
-@@ -80713,6 +82516,7 @@ fi
+ # loading this file, other *unset* `ac_cv_foo' will be assigned the
+ # following values.
+ 
+@@ -80710,12 +82513,13 @@ fi
+     TIMESTAMP='$TIMESTAMP'
+     RM='$RM'
+     ofile='$ofile'
  
  
  
@@ -4665,11 +5069,17 @@ index 16e09f097acde5c35fb4e88186cd3367c9a51884..c70253c47e94c14a1daeae5717d144e1
  
  
  
+ GCC="$GCC"
+ CC="$CC"
+ acx_cv_header_stdint="$acx_cv_header_stdint"
 diff --git a/libstdc++-v3/configure.ac b/libstdc++-v3/configure.ac
 index 1de0f6c1cbf2e21cd64a15686d32bdb0bd602b70..aa2e3cebb3f9c9a64261e6e5847f63a890be9c54 100644
 --- a/libstdc++-v3/configure.ac
 +++ b/libstdc++-v3/configure.ac
-@@ -483,6 +483,9 @@ GLIBCXX_EXPORT_INSTALL_INFO
+@@ -480,12 +480,15 @@ fi
+ GLIBCXX_EXPORT_INSTALL_INFO
+ 
+ # Export all the include and flag information to Makefiles.
  GLIBCXX_EXPORT_INCLUDES
  GLIBCXX_EXPORT_FLAGS
  
@@ -4679,11 +5089,17 @@ index 1de0f6c1cbf2e21cd64a15686d32bdb0bd602b70..aa2e3cebb3f9c9a64261e6e5847f63a8
  dnl In autoconf 2.5x, AC_OUTPUT is replaced by four AC_CONFIG_* macros,
  dnl which can all be called multiple times as needed, plus one (different)
  dnl AC_OUTPUT macro.  This one lists the files to be created:
+ AC_CONFIG_FILES(Makefile)
+ AC_CONFIG_FILES([scripts/testsuite_flags],[chmod +x scripts/testsuite_flags])
+ AC_CONFIG_FILES([scripts/extract_symvers],[chmod +x scripts/extract_symvers])
 diff --git a/libstdc++-v3/crossconfig.m4 b/libstdc++-v3/crossconfig.m4
 index 15d876eab8c1237790579fc855bccc9faf7be7b1..c5d2e5fbd51afce82a0f0c6d6418324c0f3ceb29 100644
 --- a/libstdc++-v3/crossconfig.m4
 +++ b/libstdc++-v3/crossconfig.m4
-@@ -277,6 +277,14 @@ case "${host}" in
+@@ -274,11 +274,19 @@ case "${host}" in
+     AC_DEFINE(HAVE_SINF)
+     AC_DEFINE(HAVE_SINHF)
+     AC_DEFINE(HAVE_SQRTF)
      AC_DEFINE(HAVE_TANF)
      AC_DEFINE(HAVE_TANHF)
      ;;
@@ -4698,11 +5114,16 @@ index 15d876eab8c1237790579fc855bccc9faf7be7b1..c5d2e5fbd51afce82a0f0c6d6418324c
    *)
      AC_MSG_ERROR([No support for this host/target combination.])
     ;;
+ esac
+ ])
 diff --git a/libstdc++-v3/include/bits/atomic_base.h b/libstdc++-v3/include/bits/atomic_base.h
 index 1fc0ebb7e40e071184bb45aa432ad2bdad7211ba..bfd792bf11480acb1d026613b7c66d8158afe478 100644
 --- a/libstdc++-v3/include/bits/atomic_base.h
 +++ b/libstdc++-v3/include/bits/atomic_base.h
-@@ -33,7 +33,9 @@
+@@ -30,13 +30,15 @@
+ #ifndef _GLIBCXX_ATOMIC_BASE_H
+ #define _GLIBCXX_ATOMIC_BASE_H 1
+ 
  #pragma GCC system_header
  
  #include <bits/c++config.h>
@@ -4712,11 +5133,17 @@ index 1fc0ebb7e40e071184bb45aa432ad2bdad7211ba..bfd792bf11480acb1d026613b7c66d81
  #include <stdint.h>
  #include <bits/atomic_lockfree_defines.h>
  
+ #ifndef _GLIBCXX_ALWAYS_INLINE
+ #define _GLIBCXX_ALWAYS_INLINE inline __attribute__((always_inline))
+ #endif
 diff --git a/libstdc++-v3/include/c_global/cstddef b/libstdc++-v3/include/c_global/cstddef
 index 1a87dd6488ba4f4d63e82810360eaeca80721c6d..71a776e245d355f512dee3e29a97cda59769e9f8 100644
 --- a/libstdc++-v3/include/c_global/cstddef
 +++ b/libstdc++-v3/include/c_global/cstddef
-@@ -47,8 +47,11 @@
+@@ -44,12 +44,15 @@
+ #include <bits/c++config.h>
+ #include <stddef.h>
+ 
  #if __cplusplus >= 201103L
  namespace std
  {
@@ -4728,11 +5155,15 @@ index 1a87dd6488ba4f4d63e82810360eaeca80721c6d..71a776e245d355f512dee3e29a97cda5
  }
  #endif
  
+ #endif // _GLIBCXX_CSTDDEF
 diff --git a/libstdc++-v3/include/c_std/cstddef b/libstdc++-v3/include/c_std/cstddef
 index f4845f0243290fe29ede76161d6b7a8138edde7b..b1aa06ef87ab88f41b3344f4e2c48318e0bd0886 100644
 --- a/libstdc++-v3/include/c_std/cstddef
 +++ b/libstdc++-v3/include/c_std/cstddef
-@@ -47,8 +47,11 @@
+@@ -44,12 +44,15 @@
+ #include <bits/c++config.h>
+ #include <stddef.h>
+ 
  #if __cplusplus >= 201103L
  namespace std
  {
@@ -4744,6 +5175,7 @@ index f4845f0243290fe29ede76161d6b7a8138edde7b..b1aa06ef87ab88f41b3344f4e2c48318
  }
  #endif
  
+ #endif // _GLIBCXX_CSTDDEF
 -- 
 2.1.4
 

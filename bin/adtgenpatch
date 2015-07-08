@@ -43,4 +43,4 @@ if not branchok:
 
 os.chdir(os.path.join(base,"repo"))
 patch_dir = patches = os.path.join("..",branch,"patches")
-call(["git", "format-patch", "--find-copies-harder", "--full-index", branch+"-base","-o", patch_dir])
+call(["git", "format-patch", "-U6", "--find-copies-harder", "--full-index", branch+"-base","-o", patch_dir])

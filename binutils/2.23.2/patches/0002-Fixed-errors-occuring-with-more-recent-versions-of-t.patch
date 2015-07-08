@@ -20,7 +20,10 @@ diff --git a/bfd/doc/bfd.texinfo b/bfd/doc/bfd.texinfo
 index 7b9774b71a3cb9b3c154c8c75a41de29a6813146..d3b14c56449321b5dfe33206b2c5cfcd87eb0b91 100644
 --- a/bfd/doc/bfd.texinfo
 +++ b/bfd/doc/bfd.texinfo
-@@ -327,7 +327,7 @@ All of BFD lives in one directory.
+@@ -324,21 +324,21 @@ All of BFD lives in one directory.
+ 
+ @node BFD Index,  , GNU Free Documentation License, Top
+ @unnumbered BFD Index
  @printindex cp
  
  @tex
@@ -29,7 +32,10 @@ index 7b9774b71a3cb9b3c154c8c75a41de29a6813146..d3b14c56449321b5dfe33206b2c5cfcd
  % meantime:
  \long\def\colophon{\hbox to0pt{}\vfill
  \centerline{The body of this manual is set in}
-@@ -338,7 +338,7 @@ All of BFD lives in one directory.
+ \centerline{\fontname\tenrm,}
+ \centerline{with headings in {\bf\fontname\tenbf}}
+ \centerline{and examples in {\tt\fontname\tentt}.}
+ \centerline{{\it\fontname\tenit\/} and}
  \centerline{{\sl\fontname\tensl\/}}
  \centerline{are used for emphasis.}\vfill}
  \page\colophon
@@ -42,7 +48,10 @@ diff --git a/binutils/doc/binutils.texi b/binutils/doc/binutils.texi
 index 45174b739e568d8f7f01fc373035e010ffeced3d..ce7746c103d9f6a5770b43a850a2e26b68b4b58d 100644
 --- a/binutils/doc/binutils.texi
 +++ b/binutils/doc/binutils.texi
-@@ -4413,7 +4413,7 @@ equivalent. At least one of the @option{--output-mach},
+@@ -4410,45 +4410,45 @@ which fields in the ELF header should be updated.
+ The long and short forms of options, shown here as alternatives, are
+ equivalent. At least one of the @option{--output-mach},
+ @option{--output-type} and @option{--output-osabi} options must be given.
  
  @table @env
  
@@ -51,7 +60,7 @@ index 45174b739e568d8f7f01fc373035e010ffeced3d..ce7746c103d9f6a5770b43a850a2e26b
  Set the matching input ELF machine type to @var{machine}.  If
  @option{--input-mach} isn't specified, it will match any ELF
  machine types.
-@@ -4421,21 +4421,21 @@ machine types.
+ 
  The supported ELF machine types are, @var{L1OM}, @var{K1OM} and
  @var{x86-64}.
  
@@ -77,7 +86,9 @@ index 45174b739e568d8f7f01fc373035e010ffeced3d..ce7746c103d9f6a5770b43a850a2e26b
  Set the matching input ELF file OSABI to @var{osabi}.  If
  @option{--input-osabi} isn't specified, it will match any ELF OSABIs.
  
-@@ -4445,7 +4445,7 @@ The supported ELF OSABIs are, @var{none}, @var{HPUX}, @var{NetBSD},
+ The supported ELF OSABIs are, @var{none}, @var{HPUX}, @var{NetBSD},
+ @var{GNU}, @var{Linux} (alias for @var{GNU}),
+ @var{Solaris}, @var{AIX}, @var{Irix},
  @var{FreeBSD}, @var{TRU64}, @var{Modesto}, @var{OpenBSD}, @var{OpenVMS},
  @var{NSK}, @var{AROS} and @var{FenixOS}.
  
@@ -86,11 +97,17 @@ index 45174b739e568d8f7f01fc373035e010ffeced3d..ce7746c103d9f6a5770b43a850a2e26b
  Change the ELF OSABI in the ELF header to @var{osabi}.  The
  supported ELF OSABI are the same as @option{--input-osabi}.
  
+ @item -v
+ @itemx --version
+ Display the version number of @command{elfedit}.
 diff --git a/gas/doc/c-arc.texi b/gas/doc/c-arc.texi
 index ea0fa4eb522c265700bdc3b6712894ec2ad61d7c..f27b3270abce6c40a7ff1b068313a14572c79b56 100644
 --- a/gas/doc/c-arc.texi
 +++ b/gas/doc/c-arc.texi
-@@ -220,7 +220,7 @@ The extension instructions are not macros.  The assembler creates
+@@ -217,13 +217,13 @@ can shortcut the pipeline.
+ @item .extInstruction @var{name},@var{opcode},@var{subopcode},@var{suffixclass},@var{syntaxclass}
+ The ARCtangent A4 allows the user to specify extension instructions.
+ The extension instructions are not macros.  The assembler creates
  encodings for use of these instructions according to the specification
  by the user.  The parameters are:
  
@@ -99,7 +116,13 @@ index ea0fa4eb522c265700bdc3b6712894ec2ad61d7c..f27b3270abce6c40a7ff1b068313a145
  @item @var{name}
  Name of the extension instruction 
  
-@@ -279,7 +279,7 @@ code were: inst 0,r1,r2.  You use OP1_IMM_IMPLIED by bitwise ORing it
+ @item @var{opcode}
+ Opcode to be used. (Bits 27:31 in the encoding).  Valid values
+ 0x10-0x1f or 0x03
+@@ -276,13 +276,13 @@ inst r1,r2
+ it really means that the first argument is an implied immediate (that
+ is, the result is discarded).  This is the same as though the source
+ code were: inst 0,r1,r2.  You use OP1_IMM_IMPLIED by bitwise ORing it
  with SYNTAX_20P.
  
  @end itemize 
@@ -108,11 +131,17 @@ index ea0fa4eb522c265700bdc3b6712894ec2ad61d7c..f27b3270abce6c40a7ff1b068313a145
  
  For example, defining 64-bit multiplier with immediate operands:
  
+ @smallexample
+ .extInstruction mp64,0x14,0x0,SUFFIX_COND | SUFFIX_FLAG ,
+                 SYNTAX_3OP|OP1_MUST_BE_IMM
 diff --git a/gas/doc/c-arm.texi b/gas/doc/c-arm.texi
 index a46e08f4400ef64851828be4ab4df1046678699e..1944862d1caeb8f2aca57902f4ec1be55b68eb7e 100644
 --- a/gas/doc/c-arm.texi
 +++ b/gas/doc/c-arm.texi
-@@ -390,7 +390,7 @@ ARM and THUMB instructions had their own, separate syntaxes.  The new,
+@@ -387,13 +387,13 @@ features.  The default is to warn.
+ Two slightly different syntaxes are support for ARM and THUMB
+ instructions.  The default, @code{divided}, uses the old style where
+ ARM and THUMB instructions had their own, separate syntaxes.  The new,
  @code{unified} syntax, which can be selected via the @code{.syntax}
  directive, and has the following main features:
  
@@ -121,7 +150,13 @@ index a46e08f4400ef64851828be4ab4df1046678699e..1944862d1caeb8f2aca57902f4ec1be5
  @item
  Immediate operands do not require a @code{#} prefix.
  
-@@ -415,7 +415,7 @@ The @code{.N} and @code{.W} suffixes are recognized and honored.
+ @item
+ The @code{IT} instruction may appear, and if it does it is validated
+ against subsequent conditional affixes.  In ARM mode it does not
+@@ -412,13 +412,13 @@ available.  (Only a few such instructions can be written in the
+ @item
+ The @code{.N} and @code{.W} suffixes are recognized and honored.
+ 
  @item
  All instructions set the flags if and only if they have an @code{s}
  affix.
@@ -130,7 +165,13 @@ index a46e08f4400ef64851828be4ab4df1046678699e..1944862d1caeb8f2aca57902f4ec1be5
  
  @node ARM-Chars
  @subsection Special Characters
-@@ -466,13 +466,6 @@ so @samp{: @var{align}} is used instead.  For example:
+ 
+ @cindex line comment character, ARM
+ @cindex ARM line comment character
+@@ -463,19 +463,12 @@ the @samp{@@} character as a "line comment" start,
+ so @samp{: @var{align}} is used instead.  For example:
+ 
+ @smallexample
          vld1.8 @{q0@}, [r0, :128]
  @end smallexample
  
@@ -144,7 +185,13 @@ index a46e08f4400ef64851828be4ab4df1046678699e..1944862d1caeb8f2aca57902f4ec1be5
  @node ARM-Relocations
  @subsection ARM relocation generation
  
-@@ -519,6 +512,13 @@ respectively.  For example to load the 32-bit address of foo into r0:
+ @cindex data relocations, ARM
+ @cindex ARM data relocations
+ Specific data relocations can be generated by putting the relocation name
+@@ -516,12 +509,19 @@ respectively.  For example to load the 32-bit address of foo into r0:
+ 
+ @smallexample
+         MOVW r0, #:lower16:foo
          MOVT r0, #:upper16:foo
  @end smallexample
  
@@ -158,11 +205,17 @@ index a46e08f4400ef64851828be4ab4df1046678699e..1944862d1caeb8f2aca57902f4ec1be5
  @node ARM Directives
  @section ARM Machine Directives
  
+ @cindex machine directives, ARM
+ @cindex ARM machine directives
+ @table @code
 diff --git a/gas/doc/c-cr16.texi b/gas/doc/c-cr16.texi
 index 19f859f71d8f8712e8250fda07ee5b148d2d13ac..592dc5a5459d0e48ba1ca2e2846dc5e380f18e63 100644
 --- a/gas/doc/c-cr16.texi
 +++ b/gas/doc/c-cr16.texi
-@@ -44,26 +44,33 @@ Operand expression type qualifier is an optional field in the instruction operan
+@@ -41,32 +41,39 @@ Operand expression type qualifier is an optional field in the instruction operan
+ - @code{Specifies the CompactRISC Assembler generates a relocation entry for the operand, where pc has implied bit, the expression is adjusted accordingly. The linker uses the relocation entry to update the operand address at link time.}
+ @end table
+ 
  CR16 target operand qualifiers and its size (in bits):
  
  @table @samp
@@ -216,11 +269,17 @@ index 19f859f71d8f8712e8250fda07ee5b148d2d13ac..592dc5a5459d0e48ba1ca2e2846dc5e3
  @end table
  
  For example:
+ @example
+ 1   @code{movw $_myfun@@c,r1}
+ 
 diff --git a/gas/doc/c-mips.texi b/gas/doc/c-mips.texi
 index 9ed0420549220079a9c44d2eed0b9daca7805af5..6054ab90442b3de4622743ef73720b5c891334e4 100644
 --- a/gas/doc/c-mips.texi
 +++ b/gas/doc/c-mips.texi
-@@ -234,7 +234,7 @@ the @samp{mad} and @samp{madu} instruction, and to not schedule @samp{nop}
+@@ -231,13 +231,13 @@ option.
+ @itemx -no-m4650
+ Generate code for the MIPS @sc{r4650} chip.  This tells the assembler to accept
+ the @samp{mad} and @samp{madu} instruction, and to not schedule @samp{nop}
  instructions around accesses to the @samp{HI} and @samp{LO} registers.
  @samp{-no-m4650} turns off this option.
  
@@ -229,11 +288,17 @@ index 9ed0420549220079a9c44d2eed0b9daca7805af5..6054ab90442b3de4622743ef73720b5c
  @itemx -no-m3900
  @itemx -m4100
  @itemx -no-m4100
+ For each option @samp{-m@var{nnnn}}, generate code for the MIPS
+ @sc{r@var{nnnn}} chip.  This tells the assembler to accept instructions
+ specific to that chip, and to schedule for that chip's hazards.
 diff --git a/gas/doc/c-score.texi b/gas/doc/c-score.texi
 index 3af20a381dccc9738b4e6f5152a0f83edba9892e..40959f5b9cb2aef21b5e55289b6b9c981d57ce79 100644
 --- a/gas/doc/c-score.texi
 +++ b/gas/doc/c-score.texi
-@@ -37,7 +37,7 @@ implicitly with the @code{gp} register. The default value is 8.
+@@ -34,31 +34,31 @@ The following table lists all available SCORE options.
+ This option sets the largest size of an object that can be referenced
+ implicitly with the @code{gp} register. The default value is 8.
+ 
  @item -EB
  Assemble code for a big-endian cpu
  
@@ -242,7 +307,11 @@ index 3af20a381dccc9738b4e6f5152a0f83edba9892e..40959f5b9cb2aef21b5e55289b6b9c98
  Assemble code for a little-endian cpu
  
  @item -FIXDD 
-@@ -49,13 +49,13 @@ Assemble code for no warning message for fix data dependency
+ Assemble code for fix data dependency
+ 
+ @item -NWARN 
+ Assemble code for no warning message for fix data dependency
+ 
  @item -SCORE5
  Assemble code for target is SCORE5
  
@@ -259,11 +328,17 @@ index 3af20a381dccc9738b4e6f5152a0f83edba9892e..40959f5b9cb2aef21b5e55289b6b9c98
  Assemble code for target is SCORE3
  
  @item -march=score7
+ Assemble code for target is SCORE7, this is default setting
+ 
+ @item -march=score3
 diff --git a/gas/doc/c-tic54x.texi b/gas/doc/c-tic54x.texi
 index d61ec3af1a7de0b52e9a8230e65d8b55992c8540..2c3b0f2c111461debe9d4ea20d0219a04764c734 100644
 --- a/gas/doc/c-tic54x.texi
 +++ b/gas/doc/c-tic54x.texi
-@@ -109,7 +109,7 @@ In this example, x is replaced with SYM2; SYM2 is replaced with SYM1, and SYM1
+@@ -106,13 +106,13 @@ Expansion is recursive until a previously encountered symbol is seen, at
+ which point substitution stops.  
+ 
+ In this example, x is replaced with SYM2; SYM2 is replaced with SYM1, and SYM1
  is replaced with x.  At this point, x has already been encountered
  and the substitution stops.
  
@@ -272,7 +347,13 @@ index d61ec3af1a7de0b52e9a8230e65d8b55992c8540..2c3b0f2c111461debe9d4ea20d0219a0
   .asg   "x",SYM1 
   .asg   "SYM1",SYM2
   .asg   "SYM2",x
-@@ -126,14 +126,14 @@ Substitution may be forced in situations where replacement might be
+  add    x,a             ; final code assembled is "add  x, a"
+ @end smallexample
+ 
+@@ -123,20 +123,20 @@ directive is used to identify the subsym as a local macro variable
+ @pxref{TIC54X-Directives,,@code{.var}}.
+ 
+ Substitution may be forced in situations where replacement might be
  ambiguous by placing colons on either side of the subsym.  The following
  code: 
  
@@ -289,7 +370,13 @@ index d61ec3af1a7de0b52e9a8230e65d8b55992c8540..2c3b0f2c111461debe9d4ea20d0219a0
  LAB10  add     #10, a
  @end smallexample
  
-@@ -309,7 +309,7 @@ The @code{LDX} pseudo-op is provided for loading the extended addressing bits
+ Smaller parts of the string assigned to a subsym may be accessed with
+ the following syntax:
+ 
+@@ -306,13 +306,13 @@ floating point.
+ @node TIC54X-Ext
+ @section Extended Addressing
+ The @code{LDX} pseudo-op is provided for loading the extended addressing bits
  of a label or address.  For example, if an address @code{_label} resides
  in extended program memory, the value of @code{_label} may be loaded as
  follows:
@@ -298,7 +385,13 @@ index d61ec3af1a7de0b52e9a8230e65d8b55992c8540..2c3b0f2c111461debe9d4ea20d0219a0
   ldx     #_label,16,a    ; loads extended bits of _label
   or      #_label,a       ; loads lower 16 bits of _label
   bacc    a               ; full address is in accumulator A
-@@ -345,7 +345,7 @@ Assign @var{name} the string @var{string}.  String replacement is
+ @end smallexample
+ 
+ @node TIC54X-Directives
+@@ -342,13 +342,13 @@ Align SPC to page boundary
+ @cindex @code{asg} directive, TIC54X
+ @item .asg @var{string}, @var{name}
+ Assign @var{name} the string @var{string}.  String replacement is
  performed on @var{string} before assignment.
  
  @cindex @code{eval} directive, TIC54X
@@ -307,11 +400,17 @@ index d61ec3af1a7de0b52e9a8230e65d8b55992c8540..2c3b0f2c111461debe9d4ea20d0219a0
  Evaluate the contents of string @var{string} and assign the result as a
  string to the subsym @var{name}.  String replacement is performed on
  @var{string} before assignment. 
+ 
+ @cindex @code{bss} directive, TIC54X
+ @item .bss @var{symbol}, @var{size} [, [@var{blocking_flag}] [,@var{alignment_flag}]]
 diff --git a/ld/ld.texinfo b/ld/ld.texinfo
 index 71e909e4b61606d4ca8d1f855d9cd10a3ae1947b..81d538bad91eee08ae24dc88f589b6d07719fff0 100644
 --- a/ld/ld.texinfo
 +++ b/ld/ld.texinfo
-@@ -7863,7 +7863,7 @@ If you have more than one @code{SECT} statement for the same
+@@ -7860,21 +7860,21 @@ If you have more than one @code{SECT} statement for the same
+ @node LD Index
+ @unnumbered LD Index
+ 
  @printindex cp
  
  @tex
@@ -320,7 +419,10 @@ index 71e909e4b61606d4ca8d1f855d9cd10a3ae1947b..81d538bad91eee08ae24dc88f589b6d0
  % meantime:
  \long\def\colophon{\hbox to0pt{}\vfill
  \centerline{The body of this manual is set in}
-@@ -7874,7 +7874,7 @@ If you have more than one @code{SECT} statement for the same
+ \centerline{\fontname\tenrm,}
+ \centerline{with headings in {\bf\fontname\tenbf}}
+ \centerline{and examples in {\tt\fontname\tentt}.}
+ \centerline{{\it\fontname\tenit\/} and}
  \centerline{{\sl\fontname\tensl\/}}
  \centerline{are used for emphasis.}\vfill}
  \page\colophon

@@ -11,7 +11,10 @@ diff --git a/gcc/config/rs6000/rs6000.c b/gcc/config/rs6000/rs6000.c
 index bc7576eb0c26f6c62c58b8923aed25de2aaad010..c4ad3bc1dd65214c421f718e84c476b0e15f5bc1 100644
 --- a/gcc/config/rs6000/rs6000.c
 +++ b/gcc/config/rs6000/rs6000.c
-@@ -23622,7 +23622,7 @@ rs6000_emit_prologue (void)
+@@ -23619,13 +23619,13 @@ rs6000_emit_prologue (void)
+ 			   GEN_INT (info->baserel_save_offset + frame_off)); /* or sp_off? */
+       mem = gen_frame_mem (reg_mode, addr);
+ 
        reg = gen_rtx_REG (reg_mode, 2);
        insn = emit_move_insn (mem, reg);
        rs6000_frame_related (insn, gen_rtx_REG (Pmode, 12), info->total_size, /* verify info->total_size */
@@ -20,7 +23,13 @@ index bc7576eb0c26f6c62c58b8923aed25de2aaad010..c4ad3bc1dd65214c421f718e84c476b0
      }
  #endif
    if (crtl->calls_eh_return)
-@@ -24145,6 +24145,11 @@ rs6000_output_savres_externs (FILE *file)
+     {
+       unsigned int i;
+       rtvec p;
+@@ -24142,12 +24142,17 @@ rs6000_output_savres_externs (FILE *file)
+ 		     & REST_NOINLINE_FPRS_DOESNT_RESTORE_LR) == 0;
+ 	  int sel = SAVRES_FPR | (lr ? SAVRES_LR : 0);
+ 	  name = rs6000_savres_routine_name (info, regno, sel);
  	  fprintf (file, "\t.extern %s\n", name);
  	}
      }
@@ -32,7 +41,13 @@ index bc7576eb0c26f6c62c58b8923aed25de2aaad010..c4ad3bc1dd65214c421f718e84c476b0
  }
  
  /* Write function prologue.  */
-@@ -24199,11 +24204,6 @@ rs6000_output_function_prologue (FILE *file,
+ 
+ static void
+ rs6000_output_function_prologue (FILE *file,
+@@ -24196,17 +24201,12 @@ rs6000_output_function_prologue (FILE *file,
+ 		       reg_names[STATIC_CHAIN_REGNUM], reg_names[1]);
+ 	}
+       else
  	fprintf (file, "\tbl %s\n", RS6000_MCOUNT);
      }
  
@@ -44,6 +59,9 @@ index bc7576eb0c26f6c62c58b8923aed25de2aaad010..c4ad3bc1dd65214c421f718e84c476b0
    rs6000_pic_labelno++;
  }
  
+ /* Non-zero if vmx regs are restored before the frame pop, zero if
+    we restore after the pop when possible.  */
+ #define ALWAYS_RESTORE_ALTIVEC_BEFORE_POP 0
 -- 
 2.1.4
 

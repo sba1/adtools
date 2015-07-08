@@ -12,7 +12,10 @@ diff --git a/gas/config/tc-m68k.c b/gas/config/tc-m68k.c
 index 8b5f6c60f2141ee91d6e9d1d639815abdf4e5042..9070a862b9c1266e84a8cea8da697f333227fa98 100644
 --- a/gas/config/tc-m68k.c
 +++ b/gas/config/tc-m68k.c
-@@ -5161,7 +5161,7 @@ md_convert_frag_1 (fragS *fragP)
+@@ -5158,22 +5158,22 @@ md_convert_frag_1 (fragS *fragP)
+     case TAB (BRANCHBWPL, LONG):
+       /* Here we are converting an unconditional branch into a pair of
+ 	 conditional branches, in order to get the range.  */
        fragP->fr_opcode[0] = 0x66; /* bne */
        fragP->fr_opcode[1] = 0xFF;
        fixP = fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol,
@@ -21,7 +24,8 @@ index 8b5f6c60f2141ee91d6e9d1d639815abdf4e5042..9070a862b9c1266e84a8cea8da697f33
        fixP->fx_file = fragP->fr_file;
        fixP->fx_line = fragP->fr_line;
        fragP->fr_fix += 4;  /* Skip first offset */
-@@ -5170,7 +5170,7 @@ md_convert_frag_1 (fragS *fragP)
+       buffer_address += 4;
+       *buffer_address++ = 0x67; /* beq */
        *buffer_address++ = 0xff;
        fragP->fr_fix += 2;  /* Skip second branch opcode */
        fixP = fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol,
@@ -30,7 +34,13 @@ index 8b5f6c60f2141ee91d6e9d1d639815abdf4e5042..9070a862b9c1266e84a8cea8da697f33
        fragP->fr_fix += 4;
        break;
      case TAB (BRABSJUNC, LONG):
-@@ -5351,6 +5351,8 @@ md_convert_frag_1 (fragS *fragP)
+       if (flag_small_code)
+ 	{
+ 	  as_bad (_("Long branch in small code model, not supported."));
+@@ -5348,12 +5348,14 @@ md_convert_frag_1 (fragS *fragP)
+       fragP->fr_fix += 4;
+       break;
+     case TAB (ABSREL, BYTE):
        as_bad (_("ABSREL_BYTE: how the ** does this look??"));
        break;
      case TAB (ABSREL, SHORT):
@@ -39,7 +49,13 @@ index 8b5f6c60f2141ee91d6e9d1d639815abdf4e5042..9070a862b9c1266e84a8cea8da697f33
        fragP->fr_opcode[1] &= ~0x3f;
        fragP->fr_fix += 2;
        if (S_GET_TYPE (fragP->fr_symbol) == N_TEXT)
-@@ -5365,6 +5367,7 @@ md_convert_frag_1 (fragS *fragP)
+ 	{
+ 	  /* so this is really a pc-relative address */
+ 	  fragP->fr_opcode[1] |= 0x3a;
+@@ -5362,20 +5364,23 @@ md_convert_frag_1 (fragS *fragP)
+ 	}
+       /* in that case we have to generate base-relative code
+        * (note: if we're in N_UNDF, this could as well be pc-relative, but the linker
         *        will have to do the final patch in that case) */
        fragP->fr_opcode[1] |= 0x2c;  /* (a4) */
        fix_new (fragP, fragP->fr_fix, 2, fragP->fr_symbol, fragP->fr_offset, 0, NO_RELOC, 1);
@@ -47,7 +63,8 @@ index 8b5f6c60f2141ee91d6e9d1d639815abdf4e5042..9070a862b9c1266e84a8cea8da697f33
        break;
      case TAB (ABSREL, LONG):
        as_bad (_("ABSREL_LONG: sorry, not supported."));
-@@ -5373,6 +5376,8 @@ md_convert_frag_1 (fragS *fragP)
+       break;
+     case TAB (IMMREL, BYTE):
        as_bad (_("IMMREL_BYTE: how the ** does this look??"));
        break;
      case TAB (IMMREL, SHORT):
@@ -56,7 +73,13 @@ index 8b5f6c60f2141ee91d6e9d1d639815abdf4e5042..9070a862b9c1266e84a8cea8da697f33
        if (S_GET_TYPE (fragP->fr_symbol) == N_TEXT)
  	{
  	/* we can only fix operations on data registers, not on <ea> */
-@@ -5418,6 +5423,7 @@ md_convert_frag_1 (fragS *fragP)
+ 	if ((fragP->fr_opcode[1] & 0x38) != 0)
+ 	  {
+ 	    /* use the normal reloc32, sigh... */
+@@ -5415,12 +5420,13 @@ md_convert_frag_1 (fragS *fragP)
+        *     addl a4,d0
+        */
+ 
        fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol, fragP->fr_offset, 0, NO_RELOC, 1);
        *buffer_address++ = 0xd0;
        *buffer_address++ = 0x8c;
@@ -64,7 +87,13 @@ index 8b5f6c60f2141ee91d6e9d1d639815abdf4e5042..9070a862b9c1266e84a8cea8da697f33
        break;
      }
    if (fixP)
-@@ -8305,7 +8311,7 @@ m68k_elf_cons (int nbytes /* 4=.long */)
+     {
+       fixP->fx_file = fragP->fr_file;
+       fixP->fx_line = fragP->fr_line;
+@@ -8302,13 +8308,13 @@ m68k_elf_cons (int nbytes /* 4=.long */)
+ 
+ 	      p = frag_more (nbytes);
+ 	      offset = 0;
  	      if (target_big_endian)
  		offset = nbytes - size;
  	      fix_new_exp (frag_now, p - frag_now->fr_literal + offset, size,
@@ -73,6 +102,9 @@ index 8b5f6c60f2141ee91d6e9d1d639815abdf4e5042..9070a862b9c1266e84a8cea8da697f33
  	    }
  	}
        else
+ 	emit_expr (&exp, (unsigned int) nbytes);
+     }
+   while (*input_line_pointer++ == ',');
 -- 
 2.1.4
 
