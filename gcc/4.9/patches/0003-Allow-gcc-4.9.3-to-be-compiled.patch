@@ -1,0 +1,49 @@
+From 88842b7a6bfcfaaaa3a6d2b7d602cc856dc0d477 Mon Sep 17 00:00:00 2001
+From: Sebastian Bauer <mail@sebastianbauer.info>
+Date: Wed, 8 Jul 2015 22:44:59 +0200
+Subject: [PATCH 3/3] Allow gcc 4.9.3 to be compiled.
+
+---
+ gcc/config/rs6000/rs6000.c | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/gcc/config/rs6000/rs6000.c b/gcc/config/rs6000/rs6000.c
+index bc7576eb0c26f6c62c58b8923aed25de2aaad010..c4ad3bc1dd65214c421f718e84c476b0e15f5bc1 100644
+--- a/gcc/config/rs6000/rs6000.c
++++ b/gcc/config/rs6000/rs6000.c
+@@ -23622,7 +23622,7 @@ rs6000_emit_prologue (void)
+       reg = gen_rtx_REG (reg_mode, 2);
+       insn = emit_move_insn (mem, reg);
+       rs6000_frame_related (insn, gen_rtx_REG (Pmode, 12), info->total_size, /* verify info->total_size */
+-				NULL_RTX, NULL_RTX, NULL_RTX);
++				NULL_RTX, NULL_RTX);
+     }
+ #endif
+   if (crtl->calls_eh_return)
+@@ -24145,6 +24145,11 @@ rs6000_output_savres_externs (FILE *file)
+ 	  fprintf (file, "\t.extern %s\n", name);
+ 	}
+     }
++
++#ifdef TARGET_BASEREL
++  if (info->baserel_save_p && TARGET_BASEREL)
++    fprintf (file, "\t.extern __baserel_get_addr\n");
++#endif
+ }
+ 
+ /* Write function prologue.  */
+@@ -24199,11 +24204,6 @@ rs6000_output_function_prologue (FILE *file,
+ 	fprintf (file, "\tbl %s\n", RS6000_MCOUNT);
+     }
+ 
+-#ifdef TARGET_BASEREL
+-  if (info->baserel_save_p && TARGET_BASEREL)
+-    fprintf (file, "\t.extern __baserel_get_addr\n");
+-#endif
+-
+   rs6000_pic_labelno++;
+ }
+ 
+-- 
+2.1.4
+
