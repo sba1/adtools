@@ -1,0 +1,88 @@
+From f29fb7c34e71a67e506997ffdefcafd179877116 Mon Sep 17 00:00:00 2001
+From: Sebastian Bauer <mail@sebastianbauer.info>
+Date: Fri, 27 Nov 2015 21:23:18 +0100
+Subject: [PATCH 4/4] Now compiles again.
+
+---
+ gcc/config/rs6000/amigaos.c |  5 +++++
+ gcc/doc/extend.texi         | 17 -----------------
+ 2 files changed, 5 insertions(+), 17 deletions(-)
+
+diff --git a/gcc/config/rs6000/amigaos.c b/gcc/config/rs6000/amigaos.c
+index af162a50ea594643d0f13aa4203491d91e01457d..ccf4f912cb66cd424a2398c6535e05fa493f39f1 100644
+--- a/gcc/config/rs6000/amigaos.c
++++ b/gcc/config/rs6000/amigaos.c
+@@ -22,31 +22,36 @@
+ 
+ #include "config.h"
+ #include "system.h"
+ #include "coretypes.h"
+ #include "diagnostic-core.h"
+ #include "tm.h"
++#include "hash-set.h"
++#include "inchash.h"
+ #include "rtl.h"
+ #include "regs.h"
+ #include "hard-reg-set.h"
+ #include "real.h"
+ #include "insn-config.h"
+ #include "conditions.h"
+ #include "insn-flags.h"
+ #include "insn-attr.h"
+ #include "flags.h"
+ #include "recog.h"
+ #include "obstack.h"
++#include "symtab.h"
+ #include "tree.h"
+ #include "expr.h"
+ #include "optabs.h"
+ #include "except.h"
+ #include "function.h"
+ #include "output.h"
+ #include "tm_p.h"
++#include "fold-const.h"
+ #include "langhooks.h"
++#include "explow.h"
+ 
+ #undef DEBUG
+ #ifdef DEBUG
+ #define dprintf(...)      			\
+ printf("%s: ", __PRETTY_FUNCTION__);		\
+ printf(__VA_ARGS__)
+diff --git a/gcc/doc/extend.texi b/gcc/doc/extend.texi
+index 3f82c740de5cfafa8ada0a7c4d1e6a1c82d27b15..6f5eda1e0350484cd2d15c198b345f0d5771911b 100644
+--- a/gcc/doc/extend.texi
++++ b/gcc/doc/extend.texi
+@@ -5865,29 +5865,12 @@ This attribute forces access to a variable in code compiled with
+ access should be protected with some sort of arbitration. See
+ documentation on @option{-mbaserel} option for more details about this
+ attribute.
+ 
+ @end table
+ 
+-@subsection PowerPC Variable Attributes
+-
+-Three attributes currently are defined for PowerPC configurations:
+-@code{altivec}, @code{ms_struct} and @code{gcc_struct}.
+-
+-For full documentation of the struct attributes please see the
+-documentation in @ref{i386 Variable Attributes}.
+-
+-For documentation of @code{altivec} attribute please see the
+-documentation in @ref{PowerPC Type Attributes}.
+-
+-@subsection SPU Variable Attributes
+-
+-The SPU supports the @code{spu_vector} attribute for variables.  For
+-documentation of this attribute please see the documentation in
+-@ref{SPU Type Attributes}.
+-
+ @subsection Xstormy16 Variable Attributes
+ 
+ One attribute is currently defined for xstormy16 configurations:
+ @code{below100}.
+ 
+ @table @code
+-- 
+2.1.4
+
