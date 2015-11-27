@@ -1,7 +1,7 @@
-From 668edbf6c218db1af4f600f06e0193e5ca7a602b Mon Sep 17 00:00:00 2001
+From 27bcb7df26355eb73ec18290e2128a21ed88cd08 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Tue, 17 Feb 2015 20:25:55 +0100
-Subject: [PATCH 1/4] Changes for AmigaOS version of gcc.
+Subject: [PATCH 1/3] Changes for AmigaOS version of gcc.
 
 ---
  fixincludes/configure                 |    1 +
@@ -12,7 +12,7 @@ Subject: [PATCH 1/4] Changes for AmigaOS version of gcc.
  gcc/config.gcc                        |    8 +
  gcc/config.host                       |    6 +
  gcc/config/rs6000/amigaos-protos.h    |   41 +
- gcc/config/rs6000/amigaos.c           |  461 ++++++++
+ gcc/config/rs6000/amigaos.c           |  466 +++++++++
  gcc/config/rs6000/amigaos.h           |  431 ++++++++
  gcc/config/rs6000/amigaos.opt         |   37 +
  gcc/config/rs6000/rs6000-builtin.def  |    7 +
@@ -21,7 +21,7 @@ Subject: [PATCH 1/4] Changes for AmigaOS version of gcc.
  gcc/config/rs6000/rs6000.md           |   27 +-
  gcc/config/rs6000/t-amigaos           |   20 +
  gcc/cp/typeck.c                       |   16 +
- gcc/doc/extend.texi                   |  184 ++++
+ gcc/doc/extend.texi                   |  167 +++
  gcc/doc/invoke.texi                   |  136 +++
  gcc/expr.c                            |    1 -
  gcc/gcc.c                             |   12 +-
@@ -43,7 +43,7 @@ Subject: [PATCH 1/4] Changes for AmigaOS version of gcc.
  libstdc++-v3/crossconfig.m4           |    8 +
  libstdc++-v3/include/c_global/cstddef |    3 +
  libstdc++-v3/include/c_std/cstddef    |    3 +
- 39 files changed, 3891 insertions(+), 77 deletions(-)
+ 39 files changed, 3879 insertions(+), 77 deletions(-)
  create mode 100644 gcc/config/rs6000/amigaos-protos.h
  create mode 100644 gcc/config/rs6000/amigaos.c
  create mode 100644 gcc/config/rs6000/amigaos.h
@@ -327,10 +327,10 @@ index 0000000000000000000000000000000000000000..eb5f8fc5f3d546b8d8e1cdd8118a3085
 +//#endif /* RTX_CODE */
 diff --git a/gcc/config/rs6000/amigaos.c b/gcc/config/rs6000/amigaos.c
 new file mode 100644
-index 0000000000000000000000000000000000000000..a355b6c7263444ad83f0b421a6e9f534eceea601
+index 0000000000000000000000000000000000000000..0f575a38e4dc4aac0b454c56bf62f625c0f7eb9c
 --- /dev/null
 +++ b/gcc/config/rs6000/amigaos.c
-@@ -0,0 +1,461 @@
+@@ -0,0 +1,466 @@
 +/* Subroutines used for code generation on Amiga OS 4
 +   Copyright (C) 2003 Free Software Foundation, Inc.
 +   Contributed by Thomas Frieden (ThomasF@hyperion-entertainment.com)
@@ -358,6 +358,8 @@ index 0000000000000000000000000000000000000000..a355b6c7263444ad83f0b421a6e9f534
 +#include "coretypes.h"
 +#include "diagnostic-core.h"
 +#include "tm.h"
++#include "hash-set.h"
++#include "inchash.h"
 +#include "rtl.h"
 +#include "regs.h"
 +#include "hard-reg-set.h"
@@ -369,6 +371,7 @@ index 0000000000000000000000000000000000000000..a355b6c7263444ad83f0b421a6e9f534
 +#include "flags.h"
 +#include "recog.h"
 +#include "obstack.h"
++#include "symtab.h"
 +#include "tree.h"
 +#include "expr.h"
 +#include "optabs.h"
@@ -376,7 +379,9 @@ index 0000000000000000000000000000000000000000..a355b6c7263444ad83f0b421a6e9f534
 +#include "function.h"
 +#include "output.h"
 +#include "tm_p.h"
++#include "fold-const.h"
 +#include "langhooks.h"
++#include "explow.h"
 +
 +#undef DEBUG
 +#ifdef DEBUG
@@ -1902,7 +1907,7 @@ index 1408e3ca845bbfd6ea4034deec799065b6d8bd77..4eab487ee77801e3f8c9669a86243a53
        allocated = make_tree_vector ();
        params = &allocated;
 diff --git a/gcc/doc/extend.texi b/gcc/doc/extend.texi
-index 79559c82d71aef6f2e88b41f92d7a569570978b0..3f82c740de5cfafa8ada0a7c4d1e6a1c82d27b15 100644
+index 79559c82d71aef6f2e88b41f92d7a569570978b0..6f5eda1e0350484cd2d15c198b345f0d5771911b 100644
 --- a/gcc/doc/extend.texi
 +++ b/gcc/doc/extend.texi
 @@ -4508,12 +4508,163 @@ The @code{weak} attribute causes the declaration to be emitted as a weak
@@ -2069,7 +2074,7 @@ index 79559c82d71aef6f2e88b41f92d7a569570978b0..3f82c740de5cfafa8ada0a7c4d1e6a1c
  The @code{weakref} attribute marks a declaration as a weak reference.
  Without arguments, it should be accompanied by an @code{alias} attribute
  naming the target symbol.  Optionally, the @var{target} may be given as
-@@ -5698,12 +5849,45 @@ struct
+@@ -5698,12 +5849,28 @@ struct
  
  @noindent
  Here, @code{t5} takes up 2 bytes.
@@ -2091,23 +2096,6 @@ index 79559c82d71aef6f2e88b41f92d7a569570978b0..3f82c740de5cfafa8ada0a7c4d1e6a1c
 +attribute.
 +
 +@end table
-+
-+@subsection PowerPC Variable Attributes
-+
-+Three attributes currently are defined for PowerPC configurations:
-+@code{altivec}, @code{ms_struct} and @code{gcc_struct}.
-+
-+For full documentation of the struct attributes please see the
-+documentation in @ref{i386 Variable Attributes}.
-+
-+For documentation of @code{altivec} attribute please see the
-+documentation in @ref{PowerPC Type Attributes}.
-+
-+@subsection SPU Variable Attributes
-+
-+The SPU supports the @code{spu_vector} attribute for variables.  For
-+documentation of this attribute please see the documentation in
-+@ref{SPU Type Attributes}.
 +
  @subsection Xstormy16 Variable Attributes
  
