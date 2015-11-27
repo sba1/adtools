@@ -1,0 +1,34 @@
+#! /usr/bin/python
+#
+# This script shows all packages that can be cloned and the
+# branches that can be checked out
+#
+# (c) 2015 by Sebastian Bauer
+#
+
+from __future__ import print_function
+import glob
+import os
+import sys
+import argparse
+from subprocess import call
+
+script = os.path.realpath(sys.argv[0])
+root = os.path.realpath(os.path.dirname(script) + "/../")
+
+components = [os.path.dirname(p) for p in glob.glob("*/*.url")]
+components = sorted(components)
+
+
+parser = argparse.ArgumentParser(description="""
+	Clone or fetch baselines for all components. Available components:
+	""" + ", ".join(components))
+args = parser.parse_args()
+
+for component in components:
+	base = os.path.join(root, component)
+	series = os.path.join(base, "series")
+	lines = [line.strip() for line in open(series)]
+	for line in lines:
+		branch, checkout, url = line.split("\t")
+		print("{0} {1}".format(component,branch))
