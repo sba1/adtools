@@ -1,4 +1,4 @@
-From ff1670524c5b840aa3e7e674ffc3a9f5054bc8d2 Mon Sep 17 00:00:00 2001
+From c4350ce02c3c5c90006c912f26915de06716a47c Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 14 Nov 2014 20:03:56 +0100
 Subject: [PATCH 2/3] Added new function attribute "lineartags" and pragma
@@ -78,7 +78,7 @@ index 6894f0e7c3d1ea932ff05f370680be3d18dfcf94..24278250901bfa75c9aae9be63a62351
    /* Allow plugins to register their own pragmas. */
    invoke_plugin_callbacks (PLUGIN_PRAGMAS, NULL);
 diff --git a/gcc/c/c-parser.c b/gcc/c/c-parser.c
-index f5e2ac2c21b07e0bba6ce1959ba9aafac276ae3b..d91330e0fe8339866fdd62c0f801460a752e318e 100644
+index 007cb8ad67139efafc9a0704256bc16221f47a94..f2ba2d060c6f2a152a527d2d4cc6e8457eaabbdb 100644
 --- a/gcc/c/c-parser.c
 +++ b/gcc/c/c-parser.c
 @@ -80,12 +80,74 @@ along with GCC; see the file COPYING3.  If not see
