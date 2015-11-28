@@ -56,6 +56,15 @@ A very naive patch management system that should simplify the management
 of patches is included here. The scripts are situated in the ```bin```
 directory. The scripts depend on Python.
 
+* ```adtlist```: lists available components and branches. For instance
+ ```
+ $ adtlist
+ binutils 2.23.2
+ gcc 4.9
+ gcc 5
+ ```
+ shows that there are two components ```gcc``` and ```binutils```.
+
 * ```adtclone```: will fetch the external sources of all components into
  the respective ```repo``` directories. The checkout will not be affected.
 
