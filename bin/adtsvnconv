@@ -95,3 +95,6 @@ for log in svn_logs:
 	print(log['msg'])
 
 os.chdir(workdir)
+
+print("Work directory is: " + workdir, file=sys.stderr)
+print("Patch directory is: " + patchdir, file=sys.stderr)
