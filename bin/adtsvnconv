@@ -94,6 +94,7 @@ for log in svn_logs:
 
 	print(log['msg'])
 
+# Just in case we would add stuff below here
 os.chdir(workdir)
 
 print("Work directory is: " + workdir, file=sys.stderr)
