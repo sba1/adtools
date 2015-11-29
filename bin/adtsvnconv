@@ -1,0 +1,97 @@
+#! /usr/bin/python
+#
+# This script converts a svn vendor branch to pacthes as
+# organized in this project
+#
+# (c) 2015 by Sebastian Bauer
+#
+
+from __future__ import print_function
+
+import os.path
+import os
+import sys
+import argparse
+import tempfile
+import shutil
+from subprocess import call
+from subprocess import check_output
+from xml.dom.minidom import parseString
+
+script = os.path.realpath(sys.argv[0])
+root = os.path.realpath(os.path.dirname(script) + "/../")
+
+parser = argparse.ArgumentParser(description='Convert svn vendor branches to patches')
+
+args = parser.parse_args()
+
+# FIXME: Make this command line args
+changed_url = "file:///home/sba/amiga/adtools.svn/code/trunk/coreutils"
+vendor_url = "file:///home/sba/amiga/adtools.svn/code/vendor/coreutils/5.2.1"
+start_rev = 342
+
+svn_log = check_output(["svn", "log", "--xml", changed_url])
+svn_log_dom = parseString(svn_log)
+
+workdir = tempfile.mkdtemp(prefix='tmpadtwork')
+patchdir = tempfile.mkdtemp(prefix='tmpadtpatch')
+
+print("Work directory is: " + workdir, file=sys.stderr)
+os.chdir(workdir)
+
+call(["git","init"])
+call(["git","init",patchdir])
+
+# export base
+call(["svn", "export", vendor_url, "--force","."])
+
+# add everything to git
+call(["git","add","."])
+call(["git", "commit","-m", "Initial commit."])
+
+def clean_workdir():
+    # Clean everything expect for .git (could also move .git somewhere else)
+    for p in os.listdir("."):
+        if ".git" == p: continue
+        fp = os.path.join(".", p);
+        if os.path.isfile(fp): os.unlink(fp)
+        elif os.path.isdir(fp): shutil.rmtree(fp)
+
+# Our list of svn logs comprising dicts with 'rev' and 'msg' keys
+svn_logs = []
+
+# "Plain" xml svn log entries
+svn_log_entries = svn_log_dom.getElementsByTagName("logentry")
+for e in svn_log_entries:
+    rev = int(e.getAttribute("revision"))
+    if int(rev) < start_rev:continue
+    msg = e.getElementsByTagName("msg")[0].firstChild.nodeValue
+    pair = {'rev': rev, 'msg': msg}
+    svn_logs.append(pair)
+
+# Sort according to the rev in ascending order
+svn_logs = sorted(svn_logs, key = lambda k: k['rev'])
+
+for log in svn_logs:
+	rev = log['rev']
+	msg = log['msg']
+
+	os.chdir(workdir)
+
+	call(["git","checkout","master"])
+	call(["git","checkout","-b","changes"+str(rev)])
+	clean_workdir()
+	call(["git","rm", "-r", "."])
+	call(["svn", "export", changed_url, "-r"+str(rev),"--force","."])
+	call(["git","add","."])
+	call(["git","commit","-m","Changes for AmigaOS imported from adtools svn"])
+
+	call(["git","format-patch","-U6","--find-copies-harder","--full-index","master","-o",patchdir])
+
+	os.chdir(patchdir)
+	call(["git","add","."])
+	call(["git","commit","-m",msg])
+
+	print(log['msg'])
+
+os.chdir(workdir)
