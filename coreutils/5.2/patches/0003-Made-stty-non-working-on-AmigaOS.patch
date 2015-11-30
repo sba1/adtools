@@ -1,0 +1,50 @@
+From d006fd0e2f72d399bba3dfc171b1c42a0242589e Mon Sep 17 00:00:00 2001
+From: Sebastian Bauer <mail@sebastianbauer.info>
+Date: Mon, 30 Nov 2015 14:03:16 +0100
+Subject: [PATCH 3/4] Made stty non-working on AmigaOS.
+
+---
+ src/stty.c | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+
+diff --git a/src/stty.c b/src/stty.c
+index ee837c78f5ae4b9e42c7323e2057bd0a660142fe..b00bded88aac51f613045b9e22f4fe3d54224cc9 100644
+--- a/src/stty.c
++++ b/src/stty.c
+@@ -25,12 +25,24 @@
+    If no args are given, write to stdout the baud rate and settings that
+    have been changed from their defaults.  Mode reading and changes
+    are done on the specified device, or stdin if none was specified.
+ 
+    David MacKenzie <djm@gnu.ai.mit.edu> */
+ 
++#ifdef __amigaos4__
++
++#include <stdio.h>
++
++int main(void)
++{
++    fprintf(stderr, "Not implemented!\n");
++    return 1;
++}
++
++#else
++
+ #include <config.h>
+ 
+ #ifdef TERMIOS_NEEDS_XOPEN_SOURCE
+ # define _XOPEN_SOURCE
+ #endif
+ 
+@@ -1936,6 +1948,8 @@ integer_arg (const char *s)
+     {
+       error (0, 0, _("invalid integer argument `%s'"), s);
+       usage (EXIT_FAILURE);
+     }
+   return value;
+ }
++
++#endif
+-- 
+2.1.4
+

@@ -1,0 +1,47 @@
+From fb7e78a3740ff14c72acf8eb1413f66b87674014 Mon Sep 17 00:00:00 2001
+From: Sebastian Bauer <mail@sebastianbauer.info>
+Date: Mon, 30 Nov 2015 14:28:40 +0100
+Subject: [PATCH 4/4] Exclude man and doc as they break with current tool set.
+
+---
+ Makefile.am | 2 +-
+ Makefile.in | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/Makefile.am b/Makefile.am
+index 699e44cc89ec4bca2df1190d8176c67dc06b1764..76076f1ba4a0699cc714fdbc78cc5fbdb7fa9a5e 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -1,9 +1,9 @@
+ ## Process this file with automake to produce Makefile.in -*-Makefile-*-
+ 
+-SUBDIRS = lib src doc man m4 po tests
++SUBDIRS = lib src m4 po tests
+ EXTRA_DIST = Makefile.cfg Makefile.maint GNUmakefile \
+   .kludge-stamp .prev-version THANKS-to-translators THANKStt.in \
+   .x-sc_space_tab .x-sc_sun_os_names \
+   announce-gen \
+   old/fileutils/ChangeLog \
+   old/fileutils/ChangeLog-1997 \
+diff --git a/Makefile.in b/Makefile.in
+index c21ec672960661f28c52751b4d5d930320a58b19..cf517b1b8c8161653d934f56b17d581504c40f9b 100644
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -281,13 +281,13 @@ oldincludedir = @oldincludedir@
+ prefix = @prefix@
+ program_transform_name = @program_transform_name@
+ sbindir = @sbindir@
+ sharedstatedir = @sharedstatedir@
+ sysconfdir = @sysconfdir@
+ target_alias = @target_alias@
+-SUBDIRS = lib src doc man m4 po tests
++SUBDIRS = lib src m4 po tests
+ EXTRA_DIST = Makefile.cfg Makefile.maint GNUmakefile \
+   .kludge-stamp .prev-version THANKS-to-translators THANKStt.in \
+   .x-sc_space_tab .x-sc_sun_os_names \
+   announce-gen \
+   old/fileutils/ChangeLog \
+   old/fileutils/ChangeLog-1997 \
+-- 
+2.1.4
+
