@@ -1,11 +1,11 @@
-From 597c09ba72e18e046753e6cf5e124c43ac526154 Mon Sep 17 00:00:00 2001
+From f246632c4c98455f1a72ea7ed57d623d5d5561ff Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
-Date: Mon, 30 Nov 2015 11:36:10 +0100
+Date: Mon, 30 Nov 2015 11:36:11 +0100
 Subject: [PATCH] Changes for AmigaOS imported from adtools svn
 
 ---
  config.hin         |   8 +-
- configure          |   2 +-
+ configure          |   5 +-
  lib/Makefile.am    |   4 +
  lib/Makefile.in    |  32 ++--
  lib/amigaos.c      | 524 +++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -31,6 +31,7 @@ Subject: [PATCH] Changes for AmigaOS imported from adtools svn
  lib/userspec.c     |   2 +
  lib/utime.c        |   8 +
  lib/xreadlink.c    |   4 +
+ m4/ls-mntd-fs.m4   |   2 +-
  src/chown-core.c   |   2 +
  src/copy.c         |   8 +
  src/csplit.c       |   8 +
@@ -61,7 +62,7 @@ Subject: [PATCH] Changes for AmigaOS imported from adtools svn
  src/test.c         |   4 +
  src/uname.c        |  35 ++++
  src/wheel-gen.pl   |   1 -
- 57 files changed, 942 insertions(+), 29 deletions(-)
+ 58 files changed, 944 insertions(+), 32 deletions(-)
  create mode 100644 lib/amigaos.c
  create mode 100644 lib/amigaos.h
 
@@ -93,18 +94,21 @@ index 1a7d9e7415f606922a9041096192196e02b8248c..40124541e9d1c5766cfb4f6ba2e6ebba
  
  /* FIXME */
 diff --git a/configure b/configure
-index a8b69e08dde59a566cab02cb01f69573115f9dd5..6a473a03b1ff5657fd883a85b81fed927c018e27 100755
+index a8b69e08dde59a566cab02cb01f69573115f9dd5..fe85c0f80331d6d68fe050e2a0992084e585e94f 100755
 --- a/configure
 +++ b/configure
-@@ -27323,13 +27323,13 @@ _ACEOF
+@@ -27321,15 +27321,14 @@ cat >>confdefs.h <<\_ACEOF
+ _ACEOF
+ 
    fi
  fi
  
  if test -z "$ac_list_mounted_fs"; then
-   { { echo "$as_me:$LINENO: error: could not determine how to read list of mounted filesystems" >&5
- echo "$as_me: error: could not determine how to read list of mounted filesystems" >&2;}
+-  { { echo "$as_me:$LINENO: error: could not determine how to read list of mounted filesystems" >&5
+-echo "$as_me: error: could not determine how to read list of mounted filesystems" >&2;}
 -   { (exit 1); exit 1; }; }
-+   { (echo); echo; }; }
++  echo "$as_me:$LINENO: result: could not determine how to read list of mounted filesystems" >&5
++echo "${ECHO_T}could not determine how to read list of mounted filesystems" >&6
    # FIXME -- no need to abort building the whole package
    # Can't build mountlist.c or anything that needs its functions
  fi
@@ -1386,6 +1390,25 @@ index 347357897632b83fc53bb6155af1803850f06fc2..b7c51a2e6b52c590c87a5976c0d2d823
  
  #include <stdio.h>
  #include <errno.h>
+diff --git a/m4/ls-mntd-fs.m4 b/m4/ls-mntd-fs.m4
+index c28466bb02ee227055c8183233145675607e9d9c..92a2a188c987233dd7fbacded38bacc143627169 100644
+--- a/m4/ls-mntd-fs.m4
++++ b/m4/ls-mntd-fs.m4
+@@ -269,13 +269,13 @@ if test -z "$ac_list_mounted_fs"; then
+                mounted filesystems.  fread will be used to read /etc/mnttab.
+                (SVR2) ])
+   fi
+ fi
+ 
+ if test -z "$ac_list_mounted_fs"; then
+-  AC_MSG_ERROR([could not determine how to read list of mounted filesystems])
++  AC_MSG_RESULT([could not determine how to read list of mounted filesystems])
+   # FIXME -- no need to abort building the whole package
+   # Can't build mountlist.c or anything that needs its functions
+ fi
+ 
+ AS_IF([test $ac_list_mounted_fs = found], [$1], [$2])
+ 
 diff --git a/src/chown-core.c b/src/chown-core.c
 index ba2c5c3df7f4177a589057b88430bd03a4bcbae8..18e8d9d6e18807047d6a552eb214b3d9c82992fc 100644
 --- a/src/chown-core.c
