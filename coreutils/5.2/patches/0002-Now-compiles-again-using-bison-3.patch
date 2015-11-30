@@ -1,0 +1,41 @@
+From d6e481ad2ce1eb1c50250cf963fcda71e6ebfa0a Mon Sep 17 00:00:00 2001
+From: Sebastian Bauer <mail@sebastianbauer.info>
+Date: Mon, 30 Nov 2015 13:52:18 +0100
+Subject: [PATCH 2/2] Now compiles again using bison 3.
+
+---
+ lib/getdate.y | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/lib/getdate.y b/lib/getdate.y
+index 40fd4e0fe4c969bb83237d380072216a6988a8ba..ffb02f062a72aaed0705e001bd9ee83d850fba3f 100644
+--- a/lib/getdate.y
++++ b/lib/getdate.y
+@@ -146,22 +146,21 @@ typedef struct
+ 
+   /* Table of local time zone abbrevations, terminated by a null entry.  */
+   table local_time_zone_table[3];
+ } parser_control;
+ 
+ #define PC (* (parser_control *) parm)
+-#define YYLEX_PARAM parm
+-#define YYPARSE_PARAM parm
+ 
+ static int yyerror ();
+ static int yylex ();
+ 
+ %}
+ 
+ /* We want a reentrant parser.  */
+-%pure_parser
++%pure-parser
++%parse-param {parser_control *parm}
+ 
+ /* This grammar has 13 shift/reduce conflicts. */
+ %expect 13
+ 
+ %union
+ {
+-- 
+2.1.4
+
