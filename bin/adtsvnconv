@@ -34,24 +34,33 @@ parser.add_argument('--start-rev', type=int, help="""
     Define the first revision of the changes branch for which a patch should be
     generated.
     """)
-
+parser.add_argument('--patch-dir', help="""
+    Defines the name of the directory that should contain the patches within the
+    patch repository. Default is to use the root of the patch repo.
+    """)
 args = parser.parse_args()
 
 changed_url = args.changes_url #"file:///home/sba/amiga/adtools.svn/code/trunk/coreutils"
 vendor_url = args.vendor_url #"file:///home/sba/amiga/adtools.svn/code/vendor/coreutils/5.2.1"
 start_rev = args.start_rev # 342
 
+if args.patch_dir: patch_dir = args.patch_dir
+else: patch_dir = "."
+
 svn_log = check_output(["svn", "log", "--xml", changed_url])
 svn_log_dom = parseString(svn_log)
 
-workdir = tempfile.mkdtemp(prefix='tmpadtwork')
-patchdir = tempfile.mkdtemp(prefix='tmpadtpatch')
+work_dir = tempfile.mkdtemp(prefix='tmpadtwork')
+patch_repo_dir = tempfile.mkdtemp(prefix='tmpadtpatch')
+patch_dir = os.path.join(patch_repo_dir, patch_dir);
 
-print("Work directory is: " + workdir, file=sys.stderr)
-os.chdir(workdir)
+os.makedirs(patch_dir)
+
+print("Work directory is: " + work_dir, file=sys.stderr)
+os.chdir(work_dir)
 
 call(["git","init"])
-call(["git","init",patchdir])
+call(["git","init",patch_repo_dir])
 
 # export base
 call(["svn", "export", vendor_url, "--force","."])
@@ -87,7 +96,7 @@ for log in svn_logs:
 	rev = log['rev']
 	msg = log['msg']
 
-	os.chdir(workdir)
+	os.chdir(work_dir)
 
 	call(["git","checkout","master"])
 	call(["git","checkout","-b","changes"+str(rev)])
@@ -97,16 +106,16 @@ for log in svn_logs:
 	call(["git","add","."])
 	call(["git","commit","-m","Changes for AmigaOS imported from adtools svn"])
 
-	call(["git","format-patch","-U6","--find-copies-harder","--full-index","master","-o",patchdir])
+	call(["git","format-patch","-U6","--find-copies-harder","--full-index","master","-o",patch_dir])
 
-	os.chdir(patchdir)
+	os.chdir(patch_repo_dir)
 	call(["git","add","."])
 	call(["git","commit","-m",msg])
 
 	print(log['msg'])
 
 # Just in case we would add stuff below here
-os.chdir(workdir)
+os.chdir(work_dir)
 
-print("Work directory is: " + workdir, file=sys.stderr)
-print("Patch directory is: " + patchdir, file=sys.stderr)
+print("Work directory is: " + work_dir, file=sys.stderr)
+print("Patch repo at: " + patch_repo_dir, file=sys.stderr)
