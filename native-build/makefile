@@ -24,6 +24,10 @@ BINUTILS_SRC_DIR=../binutils/repo
 GCC_SRC_DIR=../gcc/repo
 GCC_VERSION:=$(shell cat $(GCC_SRC_DIR)/gcc/BASE-VER)
 
+# Native tools
+COREUTILS_SRC_DIR=../coreutils/repo
+COREUTILS_VERSION=5.2.1
+
 CROSS_PREFIX?=$(ROOT_DIR)/root-cross
 # This assumes that cross prefix is absolute
 DESTDIR?=/
@@ -145,7 +149,7 @@ gcc-native-done-$(GCC_VERSION): binutils-native-done-$(BINUTILS_VERSION)
 
 coreutils-native-done: gcc-cross-done-$(GCC_VERSION)
 	mkdir -p coreutils-native-build
-	cd coreutils-native-build ; PATH="$(CROSS_PREFIX)/bin:$(PATH)" LDFLAGS="-lunix" ../../coreutils/configure --prefix=/gcc --host=ppc-amigaos
+	cd coreutils-native-build ; PATH="$(CROSS_PREFIX)/bin:$(PATH)" LDFLAGS="-lunix" $(realpath $(COREUTILS_SRC_DIR))/configure --prefix=/gcc --host=ppc-amigaos
 	PATH="$(CROSS_PREFIX)/bin:$(PATH)" $(MAKE) -C coreutils-native-build
 	touch $@
 
