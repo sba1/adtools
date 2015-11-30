@@ -60,6 +60,7 @@ directory. The scripts depend on Python.
  ```
  $ adtlist
  binutils 2.23.2
+ coreutils 5.2
  gcc 4.9
  gcc 5
  ```
