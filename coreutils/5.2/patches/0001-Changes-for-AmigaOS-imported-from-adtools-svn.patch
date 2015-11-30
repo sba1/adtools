@@ -1,6 +1,6 @@
-From e7906fdf6a1efde220fc725b4bc37c2ec140699a Mon Sep 17 00:00:00 2001
+From 4df8679d9c9a5867211d30b3bb90455dacbe08df Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
-Date: Mon, 30 Nov 2015 11:36:12 +0100
+Date: Mon, 30 Nov 2015 11:36:14 +0100
 Subject: [PATCH] Changes for AmigaOS imported from adtools svn
 
 ---
@@ -33,6 +33,8 @@ Subject: [PATCH] Changes for AmigaOS imported from adtools svn
  lib/xreadlink.c    |   4 +
  m4/ls-mntd-fs.m4   |   2 +-
  m4/putenv.m4       |   7 +-
+ man/Makefile.am    |   4 +-
+ man/Makefile.in    |   4 +-
  src/chown-core.c   |   2 +
  src/copy.c         |   8 +
  src/csplit.c       |   8 +
@@ -63,7 +65,7 @@ Subject: [PATCH] Changes for AmigaOS imported from adtools svn
  src/test.c         |   4 +
  src/uname.c        |  35 ++++
  src/wheel-gen.pl   |   1 -
- 59 files changed, 956 insertions(+), 34 deletions(-)
+ 61 files changed, 962 insertions(+), 36 deletions(-)
  create mode 100644 lib/amigaos.c
  create mode 100644 lib/amigaos.h
 
@@ -1454,6 +1456,60 @@ index 77b9f787459de400b409aa93a2015476efcc78a1..0cf91b0065df5b02c6a0b30ed281533d
      AC_DEFINE(putenv, rpl_putenv,
        [Define to rpl_putenv if the replacement function should be used.])
      gl_PREREQ_PUTENV
+diff --git a/man/Makefile.am b/man/Makefile.am
+index 04c3ca5b33328a6e465c1e5e4128c6074aea4e0f..8c2a2910390d45e9c8a62a4b4e50aed072f17488 100644
+--- a/man/Makefile.am
++++ b/man/Makefile.am
+@@ -123,19 +123,21 @@ mapped_name = `echo $*|sed 's/install/ginstall/; s/test/[/'`
+ 
+ # Note the use of $t/$*, rather than just `$*' as in other packages.
+ # That is necessary to avoid failures for programs that are also shell built-in
+ # functions like echo, false, printf, pwd.
+ .x.1:
+ 	@rm -f $@
++	$(if $(findstring $(host),$(build)),	\
+ 	@echo "Updating man page $@";		\
+ 	mkdir $t;				\
+ 	(cd $t && $(LN_S) ../../src/$(mapped_name)$(EXEEXT) $*$(EXEEXT)); \
+ 	$(PERL) -- $(srcdir)/help2man		\
+ 	    --info-page='$(PACKAGE) $*'		\
+ 	    --include=$(srcdir)/$*.x		\
+-	    --output=$@ $t/$*$(EXEEXT)
++	    --output=$@ $t/$*$(EXEEXT),		\
++	cp $(srcdir)/$@ $@)
+ 	@chmod a-w $@
+ 	@rm -rf $t
+ 
+ check-local: check-x-vs-1 check-programs-vs-x
+ 
+ # Sort in traditional ASCII order, regardless of the current locale;
+diff --git a/man/Makefile.in b/man/Makefile.in
+index 2bfa6f43229324e1ae373d4a592ed547541b70fb..98bd9da878201c0b4dddfa6b98fdbc2f728eea04 100644
+--- a/man/Makefile.in
++++ b/man/Makefile.in
+@@ -598,19 +598,21 @@ yes.1:		$(common_dep)	$(srcdir)/yes.x		../src/yes.c
+ 
+ # Note the use of $t/$*, rather than just `$*' as in other packages.
+ # That is necessary to avoid failures for programs that are also shell built-in
+ # functions like echo, false, printf, pwd.
+ .x.1:
+ 	@rm -f $@
++	$(if $(findstring $(host),$(build)),	\
+ 	@echo "Updating man page $@";		\
+ 	mkdir $t;				\
+ 	(cd $t && $(LN_S) ../../src/$(mapped_name)$(EXEEXT) $*$(EXEEXT)); \
+ 	$(PERL) -- $(srcdir)/help2man		\
+ 	    --info-page='$(PACKAGE) $*'		\
+ 	    --include=$(srcdir)/$*.x		\
+-	    --output=$@ $t/$*$(EXEEXT)
++	    --output=$@ $t/$*$(EXEEXT),		\
++	cp $(srcdir)/$@ $@)
+ 	@chmod a-w $@
+ 	@rm -rf $t
+ 
+ check-local: check-x-vs-1 check-programs-vs-x
+ 
+ # Ensure that for each .x file in this directory, there is a
 diff --git a/src/chown-core.c b/src/chown-core.c
 index ba2c5c3df7f4177a589057b88430bd03a4bcbae8..18e8d9d6e18807047d6a552eb214b3d9c82992fc 100644
 --- a/src/chown-core.c
