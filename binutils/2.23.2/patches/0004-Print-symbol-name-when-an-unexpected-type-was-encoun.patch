@@ -1,7 +1,7 @@
 From 5e5e0a5505d8e5fc67697f3ab397fa5a39e085cc Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Sat, 12 Sep 2015 11:29:01 +0200
-Subject: [PATCH 4/5] Print symbol name when an unexpected type was
+Subject: [PATCH 4/6] Print symbol name when an unexpected type was
  encountered.
 
 ---
