@@ -154,7 +154,7 @@ coreutils-native-done: gcc-cross-done-$(GCC_VERSION)
 	touch $@
 
 #
-# Install native compiler into /gcc. Needs write acess to this directory
+# Install native compiler into /gcc. Needs write access to this directory
 #
 native-install: coreutils-native-done gcc-native-done-$(GCC_VERSION)
 	rm -Rf /gcc/*
