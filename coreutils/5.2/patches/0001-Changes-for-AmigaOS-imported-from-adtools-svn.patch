@@ -1,11 +1,13 @@
-From 9a9db0df96b916bc56a6ec1f4dece65e62a0ba13 Mon Sep 17 00:00:00 2001
+From 597c09ba72e18e046753e6cf5e124c43ac526154 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
-Date: Mon, 30 Nov 2015 11:36:09 +0100
+Date: Mon, 30 Nov 2015 11:36:10 +0100
 Subject: [PATCH] Changes for AmigaOS imported from adtools svn
 
 ---
  config.hin         |   8 +-
  configure          |   2 +-
+ lib/Makefile.am    |   4 +
+ lib/Makefile.in    |  32 ++--
  lib/amigaos.c      | 524 +++++++++++++++++++++++++++++++++++++++++++++++++++++
  lib/amigaos.h      |  63 +++++++
  lib/euidaccess.c   |   6 +
@@ -59,7 +61,7 @@ Subject: [PATCH] Changes for AmigaOS imported from adtools svn
  src/test.c         |   4 +
  src/uname.c        |  35 ++++
  src/wheel-gen.pl   |   1 -
- 55 files changed, 920 insertions(+), 15 deletions(-)
+ 57 files changed, 942 insertions(+), 29 deletions(-)
  create mode 100644 lib/amigaos.c
  create mode 100644 lib/amigaos.h
 
@@ -109,6 +111,115 @@ index a8b69e08dde59a566cab02cb01f69573115f9dd5..6a473a03b1ff5657fd883a85b81fed92
  
  if test $ac_list_mounted_fs = found; then
    gl_cv_list_mounted_fs=yes
+diff --git a/lib/Makefile.am b/lib/Makefile.am
+index 50f17f6aa4d9b8b83bb8a4253d1236d98ecc8988..524ba708c5dfcf4d87902b72a6d4d9b83d7cdd46 100644
+--- a/lib/Makefile.am
++++ b/lib/Makefile.am
+@@ -136,12 +136,16 @@ libfetish_a_SOURCES = \
+ libfetish_a_SOURCES += \
+   printf-args.h \
+   printf-parse.h \
+   vasprintf.h \
+   vasnprintf.h
+ 
++## Required for the ppc-amigaos build 
++libfetish_a_SOURCES += \
++  amigaos.h amigaos.c
++
+ libfetish_a_LIBADD = $(LIBOBJS) $(ALLOCA)
+ libfetish_a_DEPENDENCIES = $(libfetish_a_LIBADD)
+ 
+ lib_OBJECTS = $(libfetish_a_OBJECTS)
+ 
+ 
+diff --git a/lib/Makefile.in b/lib/Makefile.in
+index c87a7df1f6727c94ae5ffa6616fa97ff83827c28..655ddd408833cb74029030eef04bd74c2a7899b7 100644
+--- a/lib/Makefile.in
++++ b/lib/Makefile.in
+@@ -188,13 +188,13 @@ am_libfetish_a_OBJECTS = acl.$(OBJEXT) getdate.$(OBJEXT) \
+ 	unicodeio.$(OBJEXT) userspec.$(OBJEXT) utimens.$(OBJEXT) \
+ 	version-etc.$(OBJEXT) xfts.$(OBJEXT) xgetcwd.$(OBJEXT) \
+ 	xgethostname.$(OBJEXT) xmalloc.$(OBJEXT) xmemcoll.$(OBJEXT) \
+ 	xnanosleep.$(OBJEXT) xreadlink.$(OBJEXT) xstrdup.$(OBJEXT) \
+ 	xstrndup.$(OBJEXT) xstrtod.$(OBJEXT) xstrtoimax.$(OBJEXT) \
+ 	xstrtol.$(OBJEXT) xstrtoul.$(OBJEXT) xstrtoumax.$(OBJEXT) \
+-	yesno.$(OBJEXT)
++	yesno.$(OBJEXT) amigaos.$(OBJEXT)
+ libfetish_a_OBJECTS = $(am_libfetish_a_OBJECTS)
+ DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
+ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
+ am__depfiles_maybe = depfiles
+ @AMDEP_TRUE@DEP_FILES = $(DEPDIR)/__fpending.Po $(DEPDIR)/alloca.Po \
+ @AMDEP_TRUE@	$(DEPDIR)/asnprintf.Po $(DEPDIR)/asprintf.Po \
+@@ -233,24 +233,25 @@ am__depfiles_maybe = depfiles
+ @AMDEP_TRUE@	$(DEPDIR)/strtol.Po $(DEPDIR)/strtoll.Po \
+ @AMDEP_TRUE@	$(DEPDIR)/strtoul.Po $(DEPDIR)/strtoull.Po \
+ @AMDEP_TRUE@	$(DEPDIR)/strtoumax.Po $(DEPDIR)/strverscmp.Po \
+ @AMDEP_TRUE@	$(DEPDIR)/tempname.Po $(DEPDIR)/utime.Po \
+ @AMDEP_TRUE@	$(DEPDIR)/vasnprintf.Po $(DEPDIR)/vasprintf.Po \
+ @AMDEP_TRUE@	./$(DEPDIR)/acl.Po ./$(DEPDIR)/addext.Po \
+-@AMDEP_TRUE@	./$(DEPDIR)/argmatch.Po ./$(DEPDIR)/backupfile.Po \
+-@AMDEP_TRUE@	./$(DEPDIR)/basename.Po ./$(DEPDIR)/c-strtod.Po \
+-@AMDEP_TRUE@	./$(DEPDIR)/canon-host.Po ./$(DEPDIR)/cloexec.Po \
+-@AMDEP_TRUE@	./$(DEPDIR)/closeout.Po ./$(DEPDIR)/cycle-check.Po \
+-@AMDEP_TRUE@	./$(DEPDIR)/diacrit.Po ./$(DEPDIR)/dirname.Po \
+-@AMDEP_TRUE@	./$(DEPDIR)/dup-safer.Po ./$(DEPDIR)/exclude.Po \
+-@AMDEP_TRUE@	./$(DEPDIR)/exitfail.Po ./$(DEPDIR)/file-type.Po \
+-@AMDEP_TRUE@	./$(DEPDIR)/filemode.Po ./$(DEPDIR)/fopen-safer.Po \
+-@AMDEP_TRUE@	./$(DEPDIR)/fts.Po ./$(DEPDIR)/full-read.Po \
+-@AMDEP_TRUE@	./$(DEPDIR)/full-write.Po ./$(DEPDIR)/getdate.Po \
+-@AMDEP_TRUE@	./$(DEPDIR)/getopt.Po ./$(DEPDIR)/getopt1.Po \
+-@AMDEP_TRUE@	./$(DEPDIR)/gettime.Po ./$(DEPDIR)/getugroups.Po \
++@AMDEP_TRUE@	./$(DEPDIR)/amigaos.Po ./$(DEPDIR)/argmatch.Po \
++@AMDEP_TRUE@	./$(DEPDIR)/backupfile.Po ./$(DEPDIR)/basename.Po \
++@AMDEP_TRUE@	./$(DEPDIR)/c-strtod.Po ./$(DEPDIR)/canon-host.Po \
++@AMDEP_TRUE@	./$(DEPDIR)/cloexec.Po ./$(DEPDIR)/closeout.Po \
++@AMDEP_TRUE@	./$(DEPDIR)/cycle-check.Po ./$(DEPDIR)/diacrit.Po \
++@AMDEP_TRUE@	./$(DEPDIR)/dirname.Po ./$(DEPDIR)/dup-safer.Po \
++@AMDEP_TRUE@	./$(DEPDIR)/exclude.Po ./$(DEPDIR)/exitfail.Po \
++@AMDEP_TRUE@	./$(DEPDIR)/file-type.Po ./$(DEPDIR)/filemode.Po \
++@AMDEP_TRUE@	./$(DEPDIR)/fopen-safer.Po ./$(DEPDIR)/fts.Po \
++@AMDEP_TRUE@	./$(DEPDIR)/full-read.Po ./$(DEPDIR)/full-write.Po \
++@AMDEP_TRUE@	./$(DEPDIR)/getdate.Po ./$(DEPDIR)/getopt.Po \
++@AMDEP_TRUE@	./$(DEPDIR)/getopt1.Po ./$(DEPDIR)/gettime.Po \
++@AMDEP_TRUE@	./$(DEPDIR)/getugroups.Po \
+ @AMDEP_TRUE@	./$(DEPDIR)/hard-locale.Po ./$(DEPDIR)/hash-pjw.Po \
+ @AMDEP_TRUE@	./$(DEPDIR)/hash.Po ./$(DEPDIR)/human.Po \
+ @AMDEP_TRUE@	./$(DEPDIR)/idcache.Po ./$(DEPDIR)/imaxtostr.Po \
+ @AMDEP_TRUE@	./$(DEPDIR)/isdir.Po ./$(DEPDIR)/linebuffer.Po \
+ @AMDEP_TRUE@	./$(DEPDIR)/localcharset.Po \
+ @AMDEP_TRUE@	./$(DEPDIR)/long-options.Po \
+@@ -512,13 +513,15 @@ libfetish_a_SOURCES = \
+   xstrtoumax.c \
+   yesno.c\
+ \
+   printf-args.h \
+   printf-parse.h \
+   vasprintf.h \
+-  vasnprintf.h
++  vasnprintf.h\
++\
++  amigaos.h amigaos.c
+ 
+ libfetish_a_LIBADD = $(LIBOBJS) $(ALLOCA)
+ libfetish_a_DEPENDENCIES = $(libfetish_a_LIBADD)
+ lib_OBJECTS = $(libfetish_a_OBJECTS)
+ BUILT_SOURCES = getdate.c $(STDBOOL_H) $(ALLOCA_H) $(FNMATCH_H)
+ CLEANFILES = charset.alias ref-add.sed ref-del.sed
+@@ -655,12 +658,13 @@ distclean-compile:
+ @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/tempname.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/utime.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/vasnprintf.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/vasprintf.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/acl.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/addext.Po@am__quote@
++@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/amigaos.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/argmatch.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/backupfile.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/basename.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/c-strtod.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/canon-host.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cloexec.Po@am__quote@
 diff --git a/lib/amigaos.c b/lib/amigaos.c
 new file mode 100644
 index 0000000000000000000000000000000000000000..37f5ac19ca1aa5ea3fd1d9a4dd666bfb2de6d710
