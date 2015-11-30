@@ -1,0 +1,2575 @@
+From 4df8679d9c9a5867211d30b3bb90455dacbe08df Mon Sep 17 00:00:00 2001
+From: Sebastian Bauer <mail@sebastianbauer.info>
+Date: Mon, 30 Nov 2015 11:36:14 +0100
+Subject: [PATCH] Changes for AmigaOS imported from adtools svn
+
+---
+ config.hin         |   8 +-
+ configure          |  12 +-
+ lib/Makefile.am    |   4 +
+ lib/Makefile.in    |  32 ++--
+ lib/amigaos.c      | 524 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ lib/amigaos.h      |  63 +++++++
+ lib/euidaccess.c   |   6 +
+ lib/fts_.h         |   4 +
+ lib/getline.c      |   4 +
+ lib/getloadavg.c   |   4 +
+ lib/getndelim2.c   |   4 +
+ lib/getopt.c       |   5 +-
+ lib/getopt1.c      |   4 +
+ lib/getpagesize.h  |   4 +
+ lib/getpass.c      |   6 +
+ lib/gettimeofday.c |   2 +
+ lib/human.c        |   4 +
+ lib/idcache.c      |   2 +
+ lib/nanosleep.c    |  20 ++
+ lib/putenv.c       |   2 +
+ lib/quotearg.c     |   4 +
+ lib/safe-read.c    |   4 +
+ lib/save-cwd.c     |   4 +
+ lib/tempname.c     |   4 +
+ lib/userspec.c     |   2 +
+ lib/utime.c        |   8 +
+ lib/xreadlink.c    |   4 +
+ m4/ls-mntd-fs.m4   |   2 +-
+ m4/putenv.m4       |   7 +-
+ man/Makefile.am    |   4 +-
+ man/Makefile.in    |   4 +-
+ src/chown-core.c   |   2 +
+ src/copy.c         |   8 +
+ src/csplit.c       |   8 +
+ src/date.c         |   8 +
+ src/dd.c           |   6 +
+ src/env.c          |   4 +
+ src/fmt.c          |   3 +
+ src/groups.sh      |   2 +-
+ src/id.c           |   2 +
+ src/install.c      |  12 +-
+ src/join.c         |   9 +
+ src/kill.c         |  11 +-
+ src/ls.c           |  18 +-
+ src/md5sum.c       |   2 +-
+ src/mkfifo.c       |   4 +
+ src/mknod.c        |   8 +
+ src/nohup.c        |   9 +-
+ src/od.c           |   6 +
+ src/pathchk.c      |   5 +-
+ src/ptx.c          |   5 +
+ src/shred.c        |  13 +-
+ src/sort.c         |  27 +++
+ src/stat.c         |  10 +
+ src/su.c           |   4 +
+ src/sync.c         |   2 +
+ src/tail.c         |   5 +
+ src/tee.c          |   4 +
+ src/test.c         |   4 +
+ src/uname.c        |  35 ++++
+ src/wheel-gen.pl   |   1 -
+ 61 files changed, 962 insertions(+), 36 deletions(-)
+ create mode 100644 lib/amigaos.c
+ create mode 100644 lib/amigaos.h
+
+diff --git a/config.hin b/config.hin
+index 1a7d9e7415f606922a9041096192196e02b8248c..40124541e9d1c5766cfb4f6ba2e6ebbae6f22207 100644
+--- a/config.hin
++++ b/config.hin
+@@ -1139,16 +1139,20 @@
+ /* The host operating system. */
+ #undef HOST_OPERATING_SYSTEM
+ 
+ /* Define as const if the declaration of iconv() needs const. */
+ #undef ICONV_CONST
+ 
+-#if FILESYSTEM_BACKSLASH_IS_FILE_NAME_SEPARATOR
+-# define ISSLASH(C) ((C) == '/' || (C) == '\\')
++#ifdef __amigaos4__
++# define ISSLASH(C) ((C) == '/' || (C) == ':')
+ #else
++# if FILESYSTEM_BACKSLASH_IS_FILE_NAME_SEPARATOR
++#  define ISSLASH(C) ((C) == '/' || (C) == '\\')
++# else
+ # define ISSLASH(C) ((C) == '/')
++# endif
+ #endif
+ 
+ /* Define if `link(2)' dereferences symbolic links. */
+ #undef LINK_FOLLOWS_SYMLINKS
+ 
+ /* FIXME */
+diff --git a/configure b/configure
+index a8b69e08dde59a566cab02cb01f69573115f9dd5..e678a4e043e6e29e52e6d492fbe203583c0fb7c8 100755
+--- a/configure
++++ b/configure
+@@ -27321,15 +27321,14 @@ cat >>confdefs.h <<\_ACEOF
+ _ACEOF
+ 
+   fi
+ fi
+ 
+ if test -z "$ac_list_mounted_fs"; then
+-  { { echo "$as_me:$LINENO: error: could not determine how to read list of mounted filesystems" >&5
+-echo "$as_me: error: could not determine how to read list of mounted filesystems" >&2;}
+-   { (exit 1); exit 1; }; }
++  echo "$as_me:$LINENO: result: could not determine how to read list of mounted filesystems" >&5
++echo "${ECHO_T}could not determine how to read list of mounted filesystems" >&6
+   # FIXME -- no need to abort building the whole package
+   # Can't build mountlist.c or anything that needs its functions
+ fi
+ 
+ if test $ac_list_mounted_fs = found; then
+   gl_cv_list_mounted_fs=yes
+@@ -35366,13 +35365,18 @@ _ACEOF
+ echo "$as_me:$LINENO: checking for SVID conformant putenv" >&5
+ echo $ECHO_N "checking for SVID conformant putenv... $ECHO_C" >&6
+ if test "${jm_cv_func_svid_putenv+set}" = set; then
+   echo $ECHO_N "(cached) $ECHO_C" >&6
+ else
+   if test "$cross_compiling" = yes; then
+-  	     jm_cv_func_svid_putenv=no
++  	     echo $host_os
++	     if test $host_os = amigaos; then
++		jm_cv_func_svid_putenv=yes
++	     else
++		jm_cv_func_svid_putenv=no
++	     fi
+ else
+   cat >conftest.$ac_ext <<_ACEOF
+ /* confdefs.h.  */
+ _ACEOF
+ cat confdefs.h >>conftest.$ac_ext
+ cat >>conftest.$ac_ext <<_ACEOF
+diff --git a/lib/Makefile.am b/lib/Makefile.am
+index 50f17f6aa4d9b8b83bb8a4253d1236d98ecc8988..524ba708c5dfcf4d87902b72a6d4d9b83d7cdd46 100644
+--- a/lib/Makefile.am
++++ b/lib/Makefile.am
+@@ -136,12 +136,16 @@ libfetish_a_SOURCES = \
+ libfetish_a_SOURCES += \
+   printf-args.h \
+   printf-parse.h \
+   vasprintf.h \
+   vasnprintf.h
+ 
++## Required for the ppc-amigaos build 
++libfetish_a_SOURCES += \
++  amigaos.h amigaos.c
++
+ libfetish_a_LIBADD = $(LIBOBJS) $(ALLOCA)
+ libfetish_a_DEPENDENCIES = $(libfetish_a_LIBADD)
+ 
+ lib_OBJECTS = $(libfetish_a_OBJECTS)
+ 
+ 
+diff --git a/lib/Makefile.in b/lib/Makefile.in
+index c87a7df1f6727c94ae5ffa6616fa97ff83827c28..655ddd408833cb74029030eef04bd74c2a7899b7 100644
+--- a/lib/Makefile.in
++++ b/lib/Makefile.in
+@@ -188,13 +188,13 @@ am_libfetish_a_OBJECTS = acl.$(OBJEXT) getdate.$(OBJEXT) \
+ 	unicodeio.$(OBJEXT) userspec.$(OBJEXT) utimens.$(OBJEXT) \
+ 	version-etc.$(OBJEXT) xfts.$(OBJEXT) xgetcwd.$(OBJEXT) \
+ 	xgethostname.$(OBJEXT) xmalloc.$(OBJEXT) xmemcoll.$(OBJEXT) \
+ 	xnanosleep.$(OBJEXT) xreadlink.$(OBJEXT) xstrdup.$(OBJEXT) \
+ 	xstrndup.$(OBJEXT) xstrtod.$(OBJEXT) xstrtoimax.$(OBJEXT) \
+ 	xstrtol.$(OBJEXT) xstrtoul.$(OBJEXT) xstrtoumax.$(OBJEXT) \
+-	yesno.$(OBJEXT)
++	yesno.$(OBJEXT) amigaos.$(OBJEXT)
+ libfetish_a_OBJECTS = $(am_libfetish_a_OBJECTS)
+ DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
+ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
+ am__depfiles_maybe = depfiles
+ @AMDEP_TRUE@DEP_FILES = $(DEPDIR)/__fpending.Po $(DEPDIR)/alloca.Po \
+ @AMDEP_TRUE@	$(DEPDIR)/asnprintf.Po $(DEPDIR)/asprintf.Po \
+@@ -233,24 +233,25 @@ am__depfiles_maybe = depfiles
+ @AMDEP_TRUE@	$(DEPDIR)/strtol.Po $(DEPDIR)/strtoll.Po \
+ @AMDEP_TRUE@	$(DEPDIR)/strtoul.Po $(DEPDIR)/strtoull.Po \
+ @AMDEP_TRUE@	$(DEPDIR)/strtoumax.Po $(DEPDIR)/strverscmp.Po \
+ @AMDEP_TRUE@	$(DEPDIR)/tempname.Po $(DEPDIR)/utime.Po \
+ @AMDEP_TRUE@	$(DEPDIR)/vasnprintf.Po $(DEPDIR)/vasprintf.Po \
+ @AMDEP_TRUE@	./$(DEPDIR)/acl.Po ./$(DEPDIR)/addext.Po \
+-@AMDEP_TRUE@	./$(DEPDIR)/argmatch.Po ./$(DEPDIR)/backupfile.Po \
+-@AMDEP_TRUE@	./$(DEPDIR)/basename.Po ./$(DEPDIR)/c-strtod.Po \
+-@AMDEP_TRUE@	./$(DEPDIR)/canon-host.Po ./$(DEPDIR)/cloexec.Po \
+-@AMDEP_TRUE@	./$(DEPDIR)/closeout.Po ./$(DEPDIR)/cycle-check.Po \
+-@AMDEP_TRUE@	./$(DEPDIR)/diacrit.Po ./$(DEPDIR)/dirname.Po \
+-@AMDEP_TRUE@	./$(DEPDIR)/dup-safer.Po ./$(DEPDIR)/exclude.Po \
+-@AMDEP_TRUE@	./$(DEPDIR)/exitfail.Po ./$(DEPDIR)/file-type.Po \
+-@AMDEP_TRUE@	./$(DEPDIR)/filemode.Po ./$(DEPDIR)/fopen-safer.Po \
+-@AMDEP_TRUE@	./$(DEPDIR)/fts.Po ./$(DEPDIR)/full-read.Po \
+-@AMDEP_TRUE@	./$(DEPDIR)/full-write.Po ./$(DEPDIR)/getdate.Po \
+-@AMDEP_TRUE@	./$(DEPDIR)/getopt.Po ./$(DEPDIR)/getopt1.Po \
+-@AMDEP_TRUE@	./$(DEPDIR)/gettime.Po ./$(DEPDIR)/getugroups.Po \
++@AMDEP_TRUE@	./$(DEPDIR)/amigaos.Po ./$(DEPDIR)/argmatch.Po \
++@AMDEP_TRUE@	./$(DEPDIR)/backupfile.Po ./$(DEPDIR)/basename.Po \
++@AMDEP_TRUE@	./$(DEPDIR)/c-strtod.Po ./$(DEPDIR)/canon-host.Po \
++@AMDEP_TRUE@	./$(DEPDIR)/cloexec.Po ./$(DEPDIR)/closeout.Po \
++@AMDEP_TRUE@	./$(DEPDIR)/cycle-check.Po ./$(DEPDIR)/diacrit.Po \
++@AMDEP_TRUE@	./$(DEPDIR)/dirname.Po ./$(DEPDIR)/dup-safer.Po \
++@AMDEP_TRUE@	./$(DEPDIR)/exclude.Po ./$(DEPDIR)/exitfail.Po \
++@AMDEP_TRUE@	./$(DEPDIR)/file-type.Po ./$(DEPDIR)/filemode.Po \
++@AMDEP_TRUE@	./$(DEPDIR)/fopen-safer.Po ./$(DEPDIR)/fts.Po \
++@AMDEP_TRUE@	./$(DEPDIR)/full-read.Po ./$(DEPDIR)/full-write.Po \
++@AMDEP_TRUE@	./$(DEPDIR)/getdate.Po ./$(DEPDIR)/getopt.Po \
++@AMDEP_TRUE@	./$(DEPDIR)/getopt1.Po ./$(DEPDIR)/gettime.Po \
++@AMDEP_TRUE@	./$(DEPDIR)/getugroups.Po \
+ @AMDEP_TRUE@	./$(DEPDIR)/hard-locale.Po ./$(DEPDIR)/hash-pjw.Po \
+ @AMDEP_TRUE@	./$(DEPDIR)/hash.Po ./$(DEPDIR)/human.Po \
+ @AMDEP_TRUE@	./$(DEPDIR)/idcache.Po ./$(DEPDIR)/imaxtostr.Po \
+ @AMDEP_TRUE@	./$(DEPDIR)/isdir.Po ./$(DEPDIR)/linebuffer.Po \
+ @AMDEP_TRUE@	./$(DEPDIR)/localcharset.Po \
+ @AMDEP_TRUE@	./$(DEPDIR)/long-options.Po \
+@@ -512,13 +513,15 @@ libfetish_a_SOURCES = \
+   xstrtoumax.c \
+   yesno.c\
+ \
+   printf-args.h \
+   printf-parse.h \
+   vasprintf.h \
+-  vasnprintf.h
++  vasnprintf.h\
++\
++  amigaos.h amigaos.c
+ 
+ libfetish_a_LIBADD = $(LIBOBJS) $(ALLOCA)
+ libfetish_a_DEPENDENCIES = $(libfetish_a_LIBADD)
+ lib_OBJECTS = $(libfetish_a_OBJECTS)
+ BUILT_SOURCES = getdate.c $(STDBOOL_H) $(ALLOCA_H) $(FNMATCH_H)
+ CLEANFILES = charset.alias ref-add.sed ref-del.sed
+@@ -655,12 +658,13 @@ distclean-compile:
+ @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/tempname.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/utime.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/vasnprintf.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/vasprintf.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/acl.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/addext.Po@am__quote@
++@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/amigaos.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/argmatch.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/backupfile.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/basename.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/c-strtod.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/canon-host.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cloexec.Po@am__quote@
+diff --git a/lib/amigaos.c b/lib/amigaos.c
+new file mode 100644
+index 0000000000000000000000000000000000000000..37f5ac19ca1aa5ea3fd1d9a4dd666bfb2de6d710
+--- /dev/null
++++ b/lib/amigaos.c
+@@ -0,0 +1,524 @@
++#include "amigaos.h"
++
++#include <proto/dos.h>
++#include <proto/exec.h>
++#include <proto/usergroup.h>
++#include <proto/utility.h>
++
++#include <dos/dos.h>
++#include <dos/var.h>
++#include <utility/hooks.h>
++
++#include <string.h>
++#include <stdlib.h>
++#include <stdio.h>
++
++#define MAX_ENV_SIZE 1024  /* maximum number of environ entries */
++
++/* clib2 specific controls */
++int __minimum_os_lib_version = 51;
++char * __minimum_os_lib_error = "Requires AmigaOS 4.0";
++BOOL __open_locale = FALSE;
++
++char **environ = 0;
++
++static struct UserGroupIFace *IUG = 0;
++static struct Library *UGBase = 0;
++
++void ___makeenviron() __attribute__((constructor));
++void ___freeenviron() __attribute__((destructor));
++void usergroup_init(void) __attribute__((constructor));
++void usergroup_term(void) __attribute__((destructor));
++
++#ifdef __NEWLIB__
++void __translate_path(const char *in, char *out);
++
++void __translate_path(const char *in, char *out)
++{
++	int absolute = (in[0] == '/');
++	int dot = 0;
++	int slashign = 0;
++
++	if (absolute) in++;
++
++	while (*in)
++	{
++		if (slashign && in[0] == '/')
++		{
++			slashign = 0;
++		}
++		else if (absolute && in[0] == '/')
++		{
++			/* Absolute path, replace first / with : */
++			*out++ = ':';
++			absolute = 0;
++		}
++		else if (dot)
++		{
++			dot = 0;
++			/* Previous char was a dot */
++			if (in[0] == '.')
++			{
++				/* Current is also a dot, make it a parent in out */
++				*out++ = '/';
++			}
++			else if (in[0] == '/')
++			{
++				/* Current dir, ignore the following slash */
++				slashign = 1;
++			}
++			else
++			{
++				/* A "solitary" dot, output it */
++				*out++ = '.';
++			}
++		}
++		else
++		{
++			if (in[0] == '.')
++			{
++				dot = 1;
++			}
++			else
++				*out ++ = *in;
++		}
++
++		in++;
++	}
++
++	*out = '\0';
++}
++#endif
++
++void usergroup_init(void)
++{
++  IUG = 0;
++
++  UGBase = IExec->OpenLibrary("usergroup.library", 4);
++  if (!UGBase)
++    return;
++
++  IUG = (struct UserGroupIFace *)IExec->GetInterface(UGBase, "main", 1, NULL);
++}
++
++void usergroup_term(void)
++{
++  if (IUG)
++    IExec->DropInterface((struct Interface *)IUG);
++
++  if (UGBase)
++    IExec->CloseLibrary(UGBase);
++}
++
++char *getlogin(void)
++{
++	if (IUG)
++		return IUG->getlogin();
++
++	return NULL;
++}
++
++uint32
++copy_env(struct Hook *hook, APTR userdata, struct ScanVarsMsg *message)
++{
++  static uint32 env_size = 1;  // environ is null terminated
++
++  if ( strlen(message->sv_GDir) <= 4 )
++  {
++    if ( env_size == MAX_ENV_SIZE )
++    {
++      return 0;
++    }
++
++    ++env_size;
++
++    char **env = (char **)hook->h_Data;
++    uint32 size = strlen(message->sv_Name) + 1 + message->sv_VarLen + 1 + 1;
++    char *buffer= (char*)malloc(size);
++
++    snprintf(buffer, size-1, "%s=%s", message->sv_Name, message->sv_Var);
++
++    *env = buffer;
++    ++env;
++    hook->h_Data = env;
++  }
++
++  return 0;
++}
++
++void
++___makeenviron()
++{
++  size_t environ_size = MAX_ENV_SIZE * sizeof(char*);
++  environ = (char **)malloc(environ_size);
++  if ( !environ )
++  {
++    return;
++  }
++
++  memset(environ, 0, environ_size);
++
++  struct Hook hook;
++  memset(&hook, 0, sizeof(struct Hook));
++  hook.h_Entry = copy_env;
++  hook.h_Data = environ;
++
++  IDOS->ScanVars(&hook, GVF_LOCAL_ONLY, 0);
++}
++
++void
++___freeenviron()
++{
++  char **i;
++
++  for ( i = environ; *i != NULL; ++i )
++  {
++    free(*i);
++    *i = 0;
++  }
++
++  free(environ);
++  environ = 0;
++}
++
++#ifdef __NEWLIB__
++void ExitCode(long ret, long data)
++{
++  exit(ret);
++}
++
++int execvp(const char *file, char *const argv[])
++{
++  unsigned int len = 0;
++  int i;
++  char *filename;
++  char buffer[1000];
++  long error;
++
++  __translate_path(file, buffer);
++
++  if (!file || !argv)
++    return -1;
++
++  len = strlen(buffer) + 1;
++
++  for (i = 0; argv[i]; i++)
++  {
++    len += strlen(argv[i]) + 1;
++    if (strchr(argv[i], ' '))
++      len += 2;
++  }
++
++  filename = malloc(len);
++  if (!filename)
++    return -1;
++
++  strcpy(filename, buffer);
++  strcat(filename, " ");
++
++  for (i = 0; argv[i]; i++)
++  {
++    if (strchr(argv[i], ' '))
++    {
++      strcat(filename, "\"");
++      strcat(filename, argv[i]);
++      strcat(filename, "\" ");
++    }
++    else
++    {
++      strcat(filename, argv[i]);
++      strcat(filename, " ");
++    }
++  }
++
++  error = IDOS->SystemTags(filename,
++    NP_CopyVars, TRUE,
++    NP_ExitCode, ExitCode,
++    TAG_DONE);
++
++  if (error == 0)
++    exit(0);
++
++  return -1;
++}
++
++int execv(const char *file, char *const argv[])
++{
++  return execvp(file, argv);
++}
++#else /* CLIB2  */
++void __execve_exit(int return_code)
++{
++	return 0;
++}
++
++int __execve_environ_init(char * const envp[])
++{
++    if (envp == NULL)
++        return 0;
++
++    while (*envp != NULL)
++    {
++        int len;
++        char *var;
++        char *val;
++
++        if ((len = strlen(*envp)))
++        {
++            size_t size = len + 1;
++            if ((var = malloc(size)))
++            {
++                memcpy(var, *envp, size);
++
++                val = strchr(var,'=');
++                if(val)
++                {
++                    *val++='\0';
++                    if (*val)
++                    {
++                        IDOS->SetVar(var,val,strlen(val)+1,GVF_LOCAL_ONLY);
++                    }
++                }
++                free(var);
++                var = NULL;
++            }
++        }
++        envp++;
++    }
++    return 0;
++}
++#endif
++
++#ifdef __NEWLIB__
++
++uid_t getuid(void)
++{
++	if (IUG)
++		return IUG->getuid();
++
++	return 65535;
++}
++
++uid_t geteuid(void)
++{
++	if (IUG)
++		return IUG->geteuid();
++
++	return 65535;
++}
++
++gid_t getgid(void)
++{
++	if (IUG)
++		return IUG->getgid();
++
++	return 65535;
++}
++
++gid_t getegid(void)
++{
++	if (IUG)
++		return IUG->getegid();
++
++	return 65535;
++}
++
++struct group *getgrnam(const char *name)
++{
++	if (IUG)
++		return IUG->getgrnam((char *)name);
++
++	return NULL;
++}
++
++struct group *getgrgid(gid_t gid)
++{
++	if (IUG)
++		return IUG->getgrgid(gid);
++
++	return NULL;
++}
++
++struct passwd *getpwuid(uid_t uid)
++{
++	if (IUG)
++		return IUG->getpwuid(uid);
++
++	return NULL;
++}
++
++struct passwd *getpwnam(const char *name)
++{
++	if (IUG)
++		return IUG->getpwnam((char *)name);
++
++	return NULL;
++}
++
++void setpwent(void)
++{
++	if (IUG)
++		IUG->setpwent();
++}
++
++void endpwent(void)
++{
++	if (IUG)
++		IUG->endpwent();
++}
++
++void setgrent(void)
++{
++	if (IUG)
++		IUG->setgrent();
++}
++
++int setgroups(size_t size, const gid_t *list)
++{
++	if (IUG)
++		return IUG->setgroups(size, list);
++
++	return -1;
++}
++
++int setgid(gid_t gid)
++{
++	if (IUG)
++		return IUG->setgid(gid);
++
++	return -1;
++}
++
++int setuid(uid_t uid)
++{
++	if (IUG)
++		return IUG->setuid(uid);
++
++	return -1;
++}
++
++static char __crypt[10] = "";
++
++char * crypt(const char *key, const char *salt)
++{
++	if (IUG)
++		return IUG->crypt((UBYTE *)key, (UBYTE *)salt);
++
++	return __crypt;
++}
++
++int symlink(const char *oldpath, const char *newpath)
++{
++	if (!oldpath || !newpath)
++		return -1;
++
++	if (DOSFALSE == IDOS->MakeLink((STRPTR)newpath, (STRPTR)oldpath, LINK_SOFT))
++		return -1;
++
++	return 0;
++}
++
++int fsync(int fd)
++{
++	fflush(fd);
++}
++
++int statfs (const char *path, struct statfs *buf)
++{
++	char buffer[1000];
++	BPTR lock;
++	struct InfoData ifd;
++	char *type;
++
++	if (!path || !buf)
++		return -1;
++
++	__translate_path(path, buffer);
++
++	lock = IDOS->Lock((STRPTR)buffer, SHARED_LOCK);
++	if (!lock)
++		return -1;
++
++	if (DOSFALSE == IDOS->Info(lock, &ifd))
++	{
++		IDOS->UnLock(lock);
++		return -1;
++	}
++
++    buf->f_bsize = ifd.id_BytesPerBlock > 0 ? ifd.id_BytesPerBlock : 512;
++    buf->f_blocks = ifd.id_NumBlocks > 0 ? ifd.id_NumBlocks : 1;
++    buf->f_bfree = buf->f_blocks - ifd.id_NumBlocks > 0 ? ifd.id_NumBlocksUsed : 1;
++    buf->f_bavail = buf->f_bfree;
++    buf->f_ffree = 0x7fffffff;
++	buf->f_fsid = ifd.id_DiskType;
++	buf->f_files = 1;
++
++	switch (ifd.id_DiskType)
++	{
++		case ID_NO_DISK_PRESENT:
++			type = "No Disk present";
++			break;
++		case ID_UNREADABLE_DISK:
++			type = "Unreadable disk";
++			break;
++		case ID_BUSY_DISK:
++			type = "Dismounted";
++			break;
++		case ID_DOS_DISK:
++			type = "Old file system (OFS, DOS\\0)";
++			break;
++		case ID_FFS_DISK:
++			type = "Old FastFileSystem (FFS, DOS\\1)";
++			break;
++		case ID_INTER_DOS_DISK:
++			type = "Old International file system (OFS, DOS\\2)";
++			break;
++		case ID_INTER_FFS_DISK:
++			type = "International FastFileSystem (FFS, DOS\\3)";
++			break;
++		case ID_FASTDIR_DOS_DISK:
++			type = "Old file system with Dircache (OFS, DOS\\4)";
++			break;
++		case ID_FASTDIR_FFS_DISK:
++			type = "FastFileSystem with Dircache (FFS, DOS\\5)";
++			break;
++		case ID_LONGNAME_DOS_DISK:
++			type = "Old file system with long filenames (OFS, DOS\\6)";
++			break;
++		case ID_LONGNAME_FFS_DISK:
++			type = "FastFileSystem with long filenames (FFS, DOS\\7)";
++			break;
++		case 0x53465300:
++			type = "SmartFileSystem (SFS, SFS\0)";
++			break;
++		case ID_NOT_REALLY_DOS:
++			type = "Not a dosk disk";
++			break;
++		default:
++			type = "Unknown file system";
++			break;
++	}
++
++	strcpy(buf->f_fstypename, type);
++
++	IDOS->UnLock(lock);
++
++	return 0;
++}
++
++void __mempcpy(void *a, void *b, size_t len)
++{
++	memcpy(a, b, len);
++}
++
++int kill(int a, int b)
++{
++	return 0;
++}
++
++char *ttyname(int fd)
++{
++	return "CONSOLE:";
++}
++
++#endif
+diff --git a/lib/amigaos.h b/lib/amigaos.h
+new file mode 100644
+index 0000000000000000000000000000000000000000..4a759e9113c76b6d12dc865765b2600057f4f0e7
+--- /dev/null
++++ b/lib/amigaos.h
+@@ -0,0 +1,63 @@
++#ifndef _AMIGAOS_H_
++#define _AMIGAOS_H_
++
++#include "dirfd.h"
++
++int fchdir (int fd);
++
++#ifdef __NEWLIB__
++int execvp(const char *file, char *const argv[]);
++#endif
++
++typedef unsigned int u_int;
++typedef unsigned short u_short;
++
++#ifdef __NEWLIB__
++
++/* Blatantly ripped from glibc, but it's all GPL in here, anyway */
++enum
++{
++  MS_RDONLY = 1,                /* Mount read-only.  */
++#define MS_RDONLY       MS_RDONLY
++  MS_NOSUID = 2,                /* Ignore suid and sgid bits.  */
++#define MS_NOSUID       MS_NOSUID
++  MS_NODEV = 4,                 /* Disallow access to device special files.  */
++#define MS_NODEV        MS_NODEV
++  MS_NOEXEC = 8,                /* Disallow program execution.  */
++#define MS_NOEXEC       MS_NOEXEC
++  MS_SYNCHRONOUS = 16,          /* Writes are synced at once.  */
++#define MS_SYNCHRONOUS  MS_SYNCHRONOUS
++  MS_REMOUNT = 32,              /* Alter flags of a mounted FS.  */
++#define MS_REMOUNT      MS_REMOUNT
++  MS_MANDLOCK = 64,             /* Allow mandatory locks on an FS.  */
++#define MS_MANDLOCK     MS_MANDLOCK
++  S_WRITE = 128,                /* Write on file/directory/symlink.  */
++#define S_WRITE         S_WRITE
++  S_APPEND = 256,               /* Append-only file.  */
++#define S_APPEND        S_APPEND
++  S_IMMUTABLE = 512,            /* Immutable file.  */
++#define S_IMMUTABLE     S_IMMUTABLE
++  MS_NOATIME = 1024,            /* Do not update access times.  */
++#define MS_NOATIME      MS_NOATIME
++  MS_NODIRATIME = 2048,         /* Do not update directory access times.  */
++#define MS_NODIRATIME   MS_NODIRATIME
++  MS_BIND = 4096,               /* Bind directory at different place.  */
++#define MS_BIND         MS_BIND
++};
++
++struct statfs
++  {
++    long f_bsize;
++    long f_blocks;
++    long f_bfree;
++    long f_bavail;
++    long f_ffree;
++    long f_fsid;
++    long f_files;
++	char f_fstypename[100];
++  };
++
++#endif
++
++
++#endif
+diff --git a/lib/euidaccess.c b/lib/euidaccess.c
+index 772cf6f1fb1b9d8001743246241be5874050372b..dd41a421d76209339996ec1af88685982bf23bf2 100644
+--- a/lib/euidaccess.c
++++ b/lib/euidaccess.c
+@@ -58,13 +58,15 @@
+ 
+ #else /* not _POSIX_VERSION */
+ uid_t getuid ();
+ gid_t getgid ();
+ uid_t geteuid ();
+ gid_t getegid ();
++#ifndef __amigaos4__
+ # include <sys/param.h>
++#endif
+ # if !defined(NGROUPS_MAX) && defined(NGROUPS)
+ #  define NGROUPS_MAX NGROUPS
+ # endif /* not NGROUPS_MAX and NGROUPS */
+ #endif /* not POSIX_VERSION */
+ 
+ #include <errno.h>
+@@ -135,12 +137,15 @@ static int have_ids;
+    id's instead of the real ones, and it does not check for read-only
+    filesystem, text busy, etc. */
+ 
+ int
+ euidaccess (const char *path, int mode)
+ {
++#ifdef __amigaos4__
++  return 0;
++#else
+   struct stat stats;
+   int granted;
+ 
+ #ifdef	_LIBC
+   if (! __libc_enable_secure)
+     /* If we are not set-uid or set-gid, access does the same.  */
+@@ -194,12 +199,13 @@ euidaccess (const char *path, int mode)
+   else
+     granted = (stats.st_mode & mode);
+   if (granted == mode)
+     return 0;
+   __set_errno (EACCESS);
+   return -1;
++#endif
+ }
+ #undef euidaccess
+ #ifdef weak_alias
+ weak_alias (__euidaccess, euidaccess)
+ #endif
+ 
+diff --git a/lib/fts_.h b/lib/fts_.h
+index 496211f6ee5117025b7e5df284706e26031bf639..d19053095c20ba283b7c8960e58c026191e995cb 100644
+--- a/lib/fts_.h
++++ b/lib/fts_.h
+@@ -44,12 +44,16 @@
+ # endif
+ 
+ # include <sys/types.h>
+ # include "hash.h"
+ # include "cycle-check.h"
+ 
++#ifdef __amigaos4__
++#include "amigaos.h"
++#endif
++
+ typedef struct {
+ 	struct _ftsent *fts_cur;	/* current node */
+ 	struct _ftsent *fts_child;	/* linked list of children */
+ 	struct _ftsent **fts_array;	/* sort array */
+ 	dev_t fts_dev;			/* starting device # */
+ 	char *fts_path;			/* path for this descent */
+diff --git a/lib/getline.c b/lib/getline.c
+index 896b6bbd84cb05326175d98a6f5af8a53c112708..07d6f2a98b32467c3fba4c8ad6b00970721bf500 100644
+--- a/lib/getline.c
++++ b/lib/getline.c
+@@ -16,12 +16,16 @@
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software Foundation,
+    Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+ 
+ /* Written by Jan Brittenson, bson@gnu.ai.mit.edu.  */
+ 
++#ifdef __amigaos4__
++typedef int ssize_t;
++#endif
++
+ #if HAVE_CONFIG_H
+ # include <config.h>
+ #endif
+ 
+ /* Specification.  */
+ #include "getline.h"
+diff --git a/lib/getloadavg.c b/lib/getloadavg.c
+index c6b6fee1098ab17e74e64a80ff9f78979d5ab085..09856e88ce72a5267077cad16c143a51e2a104f6 100644
+--- a/lib/getloadavg.c
++++ b/lib/getloadavg.c
+@@ -77,12 +77,16 @@
+    In addition, to avoid nesting many #ifdefs, we internally set
+    LDAV_DONE to indicate that the load average has been computed.
+ 
+    We also #define LDAV_PRIVILEGED if a program will require
+    special installation to be able to call getloadavg.  */
+ 
++#ifdef __amigaos4__
++typedef int ssize_t;
++#endif
++
+ /* This should always be first.  */
+ #ifdef HAVE_CONFIG_H
+ # include <config.h>
+ #endif
+ 
+ #include <sys/types.h>
+diff --git a/lib/getndelim2.c b/lib/getndelim2.c
+index 6f0868999525c671560ad97759abc0dec2de4cff..50135aee9980a1e10eef6078eb65ea7166ca39e3 100644
+--- a/lib/getndelim2.c
++++ b/lib/getndelim2.c
+@@ -17,12 +17,16 @@
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software Foundation,
+    Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+ 
+ /* Originally written by Jan Brittenson, bson@gnu.ai.mit.edu.  */
+ 
++#ifdef __amigaos4__
++typedef int ssize_t;
++#endif
++
+ #if HAVE_CONFIG_H
+ # include <config.h>
+ #endif
+ 
+ /* Specification.  */
+ #include "getndelim2.h"
+diff --git a/lib/getopt.c b/lib/getopt.c
+index 6dcdbebf5e8cb433630a4a79ce83e188ad89a34b..5dd37dadc82a630366691864a3c85deccdaafbaf 100644
+--- a/lib/getopt.c
++++ b/lib/getopt.c
+@@ -48,14 +48,17 @@
+ # include <gnu-versions.h>
+ # if _GNU_GETOPT_INTERFACE_VERSION == GETOPT_INTERFACE_VERSION
+ #  define ELIDE_CODE
+ # endif
+ #endif
+ 
+-#ifndef ELIDE_CODE
++#if defined(__amigaos4__) && !defined(__NEWLIB__)
++#define ELIDE_CODE
++#endif
+ 
++#ifndef ELIDE_CODE
+ 
+ /* This needs to come after some library #include
+    to get __GNU_LIBRARY__ defined.  */
+ #ifdef	__GNU_LIBRARY__
+ /* Don't include stdlib.h for non-GNU C libraries because some of them
+    contain conflicting prototypes for getopt.  */
+diff --git a/lib/getopt1.c b/lib/getopt1.c
+index 3288c726134471a39e12a6e8e9f59f82dc9836a1..6e984c17fceb3dbcf823212627bdd8b3c7a0390e 100644
+--- a/lib/getopt1.c
++++ b/lib/getopt1.c
+@@ -44,12 +44,16 @@
+ #include <gnu-versions.h>
+ #if _GNU_GETOPT_INTERFACE_VERSION == GETOPT_INTERFACE_VERSION
+ #define ELIDE_CODE
+ #endif
+ #endif
+ 
++#if defined(__amigaos4__) && !defined(__NEWLIB__)
++#define ELIDE_CODE
++#endif
++
+ #ifndef ELIDE_CODE
+ 
+ 
+ /* This needs to come after some library #include
+    to get __GNU_LIBRARY__ defined.  */
+ #ifdef __GNU_LIBRARY__
+diff --git a/lib/getpagesize.h b/lib/getpagesize.h
+index fb5b91c0890d0169502ddac7186b4913763d83b6..68a554217abdccfa8a8f63a35765dba7720a29f1 100644
+--- a/lib/getpagesize.h
++++ b/lib/getpagesize.h
+@@ -25,12 +25,16 @@
+ # include <OS.h>
+ # if defined B_PAGE_SIZE
+ #  define getpagesize() B_PAGE_SIZE
+ # endif
+ #endif
+ 
++#if defined __amigaos4__
++# define getpagesize() 65536
++#endif
++
+ #ifndef getpagesize
+ # include <sys/param.h>
+ # ifdef EXEC_PAGESIZE
+ #  define getpagesize() EXEC_PAGESIZE
+ # else
+ #  ifdef NBPG
+diff --git a/lib/getpass.c b/lib/getpass.c
+index 8a993d3e059b5633974f10f011a83d1e5fd1a10a..1236ad2b36d9091e358ed417789d10d837c0b065 100644
+--- a/lib/getpass.c
++++ b/lib/getpass.c
+@@ -32,13 +32,15 @@
+ # define __fsetlocking(stream, type) /* empty */
+ #endif
+ #if !_LIBC
+ # include "getline.h"
+ #endif
+ 
++#ifndef __amigaos4__
+ #include <termios.h>
++#endif
+ #include <unistd.h>
+ 
+ #if _LIBC
+ # include <wchar.h>
+ #endif
+ 
+@@ -83,12 +85,13 @@ call_fclose (void *arg)
+     fclose (arg);
+ }
+ 
+ char *
+ getpass (const char *prompt)
+ {
++#ifndef __amigaos4__
+   FILE *tty;
+   FILE *in, *out;
+   struct termios s, t;
+   bool tty_changed;
+   static char *buf;
+   static size_t bufsize;
+@@ -186,7 +189,10 @@ getpass (const char *prompt)
+ 
+   __libc_cleanup_pop (0);
+ 
+   call_fclose (tty);
+ 
+   return buf;
++#else
++  return 0;
++#endif
+ }
+diff --git a/lib/gettimeofday.c b/lib/gettimeofday.c
+index 1ebe4d0ffddd150158a63af70b38834ef2cfe3f0..bbe7b89c36551e9bc94bbbf08b81b2386330fdc1 100644
+--- a/lib/gettimeofday.c
++++ b/lib/gettimeofday.c
+@@ -104,18 +104,20 @@ rpl_gettimeofday (struct timeval *tv, struct timezone *tz)
+    tzset may clobber the static buffer used for localtime's result.
+    Save and restore the contents of the buffer used for localtime's
+    result around the call to tzset.  */
+ void
+ rpl_tzset (void)
+ {
++#ifndef __amigaos4__
+   struct tm save;
+ 
+   if (! localtime_buffer_addr)
+     {
+       time_t t = 0;
+       localtime_buffer_addr = localtime (&t);
+     }
+ 
+   save = *localtime_buffer_addr;
+   tzset ();
+   *localtime_buffer_addr = save;
++#endif
+ }
+diff --git a/lib/human.c b/lib/human.c
+index 36cfd7348876047fce07f7d0926eefb82ce278ef..703443c9bac1bc414d6ede6ab03390afd74ec679 100644
+--- a/lib/human.c
++++ b/lib/human.c
+@@ -22,12 +22,16 @@
+ #if HAVE_CONFIG_H
+ # include <config.h>
+ #endif
+ 
+ #include "human.h"
+ 
++#if defined __amigaos4__ && defined __NEWLIB__
++#include <limits.h>
++#endif
++
+ #ifndef SIZE_MAX
+ # define SIZE_MAX ((size_t) -1)
+ #endif
+ #ifndef UINTMAX_MAX
+ # define UINTMAX_MAX ((uintmax_t) -1)
+ #endif
+diff --git a/lib/idcache.c b/lib/idcache.c
+index 8b85f07c396fa77499d04318d0df141d3e5f95f2..686d59b3c07e50dda2931d30a5528d0a30ad06cd 100644
+--- a/lib/idcache.c
++++ b/lib/idcache.c
+@@ -29,18 +29,20 @@
+ #if HAVE_UNISTD_H
+ # include <unistd.h>
+ #endif
+ 
+ #include "xalloc.h"
+ 
++#ifndef __amigaos4__
+ #ifndef _POSIX_VERSION
+ struct passwd *getpwuid ();
+ struct passwd *getpwnam ();
+ struct group *getgrgid ();
+ struct group *getgrnam ();
+ #endif
++#endif
+ 
+ #ifdef __DJGPP__
+ static char digits[] = "0123456789";
+ #endif
+ 
+ struct userid
+diff --git a/lib/nanosleep.c b/lib/nanosleep.c
+index 902fd2dfe0f258e90656538ead77e7526f383d53..239d078513e4ca33f1720006d4cea041100baa16 100644
+--- a/lib/nanosleep.c
++++ b/lib/nanosleep.c
+@@ -42,12 +42,16 @@ extern int errno;
+ #ifndef SIGCONT
+ # define SIGCONT SIGTERM
+ #endif
+ 
+ #include "timespec.h"
+ 
++#if defined __amigaos4__ && defined __NEWLIB__
++#undef SA_NOCLDSTOP
++#endif
++
+ static int suspended;
+ int first_call = 1;
+ 
+ /* Handle SIGCONT. */
+ 
+ static void
+@@ -55,20 +59,36 @@ sighandler (int sig)
+ {
+   suspended = 1;
+ }
+ 
+ /* FIXME: comment */
+ 
++#ifdef __amigaos4__
++static void
++my_usleep (const struct timespec *ts_delay)
++{
++  struct timespec delay = *ts_delay;
++
++  while (delay.tv_sec > 0)
++  {
++  	usleep(1000000);
++  	delay.tv_sec --;
++  }
++
++  usleep(delay.tv_nsec/1000);
++}
++#else
+ static void
+ my_usleep (const struct timespec *ts_delay)
+ {
+   struct timeval tv_delay;
+   tv_delay.tv_sec = ts_delay->tv_sec;
+   tv_delay.tv_usec = ts_delay->tv_nsec / 1000;
+   select (0, (void *) 0, (void *) 0, (void *) 0, &tv_delay);
+ }
++#endif
+ 
+ /* FIXME: comment */
+ 
+ int
+ rpl_nanosleep (const struct timespec *requested_delay,
+ 	       struct timespec *remaining_delay)
+diff --git a/lib/putenv.c b/lib/putenv.c
+index 87c5522810ac60ad8b61bf2ad990810642c523ab..6ce32ad979499fd8216ee8c6ce93017c3e59286d 100644
+--- a/lib/putenv.c
++++ b/lib/putenv.c
+@@ -14,12 +14,13 @@
+    GNU General Public License for more details.
+ 
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software Foundation,
+    Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+ 
++#if !defined __amigaos4__ && defined __NEWLIB__
+ #if HAVE_CONFIG_H
+ # include <config.h>
+ #endif
+ 
+ #include <stddef.h>
+ 
+@@ -140,6 +141,7 @@ rpl_putenv (const char *string)
+     }
+   else
+     *ep = (char *) string;
+ 
+   return 0;
+ }
++#endif
+\ No newline at end of file
+diff --git a/lib/quotearg.c b/lib/quotearg.c
+index c695646f13ec247187b0404c04835f6f0479976e..25df490af20c6a5ee1b8ca6271783131e0a5a221 100644
+--- a/lib/quotearg.c
++++ b/lib/quotearg.c
+@@ -32,12 +32,16 @@
+ #include <string.h>
+ 
+ #include "gettext.h"
+ #define _(msgid) gettext (msgid)
+ #define N_(msgid) msgid
+ 
++#if defined(__amigaos4__) && !defined(__NEWLIB__)
++int __mb_cur_max = 1;
++#endif
++
+ #if HAVE_WCHAR_H
+ 
+ /* BSD/OS 4.1 wchar.h requires FILE and struct tm to be declared.  */
+ # include <stdio.h>
+ # include <time.h>
+ 
+diff --git a/lib/safe-read.c b/lib/safe-read.c
+index c21d1cf194004aa02ca07673d8d89d1f9add95c7..991be7ea8c8e0163d46f3f371c35c64f0b3c8eb4 100644
+--- a/lib/safe-read.c
++++ b/lib/safe-read.c
+@@ -12,12 +12,16 @@
+    GNU General Public License for more details.
+ 
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software Foundation,
+    Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+ 
++#ifdef __amigaos4__
++typedef int ssize_t;
++#endif
++
+ #if HAVE_CONFIG_H
+ # include <config.h>
+ #endif
+ 
+ /* Specification.  */
+ #ifdef SAFE_WRITE
+diff --git a/lib/save-cwd.c b/lib/save-cwd.c
+index 6fb39f0aa0c91e3864951bf7087268766bda81d8..41be412fc71ac2a851f81e564a9b29c2caf38a28 100644
+--- a/lib/save-cwd.c
++++ b/lib/save-cwd.c
+@@ -14,12 +14,16 @@
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software Foundation,
+    Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+ 
+ /* Written by Jim Meyering.  */
+ 
++#ifdef __amigaos4__
++typedef int ssize_t;
++#endif
++
+ #if HAVE_CONFIG_H
+ # include "config.h"
+ #endif
+ 
+ #include <stdio.h>
+ #include <stdlib.h>
+diff --git a/lib/tempname.c b/lib/tempname.c
+index b3d0874ce9953cd37743813cfa0af298518b28a4..1b6a08553dacbdd46ad68ebd0f3ca53210555fd2 100644
+--- a/lib/tempname.c
++++ b/lib/tempname.c
+@@ -14,12 +14,16 @@
+    GNU General Public License for more details.
+ 
+    You should have received a copy of the GNU General Public License along
+    with this program; if not, write to the Free Software Foundation,
+    Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+ 
++#ifdef __amigaos4__
++typedef int ssize_t;
++#endif
++
+ #if HAVE_CONFIG_H
+ # include <config.h>
+ #endif
+ 
+ #include <sys/types.h>
+ #include <assert.h>
+diff --git a/lib/userspec.c b/lib/userspec.c
+index 474fb60628cd110c072cf770c7c248c35356727a..3f06c58225c2493f8e3df6e95098fca3fee14235 100644
+--- a/lib/userspec.c
++++ b/lib/userspec.c
+@@ -46,17 +46,19 @@
+ #include "xstrtol.h"
+ 
+ #include "gettext.h"
+ #define _(msgid) gettext (msgid)
+ #define N_(msgid) msgid
+ 
++#ifndef __amigaos4__
+ #ifndef _POSIX_VERSION
+ struct passwd *getpwnam ();
+ struct group *getgrnam ();
+ struct group *getgrgid ();
+ #endif
++#endif
+ 
+ #ifndef HAVE_ENDGRENT
+ # define endgrent() ((void) 0)
+ #endif
+ 
+ #ifndef HAVE_ENDPWENT
+diff --git a/lib/utime.c b/lib/utime.c
+index 7b87a969df3e2222d8cda34d5fe446711655c94d..1d49ffca8b0a296681df36c405b65eb70a8620e3 100644
+--- a/lib/utime.c
++++ b/lib/utime.c
+@@ -13,12 +13,16 @@
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software Foundation,
+    Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+ 
+ /* derived from a function in touch.c */
+ 
++#ifdef __amigaos4__
++typedef int ssize_t;
++#endif
++
+ #ifdef HAVE_CONFIG_H
+ # include <config.h>
+ #endif
+ #undef utime
+ 
+ #include <sys/types.h>
+@@ -35,12 +39,16 @@
+ #include <unistd.h>
+ #include <errno.h>
+ #ifndef errno
+ extern int errno;
+ #endif
+ 
++#ifdef __amigaos4__
++#include <stdio.h>
++#endif
++
+ #include "full-write.h"
+ #include "safe-read.h"
+ 
+ /* Some systems (even some that do have <utime.h>) don't declare this
+    structure anywhere.  */
+ #ifndef HAVE_STRUCT_UTIMBUF
+diff --git a/lib/xreadlink.c b/lib/xreadlink.c
+index 347357897632b83fc53bb6155af1803850f06fc2..b7c51a2e6b52c590c87a5976c0d2d8231ca304db 100644
+--- a/lib/xreadlink.c
++++ b/lib/xreadlink.c
+@@ -16,12 +16,16 @@
+    along with this program; see the file COPYING.
+    If not, write to the Free Software Foundation,
+    59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+ 
+ /* Written by Jim Meyering <jim@meyering.net>  */
+ 
++#ifdef __amigaos4__
++typedef int ssize_t;
++#endif
++
+ #if HAVE_CONFIG_H
+ # include <config.h>
+ #endif
+ 
+ #include <stdio.h>
+ #include <errno.h>
+diff --git a/m4/ls-mntd-fs.m4 b/m4/ls-mntd-fs.m4
+index c28466bb02ee227055c8183233145675607e9d9c..92a2a188c987233dd7fbacded38bacc143627169 100644
+--- a/m4/ls-mntd-fs.m4
++++ b/m4/ls-mntd-fs.m4
+@@ -269,13 +269,13 @@ if test -z "$ac_list_mounted_fs"; then
+                mounted filesystems.  fread will be used to read /etc/mnttab.
+                (SVR2) ])
+   fi
+ fi
+ 
+ if test -z "$ac_list_mounted_fs"; then
+-  AC_MSG_ERROR([could not determine how to read list of mounted filesystems])
++  AC_MSG_RESULT([could not determine how to read list of mounted filesystems])
+   # FIXME -- no need to abort building the whole package
+   # Can't build mountlist.c or anything that needs its functions
+ fi
+ 
+ AS_IF([test $ac_list_mounted_fs = found], [$1], [$2])
+ 
+diff --git a/m4/putenv.m4 b/m4/putenv.m4
+index 77b9f787459de400b409aa93a2015476efcc78a1..0cf91b0065df5b02c6a0b30ed281533d4581ecfe 100644
+--- a/m4/putenv.m4
++++ b/m4/putenv.m4
+@@ -32,13 +32,18 @@ AC_DEFUN([jm_FUNC_PUTENV],
+       exit (0);
+     }
+ 	      ],
+ 	     jm_cv_func_svid_putenv=yes,
+ 	     jm_cv_func_svid_putenv=no,
+ 	     dnl When crosscompiling, assume putenv is broken.
+-	     jm_cv_func_svid_putenv=no)
++	     echo $host_os
++	     if test $host_os = amigaos; then
++		jm_cv_func_svid_putenv=yes
++	     else
++		jm_cv_func_svid_putenv=no
++	     fi)
+   ])
+   if test $jm_cv_func_svid_putenv = no; then
+     AC_LIBOBJ(putenv)
+     AC_DEFINE(putenv, rpl_putenv,
+       [Define to rpl_putenv if the replacement function should be used.])
+     gl_PREREQ_PUTENV
+diff --git a/man/Makefile.am b/man/Makefile.am
+index 04c3ca5b33328a6e465c1e5e4128c6074aea4e0f..8c2a2910390d45e9c8a62a4b4e50aed072f17488 100644
+--- a/man/Makefile.am
++++ b/man/Makefile.am
+@@ -123,19 +123,21 @@ mapped_name = `echo $*|sed 's/install/ginstall/; s/test/[/'`
+ 
+ # Note the use of $t/$*, rather than just `$*' as in other packages.
+ # That is necessary to avoid failures for programs that are also shell built-in
+ # functions like echo, false, printf, pwd.
+ .x.1:
+ 	@rm -f $@
++	$(if $(findstring $(host),$(build)),	\
+ 	@echo "Updating man page $@";		\
+ 	mkdir $t;				\
+ 	(cd $t && $(LN_S) ../../src/$(mapped_name)$(EXEEXT) $*$(EXEEXT)); \
+ 	$(PERL) -- $(srcdir)/help2man		\
+ 	    --info-page='$(PACKAGE) $*'		\
+ 	    --include=$(srcdir)/$*.x		\
+-	    --output=$@ $t/$*$(EXEEXT)
++	    --output=$@ $t/$*$(EXEEXT),		\
++	cp $(srcdir)/$@ $@)
+ 	@chmod a-w $@
+ 	@rm -rf $t
+ 
+ check-local: check-x-vs-1 check-programs-vs-x
+ 
+ # Sort in traditional ASCII order, regardless of the current locale;
+diff --git a/man/Makefile.in b/man/Makefile.in
+index 2bfa6f43229324e1ae373d4a592ed547541b70fb..98bd9da878201c0b4dddfa6b98fdbc2f728eea04 100644
+--- a/man/Makefile.in
++++ b/man/Makefile.in
+@@ -598,19 +598,21 @@ yes.1:		$(common_dep)	$(srcdir)/yes.x		../src/yes.c
+ 
+ # Note the use of $t/$*, rather than just `$*' as in other packages.
+ # That is necessary to avoid failures for programs that are also shell built-in
+ # functions like echo, false, printf, pwd.
+ .x.1:
+ 	@rm -f $@
++	$(if $(findstring $(host),$(build)),	\
+ 	@echo "Updating man page $@";		\
+ 	mkdir $t;				\
+ 	(cd $t && $(LN_S) ../../src/$(mapped_name)$(EXEEXT) $*$(EXEEXT)); \
+ 	$(PERL) -- $(srcdir)/help2man		\
+ 	    --info-page='$(PACKAGE) $*'		\
+ 	    --include=$(srcdir)/$*.x		\
+-	    --output=$@ $t/$*$(EXEEXT)
++	    --output=$@ $t/$*$(EXEEXT),		\
++	cp $(srcdir)/$@ $@)
+ 	@chmod a-w $@
+ 	@rm -rf $t
+ 
+ check-local: check-x-vs-1 check-programs-vs-x
+ 
+ # Ensure that for each .x file in this directory, there is a
+diff --git a/src/chown-core.c b/src/chown-core.c
+index ba2c5c3df7f4177a589057b88430bd03a4bcbae8..18e8d9d6e18807047d6a552eb214b3d9c82992fc 100644
+--- a/src/chown-core.c
++++ b/src/chown-core.c
+@@ -33,16 +33,18 @@
+ #include "chown-core.h"
+ 
+ /* The number of decimal digits required to represent the largest value of
+    type `unsigned int'.  This is enough for an 8-byte unsigned int type.  */
+ #define UINT_MAX_DECIMAL_DIGITS 20
+ 
++#ifndef __amigaos4__
+ #ifndef _POSIX_VERSION
+ struct group *getgrnam ();
+ struct group *getgrgid ();
+ #endif
++#endif
+ 
+ void
+ chopt_init (struct Chown_option *chopt)
+ {
+   chopt->verbosity = V_off;
+   chopt->root_dev_ino = NULL;
+diff --git a/src/copy.c b/src/copy.c
+index 51c5f6db80fe5db570e90b56604b26e433f62402..3163bb05fa0c43bde863ca182541c972793dea32 100644
+--- a/src/copy.c
++++ b/src/copy.c
+@@ -1433,24 +1433,32 @@ copy_internal (const char *src_path, const char *dst_path,
+ 	goto un_backup;
+     }
+   else
+ #ifdef S_ISFIFO
+   if (S_ISFIFO (src_type))
+     {
++#ifndef __amigaos4__
+       if (mkfifo (dst_path, get_dest_mode (x, src_mode)))
++#else
++      if (1)
++#endif
+ 	{
+ 	  error (0, errno, _("cannot create fifo %s"), quote (dst_path));
+ 	  goto un_backup;
+ 	}
+     }
+   else
+ #endif
+     if (S_ISBLK (src_type) || S_ISCHR (src_type)
+ 	|| S_ISSOCK (src_type))
+     {
++#ifndef __amigaos4__
+       if (mknod (dst_path, get_dest_mode (x, src_mode), src_sb.st_rdev))
++#else
++      if (1)
++#endif
+ 	{
+ 	  error (0, errno, _("cannot create special file %s"),
+ 		 quote (dst_path));
+ 	  goto un_backup;
+ 	}
+     }
+diff --git a/src/csplit.c b/src/csplit.c
+index b0758102ec6132921eddf4c9b8a124625db97208..41ee8d8f9035c16ba9c2fac9ed27d5c25ef0b81a 100644
+--- a/src/csplit.c
++++ b/src/csplit.c
+@@ -31,12 +31,16 @@
+ 
+ #include "error.h"
+ #include "inttostr.h"
+ #include "safe-read.h"
+ #include "xstrtol.h"
+ 
++#if defined __amigaos4__ && defined __NEWLIB__
++#undef SA_NOCLDSTOP
++#endif
++
+ /* The official name of this program (e.g., no `g' prefix).  */
+ #define PROGRAM_NAME "csplit"
+ 
+ #define AUTHORS "Stuart Kemp", "David MacKenzie"
+ 
+ /* Increment size of area for control records. */
+@@ -1313,18 +1317,22 @@ main (int argc, char **argv)
+     sigaction (SIGQUIT, &newact, NULL);
+ 
+   sigaction (SIGTERM, NULL, &oldact);
+   if (oldact.sa_handler != SIG_IGN)
+     sigaction (SIGTERM, &newact, NULL);
+ #else
++#ifndef __amigaos4__
+   if (signal (SIGHUP, SIG_IGN) != SIG_IGN)
+     signal (SIGHUP, interrupt_handler);
++#endif
+   if (signal (SIGINT, SIG_IGN) != SIG_IGN)
+     signal (SIGINT, interrupt_handler);
++#ifndef __amigaos4__
+   if (signal (SIGQUIT, SIG_IGN) != SIG_IGN)
+     signal (SIGQUIT, interrupt_handler);
++#endif
+   if (signal (SIGTERM, SIG_IGN) != SIG_IGN)
+     signal (SIGTERM, interrupt_handler);
+ #endif
+ 
+   while ((optc = getopt_long (argc, argv, "f:b:kn:sqz", longopts, NULL)) != -1)
+     switch (optc)
+diff --git a/src/date.c b/src/date.c
+index 70fb2aed73d7a11895963c15ccd8d791a3f43b3c..7e1689b38a4578a55d75a27fc7aac17f331218af 100644
+--- a/src/date.c
++++ b/src/date.c
+@@ -33,12 +33,16 @@
+ #include "inttostr.h"
+ #include "posixtm.h"
+ #include "posixver.h"
+ #include "quote.h"
+ #include "strftime.h"
+ 
++#ifdef __amigaos4__
++#undef putenv
++#endif
++
+ /* The official name of this program (e.g., no `g' prefix).  */
+ #define PROGRAM_NAME "date"
+ 
+ #define AUTHORS "David MacKenzie"
+ 
+ int putenv ();
+@@ -461,13 +465,17 @@ argument must be a format string beginning with `+'."),
+ 	error (EXIT_FAILURE, 0, _("invalid date `%s'"), datestr);
+ 
+       if (set_date)
+ 	{
+ 	  /* Set the system clock to the specified date, then regardless of
+ 	     the success of that operation, format and print that date.  */
++#ifdef __amigaos4__
++	  if (1)
++#else
+ 	  if (settime (&when) != 0)
++#endif
+ 	    {
+ 	      error (0, errno, _("cannot set date"));
+ 	      status = 1;
+ 	    }
+ 	}
+ 
+diff --git a/src/dd.c b/src/dd.c
+index c49183187891d6850bad521bb2cf367ed216a66e..32a8578d8b88c8e3817dc6d7d00832321ed06234 100644
+--- a/src/dd.c
++++ b/src/dd.c
+@@ -33,12 +33,16 @@
+ #include "inttostr.h"
+ #include "long-options.h"
+ #include "quote.h"
+ #include "safe-read.h"
+ #include "xstrtol.h"
+ 
++#if defined __amigaos4__ && defined __NEWLIB__
++#undef SA_NOCLDSTOP
++#endif
++
+ /* The official name of this program (e.g., no `g' prefix).  */
+ #define PROGRAM_NAME "dd"
+ 
+ #define AUTHORS "Paul Rubin", "David MacKenzie", "Stuart Kemp"
+ 
+ #ifndef SIGINFO
+@@ -1230,14 +1234,16 @@ main (int argc, char **argv)
+   else
+     {
+       output_file = _("standard output");
+     }
+ 
+   install_handler (SIGINT, interrupt_handler);
++#ifndef __amigaos4__
+   install_handler (SIGQUIT, interrupt_handler);
+   install_handler (SIGPIPE, interrupt_handler);
+   install_handler (SIGINFO, siginfo_handler);
++#endif
+ 
+   exit_status = dd_copy ();
+ 
+   quit (exit_status);
+ }
+diff --git a/src/env.c b/src/env.c
+index 26320263336c6cce67665cdd150495a799e91ffb..277fef6078ed48857e98fc72f6936fc3829d474d 100644
+--- a/src/env.c
++++ b/src/env.c
+@@ -88,13 +88,17 @@
+ 
+ /* The official name of this program (e.g., no `g' prefix).  */
+ #define PROGRAM_NAME "env"
+ 
+ #define AUTHORS "Richard Mlynarik", "David MacKenzie"
+ 
++#ifdef __amigaos4__
++# include "amigaos.h"
++#else
+ int putenv ();
++#endif
+ 
+ extern char **environ;
+ 
+ /* The name by which this program was run. */
+ char *program_name;
+ 
+diff --git a/src/fmt.c b/src/fmt.c
+index f14dc35170d11c8aaa88a080e458dbf57fb3275f..794eeba9ea3f7fd02b7a1134bca823b5a3a03b39 100644
+--- a/src/fmt.c
++++ b/src/fmt.c
+@@ -120,12 +120,15 @@ typedef long COST;
+ #undef TRUE
+ #define TRUE true
+ #undef FALSE
+ #define FALSE false
+ 
+ /* Word descriptor structure.  */
++#ifdef __amigaos4__
++#define WORD NONSYS_WORD
++#endif
+ 
+ typedef struct Word WORD;
+ 
+ struct Word
+   {
+ 
+diff --git a/src/groups.sh b/src/groups.sh
+index d371c063e30a79d33073d82e8f3236c5f44e4657..dd1fece8142886747a9f3d7ea99232f50e8748d2 100755
+--- a/src/groups.sh
++++ b/src/groups.sh
+@@ -1,7 +1,7 @@
+-#!/bin/sh
++#!sh
+ # groups -- print the groups a user is in
+ # Copyright (C) 1991, 1997, 2000, 2002 Free Software Foundation, Inc.
+ 
+ # This program is free software; you can redistribute it and/or modify
+ # it under the terms of the GNU General Public License as published by
+ # the Free Software Foundation; either version 2, or (at your option)
+diff --git a/src/id.c b/src/id.c
+index db4883c8376ab7048356e4a354a4a9642e7c0b9a..b6f2e48dfa3f852125c0169c574e8a95a8e57c26 100644
+--- a/src/id.c
++++ b/src/id.c
+@@ -31,20 +31,22 @@
+ 
+ /* The official name of this program (e.g., no `g' prefix).  */
+ #define PROGRAM_NAME "id"
+ 
+ #define AUTHORS "Arnold Robbins", "David MacKenzie"
+ 
++#ifndef __amigaos4__
+ #ifndef _POSIX_VERSION
+ struct passwd *getpwuid ();
+ struct group *getgrgid ();
+ uid_t getuid ();
+ gid_t getgid ();
+ uid_t geteuid ();
+ gid_t getegid ();
+ #endif /* not _POSIX_VERSION */
++#endif
+ 
+ int getugroups ();
+ 
+ static void print_user (uid_t uid);
+ static void print_group (gid_t gid);
+ static void print_group_list (const char *username);
+diff --git a/src/install.c b/src/install.c
+index 3279782ba46e293c889a0b925f6b9a4a4a03c7c0..6d9ec983f0f6e22060ec647279e1c7b6f1455d3e 100644
+--- a/src/install.c
++++ b/src/install.c
+@@ -508,12 +508,22 @@ change_timestamps (const char *from, const char *to)
+ /* Strip the symbol table from the file PATH.
+    We could dig the magic number out of the file first to
+    determine whether to strip it, but the header files and
+    magic numbers vary so much from system to system that making
+    it portable would be very difficult.  Not worth the effort. */
+ 
++#ifdef __amigaos4__
++static void
++strip (const char *path)
++{
++  char buffer[1024];
++  sprintf(buffer, "strip %s\n", path);
++
++  system(buffer);
++}
++#else
+ static void
+ strip (const char *path)
+ {
+   int status;
+   pid_t pid = fork ();
+ 
+@@ -532,13 +542,13 @@ strip (const char *path)
+ 	/* Do nothing. */ ;
+       if (status)
+ 	error (EXIT_FAILURE, 0, _("strip failed"));
+       break;
+     }
+ }
+-
++#endif
+ /* Initialize the user and group ownership of the files to install. */
+ 
+ static void
+ get_ids (void)
+ {
+   struct passwd *pw;
+diff --git a/src/join.c b/src/join.c
+index 2716ae339fc21d1cf8eaef7319d3e6d42e02cdaa..cc6e5820ba871a435e7f7072f1f34ba73734be36 100644
+--- a/src/join.c
++++ b/src/join.c
+@@ -138,16 +138,21 @@ static bool ignore_case;
+ 
+ /* Get the next option from the argument vector.  */
+ 
+ static int
+ get_option (int argc, char **argv)
+ {
++#ifdef __amigaos__
++  return getopt_long (argc, argv, "a:e:ij:1:2:o:t:v:",
++			 longopts + OBSOLETE_LONG_OPTIONS, NULL);
++#else
+   return (obsolete_usage
+ 	  ? getopt_long_only (argc, argv, "-a:e:i1:2:o:t:v:", longopts, NULL)
+ 	  : getopt_long (argc, argv, "a:e:ij:1:2:o:t:v:",
+ 			 longopts + OBSOLETE_LONG_OPTIONS, NULL));
++#endif
+ }
+ 
+ void
+ usage (int status)
+ {
+   if (status != EXIT_SUCCESS)
+@@ -752,13 +757,17 @@ main (int argc, char **argv)
+   initialize_main (&argc, &argv);
+   program_name = argv[0];
+   setlocale (LC_ALL, "");
+   bindtextdomain (PACKAGE, LOCALEDIR);
+   textdomain (PACKAGE);
+   hard_LC_COLLATE = hard_locale (LC_COLLATE);
++#ifdef __amigaos4__
++  obsolete_usage = 0;
++#else
+   obsolete_usage = (posix2_version () < 200112);
++#endif
+ 
+   atexit (close_stdout);
+ 
+   nfiles = 0;
+   print_pairables = true;
+ 
+diff --git a/src/kill.c b/src/kill.c
+index 9798455b96cec14afd97dad73c7dfb8a181c4d20..9282579129e6d5f5ae0472a32523443d1524b841 100644
+--- a/src/kill.c
++++ b/src/kill.c
+@@ -30,12 +30,16 @@
+ # define WIFSIGNALED(s) (((s) & 0xFFFF) - 1 < (unsigned int) 0xFF)
+ #endif
+ #ifndef WTERMSIG
+ # define WTERMSIG(s) ((s) & 0x7F)
+ #endif
+ 
++#ifdef __amigaos4__
++#include <proto/dos.h>
++#endif
++
+ #include "system.h"
+ #include "error.h"
+ #include "sig2str.h"
+ 
+ /* The official name of this program (e.g., no `g' prefix).  */
+ #define PROGRAM_NAME "kill"
+@@ -260,14 +264,19 @@ send_signals (int signum, char *const *argv)
+ 
+   do
+     {
+       char *endp;
+       intmax_t n = (errno = 0, strtoimax (arg, &endp, 10));
+       pid_t pid = n;
+-
++#ifdef __amigaos4__
++      /* Convert the given process id (Cli number) to an address */
++      pid = (pid_t)IDOS->FindCliProc((uint32)n);
++      if (errno == ERANGE || arg == endp || *endp)
++#else
+       if (errno == ERANGE || pid != n || arg == endp || *endp)
++#endif
+ 	{
+ 	  error (0, 0, _("%s: invalid process id"), arg);
+ 	  status = EXIT_FAILURE;
+ 	}
+       else if (kill (pid, signum) != 0)
+ 	{
+diff --git a/src/ls.c b/src/ls.c
+index 74d8cd4777680f60aec86e1d5f0a1cad8343f58c..57366b3b59d62e7ba3fbe0f593ddc8d30fcf4c5c 100644
+--- a/src/ls.c
++++ b/src/ls.c
+@@ -121,12 +121,16 @@ int wcwidth ();
+ 
+ #define AUTHORS "Richard Stallman", "David MacKenzie"
+ 
+ #define obstack_chunk_alloc malloc
+ #define obstack_chunk_free free
+ 
++#if defined __amigaos4__ && defined __NEWLIB__
++#undef SA_NOCLDSTOP
++#endif
++
+ /* Return an int indicating the result of comparing two integers.
+    Subtracting doesn't always work, due to overflow.  */
+ #define longdiff(a, b) ((a) < (b) ? -1 : (a) > (b))
+ 
+ /* Arrange to make lstat calls go through the wrapper function
+    on systems with an lstat function that does not dereference symlinks
+@@ -975,13 +979,13 @@ sighandler (int sig)
+ {
+ #ifndef SA_NOCLDSTOP
+   signal (sig, SIG_IGN);
+ #endif
+ 
+   restore_default_color ();
+-
++#ifndef __amigaos4__
+   /* SIGTSTP is special, since the application can receive that signal more
+      than once.  In this case, don't set the signal handler to the default.
+      Instead, just raise the uncatchable SIGSTOP.  */
+   if (sig == SIGTSTP)
+     {
+       sig = SIGSTOP;
+@@ -996,13 +1000,13 @@ sighandler (int sig)
+       sigact.sa_flags = 0;
+       sigaction (sig, &sigact, NULL);
+ #else
+       signal (sig, SIG_DFL);
+ #endif
+     }
+-
++#endif
+   raise (sig);
+ }
+ 
+ int
+ main (int argc, char **argv)
+ {
+@@ -1041,14 +1045,18 @@ main (int argc, char **argv)
+ 	  || (color_indicator[C_MISSING].string != NULL
+ 	      && format == long_format))
+ 	check_symlink_color = 1;
+ 
+       {
+ 	unsigned int j;
++#ifndef __amigaos4__
+ 	static int const sigs[] = { SIGHUP, SIGINT, SIGPIPE,
+ 				    SIGQUIT, SIGTERM, SIGTSTP };
++#else
++	static int const sigs[] = { SIGINT, SIGTERM};
++#endif
+ 	unsigned int nsigs = sizeof sigs / sizeof *sigs;
+ #ifdef SA_NOCLDSTOP
+ 	struct sigaction oldact, newact;
+ 	sigset_t caught_signals;
+ 
+ 	sigemptyset (&caught_signals);
+@@ -3761,14 +3769,20 @@ attach (char *dest, const char *dirname, const char *name)
+   /* Copy dirname if it is not ".". */
+   if (dirname[0] != '.' || dirname[1] != 0)
+     {
+       while (*dirnamep)
+ 	*dest++ = *dirnamep++;
+       /* Add '/' if `dirname' doesn't already end with it. */
++#ifdef __amigaos4__
++      /* For AmigaOS, we also need to check if there's a colon */
++      if (dirnamep > dirname && dirnamep[-1] != '/' && dirnamep[-1] != ':')
++	*dest++ = '/';
++#else
+       if (dirnamep > dirname && dirnamep[-1] != '/')
+ 	*dest++ = '/';
++#endif
+     }
+   while (*name)
+     *dest++ = *name++;
+   *dest = 0;
+ }
+ 
+diff --git a/src/md5sum.c b/src/md5sum.c
+index 561f2a5b26e85068fefb94dfef6d4a15305de1fc..af0ca1b8b4a1eba0253d7117d1c97f331e370651 100644
+--- a/src/md5sum.c
++++ b/src/md5sum.c
+@@ -46,13 +46,13 @@
+ #else
+ # if defined VMS
+ #  define OPENOPTS(BINARY) ((BINARY) != 0 ? TEXT1TO1 : TEXTCNVT)
+ #  define TEXT1TO1 "rb", "ctx=stm"
+ #  define TEXTCNVT "r", "ctx=stm"
+ # else
+-#  if UNIX || __UNIX__ || unix || __unix__ || _POSIX_VERSION
++#  if UNIX || __UNIX__ || unix || __unix__ || _POSIX_VERSION || __amigaos4__
+ #   define OPENOPTS(BINARY) "r"
+ #  else
+     /* The following line is intended to evoke an error.
+        Using #error is not portable enough.  */
+     "Cannot determine system type."
+ #  endif
+diff --git a/src/mkfifo.c b/src/mkfifo.c
+index ff9410837dd5c5dd419f06f7317576e3f9cf35c3..162d07fa4b5e0ca73104192a38a234a599ad1b79 100644
+--- a/src/mkfifo.c
++++ b/src/mkfifo.c
+@@ -126,13 +126,17 @@ main (int argc, char **argv)
+ 	xalloc_die ();
+       newmode = mode_adjust (newmode, change);
+     }
+ 
+   for (; optind < argc; ++optind)
+     {
++#ifdef __amigaos4__
++      int fail = 1;
++#else
+       int fail = mkfifo (argv[optind], newmode);
++#endif
+       if (fail)
+ 	error (0, errno, _("cannot create fifo %s"), quote (argv[optind]));
+ 
+       /* If the containing directory happens to have a default ACL, chmod
+ 	 ensures the file mode permission bits are still set as desired.  */
+ 
+diff --git a/src/mknod.c b/src/mknod.c
+index fdf2b0ebeef80fe2e86991240a1891b040157edd..b2b79e851d9313cc1ea247f62695e0ffd72143ff 100644
+--- a/src/mknod.c
++++ b/src/mknod.c
+@@ -194,13 +194,17 @@ numbers must be specified"));
+ 	device = makedev (i_major, i_minor);
+ #ifdef NODEV
+ 	if (device == NODEV)
+ 	  error (EXIT_FAILURE, 0, _("invalid device %s %s"), s_major, s_minor);
+ #endif
+ 
++#ifdef __amigaos4__
++        if (1)
++#else
+ 	if (mknod (argv[optind], newmode | node_type, device) != 0)
++#endif
+ 	  error (EXIT_FAILURE, errno, "%s", quote (argv[optind]));
+       }
+       break;
+ 
+     case 'p':			/* `pipe' */
+ #ifndef S_ISFIFO
+@@ -209,13 +213,17 @@ numbers must be specified"));
+       if (argc - optind != 2)
+ 	{
+ 	  error (0, 0, _("\
+ major and minor device numbers may not be specified for fifo files"));
+ 	  usage (EXIT_FAILURE);
+ 	}
++#ifdef __amigaos4__
++        if (1)
++#else
+       if (mkfifo (argv[optind], newmode))
++#endif
+ 	error (EXIT_FAILURE, errno, "%s", quote (argv[optind]));
+ #endif
+       break;
+ 
+     default:
+       error (0, 0, _("invalid device type %s"), quote (argv[optind + 1]));
+diff --git a/src/nohup.c b/src/nohup.c
+index 6c9f542310fe6cb6652dd29dfd06e7fbeb52b18b..9ba3527c28cbd9464610644326fe7ba15ec143a9 100644
+--- a/src/nohup.c
++++ b/src/nohup.c
+@@ -13,13 +13,13 @@
+ 
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software Foundation,
+    Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+ 
+ /* Written by Jim Meyering  */
+-
++#ifndef __amigaos4__
+ #include <config.h>
+ #include <stdio.h>
+ #include <sys/types.h>
+ #include <signal.h>
+ 
+ #include "system.h"
+@@ -191,6 +191,13 @@ main (int argc, char **argv)
+ 	    && dup2 (saved_stderr_fd, STDERR_FILENO) != -1))
+       error (0, saved_errno, _("cannot run command %s"), quote (*cmd));
+ 
+     exit (exit_status);
+   }
+ }
++#else
++#include <stdio.h>
++int main()
++{
++	printf("Not implemented\n");
++}
++#endif
+diff --git a/src/od.c b/src/od.c
+index 00b8f993988e54ba8732772dbb208b2681da624b..89ffb831278efaa21541809ecd95cd929b2ec655 100644
+--- a/src/od.c
++++ b/src/od.c
+@@ -66,12 +66,18 @@ typedef unsigned long long ulonglong_t;
+ #else
+ /* This is just a place-holder to avoid a few `#if' directives.
+    In this case, the type isn't actually used.  */
+ typedef unsigned long int ulonglong_t;
+ #endif
+ 
++#ifdef __amigaos4__
++/* LONG and SHORT are system types */
++#define LONG NOSYS_LONG
++#define SHORT NOSYS_SHORT
++#endif
++
+ enum size_spec
+   {
+     NO_SIZE,
+     CHAR,
+     SHORT,
+     INT,
+diff --git a/src/pathchk.c b/src/pathchk.c
+index 024240c36bddbd4530cf2c06a126ea7524bc458f..a7fb0b6dd0141f9fa5505eb6cb7b54ea7c1101ee 100644
+--- a/src/pathchk.c
++++ b/src/pathchk.c
+@@ -62,14 +62,17 @@
+ #  define NAME_MAX_FOR(p) pathconf_wrapper ((p), _PC_NAME_MAX);
+ #  undef NEED_PATHCONF_WRAPPER
+ #  define NEED_PATHCONF_WRAPPER 1
+ # endif /* not NAME_MAX */
+ 
+ #else
+-
++# if defined __amigaos4__ && !defined __NEWLIB__
++#  include <limits.h>
++# else
+ # include <sys/param.h>
++# endif
+ # ifndef PATH_MAX
+ #  ifdef MAXPATHLEN
+ #   define PATH_MAX MAXPATHLEN
+ #  else /* not MAXPATHLEN */
+ #   define PATH_MAX _POSIX_PATH_MAX
+ #  endif /* not MAXPATHLEN */
+diff --git a/src/ptx.c b/src/ptx.c
+index c355c618962c86236613b079df0d4b39593d720d..6e42c32a3d1e6d2c464975a099e4b697c557cb5b 100644
+--- a/src/ptx.c
++++ b/src/ptx.c
+@@ -26,12 +26,17 @@
+ #include "system.h"
+ #include "argmatch.h"
+ #include "diacrit.h"
+ #include "error.h"
+ #include "regex.h"
+ 
++#ifdef __amigaos4__
++/* WORD is a system type */
++#define WORD NOSYS_WORD
++#endif
++
+ /* The official name of this program (e.g., no `g' prefix).  */
+ #define PROGRAM_NAME "ptx"
+ 
+ /* Note to translator: Please translate "F. Pinard" to "François
+    Pinard" if "ç" (c-with-cedilla) is available in the
+    translation's character set and encoding.  */
+diff --git a/src/shred.c b/src/shred.c
+index bc89567b7043cde46f8937edc247ed1fe8f3dd32..8487f0d86c7929dce3ade3c4badd400702fb2799 100644
+--- a/src/shred.c
++++ b/src/shred.c
+@@ -599,13 +599,15 @@ isaac_seed_machdep (struct isaac_state *s)
+ static void
+ isaac_seed (struct isaac_state *s)
+ {
+   isaac_seed_start (s);
+ 
+   { pid_t t = getpid ();   ISAAC_SEED (s, t); }
++#ifndef __amigaos4__
+   { pid_t t = getppid ();  ISAAC_SEED (s, t); }
++#endif
+   { uid_t t = getuid ();   ISAAC_SEED (s, t); }
+   { gid_t t = getgid ();   ISAAC_SEED (s, t); }
+ 
+   {
+ #if HAVE_GETHRTIME
+     hrtime_t t = gethrtime ();
+@@ -625,13 +627,13 @@ isaac_seed (struct isaac_state *s)
+ # endif
+ #endif
+     ISAAC_SEED (s, t);
+   }
+ 
+   isaac_seed_machdep (s);
+-
++#ifndef __amigaos4__
+   {
+     char buf[32];
+     int fd = open ("/dev/urandom", O_RDONLY | O_NOCTTY);
+     if (fd >= 0)
+       {
+ 	read (fd, buf, 32);
+@@ -647,13 +649,13 @@ isaac_seed (struct isaac_state *s)
+ 	    read (fd, buf, 16);
+ 	    close (fd);
+ 	    isaac_seed_data (s, buf, 16);
+ 	  }
+       }
+   }
+-
++#endif
+   isaac_seed_finish (s);
+ }
+ 
+ /* Single-word RNG built on top of ISAAC */
+ struct irand_state
+ {
+@@ -1353,12 +1355,19 @@ incname (char *name, unsigned len)
+  * To force the directory data out, we try to open the directory and
+  * invoke fdatasync on it.  This is rather non-standard, so we don't
+  * insist that it works, just fall back to a global sync in that case.
+  * This is fairly significantly Unix-specific.  Of course, on any
+  * filesystem with synchronous metadata updates, this is unnecessary.
+  */
++
++#ifdef __amigaos4__
++void sync(void)
++{
++}
++#endif
++
+ static int
+ wipename (char *oldname, char const *qoldname, struct Options const *flags)
+ {
+   char *newname, *base;	  /* Base points to filename part of newname */
+   unsigned len;
+   int first = 1;
+diff --git a/src/sort.c b/src/sort.c
+index b67582a038170c2e4d3060dfec818607343a87dd..3db3ea30ff930cca703c13455e0fd521159ee61f 100644
+--- a/src/sort.c
++++ b/src/sort.c
+@@ -43,12 +43,16 @@
+ #endif
+ #ifndef RLIMIT_DATA
+ struct rlimit { size_t rlim_cur; };
+ # define getrlimit(Resource, Rlp) (-1)
+ #endif
+ 
++#if defined __amigaos4__ && defined __NEWLIB__
++#undef SA_NOCLDSTOP
++#endif
++
+ /* The official name of this program (e.g., no `g' prefix).  */
+ #define PROGRAM_NAME "sort"
+ 
+ #define AUTHORS "Mike Haertel", "Paul Eggert"
+ 
+ #if HAVE_LANGINFO_CODESET
+@@ -262,12 +266,23 @@ static bool have_read_stdin;
+ 
+ /* List of key field comparisons to be tried.  */
+ static struct keyfield *keylist;
+ 
+ static void sortlines_temp (struct line *, size_t, struct line *);
+ 
++
++#ifdef __amigaos4__
++int stdout_is_closed = 0;
++
++void my_close_stdout(void)
++{
++  if (stdout_is_closed == 0)
++  	close_stdout();
++}
++#endif
++
+ void
+ usage (int status)
+ {
+   if (status != EXIT_SUCCESS)
+     fprintf (stderr, _("Try `%s --help' for more information.\n"),
+ 	     program_name);
+@@ -469,12 +484,16 @@ xfopen (const char *file, const char *how)
+ 
+ /* Close FP, whose name is FILE, and report any errors.  */
+ 
+ static void
+ xfclose (FILE *fp, char const *file)
+ {
++#ifdef __amigaos4__
++  if (fp == stdout)
++  	stdout_is_closed = 1;
++#endif
+   if (fp == stdin)
+     {
+       /* Allow reading stdin from tty more than once. */
+       if (feof (fp))
+ 	clearerr (fp);
+     }
+@@ -2222,13 +2241,17 @@ main (int argc, char **argv)
+   bool obsolete_usage = (posix2_version () < 200112);
+   char const *short_options = (obsolete_usage
+ 			       ? COMMON_SHORT_OPTIONS "y::"
+ 			       : COMMON_SHORT_OPTIONS "y:");
+   char *minus = "-", **files;
+   char const *outfile = minus;
++#ifdef __amigaos4__
++  static int const sigs[] = { SIGINT, SIGTERM };
++#else
+   static int const sigs[] = { SIGHUP, SIGINT, SIGPIPE, SIGTERM };
++#endif
+   unsigned int nsigs = sizeof sigs / sizeof *sigs;
+ #ifdef SA_NOCLDSTOP
+   struct sigaction oldact, newact;
+ #endif
+ 
+   initialize_main (&argc, &argv);
+@@ -2237,13 +2260,17 @@ main (int argc, char **argv)
+   bindtextdomain (PACKAGE, LOCALEDIR);
+   textdomain (PACKAGE);
+ 
+   atexit (cleanup);
+ 
+   initialize_exit_failure (SORT_FAILURE);
++#ifdef __amigaos4__
++  atexit (my_close_stdout);
++#else
+   atexit (close_stdout);
++#endif
+ 
+   hard_LC_COLLATE = hard_locale (LC_COLLATE);
+ #if HAVE_NL_LANGINFO
+   hard_LC_TIME = hard_locale (LC_TIME);
+ #endif
+ 
+diff --git a/src/stat.c b/src/stat.c
+index 527ccf2fe764cfdcab73c354fa5be0495976914d..cee428a35d8689bc55c775544045f0e16c6308dd 100644
+--- a/src/stat.c
++++ b/src/stat.c
+@@ -16,16 +16,26 @@
+    Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ 
+    Written by Michael Meskes.  */
+ 
+ #include <config.h>
+ 
++#if defined __amigaos__ && defined __NEWLIB__
++# undef HAVE_SYS_MOUNT_H
++# include "amigaos.h"
++# define STATXFS_FILE_SYSTEM_TYPE_MEMBER_NAME f_fstypename
++#endif
++
+ #include <stdio.h>
+ #include <sys/types.h>
+ #include <pwd.h>
+ #include <grp.h>
++#if defined __amigaos4__ && !defined __NEWLIB__
++#include <sys/mount.h>
++#  define STATXFS_FILE_SYSTEM_TYPE_MEMBER_NAME f_fstypename
++#endif
+ #if HAVE_SYS_STATVFS_H && HAVE_STRUCT_STATVFS_F_BASETYPE
+ # include <sys/statvfs.h>
+ #elif HAVE_SYS_VFS_H
+ # include <sys/vfs.h>
+ #elif HAVE_SYS_MOUNT_H && HAVE_SYS_PARAM_H
+ /* NOTE: freebsd5.0 needs sys/param.h and sys/mount.h for statfs.
+diff --git a/src/su.c b/src/su.c
+index d15d96a935a0b87c71eed888a2946da2c3326df1..bb70ff37cc203803e7a43e4b278dd369fe125716 100644
+--- a/src/su.c
++++ b/src/su.c
+@@ -109,12 +109,16 @@
+ #if HAVE_SHADOW_H
+ # include <shadow.h>
+ #endif
+ 
+ #include "error.h"
+ 
++#ifdef __amigaos4__
++#include "amigaos.h"
++#endif
++
+ /* The official name of this program (e.g., no `g' prefix).  */
+ #define PROGRAM_NAME "su"
+ 
+ #define AUTHORS "David MacKenzie"
+ 
+ #if HAVE_PATHS_H
+diff --git a/src/sync.c b/src/sync.c
+index 7dbbc55669efdd81693ec9b568b011f764abbccb..9671eba44be8d73c7a4638a36b59d36da6c5ca3e 100644
+--- a/src/sync.c
++++ b/src/sync.c
+@@ -67,9 +67,11 @@ main (int argc, char **argv)
+   parse_long_options (argc, argv, PROGRAM_NAME, PACKAGE, VERSION,
+ 		      usage, AUTHORS, (char const *) NULL);
+ 
+   if (1 < argc)
+     error (0, 0, _("ignoring all arguments"));
+ 
++#ifndef __amigaos4__
+   sync ();
++#endif
+   exit (EXIT_SUCCESS);
+ }
+diff --git a/src/tail.c b/src/tail.c
+index d5c0c31d8c9f84ca5b12ff924142203abaf5b486..687c4203cffcc8a5a18743a66b2aa84e59e642aa 100644
+--- a/src/tail.c
++++ b/src/tail.c
+@@ -40,12 +40,17 @@
+ #include "quote.h"
+ #include "safe-read.h"
+ #include "xnanosleep.h"
+ #include "xstrtol.h"
+ #include "xstrtod.h"
+ 
++#if defined __amigaos4__ && defined __NEWLIB__
++#undef SA_NOCLDSTOP
++#include <sys/signal.h>
++#endif
++
+ /* The official name of this program (e.g., no `g' prefix).  */
+ #define PROGRAM_NAME "tail"
+ 
+ #define AUTHORS \
+   "Paul Rubin", "David MacKenzie, Ian Lance Taylor", "Jim Meyering"
+ 
+diff --git a/src/tee.c b/src/tee.c
+index 5867539625169d3792bf83811f07b8b7593b054f..22a16ab4419e80692a707dec460b4f9eb9351d37 100644
+--- a/src/tee.c
++++ b/src/tee.c
+@@ -23,12 +23,16 @@
+ #include <signal.h>
+ #include <getopt.h>
+ 
+ #include "system.h"
+ #include "error.h"
+ 
++#ifdef __amigaos4__
++#define SIGPIPE 100
++#endif
++
+ /* The official name of this program (e.g., no `g' prefix).  */
+ #define PROGRAM_NAME "tee"
+ 
+ #define AUTHORS "Mike Parker", "Richard M. Stallman", "David MacKenzie"
+ 
+ static int tee (int nfiles, const char **files);
+diff --git a/src/test.c b/src/test.c
+index ef2b35f960b2a8169382727ac354777078fa8351..ccde0a4b8e96666055f3ad1f7331a792eb7b2942 100644
+--- a/src/test.c
++++ b/src/test.c
+@@ -20,12 +20,16 @@
+    along with this program; if not, write to the Free Software Foundation,
+    Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+ 
+ /* Define TEST_STANDALONE to get the /bin/test version.  Otherwise, you get
+    the shell builtin version. */
+ 
++#ifdef __amigaos4__
++#define _POSIX_VERSION
++#endif
++
+ #include <config.h>
+ #include <stdio.h>
+ #include <sys/types.h>
+ 
+ #define TEST_STANDALONE 1
+ 
+diff --git a/src/uname.c b/src/uname.c
+index 335061d2136e29f97c1677649157b0d9de0424a3..be618e1963790f428ce5de6fba909551479ba024 100644
+--- a/src/uname.c
++++ b/src/uname.c
+@@ -22,12 +22,17 @@
+ #include <config.h>
+ #include <stdio.h>
+ #include <sys/types.h>
+ #include <sys/utsname.h>
+ #include <getopt.h>
+ 
++#ifdef __amigaos4__
++#include <proto/exec.h>
++#include <proto/expansion.h>
++#endif
++
+ #if HAVE_SYSINFO && HAVE_SYS_SYSTEMINFO_H
+ # include <sys/systeminfo.h>
+ #endif
+ 
+ #if HAVE_SYSCTL && HAVE_SYS_SYSCTL_H
+ # include <sys/param.h> /* needed for OpenBSD 3.0 */
+@@ -257,12 +262,20 @@ main (int argc, char **argv)
+ 	  size_t s = sizeof processor;
+ 	  static int mib[] = { CTL_HW, UNAME_PROCESSOR };
+ 	  if (sysctl (mib, 2, processor, &s, 0, 0) >= 0)
+ 	    element = processor;
+ 	}
+ #endif
++#ifdef __amigaos4__
++      if (element == unknown)
++        {
++          IExec->GetCPUInfoTags(
++          	GCIT_ModelString,	&element,
++          	TAG_DONE);
++        }
++#endif
+       print_element (element);
+     }
+ 
+   if (toprint & PRINT_HARDWARE_PLATFORM)
+     {
+       char const *element = unknown;
+@@ -281,12 +294,34 @@ main (int argc, char **argv)
+ 	  size_t s = sizeof hardware_platform;
+ 	  static int mib[] = { CTL_HW, UNAME_HARDWARE_PLATFORM };
+ 	  if (sysctl (mib, 2, hardware_platform, &s, 0, 0) >= 0)
+ 	    element = hardware_platform;
+ 	}
+ #endif
++#ifdef __amigaos4__
++      if (element == unknown)
++        {
++          struct Library *expansionLib;
++          struct ExpansionIFace *IExpansion;
++
++          expansionLib = IExec->OpenLibrary("expansion.library", 0);
++          if (expansionLib)
++            {
++              IExpansion = (struct ExpansionIFace *)IExec->GetInterface(
++              		expansionLib, "main", 1, NULL);
++	      if (IExpansion)
++	        {
++	          IExpansion->GetMachineInfoTags(
++	          	GMIT_MachineString, &element,
++	          	TAG_DONE);
++	          IExec->DropInterface((struct Interface *)IExpansion);
++	        }
++	      IExec->CloseLibrary(expansionLib);
++	    }
++	}
++#endif
+       print_element (element);
+     }
+ 
+   if (toprint & PRINT_OPERATING_SYSTEM)
+     print_element (HOST_OPERATING_SYSTEM);
+ 
+diff --git a/src/wheel-gen.pl b/src/wheel-gen.pl
+index be03a6e3b0a481b44dd31a0cb98c0b56e4f00c70..5d554d191914a58b80baa85363e0232335217d7a 100755
+--- a/src/wheel-gen.pl
++++ b/src/wheel-gen.pl
+@@ -6,13 +6,12 @@ eval 'exec /usr/bin/perl -S $0 ${1+"$@"}'
+ 
+ use strict;
+ (my $program_name = $0) =~ s|.*/||;
+ 
+ sub END
+ {
+-  use POSIX qw (_exit);
+   # This is required if the code might send any output to stdout
+   # E.g., even --version or --help.  So it's best to do it unconditionally.
+   close STDOUT
+     or (warn "$program_name: closing standard output: $!\n"), _exit (1);
+ }
+ 
+-- 
+2.1.4
+
