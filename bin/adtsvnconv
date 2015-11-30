@@ -23,12 +23,23 @@ root = os.path.realpath(os.path.dirname(script) + "/../")
 
 parser = argparse.ArgumentParser(description='Convert svn vendor branches to patches')
 
+parser.add_argument('vendor_url', metavar='vendor-url', help="""
+    The URL to the vendor branch. The content serves as the base of the patches.
+    """)
+parser.add_argument('changes_url', metavar='changes-url', help="""
+    The URL to the branch that contains changes to the vendor branch. For each
+    considered commit, an new patch against the base is generated.
+    """)
+parser.add_argument('--start-rev', type=int, help="""
+    Define the first revision of the changes branch for which a patch should be
+    generated.
+    """)
+
 args = parser.parse_args()
 
-# FIXME: Make this command line args
-changed_url = "file:///home/sba/amiga/adtools.svn/code/trunk/coreutils"
-vendor_url = "file:///home/sba/amiga/adtools.svn/code/vendor/coreutils/5.2.1"
-start_rev = 342
+changed_url = args.changes_url #"file:///home/sba/amiga/adtools.svn/code/trunk/coreutils"
+vendor_url = args.vendor_url #"file:///home/sba/amiga/adtools.svn/code/vendor/coreutils/5.2.1"
+start_rev = args.start_rev # 342
 
 svn_log = check_output(["svn", "log", "--xml", changed_url])
 svn_log_dom = parseString(svn_log)
