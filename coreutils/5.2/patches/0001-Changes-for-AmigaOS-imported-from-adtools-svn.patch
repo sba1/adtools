@@ -1,6 +1,6 @@
-From 3da9ddd6d9ac7c01f7ff5ea61d058e6a9bcd439f Mon Sep 17 00:00:00 2001
+From df26daaa6aaa602354cfc428a26ae5524fbf3895 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
-Date: Mon, 30 Nov 2015 11:36:07 +0100
+Date: Mon, 30 Nov 2015 11:36:08 +0100
 Subject: [PATCH] Changes for AmigaOS imported from adtools svn
 
 ---
@@ -1107,7 +1107,7 @@ index 87c5522810ac60ad8b61bf2ad990810642c523ab..6ce32ad979499fd8216ee8c6ce93017c
 +#endif
 \ No newline at end of file
 diff --git a/lib/quotearg.c b/lib/quotearg.c
-index c695646f13ec247187b0404c04835f6f0479976e..876165951725364575b89af7e9c105baf513c778 100644
+index c695646f13ec247187b0404c04835f6f0479976e..25df490af20c6a5ee1b8ca6271783131e0a5a221 100644
 --- a/lib/quotearg.c
 +++ b/lib/quotearg.c
 @@ -32,12 +32,16 @@
@@ -1117,7 +1117,7 @@ index c695646f13ec247187b0404c04835f6f0479976e..876165951725364575b89af7e9c105ba
  #define _(msgid) gettext (msgid)
  #define N_(msgid) msgid
  
-+#ifdef __amigaos4__
++#if defined(__amigaos4__) && !defined(__NEWLIB__)
 +int __mb_cur_max = 1;
 +#endif
 +
