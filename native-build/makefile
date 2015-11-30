@@ -158,7 +158,7 @@ coreutils-native-done: gcc-cross-done-$(GCC_VERSION)
 #
 native-install: coreutils-native-done gcc-native-done-$(GCC_VERSION)
 	rm -Rf /gcc/*
-	PATH="$(CROSS_PREFIX)/bin:$(PATH)" $(MAKE) -C binutils-native-build install
+	PATH="$(CROSS_PREFIX)/bin:$(PATH)" $(MAKE) -C binutils-native-build-$(BINUTILS_VERSION) install
 	PATH="$(CROSS_PREFIX)/bin:$(PATH)" $(MAKE) -C gcc-native-build-$(GCC_VERSION) install
 	PATH="$(CROSS_PREFIX)/bin:$(PATH)" $(MAKE) -C coreutils-native-build install
 	cp -R $(CROSS_PREFIX)/ppc-amigaos/SDK /gcc
