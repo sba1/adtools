@@ -1,11 +1,11 @@
-From f246632c4c98455f1a72ea7ed57d623d5d5561ff Mon Sep 17 00:00:00 2001
+From e7906fdf6a1efde220fc725b4bc37c2ec140699a Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
-Date: Mon, 30 Nov 2015 11:36:11 +0100
+Date: Mon, 30 Nov 2015 11:36:12 +0100
 Subject: [PATCH] Changes for AmigaOS imported from adtools svn
 
 ---
  config.hin         |   8 +-
- configure          |   5 +-
+ configure          |  12 +-
  lib/Makefile.am    |   4 +
  lib/Makefile.in    |  32 ++--
  lib/amigaos.c      | 524 +++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -32,6 +32,7 @@ Subject: [PATCH] Changes for AmigaOS imported from adtools svn
  lib/utime.c        |   8 +
  lib/xreadlink.c    |   4 +
  m4/ls-mntd-fs.m4   |   2 +-
+ m4/putenv.m4       |   7 +-
  src/chown-core.c   |   2 +
  src/copy.c         |   8 +
  src/csplit.c       |   8 +
@@ -62,7 +63,7 @@ Subject: [PATCH] Changes for AmigaOS imported from adtools svn
  src/test.c         |   4 +
  src/uname.c        |  35 ++++
  src/wheel-gen.pl   |   1 -
- 58 files changed, 944 insertions(+), 32 deletions(-)
+ 59 files changed, 956 insertions(+), 34 deletions(-)
  create mode 100644 lib/amigaos.c
  create mode 100644 lib/amigaos.h
 
@@ -94,7 +95,7 @@ index 1a7d9e7415f606922a9041096192196e02b8248c..40124541e9d1c5766cfb4f6ba2e6ebba
  
  /* FIXME */
 diff --git a/configure b/configure
-index a8b69e08dde59a566cab02cb01f69573115f9dd5..fe85c0f80331d6d68fe050e2a0992084e585e94f 100755
+index a8b69e08dde59a566cab02cb01f69573115f9dd5..e678a4e043e6e29e52e6d492fbe203583c0fb7c8 100755
 --- a/configure
 +++ b/configure
 @@ -27321,15 +27321,14 @@ cat >>confdefs.h <<\_ACEOF
@@ -115,6 +116,26 @@ index a8b69e08dde59a566cab02cb01f69573115f9dd5..fe85c0f80331d6d68fe050e2a0992084
  
  if test $ac_list_mounted_fs = found; then
    gl_cv_list_mounted_fs=yes
+@@ -35366,13 +35365,18 @@ _ACEOF
+ echo "$as_me:$LINENO: checking for SVID conformant putenv" >&5
+ echo $ECHO_N "checking for SVID conformant putenv... $ECHO_C" >&6
+ if test "${jm_cv_func_svid_putenv+set}" = set; then
+   echo $ECHO_N "(cached) $ECHO_C" >&6
+ else
+   if test "$cross_compiling" = yes; then
+-  	     jm_cv_func_svid_putenv=no
++  	     echo $host_os
++	     if test $host_os = amigaos; then
++		jm_cv_func_svid_putenv=yes
++	     else
++		jm_cv_func_svid_putenv=no
++	     fi
+ else
+   cat >conftest.$ac_ext <<_ACEOF
+ /* confdefs.h.  */
+ _ACEOF
+ cat confdefs.h >>conftest.$ac_ext
+ cat >>conftest.$ac_ext <<_ACEOF
 diff --git a/lib/Makefile.am b/lib/Makefile.am
 index 50f17f6aa4d9b8b83bb8a4253d1236d98ecc8988..524ba708c5dfcf4d87902b72a6d4d9b83d7cdd46 100644
 --- a/lib/Makefile.am
@@ -1409,6 +1430,30 @@ index c28466bb02ee227055c8183233145675607e9d9c..92a2a188c987233dd7fbacded38bacc1
  
  AS_IF([test $ac_list_mounted_fs = found], [$1], [$2])
  
+diff --git a/m4/putenv.m4 b/m4/putenv.m4
+index 77b9f787459de400b409aa93a2015476efcc78a1..0cf91b0065df5b02c6a0b30ed281533d4581ecfe 100644
+--- a/m4/putenv.m4
++++ b/m4/putenv.m4
+@@ -32,13 +32,18 @@ AC_DEFUN([jm_FUNC_PUTENV],
+       exit (0);
+     }
+ 	      ],
+ 	     jm_cv_func_svid_putenv=yes,
+ 	     jm_cv_func_svid_putenv=no,
+ 	     dnl When crosscompiling, assume putenv is broken.
+-	     jm_cv_func_svid_putenv=no)
++	     echo $host_os
++	     if test $host_os = amigaos; then
++		jm_cv_func_svid_putenv=yes
++	     else
++		jm_cv_func_svid_putenv=no
++	     fi)
+   ])
+   if test $jm_cv_func_svid_putenv = no; then
+     AC_LIBOBJ(putenv)
+     AC_DEFINE(putenv, rpl_putenv,
+       [Define to rpl_putenv if the replacement function should be used.])
+     gl_PREREQ_PUTENV
 diff --git a/src/chown-core.c b/src/chown-core.c
 index ba2c5c3df7f4177a589057b88430bd03a4bcbae8..18e8d9d6e18807047d6a552eb214b3d9c82992fc 100644
 --- a/src/chown-core.c
