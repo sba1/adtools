@@ -1,12 +1,12 @@
-From df26daaa6aaa602354cfc428a26ae5524fbf3895 Mon Sep 17 00:00:00 2001
+From 9a9db0df96b916bc56a6ec1f4dece65e62a0ba13 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
-Date: Mon, 30 Nov 2015 11:36:08 +0100
+Date: Mon, 30 Nov 2015 11:36:09 +0100
 Subject: [PATCH] Changes for AmigaOS imported from adtools svn
 
 ---
  config.hin         |   8 +-
  configure          |   2 +-
- lib/amigaos.c      | 522 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ lib/amigaos.c      | 524 +++++++++++++++++++++++++++++++++++++++++++++++++++++
  lib/amigaos.h      |  63 +++++++
  lib/euidaccess.c   |   6 +
  lib/fts_.h         |   4 +
@@ -59,7 +59,7 @@ Subject: [PATCH] Changes for AmigaOS imported from adtools svn
  src/test.c         |   4 +
  src/uname.c        |  35 ++++
  src/wheel-gen.pl   |   1 -
- 55 files changed, 918 insertions(+), 15 deletions(-)
+ 55 files changed, 920 insertions(+), 15 deletions(-)
  create mode 100644 lib/amigaos.c
  create mode 100644 lib/amigaos.h
 
@@ -111,10 +111,10 @@ index a8b69e08dde59a566cab02cb01f69573115f9dd5..6a473a03b1ff5657fd883a85b81fed92
    gl_cv_list_mounted_fs=yes
 diff --git a/lib/amigaos.c b/lib/amigaos.c
 new file mode 100644
-index 0000000000000000000000000000000000000000..596afd63c194a40be15962f8289adc7630ac8d75
+index 0000000000000000000000000000000000000000..37f5ac19ca1aa5ea3fd1d9a4dd666bfb2de6d710
 --- /dev/null
 +++ b/lib/amigaos.c
-@@ -0,0 +1,522 @@
+@@ -0,0 +1,524 @@
 +#include "amigaos.h"
 +
 +#include <proto/dos.h>
@@ -286,7 +286,9 @@ index 0000000000000000000000000000000000000000..596afd63c194a40be15962f8289adc76
 +void
 +___freeenviron()
 +{
-+  for ( char **i = environ; *i != NULL; ++i )
++  char **i;
++
++  for ( i = environ; *i != NULL; ++i )
 +  {
 +    free(*i);
 +    *i = 0;
