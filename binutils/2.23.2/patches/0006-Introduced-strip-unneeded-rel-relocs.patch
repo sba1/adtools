@@ -1,23 +1,19 @@
-From 45bd50658d62f16548ef4acfaba4579a69e79ef5 Mon Sep 17 00:00:00 2001
+From 6b64c328f239a146c1ce5a85c27b0ff1636f3987 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
-Date: Mon, 30 Nov 2015 22:14:31 +0100
+Date: Tue, 1 Dec 2015 13:51:20 +0100
 Subject: [PATCH 6/6] Introduced strip-unneeded-rel-relocs.
 
 Normally, on AmigaOS we keep all relocs for executables as we don't have
-an isolated address space. However, relative relocs are not necessary to
-be kept, at least if they are refering to the same program segment/section.
+an isolated address space. However, not all relative relocs are necessary
+to be kept, for instance if they are refering to the same program section.
 With the newly introduced strip option --strip-unneeded-rel-relocs these
 can be removed now.
-
-Note that we don't check, the whether the relocs target is the same or
-another section for now. We assume that the linker will emit them only
-for contiguous sections.
 ---
- binutils/objcopy.c | 28 +++++++++++++++++++++-------
- 1 file changed, 21 insertions(+), 7 deletions(-)
+ binutils/objcopy.c | 30 +++++++++++++++++++++++-------
+ 1 file changed, 23 insertions(+), 7 deletions(-)
 
 diff --git a/binutils/objcopy.c b/binutils/objcopy.c
-index 88bd071eefa8b5426eaadfd6431e9de5d4a4591b..3b43533f9453794753e8fa7677dbd1cbf1349576 100644
+index 88bd071eefa8b5426eaadfd6431e9de5d4a4591b..4beee77179b85479d5b43507d9eb2a6e0caf384e 100644
 --- a/binutils/objcopy.c
 +++ b/binutils/objcopy.c
 @@ -101,12 +101,15 @@ enum strip_action
@@ -66,7 +62,7 @@ index 88bd071eefa8b5426eaadfd6431e9de5d4a4591b..3b43533f9453794753e8fa7677dbd1cb
    {"version", no_argument, 0, 'V'},
    {"wildcard", no_argument, 0, 'w'},
    {0, no_argument, 0, 0}
-@@ -2771,30 +2776,36 @@ copy_relocations_in_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
+@@ -2771,30 +2776,38 @@ copy_relocations_in_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
  	  temp_relpp = (arelent **) xmalloc (relsize);
  	  for (i = 0; i < relcount; i++)
  	  {
@@ -89,10 +85,12 @@ index 88bd071eefa8b5426eaadfd6431e9de5d4a4591b..3b43533f9453794753e8fa7677dbd1cb
 -		temp_relpp [temp_relcount] = relpp[i];
 -		temp_relpp [temp_relcount]->addend = bfd_asymbol_value(*relpp [i]->sym_ptr_ptr)
 +		/* Don't keep the symbol, but keep the reloc unless it is a relative reloc that is
-+		 * requested by the user to be removed. TODO: We probably should not discard this
-+		 * if it is refering to another segment or section. Not sure if this really can happen.
++		 * requested by the user to be removed. For now, we also don't discard the reloc if
++		 * its targeting a different section. This can happen for relocs in the .rodata
++		 * segment that refering to the .text segment. AmigaOS will possibly split these
++		 * up.
 +		 */
-+		if (!strip_unneeded_rel_relocs || !relpp [i]->howto->pc_relative)
++		if (!strip_unneeded_rel_relocs || !relpp [i]->howto->pc_relative || sec->index != osection->index)
 +		{
 +		  temp_relpp [temp_relcount] = relpp[i];
 +		  temp_relpp [temp_relcount]->addend = bfd_asymbol_value(*relpp [i]->sym_ptr_ptr)
@@ -109,7 +107,7 @@ index 88bd071eefa8b5426eaadfd6431e9de5d4a4591b..3b43533f9453794753e8fa7677dbd1cb
  	  free (relpp);
  	  relpp = temp_relpp;
  	}
-@@ -3124,12 +3135,15 @@ strip_main (int argc, char *argv[])
+@@ -3124,12 +3137,15 @@ strip_main (int argc, char *argv[])
  	case OPTION_STRIP_DWO:
  	  strip_symbols = STRIP_DWO;
  	  break;
