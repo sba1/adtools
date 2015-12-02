@@ -64,9 +64,9 @@ directory. The scripts depend on Python.
  gcc 4.9
  gcc 5
  ```
- shows that there are three components ```binutils```, ```coreutils```, and
- ```gcc```.
-
+ shows that there are three components ```binutils```, ```coreutils```,
+ and ```gcc```
+ 
 * ```adtclone```: will fetch the external sources of all components into
  the respective ```repo``` directories. The checkout will not be affected.
 
