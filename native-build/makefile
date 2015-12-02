@@ -167,6 +167,19 @@ native-install: coreutils-native-done gcc-native-done-$(GCC_VERSION)
 	cd /gcc/lib/gcc ; for lib in `find -name *.a -o -name *.so`; do mkdir -p `dirname $$lib`/lib; mv $$lib `dirname $$lib`/lib ; done
 
 #
+# Strip native files
+#
+native-strip:
+	$(MAKE) native-strip-really
+
+native-strip-really:
+	$(foreach var,$(wildcard /gcc/bin/*), $(CROSS_PREFIX)/bin/ppc-amigaos-strip --strip-all --strip-unneeded-rel-relocs $(var) ; ) true
+	$(CROSS_PREFIX)/bin/ppc-amigaos-strip --strip-all --strip-unneeded-rel-relocs /gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/cc1
+	$(CROSS_PREFIX)/bin/ppc-amigaos-strip --strip-all --strip-unneeded-rel-relocs /gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/cc1plus
+	$(CROSS_PREFIX)/bin/ppc-amigaos-strip --strip-all --strip-unneeded-rel-relocs /gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/lto1
+	$(CROSS_PREFIX)/bin/ppc-amigaos-strip --strip-all --strip-unneeded-rel-relocs /gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/lto-wrapper
+
+#
 # Cleanup everything
 #
 .PHONY: clean
