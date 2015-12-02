@@ -1,7 +1,7 @@
 From d8511180b056003115a92c814b01a433a6d12d01 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 14 Nov 2014 20:03:56 +0100
-Subject: [PATCH 2/4] Added new function attribute "lineartags" and pragma
+Subject: [PATCH 2/5] Added new function attribute "lineartags" and pragma
  "amigaos tagtype".
 
 Functions that have the lineartags attribute are assumed to be functions
