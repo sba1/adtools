@@ -179,6 +179,9 @@ native-strip-really:
 	$(CROSS_PREFIX)/bin/ppc-amigaos-strip --strip-all --strip-unneeded-rel-relocs /gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/lto1
 	$(CROSS_PREFIX)/bin/ppc-amigaos-strip --strip-all --strip-unneeded-rel-relocs /gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/lto-wrapper
 
+native-dist: native-strip-really
+	cd / && lha ao5 $(realpath .)/adtools-native-$(shell date +%Y%d%m)-$(shell git rev-list --count HEAD).lha gcc/*
+
 #
 # Cleanup everything
 #
