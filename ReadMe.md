@@ -64,7 +64,8 @@ directory. The scripts depend on Python.
  gcc 4.9
  gcc 5
  ```
- shows that there are two components ```gcc``` and ```binutils```.
+ shows that there are three components ```binutils``, ```coreutils```, and
+ ```gcc```.
 
 * ```adtclone```: will fetch the external sources of all components into
  the respective ```repo``` directories. The checkout will not be affected.
@@ -104,6 +105,7 @@ This can be done by:
 ```
 $ bin/adtclone
 $ bin/adtcheckout binutils 2.23.2
+$ bin/adtcheckout coreutils 5.2
 $ bin/adtcheckout gcc 5
 ```
 Building is then a matter of entering
@@ -119,6 +121,9 @@ that:
 ```
 $ make -C native-build gcc-done
 ```
+
+In this case, you also don't need to checkout the ```coreutils```
+component.
 
 ### Packaging
 
