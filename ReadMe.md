@@ -64,7 +64,7 @@ directory. The scripts depend on Python.
  gcc 4.9
  gcc 5
  ```
- shows that there are three components ```binutils``, ```coreutils```, and
+ shows that there are three components ```binutils```, ```coreutils```, and
  ```gcc```.
 
 * ```adtclone```: will fetch the external sources of all components into
