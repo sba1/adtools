@@ -180,7 +180,7 @@ native-strip-really:
 	$(CROSS_PREFIX)/bin/ppc-amigaos-strip --strip-all --strip-unneeded-rel-relocs /gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/lto-wrapper
 
 native-dist: native-strip-really
-	cd / && lha ao5 $(realpath .)/adtools-native-$(shell date +%Y%d%m)-$(shell git rev-list --count HEAD).lha gcc/*
+	cd / && lha ao5 $(realpath .)/adtools-native-$(shell date +%Y%m%d)-$(shell git rev-list --count HEAD).lha gcc/*
 
 #
 # Cleanup everything
