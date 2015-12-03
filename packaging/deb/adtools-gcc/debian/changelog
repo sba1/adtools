@@ -1,4 +1,11 @@
-adtools-gcc (0.0.2-0) UNRELEASED; urgency=medium
+adtools-gcc (0.0.3-0) unstable; urgency=medium
+
+  * Now bundles GCC 5.2
+  * Assume static link when compiling C++ sources
+
+ -- Sebastian Bauer <mail@sebastianbauer.info>  Thu, 03 Dec 2015 15:31:32 +0100
+
+adtools-gcc (0.0.2-0) unstable; urgency=medium
 
   * Now bundles GCC 4.9.2.
 
