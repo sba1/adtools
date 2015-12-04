@@ -1,7 +1,7 @@
-From 27bcb7df26355eb73ec18290e2128a21ed88cd08 Mon Sep 17 00:00:00 2001
+From 1901f414bb2772cb494dda465365282052de9f97 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Tue, 17 Feb 2015 20:25:55 +0100
-Subject: [PATCH 1/7] Changes for AmigaOS version of gcc.
+Subject: [PATCH 1/6] Changes for AmigaOS version of gcc.
 
 ---
  fixincludes/configure                 |    1 +
@@ -2846,7 +2846,7 @@ index 244cc23c5090e1c0d227820dc703adbc8022f8d5..5edcd153410bcd459a0546fd9d3cef6e
        len = GetTempPath(0, NULL);
 diff --git a/libiberty/pex-amigaos.c b/libiberty/pex-amigaos.c
 new file mode 100644
-index 0000000000000000000000000000000000000000..873ea977f383d19a424c81ef5f8522e6ade18da8
+index 0000000000000000000000000000000000000000..0c61a108764c8501f8a2e9552c7c07499f402b1a
 --- /dev/null
 +++ b/libiberty/pex-amigaos.c
 @@ -0,0 +1,325 @@
@@ -2900,7 +2900,7 @@ index 0000000000000000000000000000000000000000..873ea977f383d19a424c81ef5f8522e6
 +
 +static int pex_amiga_open_read (struct pex_obj *, const char *, int);
 +static int pex_amiga_open_write (struct pex_obj *, const char *, int);
-+static long pex_amiga_exec_child (struct pex_obj *, int, const char *,
++static pid_t pex_amiga_exec_child (struct pex_obj *, int, const char *,
 +				 char * const *, char * const *,
 +				 int, int, int, int,
 +				 const char **, int *);
@@ -2967,7 +2967,7 @@ index 0000000000000000000000000000000000000000..873ea977f383d19a424c81ef5f8522e6
 +
 +const unsigned char __shell_escape_character = '\\';
 +
-+static long
++static pid_t
 +pex_amiga_exec_child (struct pex_obj *obj, int flags ATTRIBUTE_UNUSED, const char *executable ATTRIBUTE_UNUSED,
 +		     char * const * argv, char * const * env ATTRIBUTE_UNUSED,
 +                     int in ATTRIBUTE_UNUSED, int out ATTRIBUTE_UNUSED, int errdes ATTRIBUTE_UNUSED,

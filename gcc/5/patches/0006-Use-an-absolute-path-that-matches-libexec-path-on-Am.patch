@@ -1,7 +1,7 @@
-From 18611cc82ac8a4b79c7ea23ef2586f4c3ef5c257 Mon Sep 17 00:00:00 2001
+From d802c9d1177b9989e1c220f089dd0a679f770161 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Sat, 5 Dec 2015 00:32:10 +0100
-Subject: [PATCH 6/7] Use an absolute path that matches libexec path on AmigaOS
+Subject: [PATCH 6/6] Use an absolute path that matches libexec path on AmigaOS
  4.x.
 
 ---
