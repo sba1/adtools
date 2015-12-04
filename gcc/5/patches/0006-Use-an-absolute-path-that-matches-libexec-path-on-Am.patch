@@ -1,0 +1,43 @@
+From 18611cc82ac8a4b79c7ea23ef2586f4c3ef5c257 Mon Sep 17 00:00:00 2001
+From: Sebastian Bauer <mail@sebastianbauer.info>
+Date: Sat, 5 Dec 2015 00:32:10 +0100
+Subject: [PATCH 6/7] Use an absolute path that matches libexec path on AmigaOS
+ 4.x.
+
+---
+ gcc/gcc.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/gcc/gcc.c b/gcc/gcc.c
+index 8239a6b2152ac192498cd8a50b0d4b9c7db45c62..e5ab6058ea124f933643fa18ed8645b28178a32c 100644
+--- a/gcc/gcc.c
++++ b/gcc/gcc.c
+@@ -3950,20 +3950,25 @@ process_command (unsigned int decoded_options_count,
+ 
+   gcc_libexec_prefix = standard_libexec_prefix;
+ #ifndef VMS
+   /* FIXME: make_relative_prefix doesn't yet work for VMS.  */
+   if (!gcc_exec_prefix)
+     {
++#ifdef __amigaos4__
++      /* Use an absolute path that matches libexec path for now on AmigaOS 4.x */
++      gcc_exec_prefix = standard_libexec_prefix;
++#else
+       gcc_exec_prefix = get_relative_prefix (decoded_options[0].arg,
+ 					     standard_bindir_prefix,
+ 					     standard_exec_prefix);
+       gcc_libexec_prefix = get_relative_prefix (decoded_options[0].arg,
+ 					     standard_bindir_prefix,
+ 					     standard_libexec_prefix);
+       if (gcc_exec_prefix)
+ 	xputenv (concat ("GCC_EXEC_PREFIX=", gcc_exec_prefix, NULL));
++#endif
+     }
+   else
+     {
+       /* make_relative_prefix requires a program name, but
+ 	 GCC_EXEC_PREFIX is typically a directory name with a trailing
+ 	 / (which is ignored by make_relative_prefix), so append a
+-- 
+2.1.4
+

@@ -1,7 +1,7 @@
 From 27bcb7df26355eb73ec18290e2128a21ed88cd08 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Tue, 17 Feb 2015 20:25:55 +0100
-Subject: [PATCH 1/5] Changes for AmigaOS version of gcc.
+Subject: [PATCH 1/7] Changes for AmigaOS version of gcc.
 
 ---
  fixincludes/configure                 |    1 +
