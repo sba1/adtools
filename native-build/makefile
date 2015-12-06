@@ -167,6 +167,18 @@ native-install: coreutils-native-done gcc-native-done-$(GCC_VERSION)
 	cd /gcc/lib/gcc ; for lib in `find -name *.a -o -name *.so`; do mkdir -p `dirname $$lib`/lib; mv $$lib `dirname $$lib`/lib ; done
 
 #
+# Similar to native-install but deploys the components in separate directories
+#
+native-separate-install:
+	rm -Rf root-native-binutils
+	rm -Rf root-native-gcc
+	rm -Rf root-native-coreutils
+	PATH="$(CROSS_PREFIX)/bin:$(PATH)" $(MAKE) -C binutils-native-build-$(BINUTILS_VERSION) install DESTDIR=$(ROOT_DIR)/root-native-binutils
+	PATH="$(CROSS_PREFIX)/bin:$(PATH)" $(MAKE) -C gcc-native-build-$(GCC_VERSION) install DESTDIR=$(ROOT_DIR)/root-native-gcc
+	PATH="$(CROSS_PREFIX)/bin:$(PATH)" $(MAKE) -C coreutils-native-build install DESTDIR=$(ROOT_DIR)/root-native-coreutils
+
+
+#
 # Strip native files
 #
 native-strip:
