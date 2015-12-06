@@ -1,3 +1,5 @@
+sudo: required
+dist: trusty
 language: c++
 install:
 - sudo apt-get update -qq
