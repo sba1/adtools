@@ -32,6 +32,8 @@ CROSS_PREFIX?=$(ROOT_DIR)/root-cross
 # This assumes that cross prefix is absolute
 DESTDIR?=/
 
+STRIPFLAGS=--strip-all --strip-unneeded-rel-relocs -R.comment
+
 all: gcc-native-done-$(GCC_VERSION)
 
 #
@@ -186,10 +188,10 @@ native-strip:
 
 native-strip-really:
 	$(foreach var,$(wildcard /gcc/bin/*), $(CROSS_PREFIX)/bin/ppc-amigaos-strip --strip-all --strip-unneeded-rel-relocs $(var) ; ) true
-	$(CROSS_PREFIX)/bin/ppc-amigaos-strip --strip-all --strip-unneeded-rel-relocs /gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/cc1
-	$(CROSS_PREFIX)/bin/ppc-amigaos-strip --strip-all --strip-unneeded-rel-relocs /gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/cc1plus
-	$(CROSS_PREFIX)/bin/ppc-amigaos-strip --strip-all --strip-unneeded-rel-relocs /gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/lto1
-	$(CROSS_PREFIX)/bin/ppc-amigaos-strip --strip-all --strip-unneeded-rel-relocs /gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/lto-wrapper
+	$(CROSS_PREFIX)/bin/ppc-amigaos-strip $(STRIPFLAGS) /gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/cc1
+	$(CROSS_PREFIX)/bin/ppc-amigaos-strip $(STRIPFLAGS) /gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/cc1plus
+	$(CROSS_PREFIX)/bin/ppc-amigaos-strip $(STRIPFLAGS) /gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/lto1
+	$(CROSS_PREFIX)/bin/ppc-amigaos-strip $(STRIPFLAGS) /gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/lto-wrapper
 
 native-dist: native-strip-really
 	cd / && lha ao5 $(realpath .)/adtools-native-$(shell date +%Y%m%d)-$(shell git rev-list --count HEAD).lha gcc/*
