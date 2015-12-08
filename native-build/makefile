@@ -28,6 +28,9 @@ GCC_VERSION:=$(shell cat $(GCC_SRC_DIR)/gcc/BASE-VER)
 COREUTILS_SRC_DIR=../coreutils/repo
 COREUTILS_VERSION=5.2.1
 
+# Distribution version, used as middle part of a distribution archive
+DIST_VERSION=$(shell date +%Y%m%d)-$(shell git rev-list --count HEAD)
+
 CROSS_PREFIX?=$(ROOT_DIR)/root-cross
 # This assumes that cross prefix is absolute
 DESTDIR?=/
@@ -194,7 +197,7 @@ native-strip-really:
 	$(CROSS_PREFIX)/bin/ppc-amigaos-strip $(STRIPFLAGS) /gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/lto-wrapper
 
 native-dist: native-strip-really
-	cd / && lha ao5 $(realpath .)/adtools-native-$(shell date +%Y%m%d)-$(shell git rev-list --count HEAD).lha gcc/*
+	cd / && lha ao5 $(realpath .)/adtools-native-$(DIST_VERSION).lha gcc/*
 
 #
 # Cleanup everything
