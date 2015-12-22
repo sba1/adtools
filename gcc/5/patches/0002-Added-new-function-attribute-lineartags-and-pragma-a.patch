@@ -1,4 +1,4 @@
-From e1a8e966a8900ebea1c48b9cec4dbdc9c4b47148 Mon Sep 17 00:00:00 2001
+From c8d51b6ed56c643f9744d7a18fee3b13a76b98d3 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 14 Nov 2014 20:03:56 +0100
 Subject: [PATCH 2/6] Added new function attribute "lineartags" and pragma
@@ -78,7 +78,7 @@ index 6894f0e7c3d1ea932ff05f370680be3d18dfcf94..24278250901bfa75c9aae9be63a62351
    /* Allow plugins to register their own pragmas. */
    invoke_plugin_callbacks (PLUGIN_PRAGMAS, NULL);
 diff --git a/gcc/c/c-parser.c b/gcc/c/c-parser.c
-index 007cb8ad67139efafc9a0704256bc16221f47a94..f2ba2d060c6f2a152a527d2d4cc6e8457eaabbdb 100644
+index 86cbc404a4c10edac0ce2341ae0099f624ee36ea..cc77530b090576db35610468052d84763c3965fd 100644
 --- a/gcc/c/c-parser.c
 +++ b/gcc/c/c-parser.c
 @@ -80,12 +80,74 @@ along with GCC; see the file COPYING3.  If not see
@@ -263,7 +263,7 @@ index 007cb8ad67139efafc9a0704256bc16221f47a94..f2ba2d060c6f2a152a527d2d4cc6e845
    c_parser_skip_to_pragma_eol (parser);
  
 diff --git a/gcc/c/c-typeck.c b/gcc/c/c-typeck.c
-index f621e98ca196da82f60f699330c1e305d07908d5..046468dbc6f51dc4c531d93a24e6b4a237b73d0d 100644
+index a98622b16f546b88eb7fdce9ca7631c3ca37470a..2c03a10f1127c2bec5d9280ecc2f786fd5d13153 100644
 --- a/gcc/c/c-typeck.c
 +++ b/gcc/c/c-typeck.c
 @@ -3100,12 +3100,14 @@ convert_arguments (location_t loc, vec<location_t> arg_loc, tree typelist,

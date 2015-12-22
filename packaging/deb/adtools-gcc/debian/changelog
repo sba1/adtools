@@ -1,3 +1,9 @@
+adtools-gcc (0.0.4-0) unstable; urgency=medium
+
+  * Now bundles GCC 5.3
+
+ -- Sebastian Bauer <mail@sebastianbauer.info>  Tue, 22 Dec 2015 09:13:59 +0100
+
 adtools-gcc (0.0.3-0) unstable; urgency=medium
 
   * Now bundles GCC 5.2
