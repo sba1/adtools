@@ -29,8 +29,8 @@ GCC_DIR = $(basename $(basename $(GCC_ARCHIVE_NAME)))
 .PHONY: prepare-gcc
 prepare-gcc:
 	rm -Rf adtools-gcc/patches
-	cp -R $(ROOT)/gcc/4.9/patches adtools-gcc
-	$(ROOT)/bin/adtget gcc 4.9
+	cp -R $(ROOT)/gcc/5/patches adtools-gcc
+	$(ROOT)/bin/adtget gcc 5
 	rm -Rf adtools-gcc/$(GCC_DIR)
 	rm -Rf adtools-gcc/patched
 	cd adtools-gcc && \
