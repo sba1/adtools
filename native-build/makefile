@@ -192,6 +192,7 @@ native-install: coreutils-native-done gcc-native-done-$(GCC_VERSION) ReadMe
 	cp -Rf $(CROSS_PREFIX)/lib/gcc/ppc-amigaos /gcc/lib/gcc/
 	# Move lib archives (e.g., libgcc.a into the proper directory)
 	cd /gcc/lib/gcc ; for lib in `find -name *.a -o -name *.so`; do mkdir -p `dirname $$lib`/lib; mv $$lib `dirname $$lib`/lib ; done
+	cp ReadMe /gcc
 
 #
 # Similar to native-install but deploys the components in separate directories
