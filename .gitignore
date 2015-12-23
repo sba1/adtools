@@ -17,5 +17,7 @@ native-build/coreutils-native-build*
 native-build/root-native-binutils
 native-build/root-native-coreutils
 native-build/root-native-gcc
+native-build/ReadMe
+native-build/ReadMe.utf8
 packaging/deb/adtools-gcc/patched
 packaging/deb/adtools-binutils/patched
