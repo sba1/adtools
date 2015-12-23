@@ -23,7 +23,7 @@ prepare-binutils:
 			git apply ../patches/*.patch && \
 			rm -Rf .git
 
-GCC_ARCHIVE_NAME = $(shell basename $(shell $(ROOT)/bin/adtget gcc 4.9 --print-url-only))
+GCC_ARCHIVE_NAME = $(shell basename $(shell $(ROOT)/bin/adtget gcc 5 --print-url-only))
 GCC_DIR = $(basename $(basename $(GCC_ARCHIVE_NAME)))
 
 .PHONY: prepare-gcc
