@@ -248,6 +248,7 @@ native-dist: native-strip-really
 #
 .PHONY: upload-release
 upload-release: native-dist
+	ln -s adtools-os4-$(DIST_VERSION).lha adtools-os4.lha
 	lftp -e "put adtools-os4.lha && put ReadMe -o adtools-os4.readme && quit" ftp://main.aminet.net/new
 
 #
