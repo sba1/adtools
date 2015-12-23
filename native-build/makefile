@@ -159,9 +159,30 @@ coreutils-native-done: gcc-cross-done-$(GCC_VERSION)
 	touch $@
 
 #
+# Target for generating the ReadMe used for Aminet
+#
+ReadMe: ReadMe.mak
+	python -c "\
+	from mako.template import Template;\
+	from mako.lookup import TemplateLookup;\
+	print Template(\
+		filename='$<',\
+		input_encoding='utf-8',\
+		output_encoding='utf-8',\
+		lookup=TemplateLookup(['./'],input_encoding='utf-8')).render(\
+			DIST_VERSION='$(DIST_VERSION)',\
+			ADTOOLS_COMMIT_SHA1='$(shell git rev-list HEAD -1)',\
+			BINUTILS_VERSION='$(BINUTILS_VERSION)',\
+			GCC_VERSION='$(GCC_VERSION)',\
+			COREUTILS_VERSION='$(COREUTILS_VERSION)'\
+		)\
+	" >$@.utf8
+	iconv --from-code=UTF8 --to-code=ISO-8859-15 $@.utf8 >$@
+
+#
 # Install native compiler into /gcc. Needs write access to this directory
 #
-native-install: coreutils-native-done gcc-native-done-$(GCC_VERSION)
+native-install: coreutils-native-done gcc-native-done-$(GCC_VERSION) ReadMe
 	rm -Rf /gcc/*
 	PATH="$(CROSS_PREFIX)/bin:$(PATH)" $(MAKE) -C binutils-native-build-$(BINUTILS_VERSION) install
 	PATH="$(CROSS_PREFIX)/bin:$(PATH)" $(MAKE) -C gcc-native-build-$(GCC_VERSION) install
