@@ -187,7 +187,8 @@ native-install: coreutils-native-done gcc-native-done-$(GCC_VERSION) ReadMe
 	PATH="$(CROSS_PREFIX)/bin:$(PATH)" $(MAKE) -C binutils-native-build-$(BINUTILS_VERSION) install
 	PATH="$(CROSS_PREFIX)/bin:$(PATH)" $(MAKE) -C gcc-native-build-$(GCC_VERSION) install
 	PATH="$(CROSS_PREFIX)/bin:$(PATH)" $(MAKE) -C coreutils-native-build install
-	cp -R $(CROSS_PREFIX)/ppc-amigaos/SDK /gcc
+# Disabled SDK as we don't want to distribute it
+#	cp -R $(CROSS_PREFIX)/ppc-amigaos/SDK /gcc
 	cp -Rf $(CROSS_PREFIX)/lib/gcc/ppc-amigaos /gcc/lib/gcc/
 	# Move lib archives (e.g., libgcc.a into the proper directory)
 	cd /gcc/lib/gcc ; for lib in `find -name *.a -o -name *.so`; do mkdir -p `dirname $$lib`/lib; mv $$lib `dirname $$lib`/lib ; done
