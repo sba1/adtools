@@ -3,7 +3,7 @@ Uploader:      mail@sebastianbauer.info (Sebastian Bauer)
 Author:        GNU and adtools authors
 Type:          dev/gcc
 Architecture:  ppc-amigaos
-Kurz:          GCC basierende Toolchain für AmigaOS 4.x
+Kurz:          GCC-basierte Toolchain für AmigaOS 4.x
 Requires:      OS 4.1
 Version:       ${DIST_VERSION}
 
