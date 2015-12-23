@@ -5,6 +5,7 @@ repo
 *.tar.gz
 *.tar.bz2
 *.log
+68k-build/sources
 native-build/binutils-cross-build-*
 native-build/gcc-cross-build-*
 native-build/root-cross
@@ -13,5 +14,8 @@ native-build/*-done*
 native-build/binutils-native-build-*
 native-build/gcc-native-build-*
 native-build/coreutils-native-build*
+native-build/root-native-binutils
+native-build/root-native-coreutils
+native-build/root-native-gcc
 packaging/deb/adtools-gcc/patched
 packaging/deb/adtools-binutils/patched
