@@ -239,7 +239,6 @@ native-strip-really:
 native-dist: native-strip-really
 	rm -f $(realpath .)/adtools-os4-$(DIST_VERSION).lha
 	rm -Rf /tmp/adtools-os4-$(DIST_VERSION)
-	rm -f /tmp/adtools-os4-$(DIST_VERSION).lha
 	mkdir /tmp/adtools-os4-$(DIST_VERSION)
 	cp -pR /gcc/* /tmp/adtools-os4-$(DIST_VERSION)
 	cd /tmp && lha ao5 $(realpath .)/adtools-os4-$(DIST_VERSION).lha adtools-os4-$(DIST_VERSION)/*
