@@ -233,8 +233,23 @@ native-strip-really:
 	$(CROSS_PREFIX)/bin/ppc-amigaos-strip $(STRIPFLAGS) /gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/lto1
 	$(CROSS_PREFIX)/bin/ppc-amigaos-strip $(STRIPFLAGS) /gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/lto-wrapper
 
+#
+# Native distribution archive
+#
 native-dist: native-strip-really
-	cd / && lha ao5 $(realpath .)/adtools-native-$(DIST_VERSION).lha gcc/*
+	rm -f $(realpath .)/adtools-os4-$(DIST_VERSION).lha
+	rm -Rf /tmp/adtools-os4-$(DIST_VERSION)
+	rm -f /tmp/adtools-os4-$(DIST_VERSION).lha
+	mkdir /tmp/adtools-os4-$(DIST_VERSION)
+	cp -pR /gcc/* /tmp/adtools-os4-$(DIST_VERSION)
+	cd /tmp && lha ao5 $(realpath .)/adtools-os4-$(DIST_VERSION).lha adtools-os4-$(DIST_VERSION)/*
+
+#
+# Upload the binary archive to the main Aminet server
+#
+.PHONY: upload-release
+upload-release: native-dist
+	lftp -e "put adtools-os4.lha && put ReadMe -o adtools-os4.readme && quit" ftp://main.aminet.net/new
 
 #
 # Cleanup everything
