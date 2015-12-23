@@ -181,7 +181,19 @@ native-separate-install:
 	PATH="$(CROSS_PREFIX)/bin:$(PATH)" $(MAKE) -C binutils-native-build-$(BINUTILS_VERSION) install DESTDIR=$(ROOT_DIR)/root-native-binutils
 	PATH="$(CROSS_PREFIX)/bin:$(PATH)" $(MAKE) -C gcc-native-build-$(GCC_VERSION) install DESTDIR=$(ROOT_DIR)/root-native-gcc
 	PATH="$(CROSS_PREFIX)/bin:$(PATH)" $(MAKE) -C coreutils-native-build install DESTDIR=$(ROOT_DIR)/root-native-coreutils
+	$(MAKE) private-native-separate-dist
 
+# Private target. Unfinished
+private-native-separate-dist:
+	$(foreach var,$(wildcard $(ROOT_DIR)/root-native-coreutils/gcc/bin/*), $(CROSS_PREFIX)/bin/ppc-amigaos-strip $(STRIPFLAGS) $(var) ; ) true
+	$(foreach var,$(wildcard $(ROOT_DIR)/root-native-binutils/gcc/bin/*), $(CROSS_PREFIX)/bin/ppc-amigaos-strip $(STRIPFLAGS) $(var) ; ) true
+	$(foreach var,$(wildcard $(ROOT_DIR)/root-native-gcc/gcc/bin/*), $(CROSS_PREFIX)/bin/ppc-amigaos-strip $(STRIPFLAGS) $(var) ; ) true
+	$(CROSS_PREFIX)/bin/ppc-amigaos-strip $(STRIPFLAGS) $(ROOT_DIR)/root-native-gcc/gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/cc1
+	$(CROSS_PREFIX)/bin/ppc-amigaos-strip $(STRIPFLAGS) $(ROOT_DIR)/root-native-gcc/gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/cc1plus
+	$(CROSS_PREFIX)/bin/ppc-amigaos-strip $(STRIPFLAGS) $(ROOT_DIR)/root-native-gcc/gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/lto1
+	$(CROSS_PREFIX)/bin/ppc-amigaos-strip $(STRIPFLAGS) $(ROOT_DIR)/root-native-gcc/gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/lto-wrapper
+	rm -Rf dist
+	mkdir -p dist/coreutils-$(COREUTILS_VERSION)-$(DIST_VERSION)
 
 #
 # Strip native files
