@@ -1,7 +1,7 @@
 From d59229c5dcc35b3a9404bc905f2eeefe85a1beb8 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Mon, 30 Nov 2015 13:52:18 +0100
-Subject: [PATCH 2/5] Now compiles again using bison 3.
+Subject: [PATCH 2/7] Now compiles again using bison 3.
 
 ---
  lib/getdate.y | 5 ++---

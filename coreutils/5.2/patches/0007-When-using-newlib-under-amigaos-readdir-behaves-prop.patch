@@ -1,0 +1,34 @@
+From cf6addc26d1b29d225fbeed64279e3bcd1b92e17 Mon Sep 17 00:00:00 2001
+From: Sebastian Bauer <mail@sebastianbauer.info>
+Date: Fri, 1 Jan 2016 23:12:56 +0100
+Subject: [PATCH 7/7] When using newlib under amigaos, readdir() behaves
+ properly.
+
+---
+ config.hin | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/config.hin b/config.hin
+index 40124541e9d1c5766cfb4f6ba2e6ebbae6f22207..40261c45dedd420ec55b9f5cc66445e8778eecc9 100644
+--- a/config.hin
++++ b/config.hin
+@@ -1117,12 +1117,16 @@
+ /* Define to 1 if you have the `wmempcpy' function. */
+ #undef HAVE_WMEMPCPY
+ 
+ /* Define if readdir is found to work properly in some unusual cases. */
+ #undef HAVE_WORKING_READDIR
+ 
++#if defined(__amigaos4__) && defined(__NEWLIB__)
++#define HAVE_WORKING_READDIR 1
++#endif
++
+ /* Define if utimes works properly. */
+ #undef HAVE_WORKING_UTIMES
+ 
+ /* Define to 1 if the system has the type `_Bool'. */
+ #undef HAVE__BOOL
+ 
+-- 
+2.1.4
+

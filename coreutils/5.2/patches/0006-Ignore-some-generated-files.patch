@@ -1,0 +1,22 @@
+From e69900905fa2a50339ee5ca204fe5ed81703447c Mon Sep 17 00:00:00 2001
+From: Sebastian Bauer <mail@sebastianbauer.info>
+Date: Fri, 1 Jan 2016 22:52:02 +0100
+Subject: [PATCH 6/7] Ignore some generated files.
+
+---
+ .gitignore | 3 +++
+ 1 file changed, 3 insertions(+)
+ create mode 100644 .gitignore
+
+diff --git a/.gitignore b/.gitignore
+new file mode 100644
+index 0000000000000000000000000000000000000000..7bd43a5b5fb5545e87627e477cb6daab74a0fa32
+--- /dev/null
++++ b/.gitignore
+@@ -0,0 +1,3 @@
++autom4te.cache
++config.hin~
++tests
+-- 
+2.1.4
+
