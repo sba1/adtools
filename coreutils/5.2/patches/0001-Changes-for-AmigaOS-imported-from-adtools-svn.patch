@@ -1,7 +1,7 @@
 From 368e461ac201c8fdc3fc8c698adddd5b400409cc Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Mon, 30 Nov 2015 11:36:14 +0100
-Subject: [PATCH 1/4] Changes for AmigaOS imported from adtools svn
+Subject: [PATCH 1/5] Changes for AmigaOS imported from adtools svn
 
 ---
  config.hin         |   8 +-

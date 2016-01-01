@@ -1,0 +1,38 @@
+From 4454e935632c72b635a16a4a272081ae7002f114 Mon Sep 17 00:00:00 2001
+From: Sebastian Bauer <mail@sebastianbauer.info>
+Date: Fri, 1 Jan 2016 21:12:43 +0100
+Subject: [PATCH 5/5] Don't call fstat() when compiling for AmigaOS4.
+
+The st.st_inod entry seems to be always zero for fstat().
+---
+ src/copy.c | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/src/copy.c b/src/copy.c
+index 3163bb05fa0c43bde863ca182541c972793dea32..e854e0a809f8932d49ef9a719919a547a746f113 100644
+--- a/src/copy.c
++++ b/src/copy.c
+@@ -220,13 +220,20 @@ copy_reg (const char *src_path, const char *dst_path,
+   if (source_desc < 0)
+     {
+       error (0, errno, _("cannot open %s for reading"), quote (src_path));
+       return -1;
+     }
+ 
++#ifndef __amigaos4__
+   if (fstat (source_desc, &src_open_sb))
++#else
++  /* At least newlib will deliver a zero inod entry when using fstat so we will
++   * fall back to stat(). Note that st_dev will also be zero for both cases.
++   */
++  if (stat (src_path, &src_open_sb))
++#endif
+     {
+       error (0, errno, _("cannot fstat %s"), quote (src_path));
+       return_val = -1;
+       goto close_src_desc;
+     }
+ 
+-- 
+2.1.4
+
