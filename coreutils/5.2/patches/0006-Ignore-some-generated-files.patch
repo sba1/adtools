@@ -1,7 +1,7 @@
 From e69900905fa2a50339ee5ca204fe5ed81703447c Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 1 Jan 2016 22:52:02 +0100
-Subject: [PATCH 6/7] Ignore some generated files.
+Subject: [PATCH 6/8] Ignore some generated files.
 
 ---
  .gitignore | 3 +++

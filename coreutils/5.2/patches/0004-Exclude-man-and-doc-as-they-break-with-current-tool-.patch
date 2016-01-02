@@ -1,7 +1,7 @@
 From fb7e78a3740ff14c72acf8eb1413f66b87674014 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Mon, 30 Nov 2015 14:28:40 +0100
-Subject: [PATCH 4/7] Exclude man and doc as they break with current tool set.
+Subject: [PATCH 4/8] Exclude man and doc as they break with current tool set.
 
 ---
  Makefile.am | 2 +-
