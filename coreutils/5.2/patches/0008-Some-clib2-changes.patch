@@ -1,7 +1,7 @@
 From e1314e43ad809102ec36ca952524097a6d3a0791 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Sat, 2 Jan 2016 19:42:24 +0100
-Subject: [PATCH 8/8] Some clib2 changes.
+Subject: [PATCH 8/9] Some clib2 changes.
 
 ---
  config.hin | 8 ++++++++

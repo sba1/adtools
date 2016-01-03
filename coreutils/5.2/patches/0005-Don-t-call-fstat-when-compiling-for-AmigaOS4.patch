@@ -1,7 +1,7 @@
 From 4454e935632c72b635a16a4a272081ae7002f114 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 1 Jan 2016 21:12:43 +0100
-Subject: [PATCH 5/8] Don't call fstat() when compiling for AmigaOS4.
+Subject: [PATCH 5/9] Don't call fstat() when compiling for AmigaOS4.
 
 The st.st_inod entry seems to be always zero for fstat().
 ---
