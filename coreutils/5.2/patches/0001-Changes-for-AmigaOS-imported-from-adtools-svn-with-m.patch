@@ -1,14 +1,15 @@
-From 368e461ac201c8fdc3fc8c698adddd5b400409cc Mon Sep 17 00:00:00 2001
+From 55469eae0a84377c258549e5261cf2ea2baadc94 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Mon, 30 Nov 2015 11:36:14 +0100
-Subject: [PATCH 1/9] Changes for AmigaOS imported from adtools svn
+Subject: [PATCH 1/8] Changes for AmigaOS imported from adtools svn with
+ modifications.
 
 ---
  config.hin         |   8 +-
  configure          |  12 +-
  lib/Makefile.am    |   4 +
  lib/Makefile.in    |  32 ++--
- lib/amigaos.c      | 524 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ lib/amigaos.c      | 519 +++++++++++++++++++++++++++++++++++++++++++++++++++++
  lib/amigaos.h      |  63 +++++++
  lib/euidaccess.c   |   6 +
  lib/fts_.h         |   4 +
@@ -22,7 +23,7 @@ Subject: [PATCH 1/9] Changes for AmigaOS imported from adtools svn
  lib/gettimeofday.c |   2 +
  lib/human.c        |   4 +
  lib/idcache.c      |   2 +
- lib/nanosleep.c    |  20 ++
+ lib/nanosleep.c    |  20 +++
  lib/putenv.c       |   2 +
  lib/quotearg.c     |   4 +
  lib/safe-read.c    |   4 +
@@ -57,7 +58,7 @@ Subject: [PATCH 1/9] Changes for AmigaOS imported from adtools svn
  src/ptx.c          |   5 +
  src/shred.c        |  13 +-
  src/sort.c         |  27 +++
- src/stat.c         |  10 +
+ src/stat.c         |  10 ++
  src/su.c           |   4 +
  src/sync.c         |   2 +
  src/tail.c         |   5 +
@@ -65,7 +66,7 @@ Subject: [PATCH 1/9] Changes for AmigaOS imported from adtools svn
  src/test.c         |   4 +
  src/uname.c        |  35 ++++
  src/wheel-gen.pl   |   1 -
- 61 files changed, 962 insertions(+), 36 deletions(-)
+ 61 files changed, 957 insertions(+), 36 deletions(-)
  create mode 100644 lib/amigaos.c
  create mode 100644 lib/amigaos.h
 
@@ -249,10 +250,10 @@ index c87a7df1f6727c94ae5ffa6616fa97ff83827c28..655ddd408833cb74029030eef04bd74c
  @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cloexec.Po@am__quote@
 diff --git a/lib/amigaos.c b/lib/amigaos.c
 new file mode 100644
-index 0000000000000000000000000000000000000000..37f5ac19ca1aa5ea3fd1d9a4dd666bfb2de6d710
+index 0000000000000000000000000000000000000000..8c9a6a257302e579d8356d08132eb52f7a28adb5
 --- /dev/null
 +++ b/lib/amigaos.c
-@@ -0,0 +1,524 @@
+@@ -0,0 +1,519 @@
 +#include "amigaos.h"
 +
 +#include <proto/dos.h>
@@ -671,11 +672,6 @@ index 0000000000000000000000000000000000000000..37f5ac19ca1aa5ea3fd1d9a4dd666bfb
 +		return -1;
 +
 +	return 0;
-+}
-+
-+int fsync(int fd)
-+{
-+	fflush(fd);
 +}
 +
 +int statfs (const char *path, struct statfs *buf)

@@ -1,7 +1,7 @@
-From d006fd0e2f72d399bba3dfc171b1c42a0242589e Mon Sep 17 00:00:00 2001
+From aca81ee85ac80ea02d918e433bc7fae7f1e53d0c Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Mon, 30 Nov 2015 14:03:16 +0100
-Subject: [PATCH 3/9] Made stty non-working on AmigaOS.
+Subject: [PATCH 3/8] Made stty non-working on AmigaOS.
 
 ---
  src/stty.c | 14 ++++++++++++++

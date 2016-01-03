@@ -1,7 +1,7 @@
-From cf6addc26d1b29d225fbeed64279e3bcd1b92e17 Mon Sep 17 00:00:00 2001
+From 2f9ecf01a148b6b0ffe0997bab24a7e97eba7534 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 1 Jan 2016 23:12:56 +0100
-Subject: [PATCH 7/9] When using newlib under amigaos, readdir() behaves
+Subject: [PATCH 7/8] When using newlib under amigaos, readdir() behaves
  properly.
 
 ---
