@@ -18,6 +18,7 @@ all: cross
 cross:
 	mkdir -p $(CROSS_BUILD_DIR)
 	cd $(CROSS_BUILD_DIR); CFLAGS="-Wno-switch -Wno-unused" $(REAL_SRC_DIR)/configure \
+									--enable-plugins \
 									--target=ppc-amigaos \
 									--prefix=$(PREFIX)
 	make -C $(CROSS_BUILD_DIR)

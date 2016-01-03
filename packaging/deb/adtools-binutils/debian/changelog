@@ -1,3 +1,9 @@
+adtools-binutils (0.0.3-0) unstable; urgency=medium
+
+  * Now built with --enable-plugins. Patch by Chris Young.
+
+ -- Sebastian Bauer <mail@sebastianbauer.info>  Sun, 03 Jan 2016 17:18:52 +0100
+
 adtools-binutils (0.0.2-0) unstable; urgency=medium
 
   * Added --strip-unneeded-rel-relocs option to the strip command.
