@@ -119,7 +119,7 @@ If you just need a cross-compiler then call the ```gcc-cross``` target like
 that:
 
 ```
-$ make -C native-build gcc-done
+$ make -C native-build gcc-cross
 ```
 
 In this case, you also don't need to checkout the ```coreutils```
