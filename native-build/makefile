@@ -33,7 +33,7 @@ DIST_VERSION=$(shell date +%Y%m%d)-$(shell git rev-list --count HEAD)
 
 CROSS_PREFIX?=$(ROOT_DIR)/root-cross
 # This assumes that cross prefix is absolute
-DESTDIR?=/
+DESTDIR?=
 
 STRIPFLAGS=--strip-all --strip-unneeded-rel-relocs -R.comment
 
