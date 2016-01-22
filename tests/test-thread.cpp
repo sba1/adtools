@@ -9,4 +9,4 @@ int main() {
 	std::thread t1(call_from_thread);
 	t1.join();
 	return 0;
-}                   ^
+}
