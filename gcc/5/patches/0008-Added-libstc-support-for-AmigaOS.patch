@@ -1,0 +1,85 @@
+From 458aabb4525db48e8ad302163cfd6ed60dfced54 Mon Sep 17 00:00:00 2001
+From: Sebastian Bauer <mail@sebastianbauer.info>
+Date: Fri, 22 Jan 2016 20:04:50 +0100
+Subject: [PATCH 8/8] Added libstc++ support for AmigaOS.
+
+---
+ libstdc++-v3/config/os/{generic => amigaos}/ctype_base.h            | 0
+ libstdc++-v3/config/os/{generic => amigaos}/ctype_configure_char.cc | 0
+ libstdc++-v3/config/os/{generic => amigaos}/ctype_inline.h          | 0
+ libstdc++-v3/config/os/{generic => amigaos}/error_constants.h       | 0
+ libstdc++-v3/config/os/{generic => amigaos}/os_defines.h            | 5 ++++-
+ libstdc++-v3/configure.host                                         | 3 +++
+ 6 files changed, 7 insertions(+), 1 deletion(-)
+ copy libstdc++-v3/config/os/{generic => amigaos}/ctype_base.h (100%)
+ copy libstdc++-v3/config/os/{generic => amigaos}/ctype_configure_char.cc (100%)
+ copy libstdc++-v3/config/os/{generic => amigaos}/ctype_inline.h (100%)
+ copy libstdc++-v3/config/os/{generic => amigaos}/error_constants.h (100%)
+ copy libstdc++-v3/config/os/{generic => amigaos}/os_defines.h (93%)
+
+diff --git a/libstdc++-v3/config/os/generic/ctype_base.h b/libstdc++-v3/config/os/amigaos/ctype_base.h
+similarity index 100%
+copy from libstdc++-v3/config/os/generic/ctype_base.h
+copy to libstdc++-v3/config/os/amigaos/ctype_base.h
+diff --git a/libstdc++-v3/config/os/generic/ctype_configure_char.cc b/libstdc++-v3/config/os/amigaos/ctype_configure_char.cc
+similarity index 100%
+copy from libstdc++-v3/config/os/generic/ctype_configure_char.cc
+copy to libstdc++-v3/config/os/amigaos/ctype_configure_char.cc
+diff --git a/libstdc++-v3/config/os/generic/ctype_inline.h b/libstdc++-v3/config/os/amigaos/ctype_inline.h
+similarity index 100%
+copy from libstdc++-v3/config/os/generic/ctype_inline.h
+copy to libstdc++-v3/config/os/amigaos/ctype_inline.h
+diff --git a/libstdc++-v3/config/os/generic/error_constants.h b/libstdc++-v3/config/os/amigaos/error_constants.h
+similarity index 100%
+copy from libstdc++-v3/config/os/generic/error_constants.h
+copy to libstdc++-v3/config/os/amigaos/error_constants.h
+diff --git a/libstdc++-v3/config/os/generic/os_defines.h b/libstdc++-v3/config/os/amigaos/os_defines.h
+similarity index 93%
+copy from libstdc++-v3/config/os/generic/os_defines.h
+copy to libstdc++-v3/config/os/amigaos/os_defines.h
+index 45bf52a57c18e0770794dcd041c06e07047e9504..0561c9969c5193c02def4942dfc533663554a83b 100644
+--- a/libstdc++-v3/config/os/generic/os_defines.h
++++ b/libstdc++-v3/config/os/amigaos/os_defines.h
+@@ -1,7 +1,7 @@
+-// Specific definitions for generic platforms  -*- C++ -*-
++// Specific definitions for AmigaOS -*- C++ -*-
+ 
+ // Copyright (C) 2000-2015 Free Software Foundation, Inc.
+ //
+ // This file is part of the GNU ISO C++ Library.  This library is free
+ // software; you can redistribute it and/or modify it under the
+ // terms of the GNU General Public License as published by the
+@@ -30,7 +30,10 @@
+ #ifndef _GLIBCXX_OS_DEFINES
+ #define _GLIBCXX_OS_DEFINES 1
+ 
+ // System-specific #define, typedefs, corrections, etc, go here.  This
+ // file will come before all others.
+ 
++// No ioctl() on AmigaOS
++#define _GLIBCXX_NO_IOCTL 1
++
+ #endif
+diff --git a/libstdc++-v3/configure.host b/libstdc++-v3/configure.host
+index 640199c3d739afc786ab34c87f9464c3589c2927..9c1d7095e193e3b530b212ab66ce18f687e5370e 100644
+--- a/libstdc++-v3/configure.host
++++ b/libstdc++-v3/configure.host
+@@ -234,12 +234,15 @@ case "${host_os}" in
+     atomic_word_dir="os/aix"
+     ;;
+   aix*)
+     os_include_dir="os/generic"
+     atomicity_dir="cpu/generic"
+     ;;
++  amigaos*)
++    os_include_dir="os/amigaos"
++    ;;
+   bsd*)
+     # Plain BSD attempts to share FreeBSD files.
+     os_include_dir="os/bsd/freebsd"
+     ;;
+   cygwin*)
+     os_include_dir="os/newlib"
+-- 
+2.1.4
+
