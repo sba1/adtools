@@ -1,21 +1,21 @@
-From 458aabb4525db48e8ad302163cfd6ed60dfced54 Mon Sep 17 00:00:00 2001
+From e2640c982044900e4f42e6f71edd846048d83c0a Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 22 Jan 2016 20:04:50 +0100
 Subject: [PATCH 8/8] Added libstc++ support for AmigaOS.
 
 ---
- libstdc++-v3/config/os/{generic => amigaos}/ctype_base.h            | 0
- libstdc++-v3/config/os/{generic => amigaos}/ctype_configure_char.cc | 0
- libstdc++-v3/config/os/{generic => amigaos}/ctype_inline.h          | 0
- libstdc++-v3/config/os/{generic => amigaos}/error_constants.h       | 0
- libstdc++-v3/config/os/{generic => amigaos}/os_defines.h            | 5 ++++-
- libstdc++-v3/configure.host                                         | 3 +++
- 6 files changed, 7 insertions(+), 1 deletion(-)
+ libstdc++-v3/config/os/{generic => amigaos}/ctype_base.h      |  0
+ .../config/os/{generic => amigaos}/ctype_configure_char.cc    |  0
+ libstdc++-v3/config/os/{generic => amigaos}/ctype_inline.h    |  0
+ libstdc++-v3/config/os/{generic => amigaos}/error_constants.h |  0
+ libstdc++-v3/config/os/{vxworks => amigaos}/os_defines.h      | 11 ++++++-----
+ libstdc++-v3/configure.host                                   |  3 +++
+ 6 files changed, 9 insertions(+), 5 deletions(-)
  copy libstdc++-v3/config/os/{generic => amigaos}/ctype_base.h (100%)
  copy libstdc++-v3/config/os/{generic => amigaos}/ctype_configure_char.cc (100%)
  copy libstdc++-v3/config/os/{generic => amigaos}/ctype_inline.h (100%)
  copy libstdc++-v3/config/os/{generic => amigaos}/error_constants.h (100%)
- copy libstdc++-v3/config/os/{generic => amigaos}/os_defines.h (93%)
+ copy libstdc++-v3/config/os/{vxworks => amigaos}/os_defines.h (89%)
 
 diff --git a/libstdc++-v3/config/os/generic/ctype_base.h b/libstdc++-v3/config/os/amigaos/ctype_base.h
 similarity index 100%
@@ -33,15 +33,15 @@ diff --git a/libstdc++-v3/config/os/generic/error_constants.h b/libstdc++-v3/con
 similarity index 100%
 copy from libstdc++-v3/config/os/generic/error_constants.h
 copy to libstdc++-v3/config/os/amigaos/error_constants.h
-diff --git a/libstdc++-v3/config/os/generic/os_defines.h b/libstdc++-v3/config/os/amigaos/os_defines.h
-similarity index 93%
-copy from libstdc++-v3/config/os/generic/os_defines.h
+diff --git a/libstdc++-v3/config/os/vxworks/os_defines.h b/libstdc++-v3/config/os/amigaos/os_defines.h
+similarity index 89%
+copy from libstdc++-v3/config/os/vxworks/os_defines.h
 copy to libstdc++-v3/config/os/amigaos/os_defines.h
-index 45bf52a57c18e0770794dcd041c06e07047e9504..0561c9969c5193c02def4942dfc533663554a83b 100644
---- a/libstdc++-v3/config/os/generic/os_defines.h
+index 53607a44943391ca1b10a650b588be6b55a4a185..346f063958cd7e80ebf97be4acee0bdf391cb811 100644
+--- a/libstdc++-v3/config/os/vxworks/os_defines.h
 +++ b/libstdc++-v3/config/os/amigaos/os_defines.h
 @@ -1,7 +1,7 @@
--// Specific definitions for generic platforms  -*- C++ -*-
+-// Specific definitions for VxWorks  -*- C++ -*-
 +// Specific definitions for AmigaOS -*- C++ -*-
  
  // Copyright (C) 2000-2015 Free Software Foundation, Inc.
@@ -49,16 +49,24 @@ index 45bf52a57c18e0770794dcd041c06e07047e9504..0561c9969c5193c02def4942dfc53366
  // This file is part of the GNU ISO C++ Library.  This library is free
  // software; you can redistribute it and/or modify it under the
  // terms of the GNU General Public License as published by the
-@@ -30,7 +30,10 @@
+@@ -30,13 +30,14 @@
  #ifndef _GLIBCXX_OS_DEFINES
  #define _GLIBCXX_OS_DEFINES 1
  
  // System-specific #define, typedefs, corrections, etc, go here.  This
  // file will come before all others.
  
+-//Keep vxWorks from defining min()/max() as macros
+-#ifdef NOMINMAX
+-#undef NOMINMAX
 +// No ioctl() on AmigaOS
 +#define _GLIBCXX_NO_IOCTL 1
 +
++#ifdef __NEWLIB__
++#define _GLIBCXX_USE_C99_STDINT_TR1 1
+ #endif
+-#define NOMINMAX 1
+ 
  #endif
 diff --git a/libstdc++-v3/configure.host b/libstdc++-v3/configure.host
 index 640199c3d739afc786ab34c87f9464c3589c2927..9c1d7095e193e3b530b212ab66ce18f687e5370e 100644
