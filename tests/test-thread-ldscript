@@ -141,9 +141,10 @@ SECTIONS
   {
     KEEP (*crtbegin.o(.dtors))
     KEEP (*crtbegin?.o(.dtors))
-    KEEP (*(EXCLUDE_FILE (*crtend.o *crtend?.o ) .dtors))
+    KEEP (*(EXCLUDE_FILE (*crtend.o *crtend?.o  *libpthread.a:lib.o) .dtors))
     KEEP (*(SORT(.dtors.*)))
     KEEP (*(.dtors))
+    KEEP (*libpthread.a:lib.o(.dtors))
   }
   .jcr            : { KEEP (*(.jcr)) }
   .data.rel.ro : { *(.data.rel.ro.local* .gnu.linkonce.d.rel.ro.local.*) *(.data.rel.ro .data.rel.ro.* .gnu.linkonce.d.rel.ro.*) }
