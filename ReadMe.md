@@ -81,6 +81,9 @@ directory. The scripts depend on Python.
  ```
  to checkout the version 5 branch of gcc and apply all adtools patches
  for this branch.
+ 
+ You should also invoke this command if you want to reapply the current
+ set of patches (e.g., after pulling changed patch sets)
 
 * ```adtgenpatch```: will generate the patches between the base checkout
  and the current HEAD of the repo. The patches are written to the
