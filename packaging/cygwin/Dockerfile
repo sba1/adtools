@@ -1,4 +1,4 @@
-# Dockerfile for generating adtools Debian packages
+# Dockerfile for generating adtools packages for Cygwin
                            
 FROM adtools         
                     
@@ -23,8 +23,9 @@ RUN apt-get install -y --no-install-recommends \
 # Build Cygwin compiler first
 RUN mkdir -p /cygwin/src
 WORKDIR /cygwin/src
-RUN wget ftp://ftp.gwdg.de/pub/linux/sources.redhat.com/cygwin/x86/release/binutils/binutils-2.24.51-5-src.tar.xz
-RUN wget ftp://ftp.gwdg.de/pub/linux/sources.redhat.com/cygwin/x86/release/gcc/gcc-4.8.3-3-src.tar.xz
+ENV MIRROR_BASE http://cygwin.mirror.constant.com/
+RUN wget ${MIRROR_BASE}/x86/release/binutils/binutils-2.24.51-5-src.tar.xz
+RUN wget ${MIRROR_BASE}/x86/release/gcc/gcc-4.8.3-3-src.tar.xz
 
 # Start with binutils
 RUN tar -xJf binutils-2.24.51-5-src.tar.xz
@@ -55,13 +56,13 @@ RUN apt-get install -y --no-install-recommends \
 RUN mkdir ../gcc-4.8.3-build
 WORKDIR /cygwin/src/gcc-4.8.3-3.src/gcc-4.8.3-build
 
-RUN wget ftp://ftp.gwdg.de/pub/linux/sources.redhat.com/cygwin/x86/release/cygwin/cygwin-1.7.32-1.tar.xz
-RUN wget ftp://ftp.gwdg.de/pub/linux/sources.redhat.com/cygwin/x86/release/w32api-headers/w32api-headers-3.2.0-1.tar.xz
-RUN wget ftp://ftp.gwdg.de/pub/linux/sources.redhat.com/cygwin/x86/release/w32api-runtime/w32api-runtime-3.2.0-1.tar.xz
-RUN wget ftp://ftp.gwdg.de/pub/linux/sources.redhat.com/cygwin/x86/release/libiconv/libiconv-1.14-2.tar.bz2
-RUN wget ftp://ftp.gwdg.de/pub/linux/sources.redhat.com/cygwin/x86/release/gmp/libgmp-devel/libgmp-devel-4.3.2-1.tar.bz2
-RUN wget ftp://ftp.gwdg.de/pub/linux/sources.redhat.com/cygwin/x86/release/mpfr/libmpfr-devel/libmpfr-devel-3.1.2-1.tar.bz2
-RUN wget ftp://ftp.gwdg.de/pub/linux/sources.redhat.com/cygwin/x86/release/mpclib/libmpc-devel/libmpc-devel-1.0.1-2.tar.bz2
+RUN wget ${MIRROR_BASE}/x86/release/cygwin/cygwin-1.7.32-1.tar.xz
+RUN wget ${MIRROR_BASE}/x86/release/w32api-headers/w32api-headers-3.2.0-1.tar.xz
+RUN wget ${MIRROR_BASE}/x86/release/w32api-runtime/w32api-runtime-3.2.0-1.tar.xz
+RUN wget ${MIRROR_BASE}/x86/release/libiconv/libiconv-1.14-2.tar.bz2
+RUN wget ${MIRROR_BASE}/x86/release/gmp/libgmp-devel/libgmp-devel-4.3.2-1.tar.bz2
+RUN wget ${MIRROR_BASE}/x86/release/mpfr/libmpfr-devel/libmpfr-devel-3.1.2-1.tar.bz2
+RUN wget ${MIRROR_BASE}/x86/release/mpclib/libmpc-devel/libmpc-devel-1.0.1-2.tar.bz2
 RUN tar -xJf cygwin-1.7.32-1.tar.xz
 RUN tar -xJf w32api-headers-3.2.0-1.tar.xz
 RUN tar -xJf w32api-runtime-3.2.0-1.tar.xz
