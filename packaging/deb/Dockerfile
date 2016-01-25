@@ -1,9 +1,8 @@
 # Dockerfile for generating adtools Debian packages
-FROM debian:wheezy         
+FROM debian:jessie
 
-RUN echo deb http://ftp.debian.org/debian wheezy-backports main >>/etc/apt/sources.list
 RUN apt-get update
-RUN apt-get install -t wheezy-backports -y --no-install-recommends \
+RUN apt-get install -t jessie -y --no-install-recommends \
 	binutils \
 	build-essential \
 	debhelper \
