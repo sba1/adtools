@@ -126,7 +126,12 @@ $ make -C native-build gcc-cross
 ```
 
 In this case, you also don't need to checkout the ```coreutils```
-component.
+component. In order to use the cross compiler, add the ```root-cross/bin```
+path to your ```PATH``` variable, e.g., like this:
+
+```
+$ export PATH=$PATH:$(pwd)/root-cross/bin
+```
 
 ### Packaging
 
