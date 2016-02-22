@@ -1,4 +1,4 @@
-From c8d51b6ed56c643f9744d7a18fee3b13a76b98d3 Mon Sep 17 00:00:00 2001
+From 02d47c2757b7c7e8634104a9ec88e2c25b40d3a7 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 14 Nov 2014 20:03:56 +0100
 Subject: [PATCH 2/8] Added new function attribute "lineartags" and pragma
@@ -348,10 +348,10 @@ index eb5f8fc5f3d546b8d8e1cdd8118a3085079df50e..3b8c994cdbd192eaf7112c780f0106a4
  extern int amigaos_baserel_operand(rtx x);
  extern int amigaos_not_baserel_tree_p(tree decl);
 diff --git a/gcc/config/rs6000/amigaos.c b/gcc/config/rs6000/amigaos.c
-index 0f575a38e4dc4aac0b454c56bf62f625c0f7eb9c..ccf4f912cb66cd424a2398c6535e05fa493f39f1 100644
+index 23e53def482db087cf00324e43a6fefad4f0effa..c96903dfbdbdefcc443eb6eb1307b92678565cd3 100644
 --- a/gcc/config/rs6000/amigaos.c
 +++ b/gcc/config/rs6000/amigaos.c
-@@ -345,12 +345,19 @@ amigaos_handle_linearvarargs_attribute (tree *node, tree name,
+@@ -341,12 +341,19 @@ amigaos_handle_linearvarargs_attribute (tree *node, tree name,
        *no_add_attrs = true;
      }
  

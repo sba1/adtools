@@ -1,4 +1,4 @@
-From eecb39df390b5b8cd36a8a417f61d4afba24c187 Mon Sep 17 00:00:00 2001
+From 56430deb3a1a68f1a9b1e8e40030c7ab4812866b Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Tue, 17 Feb 2015 20:25:55 +0100
 Subject: [PATCH 1/8] Changes for AmigaOS version of gcc.
@@ -12,8 +12,8 @@ Subject: [PATCH 1/8] Changes for AmigaOS version of gcc.
  gcc/config.gcc                        |    8 +
  gcc/config.host                       |    6 +
  gcc/config/rs6000/amigaos-protos.h    |   41 +
- gcc/config/rs6000/amigaos.c           |  466 +++++++++
- gcc/config/rs6000/amigaos.h           |  431 ++++++++
+ gcc/config/rs6000/amigaos.c           |  462 ++++++++
+ gcc/config/rs6000/amigaos.h           |  426 ++++++++
  gcc/config/rs6000/amigaos.opt         |   37 +
  gcc/config/rs6000/rs6000-builtin.def  |    7 +
  gcc/config/rs6000/rs6000.c            |  176 +++-
@@ -43,7 +43,7 @@ Subject: [PATCH 1/8] Changes for AmigaOS version of gcc.
  libstdc++-v3/crossconfig.m4           |    8 +
  libstdc++-v3/include/c_global/cstddef |    3 +
  libstdc++-v3/include/c_std/cstddef    |    3 +
- 39 files changed, 3879 insertions(+), 77 deletions(-)
+ 39 files changed, 3870 insertions(+), 77 deletions(-)
  create mode 100644 gcc/config/rs6000/amigaos-protos.h
  create mode 100644 gcc/config/rs6000/amigaos.c
  create mode 100644 gcc/config/rs6000/amigaos.h
@@ -327,10 +327,10 @@ index 0000000000000000000000000000000000000000..eb5f8fc5f3d546b8d8e1cdd8118a3085
 +//#endif /* RTX_CODE */
 diff --git a/gcc/config/rs6000/amigaos.c b/gcc/config/rs6000/amigaos.c
 new file mode 100644
-index 0000000000000000000000000000000000000000..0f575a38e4dc4aac0b454c56bf62f625c0f7eb9c
+index 0000000000000000000000000000000000000000..23e53def482db087cf00324e43a6fefad4f0effa
 --- /dev/null
 +++ b/gcc/config/rs6000/amigaos.c
-@@ -0,0 +1,466 @@
+@@ -0,0 +1,462 @@
 +/* Subroutines used for code generation on Amiga OS 4
 +   Copyright (C) 2003 Free Software Foundation, Inc.
 +   Contributed by Thomas Frieden (ThomasF@hyperion-entertainment.com)
@@ -399,10 +399,6 @@ index 0000000000000000000000000000000000000000..0f575a38e4dc4aac0b454c56bf62f625
 +#ifdef __amigaos4__
 +static const char * __attribute__((used)) amigaos_stack_cookie = "$STACK:768000";
 +#endif /* __amigaos4__ */
-+
-+#if 0
-+const char *amigaos_crt_string;
-+#endif
 +
 +/* Initialize a variable CUM of type CUMULATIVE_ARGS
 +   for a call to a function whose data type is FNTYPE.
@@ -799,10 +795,10 @@ index 0000000000000000000000000000000000000000..0f575a38e4dc4aac0b454c56bf62f625
 +}
 diff --git a/gcc/config/rs6000/amigaos.h b/gcc/config/rs6000/amigaos.h
 new file mode 100644
-index 0000000000000000000000000000000000000000..4556163c22a8fadc51c9ed7401c7e6c414e58c0e
+index 0000000000000000000000000000000000000000..94fa93c0be047c08987d7acbc7c71413e164014c
 --- /dev/null
 +++ b/gcc/config/rs6000/amigaos.h
-@@ -0,0 +1,431 @@
+@@ -0,0 +1,426 @@
 +/* Definitions of target machine for GNU compiler, for AmigaOS.
 +   Copyright (C) 1997, 2003, 2005 Free Software Foundation, Inc.
 +
@@ -1171,11 +1167,6 @@ index 0000000000000000000000000000000000000000..4556163c22a8fadc51c9ed7401c7e6c4
 +
 +/* Used as cookie for linear vararg passing */
 +#define CALL_LINEARVARARGS      0x10000000
-+
-+/* AmigaOS specific options */
-+
-+/* Strings provided for own options management in rs6000.c */
-+/*extern const char *amigaos_crt_string;*/
 +
 +#define SUB3TARGET_OVERRIDE_OPTIONS  \
 +do                                   \
