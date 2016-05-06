@@ -17,7 +17,7 @@ is tested here.
 In contrast to the original approch, build products that are based on 
 other projects (e.g. gcc) are not imported directly into this 
 repository. Instead only the patches that need to be applied to a given 
-base version (e.g. stock gcc 5) are directly stored and maintained.
+base version (e.g. stock gcc 6) are directly stored and maintained.
 
 Installation
 ------------
@@ -78,9 +78,9 @@ directory. The scripts depend on Python.
  content of the patches e.g., using ```git rebase``` etc. For example,
  invoke
  ```
- $ adtcheckout gcc 5
+ $ adtcheckout gcc 6
  ```
- to checkout the version 5 branch of gcc and apply all adtools patches
+ to checkout the version 6 branch of gcc and apply all adtools patches
  for this branch.
  
  You should also invoke this command if you want to reapply the current
@@ -91,10 +91,10 @@ directory. The scripts depend on Python.
  ```patches``` directory of the respective component. For instance,
  invoke
  ```
- $ adtgenpatch gcc 5
+ $ adtgenpatch gcc 6
  ```
- to generate the tracked changes for 5 branch of gcc. The patches will
- be located in ```gcc/5/patches```.
+ to generate the tracked changes for 6 branch of gcc. The patches will
+ be located in ```gcc/6/patches```.
 
 Building
 --------
@@ -110,7 +110,7 @@ This can be done by:
 $ bin/adtclone
 $ bin/adtcheckout binutils 2.23.2
 $ bin/adtcheckout coreutils 5.2
-$ bin/adtcheckout gcc 5
+$ bin/adtcheckout gcc 6
 ```
 Building is then a matter of entering
 ```
