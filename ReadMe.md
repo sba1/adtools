@@ -63,6 +63,7 @@ directory. The scripts depend on Python.
  coreutils 5.2
  gcc 4.9
  gcc 5
+ gcc 6
  ```
  shows that there are three components ```binutils```, ```coreutils```,
  and ```gcc```
