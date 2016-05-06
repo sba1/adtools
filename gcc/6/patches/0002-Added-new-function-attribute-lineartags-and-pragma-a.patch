@@ -1,7 +1,7 @@
-From d413992ff26f420730a47bd855341f85b3c23729 Mon Sep 17 00:00:00 2001
+From 7f22acf42adb40c2f0af38865b638a3b7636994c Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 14 Nov 2014 20:03:56 +0100
-Subject: [PATCH 2/9] Added new function attribute "lineartags" and pragma
+Subject: [PATCH 2/8] Added new function attribute "lineartags" and pragma
  "amigaos tagtype".
 
 Functions that have the lineartags attribute are assumed to be functions
@@ -348,10 +348,10 @@ index eb5f8fc5f3d546b8d8e1cdd8118a3085079df50e..3b8c994cdbd192eaf7112c780f0106a4
  extern int amigaos_baserel_operand(rtx x);
  extern int amigaos_not_baserel_tree_p(tree decl);
 diff --git a/gcc/config/rs6000/amigaos.c b/gcc/config/rs6000/amigaos.c
-index 23e53def482db087cf00324e43a6fefad4f0effa..c96903dfbdbdefcc443eb6eb1307b92678565cd3 100644
+index a6da7d543241e2fc8cf51a952633c62e19d7d875..797261177e46a34ac0aba97f2b9c2b8af8df2e72 100644
 --- a/gcc/config/rs6000/amigaos.c
 +++ b/gcc/config/rs6000/amigaos.c
-@@ -341,12 +341,19 @@ amigaos_handle_linearvarargs_attribute (tree *node, tree name,
+@@ -342,12 +342,19 @@ amigaos_handle_linearvarargs_attribute (tree *node, tree name,
        *no_add_attrs = true;
      }
  

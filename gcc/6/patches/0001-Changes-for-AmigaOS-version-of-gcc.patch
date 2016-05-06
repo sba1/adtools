@@ -1,7 +1,7 @@
-From e9adc4d3211ca81c749b9509536fe1beba3c37a1 Mon Sep 17 00:00:00 2001
+From d305cb2e264b3f16cc9678fbef2ccf91897bd92b Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Tue, 17 Feb 2015 20:25:55 +0100
-Subject: [PATCH 1/9] Changes for AmigaOS version of gcc.
+Subject: [PATCH 1/8] Changes for AmigaOS version of gcc.
 
 ---
  fixincludes/configure                 |    1 +
@@ -12,7 +12,7 @@ Subject: [PATCH 1/9] Changes for AmigaOS version of gcc.
  gcc/config.gcc                        |    8 +
  gcc/config.host                       |    6 +
  gcc/config/rs6000/amigaos-protos.h    |   41 +
- gcc/config/rs6000/amigaos.c           |  462 ++++++++
+ gcc/config/rs6000/amigaos.c           |  463 +++++++++
  gcc/config/rs6000/amigaos.h           |  426 ++++++++
  gcc/config/rs6000/amigaos.opt         |   37 +
  gcc/config/rs6000/rs6000-builtin.def  |    7 +
@@ -43,7 +43,7 @@ Subject: [PATCH 1/9] Changes for AmigaOS version of gcc.
  libstdc++-v3/crossconfig.m4           |    8 +
  libstdc++-v3/include/c_global/cstddef |    3 +
  libstdc++-v3/include/c_std/cstddef    |    3 +
- 39 files changed, 3896 insertions(+), 77 deletions(-)
+ 39 files changed, 3897 insertions(+), 77 deletions(-)
  create mode 100644 gcc/config/rs6000/amigaos-protos.h
  create mode 100644 gcc/config/rs6000/amigaos.c
  create mode 100644 gcc/config/rs6000/amigaos.h
@@ -327,10 +327,10 @@ index 0000000000000000000000000000000000000000..eb5f8fc5f3d546b8d8e1cdd8118a3085
 +//#endif /* RTX_CODE */
 diff --git a/gcc/config/rs6000/amigaos.c b/gcc/config/rs6000/amigaos.c
 new file mode 100644
-index 0000000000000000000000000000000000000000..23e53def482db087cf00324e43a6fefad4f0effa
+index 0000000000000000000000000000000000000000..a6da7d543241e2fc8cf51a952633c62e19d7d875
 --- /dev/null
 +++ b/gcc/config/rs6000/amigaos.c
-@@ -0,0 +1,462 @@
+@@ -0,0 +1,463 @@
 +/* Subroutines used for code generation on Amiga OS 4
 +   Copyright (C) 2003 Free Software Foundation, Inc.
 +   Contributed by Thomas Frieden (ThomasF@hyperion-entertainment.com)
@@ -382,6 +382,7 @@ index 0000000000000000000000000000000000000000..23e53def482db087cf00324e43a6fefa
 +#include "fold-const.h"
 +#include "langhooks.h"
 +#include "explow.h"
++#include "emit-rtl.h"
 +
 +#undef DEBUG
 +#ifdef DEBUG
