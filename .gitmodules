@@ -1,0 +1,3 @@
+[submodule "gild"]
+	path = gild
+	url = https://github.com/sba1/gild

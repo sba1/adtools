@@ -52,13 +52,26 @@ This will also install the SDK and binutils due to the dependencies.
 Patch management
 ----------------
 
-A very naive patch management system that should simplify the management
-of patches is included here. The scripts are situated in the ```bin```
-directory. The scripts depend on Python.
+A very naive patch management system called ```gild``` that should simplify the
+management of patches has been developed in context of this project. In the
+meantime, ```gild``` became a tiny project of its own and it is located at
+http://github.com/sba1/gild. It is linked to this project using submodules
+feature of git.
 
-* ```adtlist```: lists available components and branches. For instance
+So in order to follow the build instructions, you need to make sure that the
+```gild``` directory is populated:
+
+```
+$ git submodule init
+$ git submodule update
+````
+With this and the softlink ```bin/gild``` you have access to the following
+commands:
+
+
+* ```gild list```: lists available components and branches. For instance
  ```
- $ adtlist
+ $ gild list
  binutils 2.23.2
  coreutils 5.2
  gcc 4.9
@@ -67,31 +80,31 @@ directory. The scripts depend on Python.
  ```
  shows that there are three components ```binutils```, ```coreutils```,
  and ```gcc```
- 
-* ```adtclone```: will fetch the external sources of all components into
+
+* ```gild clone```: will fetch the external sources of all components into
  the respective ```repo``` directories. The checkout will not be affected.
 
-* ```adtcheckout ```: will checkout for a specific component a specific 
- branch to the working directory of the ```repo``` directory and apply 
- the current patches for this branch. The result of this is what should 
- be used for compiling. It can also be used to adjust the order and 
+* ```gild checkout ```: will checkout for a specific component a specific
+ branch to the working directory of the ```repo``` directory and apply
+ the current patches for this branch. The result of this is what should
+ be used for compiling. It can also be used to adjust the order and
  content of the patches e.g., using ```git rebase``` etc. For example,
  invoke
  ```
- $ adtcheckout gcc 6
+ $ gild checkout gcc 6
  ```
  to checkout the version 6 branch of gcc and apply all adtools patches
  for this branch.
- 
+
  You should also invoke this command if you want to reapply the current
  set of patches (e.g., after pulling changed patch sets)
 
-* ```adtgenpatch```: will generate the patches between the base checkout
+* ```gild genpatch```: will generate the patches between the base checkout
  and the current HEAD of the repo. The patches are written to the
  ```patches``` directory of the respective component. For instance,
  invoke
  ```
- $ adtgenpatch gcc 6
+ $ gild genpatch gcc 6
  ```
  to generate the tracked changes for 6 branch of gcc. The patches will
  be located in ```gcc/6/patches```.
@@ -107,10 +120,10 @@ approch involves invoking the ```makefile``` provided in the
 have previously been checked out and that the patches have been applied.
 This can be done by:
 ```
-$ bin/adtclone
-$ bin/adtcheckout binutils 2.23.2
-$ bin/adtcheckout coreutils 5.2
-$ bin/adtcheckout gcc 6
+$ bin/gild clone
+$ bin/gild checkout binutils 2.23.2
+$ bin/gild checkout coreutils 5.2
+$ bin/bild checkout gcc 6
 ```
 Building is then a matter of entering
 ```

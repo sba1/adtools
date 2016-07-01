@@ -12,7 +12,7 @@ prepare-packages: prepare-binutils prepare-gcc
 prepare-binutils:
 	rm -Rf adtools-binutils/patches
 	cp -R $(ROOT)/binutils/2.23.2/patches adtools-binutils
-	$(ROOT)/bin/adtget binutils 2.23.2
+	$(ROOT)/bin/gild get binutils 2.23.2
 	rm -Rf adtools-binutils/binutils-2.23.2
 	rm -Rf adtools-binutils/patched
 	cd adtools-binutils && \
@@ -23,14 +23,14 @@ prepare-binutils:
 			git apply ../patches/*.patch && \
 			rm -Rf .git
 
-GCC_ARCHIVE_NAME = $(shell basename $(shell $(ROOT)/bin/adtget gcc 5 --print-url-only))
+GCC_ARCHIVE_NAME = $(shell basename $(shell $(ROOT)/bin/gild get gcc 5 --print-url-only))
 GCC_DIR = $(basename $(basename $(GCC_ARCHIVE_NAME)))
 
 .PHONY: prepare-gcc
 prepare-gcc:
 	rm -Rf adtools-gcc/patches
 	cp -R $(ROOT)/gcc/5/patches adtools-gcc
-	$(ROOT)/bin/adtget gcc 5
+	$(ROOT)/bin/gild get gcc 5
 	rm -Rf adtools-gcc/$(GCC_DIR)
 	rm -Rf adtools-gcc/patched
 	cd adtools-gcc && \
