@@ -1,3 +1,9 @@
+adtools-gcc (0.0.6-0) unstable; urgency=medium
+
+  * Enabled E500 SPE support.
+
+ -- Sebastian Bauer <mail@sebastianbauer.info>  Tue, 31 Jan 2017 20:57:24 +0100
+
 adtools-gcc (0.0.5-0) unstable; urgency=medium
 
   * Previous releases did not really include GCC 5. Fixed.
