@@ -110,7 +110,7 @@ additionals-libs:
 
 
 ifeq ($(CROSS_IS_PRESENT),1)
-NATIVE_LIBRARY_DEPENDENCIES=
+NATIVE_LIBRARY_DEPENDENCIES=downloads-done
 else
 NATIVE_LIBRARY_DEPENDENCIES=gcc-cross-done-$(GCC_VERSION)
 endif
