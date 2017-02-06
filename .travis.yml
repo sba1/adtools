@@ -23,7 +23,7 @@ script:
 - git submodule update
 - ./bin/gild clone
 - ./bin/gild checkout gcc 5
-- ./bin/gild checkout binutils 2.23
+- ./bin/gild checkout binutils 2.23.2
 - make -C native-build CROSS_IS_PRESENT=1
 env:
   global:
