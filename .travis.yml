@@ -17,6 +17,7 @@ script:
 - mv *.deb artifacts
 - cd artifacts
 - dpkg-scanpackages ./ /dev/null | gzip >Packages.gz
+- make -C ../../../native-build CROSS_IS_PRESENT=1
 env:
   global:
   - secure: mlPpfQG9RuayWWXLt1tdEI4nb9ElObenj1QDfJ8qGxEqGleout8RE9cIxArB3WJ8jih/9lM3mkUm0y3cMMsf+SGRkfkWLO+YmVHqMslC0dwd3CqPMFjYPSJh7qsxaJC3b0RrZXujlXkwgDP16Yy/+h9RqAQwuTc3AtWepcLEZp0=
