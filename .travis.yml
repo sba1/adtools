@@ -22,7 +22,7 @@ script:
 - cd ../../..
 - mv packaging/deb/adtools-binutils/patched binutils/repo
 - mv packaging/deb/adtools-gcc/patched gcc/repo
-- make -C native-build
+#- make -C native-build
 env:
   global:
   - secure: mlPpfQG9RuayWWXLt1tdEI4nb9ElObenj1QDfJ8qGxEqGleout8RE9cIxArB3WJ8jih/9lM3mkUm0y3cMMsf+SGRkfkWLO+YmVHqMslC0dwd3CqPMFjYPSJh7qsxaJC3b0RrZXujlXkwgDP16Yy/+h9RqAQwuTc3AtWepcLEZp0=
