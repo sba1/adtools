@@ -123,9 +123,10 @@ This can be done by:
 $ bin/gild clone
 $ bin/gild checkout binutils 2.23.2
 $ bin/gild checkout coreutils 5.2
-$ bin/bild checkout gcc 6
+$ bin/gild checkout gcc 5
 ```
-Building is then a matter of entering
+You can also try ```bin/gild checkout gcc 6``` but this produces the more
+experimental version of gcc 6. Building is then a matter of entering
 ```
 $ make -C native-build
 ```
