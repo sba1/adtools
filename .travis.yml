@@ -30,4 +30,4 @@ env:
 after_success:
  - pwd
  - ls
- - ../../../bin/adtdeploy
+ - ./bin/adtdeploy
