@@ -1,3 +1,9 @@
+adtools-gcc (0.0.8-0) unstable; urgency=medium
+
+  * Manually added libmpc3 dependency.
+
+ -- Sebastian Bauer <mail@sebastianbauer.info>  Wed, 08 Feb 2017 10:31:00 +0100
+
 adtools-gcc (0.0.7-0) unstable; urgency=medium
 
   * Now bundles GCC 5.4
