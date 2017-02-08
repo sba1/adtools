@@ -31,3 +31,6 @@ after_success:
  - pwd
  - ls
  - ./bin/adtdeploy
+after_failure:
+ - pwd
+ - cat native-build/downloads/gmp-5.0.5/config.log
