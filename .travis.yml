@@ -22,6 +22,7 @@ script:
 - cd ../../..
 - mv packaging/deb/adtools-binutils/patched binutils/repo
 - mv packaging/deb/adtools-gcc/patched gcc/repo
+- unset CC
 - make -C native-build CROSS_IS_PRESENT=1
 env:
   global:
