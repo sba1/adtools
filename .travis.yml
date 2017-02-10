@@ -13,7 +13,7 @@ script:
 - cd adtools-binutils && debuild -i -us -uc -b && cd ..
 - sudo dpkg -i *.deb
 - cd adtools-gcc
-- travis_wait 25 debuild -i -us -uc -b >/tmp/build.out
+- travis_wait 30 "sh -c debuild -i -us -uc -b >/tmp/build.out"
 - cd ..
 - sudo dpkg -i *gcc*.deb
 - mkdir artifacts
