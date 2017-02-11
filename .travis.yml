@@ -12,9 +12,9 @@ script:
 - cd adtools-sdk && debuild -i -us -uc -b && cd ..
 - cd adtools-binutils && debuild -i -us -uc -b && cd ..
 - sudo dpkg -i *.deb
-- cd adtools-gcc
-- travis_wait 30 "sh -c debuild -i -us -uc -b >/tmp/build.out"
-- cd ..
+- cd ../..
+- travis_wait 30 ./travis.sh
+- cd packaging/deb
 - sudo dpkg -i *gcc*.deb
 - mkdir artifacts
 - mv *.deb artifacts
