@@ -4,4 +4,4 @@
 # will build the current native adtools package.
 #
 
-(make -C native-build CROSS_IS_PRESENT=1 >>/tmp/build.out)
+make -C native-build CROSS_IS_PRESENT=1 >/tmp/build.out 2>/tmp/build.err
