@@ -29,6 +29,7 @@ script:
 - sudo mkdir -p /gcc
 - sudo chown $USER /gcc
 - travis_wait 30 ./travis-native.sh
+- make -C native-build native-dist
 env:
   global:
   - secure: mlPpfQG9RuayWWXLt1tdEI4nb9ElObenj1QDfJ8qGxEqGleout8RE9cIxArB3WJ8jih/9lM3mkUm0y3cMMsf+SGRkfkWLO+YmVHqMslC0dwd3CqPMFjYPSJh7qsxaJC3b0RrZXujlXkwgDP16Yy/+h9RqAQwuTc3AtWepcLEZp0=
