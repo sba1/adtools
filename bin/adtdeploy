@@ -14,6 +14,7 @@ from subprocess import call
 from subprocess import check_output
 
 all_debs = sorted(glob.glob("*.deb"))
+all_lhas = sorted(glob.glob("*.lha"))
 user = os.environ.get('BINTRAY_USER')
 key = os.environ.get('BINTRAY_API_KEY')
 
@@ -29,4 +30,14 @@ for deb in all_debs:
 	url = 'https://api.bintray.com/content/sba1/adtools-deb/' + pkg + '/' + version + '/' + deb + ';publish=1;override=1'
 
 	print('Uploading ' + deb);
+	call(['curl', '-T', deb, '-u' + user + ':' + key, url])
+
+for lha in all_lhas:
+	m = re.search('adtools-os4-(.*)\.lha', lha)
+	if m is None:
+		print('Skipping ' + lha)
+		continue
+	version = m.group(1)
+	url = 'https://api.bintray.com/content/sba1/adtools-native/adtools/' + version + '/' + lha + ';publish=1;override=1'
+	print('Uploading ' + lha);
 	call(['curl', '-T', deb, '-u' + user + ':' + key, url])
