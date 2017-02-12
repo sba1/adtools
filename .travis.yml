@@ -25,6 +25,8 @@ script:
 - mv packaging/deb/adtools-binutils/patched binutils/repo
 - mv packaging/deb/adtools-gcc/patched gcc/repo
 - unset CC
+- sudo mkdir -p /gcc
+- sudo chown $USER /gcc
 - travis_wait 30 ./travis-native.sh
 env:
   global:
