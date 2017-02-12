@@ -35,6 +35,7 @@ CROSS_PREFIX?=$(ROOT_DIR)/root-cross
 # This assumes that cross prefix is absolute
 DESTDIR?=
 
+STRIP=$(CROSS_PREFIX)/bin/ppc-amigaos-strip
 STRIPFLAGS=--strip-all --strip-unneeded-rel-relocs -R.comment
 
 all: gcc-native-done-$(GCC_VERSION)
@@ -212,13 +213,13 @@ native-separate-install:
 
 # Private target. Unfinished
 private-native-separate-dist:
-	$(foreach var,$(wildcard $(ROOT_DIR)/root-native-coreutils/gcc/bin/*), $(CROSS_PREFIX)/bin/ppc-amigaos-strip $(STRIPFLAGS) $(var) ; ) true
-	$(foreach var,$(wildcard $(ROOT_DIR)/root-native-binutils/gcc/bin/*), $(CROSS_PREFIX)/bin/ppc-amigaos-strip $(STRIPFLAGS) $(var) ; ) true
-	$(foreach var,$(wildcard $(ROOT_DIR)/root-native-gcc/gcc/bin/*), $(CROSS_PREFIX)/bin/ppc-amigaos-strip $(STRIPFLAGS) $(var) ; ) true
-	$(CROSS_PREFIX)/bin/ppc-amigaos-strip $(STRIPFLAGS) $(ROOT_DIR)/root-native-gcc/gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/cc1
-	$(CROSS_PREFIX)/bin/ppc-amigaos-strip $(STRIPFLAGS) $(ROOT_DIR)/root-native-gcc/gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/cc1plus
-	$(CROSS_PREFIX)/bin/ppc-amigaos-strip $(STRIPFLAGS) $(ROOT_DIR)/root-native-gcc/gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/lto1
-	$(CROSS_PREFIX)/bin/ppc-amigaos-strip $(STRIPFLAGS) $(ROOT_DIR)/root-native-gcc/gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/lto-wrapper
+	$(foreach var,$(wildcard $(ROOT_DIR)/root-native-coreutils/gcc/bin/*), $(STRIP) $(STRIPFLAGS) $(var) ; ) true
+	$(foreach var,$(wildcard $(ROOT_DIR)/root-native-binutils/gcc/bin/*), $(STRIP) $(STRIPFLAGS) $(var) ; ) true
+	$(foreach var,$(wildcard $(ROOT_DIR)/root-native-gcc/gcc/bin/*), $(STRIP) $(STRIPFLAGS) $(var) ; ) true
+	$(STRIP) $(STRIPFLAGS) $(ROOT_DIR)/root-native-gcc/gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/cc1
+	$(STRIP) $(STRIPFLAGS) $(ROOT_DIR)/root-native-gcc/gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/cc1plus
+	$(STRIP) $(STRIPFLAGS) $(ROOT_DIR)/root-native-gcc/gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/lto1
+	$(STRIP) $(STRIPFLAGS) $(ROOT_DIR)/root-native-gcc/gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/lto-wrapper
 	rm -Rf dist
 	mkdir -p dist/coreutils-$(COREUTILS_VERSION)-$(DIST_VERSION)
 
@@ -229,11 +230,11 @@ native-strip:
 	$(MAKE) native-strip-really
 
 native-strip-really:
-	$(foreach var,$(wildcard /gcc/bin/*), $(CROSS_PREFIX)/bin/ppc-amigaos-strip --strip-all --strip-unneeded-rel-relocs $(var) ; ) true
-	$(CROSS_PREFIX)/bin/ppc-amigaos-strip $(STRIPFLAGS) /gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/cc1
-	$(CROSS_PREFIX)/bin/ppc-amigaos-strip $(STRIPFLAGS) /gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/cc1plus
-	$(CROSS_PREFIX)/bin/ppc-amigaos-strip $(STRIPFLAGS) /gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/lto1
-	$(CROSS_PREFIX)/bin/ppc-amigaos-strip $(STRIPFLAGS) /gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/lto-wrapper
+	$(foreach var,$(wildcard /gcc/bin/*), $(STRIP) --strip-all --strip-unneeded-rel-relocs $(var) ; ) true
+	$(STRIP) $(STRIPFLAGS) /gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/cc1
+	$(STRIP) $(STRIPFLAGS) /gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/cc1plus
+	$(STRIP) $(STRIPFLAGS) /gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/lto1
+	$(STRIP) $(STRIPFLAGS) /gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/lto-wrapper
 
 #
 # Native distribution archive
