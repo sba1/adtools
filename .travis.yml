@@ -11,6 +11,8 @@ script:
 - python --version
 - python -c "import sys; print(sys.path)"
 - python -c "import mako; import mako.template"
+- which mako-render
+- find /usr/ -iname mako
 - make prepare-packages
 - cd adtools-sdk && debuild -i -us -uc -b && cd ..
 - cd adtools-binutils && debuild -i -us -uc -b && cd ..
