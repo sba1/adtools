@@ -8,6 +8,7 @@ install:
 before_script:
 - cd packaging/deb
 script:
+- python --version
 - python -c "import mako; import mako.template"
 - make prepare-packages
 - cd adtools-sdk && debuild -i -us -uc -b && cd ..
