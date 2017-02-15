@@ -156,7 +156,11 @@ gcc-native-done-$(GCC_VERSION): binutils-native-done-$(BINUTILS_VERSION)
 			NATIVE_SYS_ROOT=$(ROOT_DIR)/root-native
 	touch $@
 
+ifeq ($(CROSS_IS_PRESENT),1)
+coreutils-native-done:
+else
 coreutils-native-done: gcc-cross-done-$(GCC_VERSION)
+endif
 	mkdir -p coreutils-native-build
 	cd coreutils-native-build ; PATH="$(CROSS_PREFIX)/bin:$(PATH)" LIBS="-lunix" $(realpath $(COREUTILS_SRC_DIR))/configure --prefix=/gcc --host=ppc-amigaos
 #	cd coreutils-native-build ; PATH="$(CROSS_PREFIX)/bin:$(PATH)" CPPFLAGS="-mcrt=clib2" LDFLAGS="-mcrt=clib2" LIBS="-lunix -lnet" $(realpath $(COREUTILS_SRC_DIR))/configure --prefix=/gcc --host=ppc-amigaos
