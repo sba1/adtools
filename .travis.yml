@@ -9,6 +9,7 @@ install:
 before_script:
 - cd packaging/deb
 script:
+- export PYTHONPATH=/usr/local/lib/python2.7/dist-packages:$PYTHONPATH
 - python --version
 - python -c "import sys; print(sys.path)"
 - python -c "import mako; import mako.template"
