@@ -198,7 +198,8 @@ native-install: coreutils-native-done gcc-native-done-$(GCC_VERSION) ReadMe
 	PATH="$(CROSS_PREFIX)/bin:$(PATH)" $(MAKE) -C coreutils-native-build install
 # Disabled SDK as we don't want to distribute it
 #	cp -R $(CROSS_PREFIX)/ppc-amigaos/SDK /gcc
-	cp -Rf $(CROSS_PREFIX)/lib/gcc/ppc-amigaos /gcc/lib/gcc/
+# Disabled, because we don't want to copy from CROSS_PREFIX here
+#	cp -Rf $(CROSS_PREFIX)/lib/gcc/ppc-amigaos /gcc/lib/gcc/
 	# Delete all but our target gcc libs
 	find /gcc/lib/gcc/ppc-amigaos -mindepth 1 -maxdepth 1 -not -name $(GCC_VERSION) | xargs rm -Rf
 # Disabled, no longer required
