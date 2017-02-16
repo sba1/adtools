@@ -62,8 +62,8 @@ So in order to follow the build instructions, you need to make sure that the
 $ git submodule init
 $ git submodule update
 ````
-With this and the softlink ```bin/gild``` you have access to the following
-commands:
+With this, the softlink ```bin/gild``` and ```bin``` being in your command
+line path, you have access to the following commands:
 
 
 * ```gild list```: lists available components and branches. For instance
@@ -144,6 +144,15 @@ path to your ```PATH``` variable, e.g., like this:
 ```
 $ export PATH=$PATH:$(pwd)/root-cross/bin
 ```
+
+Note that you can change where the cross toolchain is located via the
+```CROSS_PREFIX``` macro. For instance,
+
+```
+$ make -C native-build gcc-cross CROSS_PREFIX=/opt/adtools
+```
+would install the toolchain into ```/opt/adtools``` directory. Note that
+the build process will write to this directory.
 
 ### Packaging
 
