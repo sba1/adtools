@@ -43,11 +43,8 @@ $ echo "deb http://dl.bintray.com/sba1/adtools-deb /" | sudo tee -a /etc/apt/sou
 Note that the packages are currently not signed. Installation is then as easy as typing
 
 ```
-$ aptitude install adtools-gcc
+$ aptitude install adtools-binutils adtools-sdk adtools-gcc
 ```
-
-This will also install the SDK and binutils due to the dependencies.
-
 
 Patch management
 ----------------
