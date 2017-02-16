@@ -40,4 +40,4 @@ for lha in all_lhas:
 	version = m.group(1)
 	url = 'https://api.bintray.com/content/sba1/adtools-native/adtools/' + version + '/' + lha + ';publish=1;override=1'
 	print('Uploading ' + lha);
-	call(['curl', '-T', deb, '-u' + user + ':' + key, url])
+	call(['curl', '-T', lha, '-u' + user + ':' + key, url])
