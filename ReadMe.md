@@ -23,7 +23,22 @@ Installation
 ------------
 
 ### AmigaOS
-No binaries for AmigaOS are currently provided. Refer to the Building section how to build one yourself.
+
+An lha archive with current binaries can be found at
+
+ https://dl.bintray.com/sba1/adtools-native/
+
+In order to install it on your Amiga, extract the archive to a destination of your
+choice. Then establish a GCC: assignment to the extracted folder and add the contained
+```bin``` folder to the command search path
+
+```
+ 1> ASSIGN GCC: <extracted folder>
+ 1> PATH GCC:bin add
+```
+
+Furthermore, you need to have an ```SDK:``` assign as in the original SDK.
+
 
 ### Debian-based Linux distributions
 
