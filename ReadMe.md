@@ -24,7 +24,7 @@ Installation
 
 ### AmigaOS
 
-An lha archive with current binaries can be found at https://dl.bintray.com/sba1/adtools-native/
+An lha archive with current binaries can be found at https://dl.bintray.com/sba1/adtools-native.
 
 In order to install it on your Amiga, extract the archive to a destination of your
 choice. Then establish a GCC: assignment to the extracted folder and add the contained
