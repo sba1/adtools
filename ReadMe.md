@@ -37,6 +37,13 @@ choice. Then establish a GCC: assignment to the extracted folder and add the con
 
 Furthermore, you need to have an ```SDK:``` assign as in the original SDK.
 
+Note that if you use the ```APPDIR:``` feature you should flush its contents. Otherwise,
+you may observe unexpected behaviour. Most easily this can be achieved by entering
+
+```
+ 1> delete APPDIR:#?
+```
+
 
 ### Debian-based Linux distributions
 
