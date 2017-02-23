@@ -10,6 +10,19 @@
 
 set -e
 
+find_id() {
+		while read id ver rev
+		do
+			if [[ "$ver" == "$1" && "$rev" == "$2" ]]; then
+				echo $id
+				return
+			fi
+		lastid=$id
+		done
+echo $lastid
+return
+}
+
 # Root of the cross compiler environment
 CROSS_ROOT=/usr/
 
@@ -22,25 +35,42 @@ display_usage() {
 }
 
 # Parse options
-GETOPT_RESULT=`getopt --longoptions install,uninstall --options iu -n update-adtools-sdk -- "$@"` || display_usage
+GETOPT_RESULT=`getopt --longoptions install,uninstall,version:,latest --options iuv:l -n update-adtools-sdk -- "$@"` || display_usage
 eval set -- "${GETOPT_RESULT}" || display_usage
 
 case "$1" in
 
 	--install)
-		# Temporary directory that will contain extracted stuff
-		DOWNLOADURL='/index.php/downloads?view=download&format=raw&'
+	target_ver=""
+	target_rev=""
+	
+	if [ "$2" == "--version" ]; then 
+		#version is specified as vv.rr, while below it's decomposed.
+		arrIN=(${3//./ })
+		target_ver=${arrIN[0]}
+		target_rev=${arrIN[1]}		
+	fi
+	
+	#echo "version $target_ver revision $target_rev"
+
+	# Temporary directory that will contain extracted stuff
+		DOWNLOADURL='/index.php/downloads?view=download&format=raw&file='
 		EXTRACTDIR=`mktemp -d /tmp/adtools-sdk.XXXXXXXXXXX`
 		BASEURL='http://www.hyperion-entertainment.biz'
 		OUTNAME='OS4_SDK.lha'
 		#wget "http://www.hyperion-entertainment.biz/index.php?option=com_registration&amp;view=download&amp;format=raw&amp;file=69&amp;Itemid=63" -O ${EXTRACTDIR}/SDK_53.24.lha
-		CODE=`wget -q -O - "http://www.hyperion-entertainment.biz/index.php?option=com_registration&view=files&parent=30&Itemid=63" | grep -o '<a href=['"'"'"][^"'"'"']*['"'"'"]' | sed -e 's/^<a href=["'"'"']//' -e 's/["'"'"']$//'| grep downloads\?view\=download | tail -1| rev | cut -d\; -f1 | rev`
-		$FULLURL=$BASEURL$DOWNLOADURL$CODE
+		#CODE=`wget -q -O - "http://www.hyperion-entertainment.biz/index.php?option=com_registration&view=files&parent=30&Itemid=63" | grep -o '<a href=['"'"'"][^"'"'"']*['"'"'"]' | sed -e 's/^<a href=["'"'"']//' -e 's/["'"'"']$//'| grep downloads\?view\=download | tail -1| rev | cut -d\; -f1 | rev`
+		
+		CODES=`wget -q -O - "http://www.hyperion-entertainment.biz/index.php?option=com_registration&view=files&parent=30&Itemid=63" |grep -o '<a href=['"'"'"][^"'"'"']*['"'"'"]>SDK_[0-9][0-9].[0-9][0-9].lha</a>' | sed -e 's/^<a href=["'"'"']//' -e 's/["'"'"']$//' -e 's/.*file\=\([0-9]\+\).*SDK_\([0-9]\+\)\.\([0-9]\+\).*\.lha<\/a>/\1 \2 \3/' | sort -k 2n,3n`
+
+		id=$(echo "$CODES" | find_id $target_ver $target_rev)
+		FULLURL=$BASEURL$DOWNLOADURL$id
 		wget "$FULLURL" -O ${EXTRACTDIR}/$OUTNAME
 		lha xw=${EXTRACTDIR} ${EXTRACTDIR}/$OUTNAME
 		lha xw=${EXTRACTDIR} ${EXTRACTDIR}/SDK_Install/base.lha
 		lha xw=${EXTRACTDIR} ${EXTRACTDIR}/SDK_Install/clib*.lha
 		lha xw=${EXTRACTDIR} ${EXTRACTDIR}/SDK_Install/newlib*.lha
+		exit;
 		mkdir -p ${CROSS_ROOT}/ppc-amigaos/SDK/include
 
 		# Keep information about which files we copied
