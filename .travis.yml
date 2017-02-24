@@ -22,7 +22,7 @@ script:
 - make prepare-packages
 - cd adtools-sdk && debuild -i -us -uc -b && cd ..
 - cd adtools-binutils && debuild -i -us -uc -b && cd ..
-- sudo dpkg -i *.deb
+- sudo dpkg -i adtools-binutils_*.deb adtools-sdk_*.deb
 - cd ../..
 - travis_wait 30 ./travis-gcc-deb.sh
 - cd packaging/deb
