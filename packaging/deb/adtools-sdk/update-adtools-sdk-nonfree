@@ -5,8 +5,23 @@
 #
 # (c) 2014 by Sebastian Bauer
 #
+# Changes to fetch the latest SDK and install Documentation (c) 2017 by Andrea Vallinotto
+#
 
 set -e
+
+find_id() {
+		while read id ver rev
+		do
+			if [[ "$ver" == "$1" && "$rev" == "$2" ]]; then
+				echo $id
+				return
+			fi
+		lastid=$id
+		done
+echo $lastid
+return
+}
 
 # Root of the cross compiler environment
 CROSS_ROOT=/usr/
@@ -20,26 +35,47 @@ display_usage() {
 }
 
 # Parse options
-GETOPT_RESULT=`getopt --longoptions install,uninstall --options iu -n update-adtools-sdk -- "$@"` || display_usage
+GETOPT_RESULT=`getopt --longoptions install,uninstall,version:,latest --options iuv:l -n update-adtools-sdk -- "$@"` || display_usage
 eval set -- "${GETOPT_RESULT}" || display_usage
 
 case "$1" in
 
 	--install)
-		# Temporary directory that will contain extracted stuff
-		EXTRACTDIR=`mktemp -d /tmp/adtools-sdk.XXXXXXXXXXX`
+	target_ver=""
+	target_rev=""
+	
+	if [ "$2" == "--version" ]; then 
+		#version is specified as vv.rr, while below it's decomposed.
+		arrIN=(${3//./ })
+		target_ver=${arrIN[0]}
+		target_rev=${arrIN[1]}		
+	fi
+	
+	#echo "version $target_ver revision $target_rev"
 
-		wget "http://www.hyperion-entertainment.biz/index.php?option=com_registration&amp;view=download&amp;format=raw&amp;file=69&amp;Itemid=63" -O ${EXTRACTDIR}/SDK_53.24.lha
-		#cp ../../../native-build/downloads/SDK_53.24.lha ${EXTRACTDIR}/SDK_53.24.lha
-		lha xw=${EXTRACTDIR} ${EXTRACTDIR}/SDK_53.24.lha
+	# Temporary directory that will contain extracted stuff
+		DOWNLOADURL='/index.php/downloads?view=download&format=raw&file='
+		EXTRACTDIR=`mktemp -d /tmp/adtools-sdk.XXXXXXXXXXX`
+		BASEURL='http://www.hyperion-entertainment.biz'
+		OUTNAME='OS4_SDK.lha'
+		#wget "http://www.hyperion-entertainment.biz/index.php?option=com_registration&amp;view=download&amp;format=raw&amp;file=69&amp;Itemid=63" -O ${EXTRACTDIR}/SDK_53.24.lha
+		#CODE=`wget -q -O - "http://www.hyperion-entertainment.biz/index.php?option=com_registration&view=files&parent=30&Itemid=63" | grep -o '<a href=['"'"'"][^"'"'"']*['"'"'"]' | sed -e 's/^<a href=["'"'"']//' -e 's/["'"'"']$//'| grep downloads\?view\=download | tail -1| rev | cut -d\; -f1 | rev`
+		
+		CODES=`wget -q -O - "http://www.hyperion-entertainment.biz/index.php?option=com_registration&view=files&parent=30&Itemid=63" |grep -o '<a href=['"'"'"][^"'"'"']*['"'"'"]>SDK_[0-9][0-9].[0-9][0-9].lha</a>' | sed -e 's/^<a href=["'"'"']//' -e 's/["'"'"']$//' -e 's/.*file\=\([0-9]\+\).*SDK_\([0-9]\+\)\.\([0-9]\+\).*\.lha<\/a>/\1 \2 \3/' | sort -k 2n,3n`
+
+		id=$(echo "$CODES" | find_id $target_ver $target_rev)
+		FULLURL=$BASEURL$DOWNLOADURL$id
+		wget "$FULLURL" -O ${EXTRACTDIR}/$OUTNAME
+		lha xw=${EXTRACTDIR} ${EXTRACTDIR}/$OUTNAME
 		lha xw=${EXTRACTDIR} ${EXTRACTDIR}/SDK_Install/base.lha
-		lha xw=${EXTRACTDIR} ${EXTRACTDIR}/SDK_Install/clib2-1.205.lha
-		lha xw=${EXTRACTDIR} ${EXTRACTDIR}/SDK_Install/newlib-53.28.lha
+		lha xw=${EXTRACTDIR} ${EXTRACTDIR}/SDK_Install/clib*.lha
+		lha xw=${EXTRACTDIR} ${EXTRACTDIR}/SDK_Install/newlib*.lha
 		mkdir -p ${CROSS_ROOT}/ppc-amigaos/SDK/include
 
 		# Keep information about which files we copied
 		(cd ${EXTRACTDIR}; find newlib clib2 -type f | sort | xargs sha1sum >${CROSS_ROOT}/ppc-amigaos/crt.sha1sum)
 		(cd ${EXTRACTDIR}/Include; find * -type f | sort | xargs sha1sum >${CROSS_ROOT}/ppc-amigaos/include.sha1sum)
+		(cd ${EXTRACTDIR}/Documentation; find * -type f -print0 | xargs -0 sha1sum >${CROSS_ROOT}/ppc-amigaos/docs.sha1sum)
 
 		# Make the files readable for all
 		chmod -R a+r ${EXTRACTDIR}
@@ -47,13 +83,17 @@ case "$1" in
 		# Now copy/move the files to the appropriate destination
 		mv ${EXTRACTDIR}/clib2* ${EXTRACTDIR}/newlib* ${CROSS_ROOT}/ppc-amigaos/SDK
 		mv ${EXTRACTDIR}/Include/* ${CROSS_ROOT}/ppc-amigaos/SDK/include
+		mv ${EXTRACTDIR}/Documentation ${CROSS_ROOT}/ppc-amigaos/SDK/
 
 		;;
 	--uninstall)
 		(cd ${CROSS_ROOT}/ppc-amigaos/SDK; sha1sum -c ../crt.sha1sum | grep OK$  | cut -d ':' -f 1 | xargs rm)
 		(cd ${CROSS_ROOT}/ppc-amigaos/SDK/include; sha1sum -c ../../include.sha1sum | grep OK$  | cut -d ':' -f 1 | xargs rm)
+		(cd ${CROSS_ROOT}/ppc-amigaos/SDK/Documentation; sha1sum -c ../../docs.sha1sum | grep OK$  | cut -d ':' -f 1 | xargs rm)
 		rm ${CROSS_ROOT}/ppc-amigaos/crt.sha1sum
 		rm ${CROSS_ROOT}/ppc-amigaos/include.sha1sum
+		rm ${CROSS_ROOT}/ppc-amigaos/docs.sha1sum
+		
 		find ${CROSS_ROOT}/ppc-amigaos -depth -type d -delete
 		;;
 

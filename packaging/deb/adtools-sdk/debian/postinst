@@ -4,7 +4,7 @@ set -e
 
 case "$1" in
 	configure)
-		update-adtools-sdk-nonfree --install
+		update-adtools-sdk-nonfree --install --version 53.24
 	;;
 
 	abort-upgrade|abort-remove|abort-deconfigure)
