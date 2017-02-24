@@ -1,8 +1,8 @@
-adtools-sdk (0.0.3-0) UNRELEASED; urgency=medium
+adtools-sdk (0.0.3-0) unstable; urgency=medium
 
   * Provide additional adtools-sdk-53.30 that install the newer SDK.
 
- -- Sebastian Bauer <mail@sebastianbauer.info>  Fri, 24 Feb 2017 20:35:51 +0100
+ -- Sebastian Bauer <mail@sebastianbauer.info>  Fri, 24 Feb 2017 20:37:00 +0100
 
 adtools-sdk (0.0.2-0) unstable; urgency=medium
 
