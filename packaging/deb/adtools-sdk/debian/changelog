@@ -1,9 +1,9 @@
-adtools-sdk (0.0.2-0) UNRELEASED; urgency=medium
+adtools-sdk (0.0.2-0) unstable; urgency=medium
 
   * The included script can now install arbitrary SDK versions (contributed
     by Andrea Vallinotto), it is still pinned at 53.24 though.
 
- -- Sebastian Bauer <mail@sebastianbauer.info>  Fri, 24 Feb 2017 11:20:39 +0100
+ -- Sebastian Bauer <mail@sebastianbauer.info>  Fri, 24 Feb 2017 12:21:44 +0100
 
 adtools-sdk (0.0.1-0) unstable; urgency=medium
 
