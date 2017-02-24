@@ -70,7 +70,6 @@ case "$1" in
 		lha xw=${EXTRACTDIR} ${EXTRACTDIR}/SDK_Install/base.lha
 		lha xw=${EXTRACTDIR} ${EXTRACTDIR}/SDK_Install/clib*.lha
 		lha xw=${EXTRACTDIR} ${EXTRACTDIR}/SDK_Install/newlib*.lha
-		exit;
 		mkdir -p ${CROSS_ROOT}/ppc-amigaos/SDK/include
 
 		# Keep information about which files we copied
