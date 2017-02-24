@@ -24,6 +24,9 @@ BINUTILS_SRC_DIR=../binutils/repo
 GCC_SRC_DIR=../gcc/repo
 GCC_VERSION:=$(shell cat $(GCC_SRC_DIR)/gcc/BASE-VER)
 
+SDK_URL=http://www.hyperion-entertainment.biz/index.php?option=com_registration&amp;view=download&amp;format=raw&amp;file=69&amp;Itemid=63
+SDK_VERSION=53.24
+
 # Native tools
 COREUTILS_SRC_DIR=../coreutils/repo
 COREUTILS_VERSION=5.2.1
@@ -35,6 +38,7 @@ CROSS_PREFIX?=$(ROOT_DIR)/root-cross
 # This assumes that cross prefix is absolute
 DESTDIR?=
 
+STRIP=$(CROSS_PREFIX)/bin/ppc-amigaos-strip
 STRIPFLAGS=--strip-all --strip-unneeded-rel-relocs -R.comment
 
 all: gcc-native-done-$(GCC_VERSION)
@@ -44,7 +48,7 @@ all: gcc-native-done-$(GCC_VERSION)
 #
 downloads-done:
 	mkdir -p downloads
-	wget "http://www.hyperion-entertainment.biz/index.php?option=com_registration&amp;view=download&amp;format=raw&amp;file=69&amp;Itemid=63" -O downloads/SDK_53.24.lha
+	wget "$(SDK_URL)" -O downloads/SDK_$(SDK_VERSION).lha
 	cd downloads && wget -N https://gmplib.org/download/gmp/$(GMP_ARCHIVE)
 	cd downloads && wget -N http://www.mpfr.org/$(MPFR_ARCHIVE)
 	cd downloads && wget -N http://www.multiprecision.org/mpc/download/$(MPC_ARCHIVE)
@@ -75,7 +79,7 @@ binutils-install: binutils-cross-done-$(BINUTILS_VERSION)
 #
 includes-done: downloads-done
 	mkdir -p $(CROSS_PREFIX)/ppc-amigaos/SDK/include
-	cd downloads && lha x SDK_53.24.lha
+	cd downloads && lha x SDK_$(SDK_VERSION).lha
 	cd downloads/SDK_Install && lha xf clib2*.lha
 	cd downloads/SDK_Install && lha xf newlib*.lha
 	cd downloads/SDK_Install && lha xf base.lha
@@ -103,7 +107,7 @@ gcc-cross: gcc-cross-done-$(GCC_VERSION)
 additionals-libs:
 	mkdir -p $(CROSS_PREFIX)/ppc-amigaos/SDK/local/common/include
 	mkdir -p /tmp/abcd
-	cd downloads && lha xw=/tmp/abcd SDK_53.24.lha
+	cd downloads && lha xw=/tmp/abcd SDK_$(SDK_VERSION).lha
 	cd /tmp/abcd/SDK_Install && lha x pthread.lha && lha x zlib-1.2.3.lha
 	cp -Rf /tmp/abcd/SDK_Install/Local/* $(CROSS_PREFIX)/ppc-amigaos/SDK/local
 	rm -Rf /tmp/abcd
@@ -152,7 +156,11 @@ gcc-native-done-$(GCC_VERSION): binutils-native-done-$(BINUTILS_VERSION)
 			NATIVE_SYS_ROOT=$(ROOT_DIR)/root-native
 	touch $@
 
+ifeq ($(CROSS_IS_PRESENT),1)
+coreutils-native-done:
+else
 coreutils-native-done: gcc-cross-done-$(GCC_VERSION)
+endif
 	mkdir -p coreutils-native-build
 	cd coreutils-native-build ; PATH="$(CROSS_PREFIX)/bin:$(PATH)" LIBS="-lunix" $(realpath $(COREUTILS_SRC_DIR))/configure --prefix=/gcc --host=ppc-amigaos
 #	cd coreutils-native-build ; PATH="$(CROSS_PREFIX)/bin:$(PATH)" CPPFLAGS="-mcrt=clib2" LDFLAGS="-mcrt=clib2" LIBS="-lunix -lnet" $(realpath $(COREUTILS_SRC_DIR))/configure --prefix=/gcc --host=ppc-amigaos
@@ -190,7 +198,8 @@ native-install: coreutils-native-done gcc-native-done-$(GCC_VERSION) ReadMe
 	PATH="$(CROSS_PREFIX)/bin:$(PATH)" $(MAKE) -C coreutils-native-build install
 # Disabled SDK as we don't want to distribute it
 #	cp -R $(CROSS_PREFIX)/ppc-amigaos/SDK /gcc
-	cp -Rf $(CROSS_PREFIX)/lib/gcc/ppc-amigaos /gcc/lib/gcc/
+# Disabled, because we don't want to copy from CROSS_PREFIX here
+#	cp -Rf $(CROSS_PREFIX)/lib/gcc/ppc-amigaos /gcc/lib/gcc/
 	# Delete all but our target gcc libs
 	find /gcc/lib/gcc/ppc-amigaos -mindepth 1 -maxdepth 1 -not -name $(GCC_VERSION) | xargs rm -Rf
 # Disabled, no longer required
@@ -212,13 +221,13 @@ native-separate-install:
 
 # Private target. Unfinished
 private-native-separate-dist:
-	$(foreach var,$(wildcard $(ROOT_DIR)/root-native-coreutils/gcc/bin/*), $(CROSS_PREFIX)/bin/ppc-amigaos-strip $(STRIPFLAGS) $(var) ; ) true
-	$(foreach var,$(wildcard $(ROOT_DIR)/root-native-binutils/gcc/bin/*), $(CROSS_PREFIX)/bin/ppc-amigaos-strip $(STRIPFLAGS) $(var) ; ) true
-	$(foreach var,$(wildcard $(ROOT_DIR)/root-native-gcc/gcc/bin/*), $(CROSS_PREFIX)/bin/ppc-amigaos-strip $(STRIPFLAGS) $(var) ; ) true
-	$(CROSS_PREFIX)/bin/ppc-amigaos-strip $(STRIPFLAGS) $(ROOT_DIR)/root-native-gcc/gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/cc1
-	$(CROSS_PREFIX)/bin/ppc-amigaos-strip $(STRIPFLAGS) $(ROOT_DIR)/root-native-gcc/gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/cc1plus
-	$(CROSS_PREFIX)/bin/ppc-amigaos-strip $(STRIPFLAGS) $(ROOT_DIR)/root-native-gcc/gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/lto1
-	$(CROSS_PREFIX)/bin/ppc-amigaos-strip $(STRIPFLAGS) $(ROOT_DIR)/root-native-gcc/gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/lto-wrapper
+	$(foreach var,$(wildcard $(ROOT_DIR)/root-native-coreutils/gcc/bin/*), $(STRIP) $(STRIPFLAGS) $(var) ; ) true
+	$(foreach var,$(wildcard $(ROOT_DIR)/root-native-binutils/gcc/bin/*), $(STRIP) $(STRIPFLAGS) $(var) ; ) true
+	$(foreach var,$(wildcard $(ROOT_DIR)/root-native-gcc/gcc/bin/*), $(STRIP) $(STRIPFLAGS) $(var) ; ) true
+	$(STRIP) $(STRIPFLAGS) $(ROOT_DIR)/root-native-gcc/gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/cc1
+	$(STRIP) $(STRIPFLAGS) $(ROOT_DIR)/root-native-gcc/gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/cc1plus
+	$(STRIP) $(STRIPFLAGS) $(ROOT_DIR)/root-native-gcc/gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/lto1
+	$(STRIP) $(STRIPFLAGS) $(ROOT_DIR)/root-native-gcc/gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/lto-wrapper
 	rm -Rf dist
 	mkdir -p dist/coreutils-$(COREUTILS_VERSION)-$(DIST_VERSION)
 
@@ -229,11 +238,11 @@ native-strip:
 	$(MAKE) native-strip-really
 
 native-strip-really:
-	$(foreach var,$(wildcard /gcc/bin/*), $(CROSS_PREFIX)/bin/ppc-amigaos-strip --strip-all --strip-unneeded-rel-relocs $(var) ; ) true
-	$(CROSS_PREFIX)/bin/ppc-amigaos-strip $(STRIPFLAGS) /gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/cc1
-	$(CROSS_PREFIX)/bin/ppc-amigaos-strip $(STRIPFLAGS) /gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/cc1plus
-	$(CROSS_PREFIX)/bin/ppc-amigaos-strip $(STRIPFLAGS) /gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/lto1
-	$(CROSS_PREFIX)/bin/ppc-amigaos-strip $(STRIPFLAGS) /gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/lto-wrapper
+	$(foreach var,$(wildcard /gcc/bin/*), $(STRIP) --strip-all --strip-unneeded-rel-relocs $(var) ; ) true
+	$(STRIP) $(STRIPFLAGS) /gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/cc1
+	$(STRIP) $(STRIPFLAGS) /gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/cc1plus
+	$(STRIP) $(STRIPFLAGS) /gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/lto1
+	$(STRIP) $(STRIPFLAGS) /gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/lto-wrapper
 
 #
 # Native distribution archive

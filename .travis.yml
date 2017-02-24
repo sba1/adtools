@@ -1,39 +1,58 @@
 sudo: required
 dist: trusty
 language: c++
+git:
+  depth: 9999999
 install:
 - sudo apt-get update -qq
 - sudo apt-get install -y debhelper devscripts libgmp-dev libmpfr-dev libmpc-dev texinfo bison
-  flex lhasa
+  flex
+- wget http://mirrors.kernel.org/ubuntu/pool/multiverse/l/lha/lha_1.14i-10.3_amd64.deb
+- sudo dpkg -i lha_1.14i-10.3_amd64.deb
+- sudo pip install Mako
 before_script:
 - cd packaging/deb
 script:
+- export PYTHONPATH=/usr/local/lib/python2.7/dist-packages:$PYTHONPATH
+- python --version
+- python -c "import sys; print(sys.path)"
+- python -c "import mako; import mako.template"
+- which mako-render
+- find /usr/ -iname mako
 - make prepare-packages
 - cd adtools-sdk && debuild -i -us -uc -b && cd ..
 - cd adtools-binutils && debuild -i -us -uc -b && cd ..
 - sudo dpkg -i *.deb
-- cd adtools-gcc
-- travis_wait 30 "sh -c debuild -i -us -uc -b >/tmp/build.out"
-- cd ..
+- cd ../..
+- travis_wait 30 ./travis-gcc-deb.sh
+- cd packaging/deb
 - sudo dpkg -i *gcc*.deb
-- mkdir artifacts
-- mv *.deb artifacts
-- cd artifacts
+- mkdir ../artifacts
+- mv *.deb ../artifacts
+- cd ../artifacts
 - dpkg-scanpackages ./ /dev/null | gzip >Packages.gz
-# Native compile, take adventage of previous steps
-- cd ../../..
+# Native compile, take advantage of previous steps
+- cd ../..
 - mv packaging/deb/adtools-binutils/patched binutils/repo
 - mv packaging/deb/adtools-gcc/patched gcc/repo
 - unset CC
-- make -C native-build CROSS_IS_PRESENT=1
+- unset CXX
+- sudo mkdir -p /gcc
+- sudo chown $USER /gcc
+- ./bin/gild clone coreutils
+- ./bin/gild checkout coreutils 5.2
+- travis_wait 30 ./travis-native.sh
+- make -C native-build native-dist STRIP=ppc-amigaos-strip
+- mv native-build/*.lha packaging/artifacts
 env:
   global:
   - secure: mlPpfQG9RuayWWXLt1tdEI4nb9ElObenj1QDfJ8qGxEqGleout8RE9cIxArB3WJ8jih/9lM3mkUm0y3cMMsf+SGRkfkWLO+YmVHqMslC0dwd3CqPMFjYPSJh7qsxaJC3b0RrZXujlXkwgDP16Yy/+h9RqAQwuTc3AtWepcLEZp0=
   - secure: viZg+Dmh8k1acvKYBf5yzDdTClekE5fqx84CttWZnljQlwVWbfJEqjSvWoyAvI07UosY69y3vJ5VKjIViDcz1N36LjcV+sxnWIfSwfTa6bCWeYS03cERlKQB6QJPR+RR/UFhloJy5XQyaLzC1TdVQTH4A01OV49uN8uUKjh7hyk=
 after_success:
+ - cd packaging/artifacts
  - pwd
  - ls
- - ./bin/adtdeploy
+ - ../../bin/adtdeploy
 after_failure:
  - pwd
- - cat /tmp/build.out
+ - tail -n 1000 /tmp/build.out

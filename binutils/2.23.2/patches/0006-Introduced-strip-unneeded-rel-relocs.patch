@@ -1,7 +1,7 @@
 From 6b64c328f239a146c1ce5a85c27b0ff1636f3987 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Tue, 1 Dec 2015 13:51:20 +0100
-Subject: [PATCH 6/7] Introduced strip-unneeded-rel-relocs.
+Subject: [PATCH 6/8] Introduced strip-unneeded-rel-relocs.
 
 Normally, on AmigaOS we keep all relocs for executables as we don't have
 an isolated address space. However, not all relative relocs are necessary
@@ -124,5 +124,5 @@ index 88bd071eefa8b5426eaadfd6431e9de5d4a4591b..4beee77179b85479d5b43507d9eb2a6e
  	  add_specific_symbol (optarg, strip_specific_htab);
  	  break;
 -- 
-2.1.4
+2.11.0
 

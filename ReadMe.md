@@ -23,7 +23,27 @@ Installation
 ------------
 
 ### AmigaOS
-No binaries for AmigaOS are currently provided. Refer to the Building section how to build one yourself.
+
+An lha archive with current binaries can be found at https://dl.bintray.com/sba1/adtools-native.
+
+In order to install it on your Amiga, extract the archive to a destination of your
+choice. Then establish a GCC: assignment to the extracted folder and add the contained
+```bin``` folder to the command search path
+
+```
+ 1> ASSIGN GCC: <extracted folder>
+ 1> PATH GCC:bin add
+```
+
+Furthermore, you need to have an ```SDK:``` assign as in the original SDK.
+
+Note that if you use the ```APPDIR:``` feature you should flush its contents. Otherwise,
+you may observe unexpected behaviour. Most easily this can be achieved by entering
+
+```
+ 1> delete APPDIR:#?
+```
+
 
 ### Debian-based Linux distributions
 
@@ -43,11 +63,8 @@ $ echo "deb http://dl.bintray.com/sba1/adtools-deb /" | sudo tee -a /etc/apt/sou
 Note that the packages are currently not signed. Installation is then as easy as typing
 
 ```
-$ aptitude install adtools-gcc
+$ aptitude install adtools-binutils adtools-sdk adtools-gcc
 ```
-
-This will also install the SDK and binutils due to the dependencies.
-
 
 Patch management
 ----------------
@@ -65,8 +82,8 @@ So in order to follow the build instructions, you need to make sure that the
 $ git submodule init
 $ git submodule update
 ````
-With this and the softlink ```bin/gild``` you have access to the following
-commands:
+With this, the softlink ```bin/gild``` and ```bin``` being in your command
+line path, you have access to the following commands:
 
 
 * ```gild list```: lists available components and branches. For instance
@@ -147,6 +164,15 @@ path to your ```PATH``` variable, e.g., like this:
 ```
 $ export PATH=$PATH:$(pwd)/root-cross/bin
 ```
+
+Note that you can change where the cross toolchain is located via the
+```CROSS_PREFIX``` macro. For instance,
+
+```
+$ make -C native-build gcc-cross CROSS_PREFIX=/opt/adtools
+```
+would install the toolchain into ```/opt/adtools``` directory. Note that
+the build process will write to this directory.
 
 ### Packaging
 
