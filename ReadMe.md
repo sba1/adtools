@@ -47,20 +47,26 @@ you may observe unexpected behaviour. Most easily this can be achieved by enteri
 
 ### Debian-based Linux distributions
 
-Debian packages are generated automatically for the amd64 architecture. You can integrate them in
-your Debian installation by adding
+Debian packages are generated automatically for the amd64 architecture. If not already
+done, add the Bintray key that is used to sign the package to your installation, e.g., via:
+
+```
+apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 379CE192D401AB61
+```
+
+Then insert
 
 ```
  deb http://dl.bintray.com/sba1/adtools-deb /
 ```
 
-to your ```/etc/apt/sources.list``` file. E.g., by 
+to your ```/etc/apt/sources.list``` file. For instance, enter:
 
 ```
 $ echo "deb http://dl.bintray.com/sba1/adtools-deb /" | sudo tee -a /etc/apt/sources.list
 ```
 
-Note that the packages are currently not signed. Installation is then as easy as typing
+Installation is then as easy as typing
 
 ```
 $ aptitude install adtools-binutils adtools-sdk adtools-gcc
