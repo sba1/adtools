@@ -76,10 +76,12 @@ case "$1" in
 		# Make the files readable for all
 		chmod -R a+r ${EXTRACTDIR}
 
-		# Now copy/move the files to the appropriate destination
-		mv ${EXTRACTDIR}/clib2* ${EXTRACTDIR}/newlib* ${CROSS_ROOT}/ppc-amigaos/SDK
-		mv ${EXTRACTDIR}/Include/* ${CROSS_ROOT}/ppc-amigaos/SDK/include
-		mv ${EXTRACTDIR}/Documentation ${CROSS_ROOT}/ppc-amigaos/SDK/
+		# Now copy the files to the appropriate destination
+		cp -rf ${EXTRACTDIR}/clib2* ${EXTRACTDIR}/newlib* ${CROSS_ROOT}/ppc-amigaos/SDK
+		cp ${EXTRACTDIR}/SDK-Version.txt ${CROSS_ROOT}/ppc-amigaos/SDK
+		cp -rf ${EXTRACTDIR}/Include/* ${CROSS_ROOT}/ppc-amigaos/SDK/include
+		cp -rf ${EXTRACTDIR}/Documentation ${CROSS_ROOT}/ppc-amigaos/SDK/
+
 		;;
 
 	--uninstall)
