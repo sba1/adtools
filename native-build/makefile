@@ -14,6 +14,10 @@
 
 ROOT_DIR=$(realpath .)
 
+# Compiler setup, utilize ccache if available
+HOST_GCC=$(shell (which ccache >/dev/zero && echo ccache gcc) || echo gcc)
+HOST_GXX=$(shell (which ccache >/dev/zero && echo ccache g++) || echo g++)
+
 GMP_ARCHIVE=gmp-5.0.5.tar.bz2
 MPFR_ARCHIVE=mpfr-3.1.2/mpfr-3.1.2.tar.bz2
 MPC_ARCHIVE=mpc-0.9.tar.gz
@@ -93,7 +97,7 @@ includes-done: downloads-done
 # Build the cross compiler
 #
 gcc-cross-done-$(GCC_VERSION): includes-done binutils-cross-done-$(BINUTILS_VERSION)
-	$(MAKE) -C ../gcc-build SRC_DIR=$(GCC_SRC_DIR) PREFIX=$(CROSS_PREFIX) CROSS_BUILD_DIR=$(ROOT_DIR)/gcc-cross-build-$(GCC_VERSION) VERSION=$(GCC_VERSION)
+	CC="$(HOST_GCC)" CXX="$(HOST_GXX)" $(MAKE) -C ../gcc-build SRC_DIR=$(GCC_SRC_DIR) PREFIX=$(CROSS_PREFIX) CROSS_BUILD_DIR=$(ROOT_DIR)/gcc-cross-build-$(GCC_VERSION) VERSION=$(GCC_VERSION)
 	$(MAKE) -C $(ROOT_DIR)/gcc-cross-build-$(GCC_VERSION) install
 	touch $@
 

@@ -1,3 +1,21 @@
+adtools-sdk (0.0.5) unstable; urgency=medium
+
+  * Reformatted script.
+
+ -- Sebastian Bauer <mail@sebastianbauer.info>  Sun, 26 Feb 2017 17:48:15 +0100
+
+adtools-sdk (0.0.4) unstable; urgency=medium
+
+  * Package reupload.
+
+ -- Sebastian Bauer <mail@sebastianbauer.info>  Sat, 25 Feb 2017 07:01:59 +0100
+
+adtools-sdk (0.0.3-0) unstable; urgency=medium
+
+  * Provide additional adtools-sdk-53.30 that install the newer SDK.
+
+ -- Sebastian Bauer <mail@sebastianbauer.info>  Fri, 24 Feb 2017 20:37:00 +0100
+
 adtools-sdk (0.0.2-0) unstable; urgency=medium
 
   * The included script can now install arbitrary SDK versions (contributed

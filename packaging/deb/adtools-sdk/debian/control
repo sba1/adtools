@@ -7,4 +7,11 @@ Maintainer: Sebastian Bauer <mail@sebastianbauer.info>
 Package: adtools-sdk
 Depends: lhasa | lha, wget
 Description: Amiga Development Tools - SDK
+Conflicts: adtools-sdk-53.30
+Architecture: any
+
+Package: adtools-sdk-53.30
+Depends: lhasa | lha, wget
+Conflicts: adtools-sdk
+Description: Amiga Development Tools - SDK 53.30
 Architecture: any
