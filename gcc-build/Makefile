@@ -21,7 +21,7 @@ all: cross
 cross:
 	mkdir -p $(CROSS_BUILD_DIR)
 	cd $(CROSS_BUILD_DIR); $(REAL_SRC_DIR)/configure \
-                      --with-bugurl='http://sf.net/p/adtools' \
+                      --with-bugurl='https://github.com/sba1/adtools/issues' \
                       --with-pkgversion='adtools build $(VERSION)' \
 											--target=ppc-amigaos \
 											--prefix=$(PREFIX) \
@@ -37,7 +37,7 @@ cross:
 native:
 	mkdir -p $(NATIVE_BUILD_DIR)
 	cd $(NATIVE_BUILD_DIR); LDFLAGS="-lunix" $(REAL_SRC_DIR)/configure \
-                      --with-bugurl='http://sf.net/p/adtools' \
+                      --with-bugurl='https://github.com/sba1/adtools/issues' \
                       --with-pkgversion='adtools build $(VERSION)' \
 											--host=ppc-amigaos \
 											--target=ppc-amigaos \
