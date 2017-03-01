@@ -1,3 +1,11 @@
+adtools-sdk (0.0.6) unstable; urgency=medium
+
+  * Use copy when copying files to avoid problem when upgrading
+    (contributed by Andrea Vallinotto).
+  * Cleanup extract dir after installation.
+
+ -- Sebastian Bauer <mail@sebastianbauer.info>  Wed, 01 Mar 2017 22:10:13 +0100
+
 adtools-sdk (0.0.5) unstable; urgency=medium
 
   * Reformatted script.
