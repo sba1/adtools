@@ -82,6 +82,8 @@ case "$1" in
 		cp -rf ${EXTRACTDIR}/Include/* ${CROSS_ROOT}/ppc-amigaos/SDK/include
 		cp -rf ${EXTRACTDIR}/Documentation ${CROSS_ROOT}/ppc-amigaos/SDK/
 
+		# Cleanup
+		rm -rf ${EXTRACTDIR}
 		;;
 
 	--uninstall)
