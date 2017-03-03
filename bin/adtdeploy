@@ -33,7 +33,7 @@ for deb in all_debs:
 	m = re.search('Version: ([\w\.-]+)', deb_info)
 	version = m.group(1)
 
-	url = 'https://api.bintray.com/content/sba1/adtools-deb/' + pkg + '/' + version + '/' + deb + ';publish=1;override=1'
+	url = 'https://api.bintray.com/content/sba1/adtools-deb/' + pkg + '/' + version + '/' + deb + ';publish=1'
 
 	print('Uploading ' + deb);
 	call(['curl', '-T', deb, '-u' + user + ':' + key, url])
@@ -44,6 +44,6 @@ for lha in all_lhas:
 		print('Skipping ' + lha)
 		continue
 	version = m.group(1)
-	url = 'https://api.bintray.com/content/sba1/adtools-native/adtools/' + version + '/' + lha + ';publish=1;override=1'
+	url = 'https://api.bintray.com/content/sba1/adtools-native/adtools/' + version + '/' + lha + ';publish=1'
 	print('Uploading ' + lha);
 	call(['curl', '-T', lha, '-u' + user + ':' + key, url])
