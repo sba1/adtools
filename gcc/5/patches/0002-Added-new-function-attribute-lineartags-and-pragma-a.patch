@@ -1,7 +1,7 @@
-From f1d0374b4e109692a8927ab8cd5693486f52b7aa Mon Sep 17 00:00:00 2001
+From 1ee66741f700c42ac627bcefb4a3580f8d747dab Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 14 Nov 2014 20:03:56 +0100
-Subject: [PATCH 2/9] Added new function attribute "lineartags" and pragma
+Subject: [PATCH 02/10] Added new function attribute "lineartags" and pragma
  "amigaos tagtype".
 
 Functions that have the lineartags attribute are assumed to be functions
@@ -38,7 +38,7 @@ functions.
  5 files changed, 171 insertions(+)
 
 diff --git a/gcc/c-family/c-pragma.c b/gcc/c-family/c-pragma.c
-index 6894f0e7c3d1ea932ff05f370680be3d18dfcf94..24278250901bfa75c9aae9be63a62351f33e390e 100644
+index 03c10397c8bff89c8757e603a336a3264e145971..0f327db5793658bb31365cbeab71f8e2917d6f8c 100644
 --- a/gcc/c-family/c-pragma.c
 +++ b/gcc/c-family/c-pragma.c
 @@ -1066,12 +1066,21 @@ handle_pragma_message (cpp_reader *ARG_UNUSED(dummy))
@@ -63,7 +63,7 @@ index 6894f0e7c3d1ea932ff05f370680be3d18dfcf94..24278250901bfa75c9aae9be63a62351
  
  void
  mark_valid_location_for_stdc_pragma (bool flag)
-@@ -1483,12 +1492,13 @@ init_pragma (void)
+@@ -1490,12 +1499,13 @@ init_pragma (void)
  
    c_register_pragma_with_expansion (0, "redefine_extname",
  				    handle_pragma_redefine_extname);
@@ -78,7 +78,7 @@ index 6894f0e7c3d1ea932ff05f370680be3d18dfcf94..24278250901bfa75c9aae9be63a62351
    /* Allow plugins to register their own pragmas. */
    invoke_plugin_callbacks (PLUGIN_PRAGMAS, NULL);
 diff --git a/gcc/c/c-parser.c b/gcc/c/c-parser.c
-index 86cbc404a4c10edac0ce2341ae0099f624ee36ea..cc77530b090576db35610468052d84763c3965fd 100644
+index c5378fec81ee49082e2165fad650f50f10f1c39d..9f334ba043fd888ff084564216de828c5a765951 100644
 --- a/gcc/c/c-parser.c
 +++ b/gcc/c/c-parser.c
 @@ -80,12 +80,74 @@ along with GCC; see the file COPYING3.  If not see
@@ -156,7 +156,7 @@ index 86cbc404a4c10edac0ce2341ae0099f624ee36ea..cc77530b090576db35610468052d8476
  void
  c_parse_init (void)
  {
-@@ -2390,12 +2452,15 @@ c_parser_declspecs (c_parser *parser, struct c_declspecs *specs,
+@@ -2391,12 +2453,15 @@ c_parser_declspecs (c_parser *parser, struct c_declspecs *specs,
  	    goto out;
  	  attrs_ok = true;
  	  seen_type = true;
@@ -172,7 +172,7 @@ index 86cbc404a4c10edac0ce2341ae0099f624ee36ea..cc77530b090576db35610468052d8476
  	  if (!typespec_ok)
  	    goto out;
  	  attrs_ok = true;
-@@ -9590,12 +9655,32 @@ c_parser_objc_at_dynamic_declaration (c_parser *parser)
+@@ -9596,12 +9661,32 @@ c_parser_objc_at_dynamic_declaration (c_parser *parser)
      }
    c_parser_skip_until_found (parser, CPP_SEMICOLON, "expected %<;%>");
    objc_add_dynamic_declaration (loc, list);
@@ -205,7 +205,7 @@ index 86cbc404a4c10edac0ce2341ae0099f624ee36ea..cc77530b090576db35610468052d8476
     true if we actually parsed such a pragma.  */
  
  static bool
-@@ -9777,12 +9862,56 @@ c_parser_pragma (c_parser *parser, enum pragma_context context)
+@@ -9783,12 +9868,56 @@ c_parser_pragma (c_parser *parser, enum pragma_context context)
        break;
      }
  
@@ -263,7 +263,7 @@ index 86cbc404a4c10edac0ce2341ae0099f624ee36ea..cc77530b090576db35610468052d8476
    c_parser_skip_to_pragma_eol (parser);
  
 diff --git a/gcc/c/c-typeck.c b/gcc/c/c-typeck.c
-index a98622b16f546b88eb7fdce9ca7631c3ca37470a..2c03a10f1127c2bec5d9280ecc2f786fd5d13153 100644
+index 547f298c495622005629f8059bab435e55958b4f..0114457075f595a1961b4e72e6789748f7664049 100644
 --- a/gcc/c/c-typeck.c
 +++ b/gcc/c/c-typeck.c
 @@ -3100,12 +3100,14 @@ convert_arguments (location_t loc, vec<location_t> arg_loc, tree typelist,
@@ -372,5 +372,5 @@ index 23e53def482db087cf00324e43a6fefad4f0effa..c96903dfbdbdefcc443eb6eb1307b926
  amigaos_legitimize_baserel_address (rtx addr)
  {
 -- 
-1.9.1
+2.11.0
 
