@@ -1,7 +1,12 @@
 CC  = ppc-amigaos-gcc
 CPP = ppc-amigaos-g++ -v
 
-all: test-exceptions test-dynld
+TESTS = \
+	test-dynld \
+	test-exceptions \
+	test-thread
+
+all: $(TESTS)
 
 test-exceptions.o: test-exceptions.cpp
 	$(CPP) -c $< -o $@  -ggdb
@@ -17,4 +22,4 @@ test-thread: test-thread.cpp
 	$(CPP) -ggdb $@.o -o $@ -std=c++11 -lpthread -Wl,-Map=$@.map,--cref -Wl,--gc-sections -Wl,--verbose -Wl,-T,test-thread-ldscript
 
 clean:
-	rm -Rf test-exceptions.o test-exceptions
+	rm -Rf $(TESTS)
