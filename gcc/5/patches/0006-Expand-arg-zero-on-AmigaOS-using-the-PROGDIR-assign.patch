@@ -1,7 +1,7 @@
 From 733805d1338a46ce4ef66c9528e198d1b78d7381 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Sat, 5 Dec 2015 13:17:26 +0100
-Subject: [PATCH 06/10] Expand arg zero on AmigaOS using the PROGDIR: assign.
+Subject: [PATCH 06/11] Expand arg zero on AmigaOS using the PROGDIR: assign.
 
 This should make sure that the proper relative paths are computed during
 process_command().
