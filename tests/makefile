@@ -4,6 +4,7 @@ CPP = ppc-amigaos-g++ -v
 TESTS = \
 	test-dynld \
 	test-exceptions \
+	test-std-string \
 	test-thread
 
 all: $(TESTS)
@@ -13,6 +14,9 @@ test-exceptions.o: test-exceptions.cpp
 
 test-exceptions: test-exceptions.o
 	$(CPP) $< -o $@ -ggdb -use-dynld
+
+test-std-string: test-std-string.c
+	$(CPP) $< -o $@ -std=c++11 -U__STRICT_ANSI__
 
 test-dynld: test-dynld.c
 	$(CC) $< -o $@ -fPIC -use-dynld -o $@
