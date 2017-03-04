@@ -1,3 +1,11 @@
+adtools-gcc (0.0.11) unstable; urgency=medium
+
+  * Enforce newlib C99 compatibility.
+  * Disable strtold() usage when compining for AmigaOS4 (it is not available
+    yet)
+
+ -- Sebastian Bauer <mail@sebastianbauer.info>  Sat, 04 Mar 2017 07:46:11 +0100
+
 adtools-gcc (0.0.10) unstable; urgency=medium
 
   * Initial libatomic support.
