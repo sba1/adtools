@@ -2,6 +2,7 @@ The adtools project
 ===================
 
 [![Build Status](https://travis-ci.org/sba1/adtools.svg?branch=master)](https://travis-ci.org/sba1/adtools)
+[![DL](https://api.bintray.com/packages/sba1/adtools-native/adtools/images/download.svg)](https://bintray.com/sba1/adtools-native/adtools/20170304-400#files)
 
 This is the Amiga developement tools project that host a number of tools
 that can be used to develop applications for AmigaOS and Amigaoid
