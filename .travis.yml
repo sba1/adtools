@@ -13,12 +13,8 @@ install:
 before_script:
 - cd packaging/deb
 script:
+# So Python finds Mako
 - export PYTHONPATH=/usr/local/lib/python2.7/dist-packages:$PYTHONPATH
-- python --version
-- python -c "import sys; print(sys.path)"
-- python -c "import mako; import mako.template"
-- which mako-render
-- find /usr/ -iname mako
 - make prepare-packages
 - cd adtools-sdk && debuild -i -us -uc -b && cd ..
 - cd adtools-binutils && debuild -i -us -uc -b && cd ..
