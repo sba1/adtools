@@ -1,4 +1,4 @@
-From ef9a72fd57f1d0726d63bdf89258413d905e5558 Mon Sep 17 00:00:00 2001
+From 69d5402b3939a891b5776ad857f96627821e48ef Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Sat, 4 Mar 2017 07:39:21 +0100
 Subject: [PATCH 11/11] Pretend C99 compatibility.
@@ -30,10 +30,10 @@ index 346f063958cd7e80ebf97be4acee0bdf391cb811..6b67630b7be7102a9dfb7c104deac629
  
  #endif
 diff --git a/libstdc++-v3/include/bits/basic_string.h b/libstdc++-v3/include/bits/basic_string.h
-index 9ef5be95a918a89b009d9cfc95383290691db19d..3ad2146e38eaa8111ca2275ba0c8fcbffcc4e8ff 100644
+index cccf6765695bb736489d932b90fcef0a5624c7a5..fae98eab824141b9201b685871f9ebd820b77ef4 100644
 --- a/libstdc++-v3/include/bits/basic_string.h
 +++ b/libstdc++-v3/include/bits/basic_string.h
-@@ -5285,15 +5285,17 @@ _GLIBCXX_BEGIN_NAMESPACE_CXX11
+@@ -5388,15 +5388,17 @@ _GLIBCXX_BEGIN_NAMESPACE_CXX11
    { return __gnu_cxx::__stoa(&std::strtof, "stof", __str.c_str(), __idx); }
  
    inline double

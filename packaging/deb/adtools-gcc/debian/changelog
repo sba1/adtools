@@ -1,3 +1,9 @@
+adtools-gcc (0.0.12) unstable; urgency=medium
+
+  * Now bundles GCC 5.5
+
+ -- Sebastian Bauer <mail@sebastianbauer.info>  Sat, 09 Dec 2017 20:22:10 +0100
+
 adtools-gcc (0.0.11) unstable; urgency=medium
 
   * Enforce newlib C99 compatibility.
