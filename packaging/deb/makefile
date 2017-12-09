@@ -34,7 +34,7 @@ prepare-gcc:
 	rm -Rf adtools-gcc/$(GCC_DIR)
 	rm -Rf adtools-gcc/patched
 	cd adtools-gcc && \
-		tar xjf ../$(GCC_ARCHIVE_NAME) && \
+		tar xzf ../$(GCC_ARCHIVE_NAME) && \
 		mv $(GCC_DIR) patched && \
 		cd patched && \
 			git init && \
