@@ -52,3 +52,4 @@ after_success:
 after_failure:
  - pwd
  - tail -n 1000 /tmp/build.out
+ - tail -n 1000 /tmp/build2.out
