@@ -55,7 +55,7 @@ downloads-done:
 	wget "$(SDK_URL)" -O downloads/SDK_$(SDK_VERSION).lha
 	cd downloads && wget -N https://gmplib.org/download/gmp/$(GMP_ARCHIVE)
 	cd downloads && wget -N http://www.mpfr.org/$(MPFR_ARCHIVE)
-	cd downloads && wget -N http://www.multiprecision.org/download/$(MPC_ARCHIVE)
+	cd downloads && wget -N http://www.multiprecision.org/downloads/$(MPC_ARCHIVE)
 	touch $@
 
 #
