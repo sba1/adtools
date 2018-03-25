@@ -17,8 +17,8 @@ REAL_SRC_DIR=$(realpath $(SRC_DIR))
 
 all: cross
 
-.PHONY: cross
-cross:
+.PHONY: cross-configure
+cross-configure:
 	mkdir -p $(CROSS_BUILD_DIR)
 	cd $(CROSS_BUILD_DIR); $(REAL_SRC_DIR)/configure \
                       --with-bugurl='https://github.com/sba1/adtools/issues' \
@@ -31,6 +31,9 @@ cross:
 											--disable-libstdcxx-pch \
 											--disable-tls # \
 #											--enable-checking=gc
+
+.PHONY: cross
+cross: cross-configure
 	make -C $(CROSS_BUILD_DIR)
 
 .PHONY: native

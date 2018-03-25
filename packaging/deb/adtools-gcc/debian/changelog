@@ -1,3 +1,9 @@
+adtools-gcc (0.0.13) UNRELEASED; urgency=medium
+
+  * Split configuring and compiling phase.
+
+ -- Sebastian Bauer <mail@sebastianbauer.info>  Sun, 25 Mar 2018 23:35:03 +0200
+
 adtools-gcc (0.0.12) unstable; urgency=medium
 
   * Now bundles GCC 5.5
