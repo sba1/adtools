@@ -56,6 +56,7 @@ downloads-done:
 	cd downloads && wget -N https://gmplib.org/download/gmp/$(GMP_ARCHIVE)
 	cd downloads && wget -N http://www.mpfr.org/$(MPFR_ARCHIVE)
 	cd downloads && wget -N http://www.multiprecision.org/downloads/$(MPC_ARCHIVE)
+	cd downloads && (git clone https://github.com/adtools/clib2 || true) && cd clib2 && git checkout c84b1fc1ff19ce24751073a3219b2a74e2ba9557
 	touch $@
 
 #
