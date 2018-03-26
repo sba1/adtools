@@ -1,5 +1,6 @@
 /test-thread
 /test-thread.d
 /test-thread.o
+/test-wchar
 /*.map
 
