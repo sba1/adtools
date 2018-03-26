@@ -1,6 +1,8 @@
 adtools-gcc (0.0.13) UNRELEASED; urgency=medium
 
   * Split configuring and compiling phase.
+  * Directly build clib2 from official repo and bundle. We use commit
+    c84b1fc1ff19ce24751073a3219b2a74e2ba9557, which is post release 1.214.
 
  -- Sebastian Bauer <mail@sebastianbauer.info>  Sun, 25 Mar 2018 23:35:03 +0200
 

@@ -89,16 +89,42 @@ includes-done: downloads-done
 	cd downloads/SDK_Install && lha xf newlib*.lha
 	cd downloads/SDK_Install && lha xf base.lha
 	cd downloads/SDK_Install && rm -Rf *.lha
-	cd downloads/SDK_Install && mv clib2* newlib* $(CROSS_PREFIX)/ppc-amigaos/SDK
+	cd downloads/SDK_Install && mv newlib* $(CROSS_PREFIX)/ppc-amigaos/SDK
+# We built clib2 inplace
+#	cd downloads/SDK_Install && mv clib2* $(CROSS_PREFIX)/ppc-amigaos/SDK
 	cd downloads/SDK_Install && mv Include/* $(CROSS_PREFIX)/ppc-amigaos/SDK/include
 	rm -Rf downloads/SDK_Install downloads/SDK_Install.info
 	touch $@
+
+# Path to the initial cross compiler
+XGCC_DIR=$(abspath .)/gcc-cross-build-$(GCC_VERSION)/gcc
+XGCC=$(XGCC_DIR)/xgcc
+XGCC_CC=$(XGCC) -B $(XGCC_DIR)
+XAR=$(abspath .)/root-cross/bin/ppc-amigaos-ar -q
+XRANLIB=$(abspath .)/root-cross/bin/ppc-amigaos-ranlib
+
+CLIB2_DIR=downloads/clib2/library
 
 #
 # Build the cross compiler
 #
 gcc-cross-done-$(GCC_VERSION): includes-done binutils-cross-done-$(BINUTILS_VERSION)
-	CC="$(HOST_GCC)" CXX="$(HOST_GXX)" $(MAKE) -C ../gcc-build SRC_DIR=$(GCC_SRC_DIR) PREFIX=$(CROSS_PREFIX) CROSS_BUILD_DIR=$(ROOT_DIR)/gcc-cross-build-$(GCC_VERSION) VERSION=$(GCC_VERSION) cross-configure
+	CC="$(HOST_GCC)" CXX="$(HOST_GXX)" $(MAKE) -C ../gcc-build cross-configure \
+		SRC_DIR=$(GCC_SRC_DIR) \
+		PREFIX=$(CROSS_PREFIX) \
+		CROSS_BUILD_DIR=$(ROOT_DIR)/gcc-cross-build-$(GCC_VERSION) \
+		VERSION=$(GCC_VERSION) \
+# Build only xgcc, no other stuff like libstdc++ etc.
+	$(MAKE) -C $(ROOT_DIR)/gcc-cross-build-$(GCC_VERSION) all-gcc
+# Build clib2 using xgcc that have just been built
+	$(MAKE) -C $(CLIB2_DIR) -f GNUmakefile.os4 CC="$(XGCC_CC)" AR="$(XAR)" RANLIB="$(XRANLIB)"
+# Copy clib2 libs and includes
+	rm -Rf root-cross/ppc-amigaos/SDK/clib2/lib root-cross/ppc-amigaos/SDK/clib2/include
+	mkdir -p root-cross/ppc-amigaos/SDK/clib2/lib
+	mkdir -p root-cross/ppc-amigaos/SDK/clib2/include
+	cp -Rp $(CLIB2_DIR)/include/* root-cross/ppc-amigaos/SDK/clib2/include
+	cp -Rp $(CLIB2_DIR)/lib/* root-cross/ppc-amigaos/SDK/clib2/lib
+# Compile remaining
 	$(MAKE) -C $(ROOT_DIR)/gcc-cross-build-$(GCC_VERSION)
 	$(MAKE) -C $(ROOT_DIR)/gcc-cross-build-$(GCC_VERSION) install
 	touch $@
