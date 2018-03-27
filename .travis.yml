@@ -18,7 +18,7 @@ script:
 - make prepare-packages
 - cd adtools-sdk && debuild -i -us -uc -b && cd ..
 - cd adtools-binutils && debuild -i -us -uc -b && cd ..
-- sudo dpkg -i adtools-binutils_*.deb adtools-sdk_*.deb
+- sudo dpkg -i adtools-binutils_*.deb adtools-sdk_*.deb &> /tmp/dpkg.out
 - cd ../..
 - travis_wait 30 ./travis-gcc-deb.sh
 - cd packaging/deb
@@ -53,3 +53,4 @@ after_failure:
  - pwd
  - tail -n 1000 /tmp/build.out
  - tail -n 1000 /tmp/build2.out
+ - tail -n 1000 /tmp/dpkg.out
