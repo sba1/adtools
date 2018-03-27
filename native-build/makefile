@@ -31,6 +31,9 @@ GCC_VERSION:=$(shell cat $(GCC_SRC_DIR)/gcc/BASE-VER)
 SDK_URL=http://www.hyperion-entertainment.biz/index.php?option=com_registration&amp;view=download&amp;format=raw&amp;file=69&amp;Itemid=63
 SDK_VERSION=53.24
 
+CLIB2_URL=https://github.com/sba1/clib2-1
+CLIB2_SHA1=75d47ccdade9d454f4c12a2fe422a9e12eb6cc0d
+
 # Native tools
 COREUTILS_SRC_DIR=../coreutils/repo
 COREUTILS_VERSION=5.2.1
@@ -56,7 +59,7 @@ downloads-done:
 	cd downloads && wget -N https://gmplib.org/download/gmp/$(GMP_ARCHIVE)
 	cd downloads && wget -N http://www.mpfr.org/$(MPFR_ARCHIVE)
 	cd downloads && wget -N http://www.multiprecision.org/downloads/$(MPC_ARCHIVE)
-	cd downloads && (git clone https://github.com/adtools/clib2 || true) && cd clib2 && git checkout c84b1fc1ff19ce24751073a3219b2a74e2ba9557
+	cd downloads && (git clone $(CLIB2_URL) || true) && cd clib2 && git checkout $(CLIB2_SHA1)
 	touch $@
 
 #
