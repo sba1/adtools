@@ -88,12 +88,12 @@ binutils-install: binutils-cross-done-$(BINUTILS_VERSION)
 includes-done: downloads-done
 	mkdir -p $(CROSS_PREFIX)/ppc-amigaos/SDK/include
 	cd downloads && lha x SDK_$(SDK_VERSION).lha
-	cd downloads/SDK_Install && lha xf clib2*.lha
+# We built clib2 inplace
+#	cd downloads/SDK_Install && lha xf clib2*.lha
 	cd downloads/SDK_Install && lha xf newlib*.lha
 	cd downloads/SDK_Install && lha xf base.lha
 	cd downloads/SDK_Install && rm -Rf *.lha
 	cd downloads/SDK_Install && mv newlib* $(CROSS_PREFIX)/ppc-amigaos/SDK
-# We built clib2 inplace
 #	cd downloads/SDK_Install && mv clib2* $(CROSS_PREFIX)/ppc-amigaos/SDK
 	cd downloads/SDK_Install && mv Include/* $(CROSS_PREFIX)/ppc-amigaos/SDK/include
 	rm -Rf downloads/SDK_Install downloads/SDK_Install.info
