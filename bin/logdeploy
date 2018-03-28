@@ -1,0 +1,21 @@
+#!/usr/bin/python
+#
+# A simple script for deploying the travis logs
+#
+
+from __future__ import print_function
+
+import glob
+import os
+import sys
+from subprocess import call
+
+all_outs = sorted(glob.glob("/tmp/*.out"))
+user = os.environ.get('BINTRAY_USER')
+key = os.environ.get('BINTRAY_API_KEY')
+
+for out in all_outs:
+	version = "99999999"
+	url = 'https://api.bintray.com/content/sba1/adtools-native/adtools/' + version + '/' + out + ';publish=1'
+	print('Uploading ' + lha);
+	call(['curl', '-T', lha, '-u' + user + ':' + key, url])
