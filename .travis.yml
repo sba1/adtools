@@ -54,3 +54,4 @@ after_failure:
  - tail -n 1000 /tmp/build.out
  - tail -n 1000 /tmp/build2.out
  - tail -n 1000 /tmp/dpkg.out
+ - ./bin/logdeploy
