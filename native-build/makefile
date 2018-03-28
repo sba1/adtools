@@ -109,16 +109,21 @@ XRANLIB=$(abspath .)/root-cross/bin/ppc-amigaos-ranlib
 CLIB2_DIR=downloads/clib2/library
 
 #
-# Build the cross compiler
+# Build only xgcc, no other stuff like libstdc++ etc.
 #
-gcc-cross-done-$(GCC_VERSION): includes-done binutils-cross-done-$(BINUTILS_VERSION)
+xgcc-done-$(GCC_VERSION): includes-done binutils-cross-done-$(BINUTILS_VERSION)
 	CC="$(HOST_GCC)" CXX="$(HOST_GXX)" $(MAKE) -C ../gcc-build cross-configure \
 		SRC_DIR=$(GCC_SRC_DIR) \
 		PREFIX=$(CROSS_PREFIX) \
 		CROSS_BUILD_DIR=$(ROOT_DIR)/gcc-cross-build-$(GCC_VERSION) \
-		VERSION=$(GCC_VERSION) \
-# Build only xgcc, no other stuff like libstdc++ etc.
+		VERSION=$(GCC_VERSION)
 	$(MAKE) -C $(ROOT_DIR)/gcc-cross-build-$(GCC_VERSION) all-gcc
+	touch $@
+
+#
+# Build the cross compiler
+#
+gcc-cross-done-$(GCC_VERSION): #xgcc-done-$(GCC_VERSION)
 # Build clib2 using xgcc that have just been built
 	$(MAKE) -C $(CLIB2_DIR) -f GNUmakefile.os4 CC="$(XGCC_CC)" AR="$(XAR)" RANLIB="$(XRANLIB)"
 # Copy clib2 libs and includes
