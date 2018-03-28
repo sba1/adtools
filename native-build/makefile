@@ -123,7 +123,7 @@ xgcc-done-$(GCC_VERSION): includes-done binutils-cross-done-$(BINUTILS_VERSION)
 #
 # Build the cross compiler
 #
-gcc-cross-done-$(GCC_VERSION): #xgcc-done-$(GCC_VERSION)
+gcc-cross-done-$(GCC_VERSION): xgcc-done-$(GCC_VERSION)
 # Build clib2 using xgcc that have just been built
 	$(MAKE) -C $(CLIB2_DIR) -f GNUmakefile.os4 CC="$(XGCC_CC)" AR="$(XAR)" RANLIB="$(XRANLIB)"
 # Copy clib2 libs and includes
