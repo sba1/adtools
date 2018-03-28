@@ -314,6 +314,7 @@ clean:
 		binutils-cross-build-done-$(BINUTILS_VERSION) \
 		binutils-cross-done-$(BINUTILS_VERSION) \
 		binutils-native-done gcc-cross-build-$(GCC_VERSION) \
+		xgcc-done-$(GCC_VERSION) \
 		gcc-cross-done-$(GCC_VERSION) gcc-native-build-$(GCC_VERSION) \
 		gcc-native-done-$(GCC_VERSION) \
 		includes-done \
