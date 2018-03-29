@@ -125,7 +125,7 @@ XGCC_CC=ppc-amigaos-gcc
 XAR=ppc-amigaos-ar -q
 XRANLIB=ppc-amigaos-ranlib
 
-CLIB2_CROSS_DONE_DEPENDENCY=
+CLIB2_CROSS_DONE_DEPENDENCY=downloads-done-clib2
 
 else
 
