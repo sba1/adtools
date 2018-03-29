@@ -119,7 +119,7 @@ XGCC_CC=ppc-amigaos-gcc
 XAR=ppc-amigaos-ar -q
 XRANLIB=ppc-amigaos-ranlib
 
-CLIB2_CROSS_DONE_DEPENDENCY=xgcc-done-$(GCC_VERSION)
+CLIB2_CROSS_DONE_DEPENDENCY=
 
 else
 
@@ -129,7 +129,7 @@ XGCC_CC=$(XGCC) -B $(XGCC_DIR)
 XAR=$(abspath .)/root-cross/bin/ppc-amigaos-ar -q
 XRANLIB=$(abspath .)/root-cross/bin/ppc-amigaos-ranlib
 
-CLIB2_CROSS_DONE_DEPENDENCY=
+CLIB2_CROSS_DONE_DEPENDENCY=xgcc-done-$(GCC_VERSION)
 
 endif
 
