@@ -309,6 +309,12 @@ native-dist: native-strip-really
 	cd /tmp && lha ao5 $(realpath .)/adtools-os4-$(DIST_VERSION).lha adtools-os4-$(DIST_VERSION)/*
 
 #
+# Clib2 distribution
+#
+clib2-dist: clib2-cross-done-$(GCC_VERSION)
+	cd root-cross/ppc-amigaos/SDK && lha ao5 $(realpath .)/adtools-clib2-$(DIST_VERSION).lha clib2
+
+#
 # Upload the binary archive to the main Aminet server
 #
 .PHONY: upload-release
