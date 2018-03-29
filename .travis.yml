@@ -40,6 +40,7 @@ script:
 - ./bin/gild checkout coreutils 5.2
 - travis_wait 30 ./travis-native.sh
 - make -C native-build native-dist STRIP=ppc-amigaos-strip
+- make -C native-build clib2-dist
 - mv native-build/*.lha packaging/artifacts
 env:
   global:

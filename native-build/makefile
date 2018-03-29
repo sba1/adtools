@@ -107,12 +107,31 @@ includes-done: downloads-done
 	rm -Rf downloads/SDK_Install downloads/SDK_Install.info
 	touch $@
 
-# Path to the initial cross compiler
+#
+# Path to the initial cross compiler or standard
+# cross compiler if a cross compiler is present
+#
+
+ifeq ($(CROSS_IS_PRESENT),1)
+
+XGCC=ppc-amigaos-gcc
+XGCC_CC=ppc-amigaos-gcc
+XAR=ppc-amigaos-ar -q
+XRANLIB=ppc-amigaos-ranlib
+
+CLIB2_CROSS_DONE_DEPENDENCY=xgcc-done-$(GCC_VERSION)
+
+else
+
 XGCC_DIR=$(abspath .)/gcc-cross-build-$(GCC_VERSION)/gcc
 XGCC=$(XGCC_DIR)/xgcc
 XGCC_CC=$(XGCC) -B $(XGCC_DIR)
 XAR=$(abspath .)/root-cross/bin/ppc-amigaos-ar -q
 XRANLIB=$(abspath .)/root-cross/bin/ppc-amigaos-ranlib
+
+CLIB2_CROSS_DONE_DEPENDENCY=
+
+endif
 
 CLIB2_DIR=downloads/clib2/library
 
@@ -131,7 +150,7 @@ xgcc-done-$(GCC_VERSION): includes-done binutils-cross-done-$(BINUTILS_VERSION)
 #
 # Build clib2 via xgcc
 #
-clib2-cross-done-$(GCC_VERSION): xgcc-done-$(GCC_VERSION)
+clib2-cross-done-$(GCC_VERSION): $(CLIB2_CROSS_DONE_DEPENDENCY)
 # Build clib2 using xgcc that have just been built
 	$(MAKE) -C $(CLIB2_DIR) -f GNUmakefile.os4 CC="$(XGCC_CC)" AR="$(XAR)" RANLIB="$(XRANLIB)"
 # Copy clib2 libs and includes
