@@ -59,7 +59,7 @@ downloads-done:
 	cd downloads && wget -N https://gmplib.org/download/gmp/$(GMP_ARCHIVE)
 	cd downloads && wget -N http://www.mpfr.org/$(MPFR_ARCHIVE)
 	cd downloads && wget -N http://www.multiprecision.org/downloads/$(MPC_ARCHIVE)
-	cd downloads && (git clone $(CLIB2_URL) || true) && cd clib2 && git checkout $(CLIB2_SHA1)
+	cd downloads && (git clone $(CLIB2_URL) clib2 || true) && cd clib2 && git checkout $(CLIB2_SHA1)
 	touch $@
 
 #
