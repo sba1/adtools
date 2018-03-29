@@ -51,6 +51,14 @@ STRIPFLAGS=--strip-all --strip-unneeded-rel-relocs -R.comment
 all: gcc-native-done-$(GCC_VERSION)
 
 #
+# Print the dist version that is used as suffix for various
+# suffixes.
+#
+.PHONY: print-dist-version
+print-dist-version:
+	@echo $(DIST_VERSION)
+
+#
 # Downloads the SDK and libraries necesseary to build the cross compiler
 #
 downloads-done:
