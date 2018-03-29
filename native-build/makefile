@@ -121,9 +121,9 @@ xgcc-done-$(GCC_VERSION): includes-done binutils-cross-done-$(BINUTILS_VERSION)
 	touch $@
 
 #
-# Build the cross compiler
+# Build clib2 via xgcc
 #
-gcc-cross-done-$(GCC_VERSION): xgcc-done-$(GCC_VERSION)
+clib2-cross-done-$(GCC_VERSION): xgcc-done-$(GCC_VERSION)
 # Build clib2 using xgcc that have just been built
 	$(MAKE) -C $(CLIB2_DIR) -f GNUmakefile.os4 CC="$(XGCC_CC)" AR="$(XAR)" RANLIB="$(XRANLIB)"
 # Copy clib2 libs and includes
@@ -132,6 +132,12 @@ gcc-cross-done-$(GCC_VERSION): xgcc-done-$(GCC_VERSION)
 	mkdir -p root-cross/ppc-amigaos/SDK/clib2/include
 	cp -Rp $(CLIB2_DIR)/include/* root-cross/ppc-amigaos/SDK/clib2/include
 	cp -Rp $(CLIB2_DIR)/lib/* root-cross/ppc-amigaos/SDK/clib2/lib
+	touch $@
+
+#
+# Build the cross compiler
+#
+gcc-cross-done-$(GCC_VERSION): clib2-cross-done-$(GCC_VERSION)
 # Compile remaining
 	$(MAKE) -C $(ROOT_DIR)/gcc-cross-build-$(GCC_VERSION)
 	$(MAKE) -C $(ROOT_DIR)/gcc-cross-build-$(GCC_VERSION) install
@@ -315,6 +321,7 @@ clean:
 		binutils-cross-done-$(BINUTILS_VERSION) \
 		binutils-native-done gcc-cross-build-$(GCC_VERSION) \
 		xgcc-done-$(GCC_VERSION) \
+		clib2-cross-done-$(GCC_VERSION) \
 		gcc-cross-done-$(GCC_VERSION) gcc-native-build-$(GCC_VERSION) \
 		gcc-native-done-$(GCC_VERSION) \
 		includes-done \
