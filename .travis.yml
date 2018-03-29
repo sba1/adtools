@@ -20,7 +20,6 @@ script:
 - cd adtools-binutils && debuild -i -us -uc -b && cd ..
 - sudo dpkg -i adtools-binutils_*.deb adtools-sdk_*.deb &> /tmp/dpkg.out
 - cd ../..
-- export DIST_VERSION=$(make -C native-build print-dist-version)
 - travis_wait 30 ./travis-gcc-deb.sh
 - cd packaging/deb
 - sudo dpkg -i *gcc*.deb
@@ -58,4 +57,5 @@ after_failure:
  - tail -n 1000 /tmp/dpkg.out
  - cat /tmp/build.out /tmp/build2.out /tmp/dpkg.out >/build-$DIST_VERSION.out
  - rm /tmp/build.out /tmp/build2.out /tmp/dpkg.out
+ - export DIST_VERSION=$(make -C native-build print-dist-version)
  - ./bin/logdeploy $DIST_VERSION
