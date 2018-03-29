@@ -315,11 +315,13 @@ upload-release: native-dist
 clean:
 	rm -Rf	\
 		binutils-cross-build-$(BINUTILS_VERSION) \
-		binutils-native-build $(CROSS_PREFIX) \
+		binutils-native-build-$(BINUTILS_VERSION) \
+		$(CROSS_PREFIX) \
 		build-cross-done \
 		binutils-cross-build-done-$(BINUTILS_VERSION) \
 		binutils-cross-done-$(BINUTILS_VERSION) \
-		binutils-native-done gcc-cross-build-$(GCC_VERSION) \
+		binutils-native-done-$(BINUTILS_VERSION) \
+		gcc-cross-build-$(GCC_VERSION) \
 		xgcc-done-$(GCC_VERSION) \
 		clib2-cross-done-$(GCC_VERSION) \
 		gcc-cross-done-$(GCC_VERSION) gcc-native-build-$(GCC_VERSION) \
