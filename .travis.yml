@@ -55,4 +55,6 @@ after_failure:
  - tail -n 1000 /tmp/build.out
  - tail -n 1000 /tmp/build2.out
  - tail -n 1000 /tmp/dpkg.out
- - ./bin/logdeploy
+ - cat /tmp/build.out /tmp/build2.out /tmp/dpkg.out >/build-$DIST_VERSION.out
+ - rm /tmp/build.out /tmp/build2.out /tmp/dpkg.out
+ - ./bin/logdeploy $DIST_VERSION
