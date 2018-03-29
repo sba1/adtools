@@ -59,15 +59,21 @@ print-dist-version:
 	@echo $(DIST_VERSION)
 
 #
+# Downloads clib2
+#
+downloads-done-clib2:
+	cd downloads && (git clone $(CLIB2_URL) clib2 || true) && cd clib2 && git checkout $(CLIB2_SHA1)
+	touch $@
+
+#
 # Downloads the SDK and libraries necesseary to build the cross compiler
 #
-downloads-done:
+downloads-done: downloads-done-clib2
 	mkdir -p downloads
 	wget "$(SDK_URL)" -O downloads/SDK_$(SDK_VERSION).lha
 	cd downloads && wget -N https://gmplib.org/download/gmp/$(GMP_ARCHIVE)
 	cd downloads && wget -N http://www.mpfr.org/$(MPFR_ARCHIVE)
 	cd downloads && wget -N http://www.multiprecision.org/downloads/$(MPC_ARCHIVE)
-	cd downloads && (git clone $(CLIB2_URL) clib2 || true) && cd clib2 && git checkout $(CLIB2_SHA1)
 	touch $@
 
 #
