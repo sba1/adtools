@@ -32,7 +32,7 @@ SDK_URL=http://www.hyperion-entertainment.biz/index.php?option=com_registration&
 SDK_VERSION=53.24
 
 CLIB2_URL=https://github.com/sba1/clib2-1
-CLIB2_SHA1=60eebbe7320681f8c715bec7c16a5e5bc9188fa2
+CLIB2_SHA1=3e50be491ba4a0c6fe7f21c29d5376dfcd5f295a
 
 # Native tools
 COREUTILS_SRC_DIR=../coreutils/repo
