@@ -376,4 +376,4 @@ clean:
 #
 .PNONY: clean-all
 clean-all: clean
-	rm -Rf downloads-done downloads
+	rm -Rf downloads-done downloads-done-clib2 downloads
