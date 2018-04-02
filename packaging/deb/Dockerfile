@@ -32,7 +32,7 @@ RUN cd adtools-sdk* && debuild -i -us -uc -b
 RUN cd adtools-binutils* && debuild -i -us -uc -b
 
 # Install the adtools-sdk dependency
-RUN dpkg --install adtools-sdk*.deb
+RUN dpkg --install adtools-sdk_*.deb
 RUN dpkg --install adtools-binutils*.deb
 
 RUN cd adtools-gcc* && debuild -i -us -uc -b
