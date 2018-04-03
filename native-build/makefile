@@ -28,8 +28,8 @@ BINUTILS_SRC_DIR=../binutils/repo
 GCC_SRC_DIR=../gcc/repo
 GCC_VERSION:=$(shell cat $(GCC_SRC_DIR)/gcc/BASE-VER)
 
-SDK_URL=http://www.hyperion-entertainment.biz/index.php?option=com_registration&amp;view=download&amp;format=raw&amp;file=69&amp;Itemid=63
-SDK_VERSION=53.24
+SDK_URL=http://www.hyperion-entertainment.biz/index.php?option=com_registration&amp;view=download&amp;format=raw&amp;file=69&amp;Itemid=82
+SDK_VERSION=53.30
 
 CLIB2_URL=https://github.com/sba1/clib2-1
 CLIB2_SHA1=425f899302f3d8e9f658121e789ef1527c5a2877
