@@ -1,4 +1,4 @@
-From 3869d97bffe8fba6c25a43e36bd495e4d6c324a7 Mon Sep 17 00:00:00 2001
+From 71fa10ee3f1024b2e5edf86f59ee16b38cbe9d2e Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 14 Nov 2014 20:03:56 +0100
 Subject: [PATCH 02/12] Added new function attribute "lineartags" and pragma
@@ -78,7 +78,7 @@ index c73aa8221049b85949b0b62e88f58120e43aa39d..6cda91994f9140398841610063c29773
    global_sso = default_sso;
    c_register_pragma (0, "scalar_storage_order", 
 diff --git a/gcc/c/c-parser.c b/gcc/c/c-parser.c
-index 1b6bacd7498fb8ec37dc4b76bcfa26eacc1c8e1b..60eecd4854780322205cee5d47727d3376a6c9eb 100644
+index 4044bb58c8763c9de8f80038735fdc6950ed2f53..c9552a160f892c5e314b76535d3c540726746ee3 100644
 --- a/gcc/c/c-parser.c
 +++ b/gcc/c/c-parser.c
 @@ -84,12 +84,74 @@ set_c_expr_source_range (c_expr *expr,
@@ -263,7 +263,7 @@ index 1b6bacd7498fb8ec37dc4b76bcfa26eacc1c8e1b..60eecd4854780322205cee5d47727d33
    c_parser_skip_to_pragma_eol (parser);
  
 diff --git a/gcc/c/c-typeck.c b/gcc/c/c-typeck.c
-index b1c5cd6d3db3bd6d21185bcb49af14d9bfc83d12..ebb7f5741007c6769e4af94c3c6b856af305132c 100644
+index 796eacb58db89d20b575c597b6fba02afa979316..6877ebad2478c879e70207abaa9e36461f3b5858 100644
 --- a/gcc/c/c-typeck.c
 +++ b/gcc/c/c-typeck.c
 @@ -3169,12 +3169,14 @@ convert_arguments (location_t loc, vec<location_t> arg_loc, tree typelist,
@@ -372,5 +372,5 @@ index a6da7d543241e2fc8cf51a952633c62e19d7d875..797261177e46a34ac0aba97f2b9c2b8a
  amigaos_legitimize_baserel_address (rtx addr)
  {
 -- 
-2.16.2
+2.11.0
 

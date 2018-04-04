@@ -1,4 +1,4 @@
-From f6b252fd36a09a0636e93268fc38aead6dc86234 Mon Sep 17 00:00:00 2001
+From b198a4caa5e6bd6794ba50e57a29180d39505085 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Wed, 2 Dec 2015 21:39:42 +0100
 Subject: [PATCH 05/12] Disable the usage of /dev/urandom when compiling for
@@ -10,10 +10,10 @@ Subject: [PATCH 05/12] Disable the usage of /dev/urandom when compiling for
  2 files changed, 5 insertions(+), 2 deletions(-)
 
 diff --git a/gcc/gcc.c b/gcc/gcc.c
-index e88e6d3497c13a4e9a5d92d71de6128678ec546f..eb56ea7242ab51c941b88d72f8dee2a0381e2c8f 100644
+index 914b39a98be30b01ff6f9f13073ca8b6919a2c8d..f189a4ff9cb6f7cc26141a7740cfcc5cfcf1ccc4 100644
 --- a/gcc/gcc.c
 +++ b/gcc/gcc.c
-@@ -9511,22 +9511,25 @@ print_asm_header_spec_function (int arg ATTRIBUTE_UNUSED,
+@@ -9546,22 +9546,25 @@ print_asm_header_spec_function (int arg ATTRIBUTE_UNUSED,
  /* Get a random number for -frandom-seed */
  
  static unsigned HOST_WIDE_INT
@@ -40,7 +40,7 @@ index e88e6d3497c13a4e9a5d92d71de6128678ec546f..eb56ea7242ab51c941b88d72f8dee2a0
      struct timeval tv;
  
 diff --git a/gcc/toplev.c b/gcc/toplev.c
-index 8979d2634260b1e5ad1183ed26da444c47cd3631..de6cdfc5dfdadbef3851fa842d6566648720ffa7 100644
+index 3d4137b7c7b91490e63c3e0620058bd6f65b47c9..8a1ffe877f0e7d0166781cb7b5cc2f1f03c5a431 100644
 --- a/gcc/toplev.c
 +++ b/gcc/toplev.c
 @@ -238,22 +238,22 @@ static void
@@ -69,5 +69,5 @@ index 8979d2634260b1e5ad1183ed26da444c47cd3631..de6cdfc5dfdadbef3851fa842d656664
  
  	gettimeofday (&tv, NULL);
 -- 
-2.16.2
+2.11.0
 

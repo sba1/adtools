@@ -1,4 +1,4 @@
-From 96a743cfbc5a16aa4f89697db64e3299bdeba16d Mon Sep 17 00:00:00 2001
+From 39b6dbe03d05b8e24d8d81641b23b0aab886d87d Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Tue, 3 Apr 2018 19:52:01 +0200
 Subject: [PATCH 12/12] Add amigaos-stdint.h for libatomic.
@@ -10,10 +10,10 @@ Subject: [PATCH 12/12] Add amigaos-stdint.h for libatomic.
  copy gcc/config/{dragonfly-stdint.h => amigaos-stdint.h} (95%)
 
 diff --git a/gcc/config.gcc b/gcc/config.gcc
-index 3699a9831cccbb6a74ed0f8b2ddf5574bee1f086..530d56de04360f93a9d8034a7f8edc7fe8536ef1 100644
+index ec2f3ce8eae0f4b16f27e954c1575dc84fe8e9ce..74a4bdf85185873dc93d70e116347f2606a27a42 100644
 --- a/gcc/config.gcc
 +++ b/gcc/config.gcc
-@@ -2295,13 +2295,13 @@ nvptx-*)
+@@ -2309,13 +2309,13 @@ nvptx-*)
  	;;
  pdp11-*-*)
  	tm_file="${tm_file} newlib-stdint.h"
@@ -47,5 +47,5 @@ index 23e94752d3dd84da609e3f5dd9caf8c5008a1d57..7d5248b96c92ee5c66410172ab93488e
  GCC is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
 -- 
-2.16.2
+2.11.0
 
