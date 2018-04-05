@@ -1,7 +1,7 @@
 From 09efc25117a103b97e6ee491027cae795048b970 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Wed, 4 Apr 2018 10:34:04 +0200
-Subject: [PATCH 13/15] Use -idirafter instead of -isystem.
+Subject: [PATCH 13/16] Use -idirafter instead of -isystem.
 
 This makes sure that the custom include dirs are added at the end of the
 search path list. This is required for fixincludes and gcc 6 libstdc++.
