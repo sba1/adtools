@@ -1,7 +1,7 @@
-From b451093207482460be77eb1cc393bd1ede0affdc Mon Sep 17 00:00:00 2001
+From f05d3f9ba003b8adadcc17c2dce49af8fb371f65 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Tue, 17 Feb 2015 20:25:55 +0100
-Subject: [PATCH 01/16] Changes for AmigaOS version of gcc.
+Subject: [PATCH 01/15] Changes for AmigaOS version of gcc.
 
 ---
  fixincludes/configure                 |    1 +
@@ -13,7 +13,7 @@ Subject: [PATCH 01/16] Changes for AmigaOS version of gcc.
  gcc/config.host                       |    6 +
  gcc/config/rs6000/amigaos-protos.h    |   41 +
  gcc/config/rs6000/amigaos.c           |  463 +++++++++
- gcc/config/rs6000/amigaos.h           |  426 ++++++++
+ gcc/config/rs6000/amigaos.h           |  433 ++++++++
  gcc/config/rs6000/amigaos.opt         |   37 +
  gcc/config/rs6000/rs6000-builtin.def  |    7 +
  gcc/config/rs6000/rs6000.c            |  176 +++-
@@ -43,7 +43,7 @@ Subject: [PATCH 01/16] Changes for AmigaOS version of gcc.
  libstdc++-v3/crossconfig.m4           |    8 +
  libstdc++-v3/include/c_global/cstddef |    3 +
  libstdc++-v3/include/c_std/cstddef    |    3 +
- 39 files changed, 3897 insertions(+), 77 deletions(-)
+ 39 files changed, 3904 insertions(+), 77 deletions(-)
  create mode 100644 gcc/config/rs6000/amigaos-protos.h
  create mode 100644 gcc/config/rs6000/amigaos.c
  create mode 100644 gcc/config/rs6000/amigaos.h
@@ -796,10 +796,10 @@ index 0000000000000000000000000000000000000000..a6da7d543241e2fc8cf51a952633c62e
 +}
 diff --git a/gcc/config/rs6000/amigaos.h b/gcc/config/rs6000/amigaos.h
 new file mode 100644
-index 0000000000000000000000000000000000000000..94fa93c0be047c08987d7acbc7c71413e164014c
+index 0000000000000000000000000000000000000000..0d06f2dd48c7d97bbd192b26d530b18bc3029665
 --- /dev/null
 +++ b/gcc/config/rs6000/amigaos.h
-@@ -0,0 +1,426 @@
+@@ -0,0 +1,433 @@
 +/* Definitions of target machine for GNU compiler, for AmigaOS.
 +   Copyright (C) 1997, 2003, 2005 Free Software Foundation, Inc.
 +
@@ -977,10 +977,17 @@ index 0000000000000000000000000000000000000000..94fa93c0be047c08987d7acbc7c71413
 +#define MULTILIB_DEFAULTS {"mcrt=clib2"}
 +#endif
 +
++
++/* For specifying the include system paths, we generally use -idirafter so the include
++ * paths are added at the end of the gcc default include paths. This is required for
++ * fixincludes and libstdc++ to work properly
++ */
++
++
 +/* clib2 */
 +
 +#define CPP_CLIB2_SPEC "\
-+-isystem %(base_sdk)clib2/include -isystem %(base_sdk)local/clib2/include"
++-idirafter %(base_sdk)clib2/include -idirafter %(base_sdk)local/clib2/include"
 +
 +#define LIB_SUBDIR_CLIB2_SPEC "%{mcrt=clib2-ts:lib.threadsafe; :lib}%(lib_subdir_type)"
 +
@@ -1002,7 +1009,7 @@ index 0000000000000000000000000000000000000000..94fa93c0be047c08987d7acbc7c71413
 +/* ixemul */
 +
 +#define CPP_IXEMUL_SPEC "\
-+-isystem %(base_sdk)ixemul/include -isystem %(base_sdk)local/ixemul/include"
++-idirafter %(base_sdk)ixemul/include -idirafter %(base_sdk)local/ixemul/include"
 +
 +#define LIB_SUBDIR_IXEMUL_SPEC "lib%(lib_subdir_type)"
 +
@@ -1018,7 +1025,7 @@ index 0000000000000000000000000000000000000000..94fa93c0be047c08987d7acbc7c71413
 +/* libnix */
 +
 +#define CPP_LIBNIX_SPEC "\
-+-isystem %(base_sdk)libnix/include -isystem %(base_sdk)local/libnix/include"
++-idirafter %(base_sdk)libnix/include -idirafter %(base_sdk)local/libnix/include"
 +
 +#define LIB_SUBDIR_LIBNIX_SPEC "lib%(lib_subdir_type)"
 +
@@ -1033,7 +1040,7 @@ index 0000000000000000000000000000000000000000..94fa93c0be047c08987d7acbc7c71413
 +/* newlib */
 +
 +#define CPP_NEWLIB_SPEC "\
-+-isystem %(base_sdk)newlib/include -isystem %(base_sdk)local/newlib/include"
++-idirafter %(base_sdk)newlib/include -idirafter %(base_sdk)local/newlib/include"
 +
 +#define LIB_SUBDIR_NEWLIB_SPEC "lib%(lib_subdir_type)"
 +
@@ -1059,9 +1066,9 @@ index 0000000000000000000000000000000000000000..94fa93c0be047c08987d7acbc7c71413
 +mcrt=newlib: %(cpp_newlib); \
 +mcrt=default|!mcrt=*: %{mcrt=default|!nostdinc: %(cpp_amiga_default)}; \
 +: %eInvalid C runtime library} \
-+-isystem %(base_sdk)include/include_h \
-+-isystem %(base_sdk)include/netinclude \
-+-isystem %(base_sdk)local/common/include \
++-idirafter %(base_sdk)include/include_h \
++-idirafter %(base_sdk)include/netinclude \
++-idirafter %(base_sdk)local/common/include \
 +%{mbaserel: %{msdata|msdata=default|msdata=sysv: %e-mbaserel and -msdata options are incompatible}} \
 +%{newlib: %e-newlib is obsolete, use -mcrt=newlib instead}"
 +
