@@ -314,6 +314,7 @@ private-native-separate-dist:
 # Strip native files
 #
 native-strip:
+# Invoke make recursively with another target so that $(wildcard) is properly resolved.
 	$(MAKE) native-strip-really
 
 native-strip-really:
