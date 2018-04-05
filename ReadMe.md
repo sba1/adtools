@@ -183,5 +183,38 @@ the build process will write to this directory.
 
 ### Packaging
 
+#### For AmigaOS
+
+For creating an AmigaOS distribution archive, the ```makefile``` in the
+```native-build``` folder is used as well. One prerequiste is that you
+provide the current user access to a ```/gcc``` folder, e.g., via
+```
+ $ su
+ $ mkdir /gcc
+ $ chown <user> /gcc
+```
+
+Then, being in the ```native-build``` folder, enter
+
+```
+ $ make native-install
+...
+ $ make native-dist
+...
+ $ make clib2-dist
+...
+```
+
+This will write some files into ```/gcc``` folder and create the
+distribution archives suitable for ```lha``` for the entire toolchain
+inclusive a custom archive for the clib2 static link library. List them
+via
+```
+ $ ls *.lha
+adtools-os4-20180405-458.lha  adtools-os4-clib2-20180405-458.lha
+```
+
+#### For Debian-based distributions
+
 Debian packaging is provided in ```packaging/deb```. There also some Docker
 scripts, however, they may not work correctly at the moment.
