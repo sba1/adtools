@@ -267,12 +267,46 @@ ReadMe: ReadMe.mak
 	" >$@.utf8
 	iconv --from-code=UTF8 --to-code=ISO-8859-15 $@.utf8 >$@
 
+# Function to make a file whose name is prefixed by the target alias
+# but which is the same as the given one.
+#
+# We use cp here until we know that softlinks would work properly.
+define MAKE_TARGET_ALIAS =
+	cp /gcc/bin/$(1) /gcc/bin/ppc-amigaos-$(1)
+endef
+
+# A simple macro for inserting a newline
+define NL =
+
+
+endef
+
+BINUTILS_EXES = \
+	addr2line \
+	ar \
+	as \
+	c++filt \
+	elfedit \
+	gprof \
+	ld \
+	ld.bfd \
+	nm \
+	objcopy \
+	objdump \
+	ranlib \
+	readelf \
+	size \
+	strings \
+	strip
+
 #
 # Install native compiler into /gcc. Needs write access to this directory
 #
 native-install: coreutils-native-done gcc-native-done-$(GCC_VERSION) ReadMe
 	rm -Rf /gcc/*
 	PATH="$(CROSS_PREFIX)/bin:$(PATH)" $(MAKE) -C binutils-native-build-$(BINUTILS_VERSION) install
+# Create copies of few files that usually are also accessible via a filename with the target alias prefix
+	$(foreach EXE, $(BINUTILS_EXES), $(call MAKE_TARGET_ALIAS,$(EXE))$(NL))
 	PATH="$(CROSS_PREFIX)/bin:$(PATH)" $(MAKE) -C gcc-native-build-$(GCC_VERSION) install
 	PATH="$(CROSS_PREFIX)/bin:$(PATH)" $(MAKE) -C coreutils-native-build install
 # Disabled SDK as we don't want to distribute it
