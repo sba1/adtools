@@ -1,19 +1,19 @@
-From 5190256d77f2bb13594a1003c7a378c489f92668 Mon Sep 17 00:00:00 2001
+From 82efd160413842864b60c48e91db8b8691ce4c52 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Tue, 3 Apr 2018 19:52:01 +0200
 Subject: [PATCH 12/15] Add amigaos-stdint.h for libatomic.
 
 ---
  gcc/config.gcc                                      | 2 +-
- gcc/config/{dragonfly-stdint.h => amigaos-stdint.h} | 3 ++-
- 2 files changed, 3 insertions(+), 2 deletions(-)
- copy gcc/config/{dragonfly-stdint.h => amigaos-stdint.h} (95%)
+ gcc/config/{dragonfly-stdint.h => amigaos-stdint.h} | 7 ++++---
+ 2 files changed, 5 insertions(+), 4 deletions(-)
+ copy gcc/config/{dragonfly-stdint.h => amigaos-stdint.h} (90%)
 
 diff --git a/gcc/config.gcc b/gcc/config.gcc
-index ec2f3ce8eae0f4b16f27e954c1575dc84fe8e9ce..74a4bdf85185873dc93d70e116347f2606a27a42 100644
+index 04a24dd757685aeab26d60d14b1f56e1394170f8..297392334c4ef03b566c14f2c59213ab20ca60b1 100644
 --- a/gcc/config.gcc
 +++ b/gcc/config.gcc
-@@ -2309,13 +2309,13 @@ nvptx-*)
+@@ -2363,13 +2363,13 @@ nvptx-*)
  	;;
  pdp11-*-*)
  	tm_file="${tm_file} newlib-stdint.h"
@@ -29,23 +29,26 @@ index ec2f3ce8eae0f4b16f27e954c1575dc84fe8e9ce..74a4bdf85185873dc93d70e116347f26
  	use_collect2=no
  	;;
 diff --git a/gcc/config/dragonfly-stdint.h b/gcc/config/amigaos-stdint.h
-similarity index 95%
+similarity index 90%
 copy from gcc/config/dragonfly-stdint.h
 copy to gcc/config/amigaos-stdint.h
-index 23e94752d3dd84da609e3f5dd9caf8c5008a1d57..7d5248b96c92ee5c66410172ab93488e9c266407 100644
+index d29dd8c54530f003c20786c9261159de83276d8e..854009ca098f9dff59be936425a565dd842a3cd7 100644
 --- a/gcc/config/dragonfly-stdint.h
 +++ b/gcc/config/amigaos-stdint.h
-@@ -1,8 +1,9 @@
+@@ -1,9 +1,10 @@
 -/* Definitions for <stdint.h> types for DragonFly systems.
+-   Copyright (C) 2014-2018 Free Software Foundation, Inc.
+-   Contributed by John Marino <gnugcc@marino.st>
 +/* Definitions for <stdint.h> types for AmigaOS systems.
-    Copyright (C) 2014-2016 Free Software Foundation, Inc.
++   Copyright (C) 2014-2016 Free Software Foundation, Inc.
 +   Based on the types of the dragon fly bsd that was
-    Contributed by John Marino <gnugcc@marino.st>
++   contributed by John Marino <gnugcc@marino.st>
  
  This file is part of GCC.
  
  GCC is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 3, or (at your option)
 -- 
-2.11.0
+2.16.2
 

@@ -1,4 +1,4 @@
-From cc7b0164adf2e5ce5c4fa396c4974fb8061542eb Mon Sep 17 00:00:00 2001
+From 89aedb96c3901cb51528d43e23ff2cd05b78587c Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Mon, 30 Jan 2017 20:49:17 +0100
 Subject: [PATCH 09/15] Added e500 support for AmigaOS.
@@ -8,10 +8,10 @@ Subject: [PATCH 09/15] Added e500 support for AmigaOS.
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/gcc/config.gcc b/gcc/config.gcc
-index 568f207eed3c16d4b772b47a7d7273de801977e1..ec2f3ce8eae0f4b16f27e954c1575dc84fe8e9ce 100644
+index 16fde2c488613b80b27dc563869eb284d2928fa8..04a24dd757685aeab26d60d14b1f56e1394170f8 100644
 --- a/gcc/config.gcc
 +++ b/gcc/config.gcc
-@@ -2309,13 +2309,13 @@ nvptx-*)
+@@ -2363,13 +2363,13 @@ nvptx-*)
  	;;
  pdp11-*-*)
  	tm_file="${tm_file} newlib-stdint.h"
@@ -27,5 +27,5 @@ index 568f207eed3c16d4b772b47a7d7273de801977e1..ec2f3ce8eae0f4b16f27e954c1575dc8
  	use_collect2=no
  	;;
 -- 
-2.11.0
+2.16.2
 

@@ -1,4 +1,4 @@
-From 3f3f933751d784b005d7d4d882e7b6d8e5f4e468 Mon Sep 17 00:00:00 2001
+From d70d338732911da7fd693bd98b7d6c3e47afb1c4 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 14 Nov 2014 20:03:56 +0100
 Subject: [PATCH 02/15] Added new function attribute "lineartags" and pragma
@@ -38,10 +38,10 @@ functions.
  5 files changed, 171 insertions(+)
 
 diff --git a/gcc/c-family/c-pragma.c b/gcc/c-family/c-pragma.c
-index c73aa8221049b85949b0b62e88f58120e43aa39d..6cda91994f9140398841610063c297735b797863 100644
+index 84e4341ee5f0594515ff564d39a9073ed9f42466..d22bf0ae4c2ae578274b52e71e1e5d942cc18179 100644
 --- a/gcc/c-family/c-pragma.c
 +++ b/gcc/c-family/c-pragma.c
-@@ -1124,12 +1124,21 @@ handle_pragma_message (cpp_reader *ARG_UNUSED(dummy))
+@@ -1138,12 +1138,21 @@ handle_pragma_message (cpp_reader *ARG_UNUSED(dummy))
      warning (OPT_Wpragmas, "junk at end of %<#pragma message%>");
  
    if (TREE_STRING_LENGTH (message) > 1)
@@ -63,7 +63,7 @@ index c73aa8221049b85949b0b62e88f58120e43aa39d..6cda91994f9140398841610063c29773
  
  void
  mark_valid_location_for_stdc_pragma (bool flag)
-@@ -1555,12 +1564,13 @@ init_pragma (void)
+@@ -1551,12 +1560,13 @@ init_pragma (void)
  
    c_register_pragma_with_expansion (0, "redefine_extname",
  				    handle_pragma_redefine_extname);
@@ -78,10 +78,10 @@ index c73aa8221049b85949b0b62e88f58120e43aa39d..6cda91994f9140398841610063c29773
    global_sso = default_sso;
    c_register_pragma (0, "scalar_storage_order", 
 diff --git a/gcc/c/c-parser.c b/gcc/c/c-parser.c
-index 4044bb58c8763c9de8f80038735fdc6950ed2f53..c9552a160f892c5e314b76535d3c540726746ee3 100644
+index 47720861d3f22ea1ec414c0f134004b355798df3..2402da0ce1d38d16739ca90860022268117de326 100644
 --- a/gcc/c/c-parser.c
 +++ b/gcc/c/c-parser.c
-@@ -84,12 +84,74 @@ set_c_expr_source_range (c_expr *expr,
+@@ -94,12 +94,74 @@ set_c_expr_source_range (c_expr *expr,
  {
    expr->src_range = src_range;
    if (expr->value)
@@ -156,7 +156,7 @@ index 4044bb58c8763c9de8f80038735fdc6950ed2f53..c9552a160f892c5e314b76535d3c5407
  void
  c_parse_init (void)
  {
-@@ -2514,12 +2576,15 @@ c_parser_declspecs (c_parser *parser, struct c_declspecs *specs,
+@@ -2755,12 +2817,15 @@ c_parser_declspecs (c_parser *parser, struct c_declspecs *specs,
  	    goto out;
  	  attrs_ok = true;
  	  seen_type = true;
@@ -172,13 +172,13 @@ index 4044bb58c8763c9de8f80038735fdc6950ed2f53..c9552a160f892c5e314b76535d3c5407
  	  if (!typespec_ok)
  	    goto out;
  	  attrs_ok = true;
-@@ -10011,12 +10076,32 @@ c_parser_objc_at_dynamic_declaration (c_parser *parser)
+@@ -10915,12 +10980,32 @@ c_parser_pragma_unroll (c_parser *parser)
      }
-   c_parser_skip_until_found (parser, CPP_SEMICOLON, "expected %<;%>");
-   objc_add_dynamic_declaration (loc, list);
+ 
+   c_parser_skip_to_pragma_eol (parser);
+   return unroll;
  }
  
- 
 +/**
 + * This function is called whenever a declaration was finished that was preceded
 + * by a tagtype pragma.
@@ -205,7 +205,7 @@ index 4044bb58c8763c9de8f80038735fdc6950ed2f53..c9552a160f892c5e314b76535d3c5407
     true if we actually parsed such a pragma.  */
  
  static bool
-@@ -10210,12 +10295,56 @@ c_parser_pragma (c_parser *parser, enum pragma_context context, bool *if_p)
+@@ -11136,12 +11221,56 @@ c_parser_pragma (c_parser *parser, enum pragma_context context, bool *if_p)
        break;
      }
  
@@ -263,15 +263,15 @@ index 4044bb58c8763c9de8f80038735fdc6950ed2f53..c9552a160f892c5e314b76535d3c5407
    c_parser_skip_to_pragma_eol (parser);
  
 diff --git a/gcc/c/c-typeck.c b/gcc/c/c-typeck.c
-index 796eacb58db89d20b575c597b6fba02afa979316..6877ebad2478c879e70207abaa9e36461f3b5858 100644
+index 7bf360ddc98fa57be91b046f43e09568643b0618..0d6fa12c64dd31d00ce4a693f528d585ea532056 100644
 --- a/gcc/c/c-typeck.c
 +++ b/gcc/c/c-typeck.c
-@@ -3169,12 +3169,14 @@ convert_arguments (location_t loc, vec<location_t> arg_loc, tree typelist,
-   unsigned int parmnum;
+@@ -3235,12 +3235,14 @@ convert_arguments (location_t loc, vec<location_t> arg_loc, tree typelist,
    bool error_args = false;
    const bool type_generic = fundecl
      && lookup_attribute ("type generic", TYPE_ATTRIBUTES (TREE_TYPE (fundecl)));
    bool type_generic_remove_excess_precision = false;
+   bool type_generic_overflow_p = false;
    tree selector;
 +  const bool lineartags = fundecl
 +    && lookup_attribute ("lineartags", TYPE_ATTRIBUTES (TREE_TYPE (fundecl)));
@@ -281,9 +281,9 @@ index 796eacb58db89d20b575c597b6fba02afa979316..6877ebad2478c879e70207abaa9e3646
    if (TREE_CODE (function) == ADDR_EXPR
        && TREE_CODE (TREE_OPERAND (function, 0)) == FUNCTION_DECL)
      function = TREE_OPERAND (function, 0);
-@@ -3208,12 +3210,14 @@ convert_arguments (location_t loc, vec<location_t> arg_loc, tree typelist,
-   if (flag_cilkplus && fundecl && is_cilkplus_reduce_builtin (fundecl))
-     return vec_safe_length (values);
+@@ -3279,12 +3281,14 @@ convert_arguments (location_t loc, vec<location_t> arg_loc, tree typelist,
+ 	}
+     }
  
    /* Scan the given expressions and types, producing individual
       converted arguments.  */
@@ -296,17 +296,17 @@ index 796eacb58db89d20b575c597b6fba02afa979316..6877ebad2478c879e70207abaa9e3646
      {
        tree type = typetail ? TREE_VALUE (typetail) : 0;
        tree valtype = TREE_TYPE (val);
-@@ -3262,12 +3266,32 @@ convert_arguments (location_t loc, vec<location_t> arg_loc, tree typelist,
+@@ -3357,12 +3361,32 @@ convert_arguments (location_t loc, vec<location_t> arg_loc, tree typelist,
+ 	      {
+ 		promote_float_arg = false;
+ 		break;
+ 	      }
  	}
-       val = c_fully_fold (val, false, NULL);
-       STRIP_TYPE_NOPS (val);
- 
-       val = require_complete_type (val);
  
 +      /* If this is a function call with linear tags try to improve the expected
 +       * type on base of recorded tag <-> type mapping.
 +       */
-+      if (lineartags && type == 0)
++      if (lineartags && type == NULL_TREE)
 +        {
 +          extern tree amigaos_get_type_associated_tagtype(tree type);
 +
@@ -323,7 +323,7 @@ index 796eacb58db89d20b575c597b6fba02afa979316..6877ebad2478c879e70207abaa9e3646
 +            }
 +        }
 +
-       if (type != 0)
+       if (type != NULL_TREE)
  	{
  	  /* Formal parm type is specified by a function prototype.  */
  
@@ -372,5 +372,5 @@ index a6da7d543241e2fc8cf51a952633c62e19d7d875..797261177e46a34ac0aba97f2b9c2b8a
  amigaos_legitimize_baserel_address (rtx addr)
  {
 -- 
-2.11.0
+2.16.2
 

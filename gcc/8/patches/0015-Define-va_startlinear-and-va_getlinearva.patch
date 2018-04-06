@@ -1,4 +1,4 @@
-From e3382a3cf62571df89402542268cc17ec92f5ea8 Mon Sep 17 00:00:00 2001
+From e1d7782c196e802e8d59b69e8dbfa7d380053be9 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Thu, 5 Apr 2018 19:56:45 +0200
 Subject: [PATCH 15/15] Define va_startlinear and va_getlinearva.
@@ -10,7 +10,7 @@ changed the include path order, clibs' stdarg.h is never included.
  1 file changed, 14 insertions(+)
 
 diff --git a/gcc/ginclude/stdarg.h b/gcc/ginclude/stdarg.h
-index 65251522ad46df427b043031bedba5b3fdd81543..fd586e16a025870494e68ab3af210b634189e2fe 100644
+index e4c73fd23a271b0b452cece0212ff244d2b55d48..46a5a4cc6012b9ab7ea973ce89150f378dbdafd6 100644
 --- a/gcc/ginclude/stdarg.h
 +++ b/gcc/ginclude/stdarg.h
 @@ -61,12 +61,26 @@ typedef __builtin_va_list __gnuc_va_list;
@@ -41,5 +41,5 @@ index 65251522ad46df427b043031bedba5b3fdd81543..fd586e16a025870494e68ab3af210b63
     have no conflict with that.  */
  #ifndef _VA_LIST_
 -- 
-2.11.0
+2.16.2
 

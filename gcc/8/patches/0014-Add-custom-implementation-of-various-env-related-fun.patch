@@ -1,4 +1,4 @@
-From 4a16b689af16e4372a00b2e14933c27261ad1b2d Mon Sep 17 00:00:00 2001
+From d33542641d7c3f7dc9f54f79e5c4cc98c7095530 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Wed, 4 Apr 2018 23:50:48 +0200
 Subject: [PATCH 14/15] Add custom implementation of various env-related
@@ -17,16 +17,16 @@ part of the clib like putenv().
  create mode 100644 libiberty/setenv-amigaos.c
 
 diff --git a/libiberty/Makefile.in b/libiberty/Makefile.in
-index bc954c353775b59b904dd5a9d8648083ce538848..c65838b149ac0965b2aec71be937aeaf0c66f2ce 100644
+index fa4f5f17cb5d9d6d78b3c071c738dec302193927..1ae667200cae3c076cc302b2685e3a07271a5300 100644
 --- a/libiberty/Makefile.in
 +++ b/libiberty/Makefile.in
-@@ -144,13 +144,13 @@ CFILES = alloca.c argv.c asprintf.c atexit.c				\
- 	partition.c pexecute.c						\
+@@ -143,13 +143,13 @@ CFILES = alloca.c argv.c asprintf.c atexit.c				\
  	 pex-common.c pex-djgpp.c pex-msdos.c pex-one.c			\
  	 pex-unix.c pex-win32.c						\
  	 pex-amigaos.c		\
           physmem.c putenv.c						\
  	random.c regex.c rename.c rindex.c				\
+ 	rust-demangle.c							\
 -	safe-ctype.c setenv.c setproctitle.c sha1.c sigsetmask.c        \
 +	safe-ctype.c setenv.c setenv-amigaos.c setproctitle.c sha1.c sigsetmask.c        \
  	 simple-object.c simple-object-coff.c simple-object-elf.c	\
@@ -50,7 +50,7 @@ index bc954c353775b59b904dd5a9d8648083ce538848..c65838b149ac0965b2aec71be937aeaf
  	 ./strchr.$(objext) ./strdup.$(objext) ./strncasecmp.$(objext)	\
  	 ./strncmp.$(objext) ./strndup.$(objext) ./strnlen.$(objext)	\
  	 ./strrchr.$(objext) ./strstr.$(objext) ./strtod.$(objext)	\
-@@ -1211,12 +1211,21 @@ $(CONFIGURED_OFILES): stamp-picdir stamp-noasandir
+@@ -1223,12 +1223,21 @@ $(CONFIGURED_OFILES): stamp-picdir stamp-noasandir
  	else true; fi
  	if [ x"$(NOASANFLAG)" != x ]; then \
  	  $(COMPILE.c) $(PICFLAG) $(NOASANFLAG) $(srcdir)/safe-ctype.c -o noasan/$@; \
@@ -73,10 +73,10 @@ index bc954c353775b59b904dd5a9d8648083ce538848..c65838b149ac0965b2aec71be937aeaf
  	else true; fi
  	if [ x"$(NOASANFLAG)" != x ]; then \
 diff --git a/libiberty/configure b/libiberty/configure
-index 31b6bb40db646f3c5a6cc4e02b766f069e66e7cf..f72e5005b4ab83cf6d6b2e136ed7515d6c2eaa29 100755
+index bd81dc14b615c8f305a62f6a4b12926a0eb6752b..8d7e7670ffd68fddb11c8e57aae2edf2a1c30f00 100755
 --- a/libiberty/configure
 +++ b/libiberty/configure
-@@ -6285,12 +6285,23 @@ if test -z "${setobjs}"; then
+@@ -6296,12 +6296,23 @@ if test -z "${setobjs}"; then
    *-*-android*)
      # On android, getpagesize is defined in unistd.h as a static inline
      # function, which AC_CHECK_FUNCS does not handle properly.
@@ -101,10 +101,10 @@ index 31b6bb40db646f3c5a6cc4e02b766f069e66e7cf..f72e5005b4ab83cf6d6b2e136ed7515d
      libiberty_cv_var_sys_errlist=yes
      ;;
 diff --git a/libiberty/configure.ac b/libiberty/configure.ac
-index 4b921054786e0260add9796888b7ffb79f2f5bab..4ae698331038d287abe132b63c0cbeca9dd55666 100644
+index e0edfb00ac01b1090151a6039b4888b2809ff452..bf659d099e9cdfa030ec2d90e7992d6840dc2809 100644
 --- a/libiberty/configure.ac
 +++ b/libiberty/configure.ac
-@@ -604,12 +604,18 @@ if test -z "${setobjs}"; then
+@@ -605,12 +605,18 @@ if test -z "${setobjs}"; then
    *-*-android*)
      # On android, getpagesize is defined in unistd.h as a static inline
      # function, which AC_CHECK_FUNCS does not handle properly.
@@ -204,5 +204,5 @@ index 0000000000000000000000000000000000000000..dc9a460737538d74558bb43c21c21e61
 +	return lvar->lv_Value;
 +}
 -- 
-2.11.0
+2.16.2
 

@@ -1,4 +1,4 @@
-From 3fa92200fb1c0b3f0c9334a5cd0d6b01d7a00c7f Mon Sep 17 00:00:00 2001
+From daa1435f696e14621f896174087227ca68487b95 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Sat, 4 Mar 2017 07:39:21 +0100
 Subject: [PATCH 11/15] Pretend C99 compatibility.
@@ -30,10 +30,10 @@ index 346f063958cd7e80ebf97be4acee0bdf391cb811..6b67630b7be7102a9dfb7c104deac629
  
  #endif
 diff --git a/libstdc++-v3/include/bits/basic_string.h b/libstdc++-v3/include/bits/basic_string.h
-index 0352bf49fdcb66996b4a8ad4f9cbd65a50e373af..a76b2ebfd4c9fca966bf058a921066ba04cac07a 100644
+index 3e8310e762cd986b1f9ee77488e0445693f50cf2..c8020fa9f30ad40bff70810b3abddc5b959dff58 100644
 --- a/libstdc++-v3/include/bits/basic_string.h
 +++ b/libstdc++-v3/include/bits/basic_string.h
-@@ -5454,15 +5454,18 @@ _GLIBCXX_BEGIN_NAMESPACE_CXX11
+@@ -6398,15 +6398,18 @@ _GLIBCXX_BEGIN_NAMESPACE_CXX11
    { return __gnu_cxx::__stoa(&std::strtof, "stof", __str.c_str(), __idx); }
  
    inline double
@@ -53,10 +53,10 @@ index 0352bf49fdcb66996b4a8ad4f9cbd65a50e373af..a76b2ebfd4c9fca966bf058a921066ba
  
    // DR 1261.
 diff --git a/libstdc++-v3/include/c_global/cstdlib b/libstdc++-v3/include/c_global/cstdlib
-index 1ba5fb7f03ad509d7663ad610c250a72789b02a3..66862e087ee9abee00a6bb06cad058e489d01cdc 100644
+index 10335017f0c4261c02b0b4d87c15b9a8572e6a61..fb5ae1889b288097f793396f35a9b65c2acf9fbb 100644
 --- a/libstdc++-v3/include/c_global/cstdlib
 +++ b/libstdc++-v3/include/c_global/cstdlib
-@@ -207,13 +207,17 @@ _GLIBCXX_END_NAMESPACE_VERSION
+@@ -187,13 +187,17 @@ _GLIBCXX_END_NAMESPACE_VERSION
  #undef llabs
  #undef lldiv
  #undef atoll
@@ -74,7 +74,7 @@ index 1ba5fb7f03ad509d7663ad610c250a72789b02a3..66862e087ee9abee00a6bb06cad058e4
  _GLIBCXX_BEGIN_NAMESPACE_VERSION
  
  #if !_GLIBCXX_USE_C99_LONG_LONG_DYNAMIC
-@@ -246,13 +250,15 @@ _GLIBCXX_BEGIN_NAMESPACE_VERSION
+@@ -226,13 +230,15 @@ _GLIBCXX_BEGIN_NAMESPACE_VERSION
  #if !_GLIBCXX_USE_C99_LONG_LONG_DYNAMIC
    using ::atoll;
    using ::strtoll;
@@ -90,7 +90,7 @@ index 1ba5fb7f03ad509d7663ad610c250a72789b02a3..66862e087ee9abee00a6bb06cad058e4
  
  namespace std
  {
-@@ -266,13 +272,15 @@ namespace std
+@@ -246,13 +252,15 @@ namespace std
    using ::__gnu_cxx::lldiv;
  #endif
    using ::__gnu_cxx::atoll;
@@ -107,5 +107,5 @@ index 1ba5fb7f03ad509d7663ad610c250a72789b02a3..66862e087ee9abee00a6bb06cad058e4
  } // extern "C++"
  
 -- 
-2.11.0
+2.16.2
 
