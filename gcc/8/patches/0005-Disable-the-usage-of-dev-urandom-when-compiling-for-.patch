@@ -1,0 +1,73 @@
+From 62d3dfdb923600322493466db16d178d688269d3 Mon Sep 17 00:00:00 2001
+From: Sebastian Bauer <mail@sebastianbauer.info>
+Date: Wed, 2 Dec 2015 21:39:42 +0100
+Subject: [PATCH 05/15] Disable the usage of /dev/urandom when compiling for
+ AmigaOS.
+
+---
+ gcc/gcc.c    | 3 +++
+ gcc/toplev.c | 4 ++--
+ 2 files changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/gcc/gcc.c b/gcc/gcc.c
+index 914b39a98be30b01ff6f9f13073ca8b6919a2c8d..f189a4ff9cb6f7cc26141a7740cfcc5cfcf1ccc4 100644
+--- a/gcc/gcc.c
++++ b/gcc/gcc.c
+@@ -9546,22 +9546,25 @@ print_asm_header_spec_function (int arg ATTRIBUTE_UNUSED,
+ /* Get a random number for -frandom-seed */
+ 
+ static unsigned HOST_WIDE_INT
+ get_random_number (void)
+ {
+   unsigned HOST_WIDE_INT ret = 0;
++
++#ifndef __amigaos4__
+   int fd; 
+ 
+   fd = open ("/dev/urandom", O_RDONLY); 
+   if (fd >= 0)
+     {
+       read (fd, &ret, sizeof (HOST_WIDE_INT));
+       close (fd);
+       if (ret)
+         return ret;
+     }
++#endif
+ 
+   /* Get some more or less random data.  */
+ #ifdef HAVE_GETTIMEOFDAY
+   {
+     struct timeval tv;
+ 
+diff --git a/gcc/toplev.c b/gcc/toplev.c
+index 3d4137b7c7b91490e63c3e0620058bd6f65b47c9..8a1ffe877f0e7d0166781cb7b5cc2f1f03c5a431 100644
+--- a/gcc/toplev.c
++++ b/gcc/toplev.c
+@@ -238,22 +238,22 @@ static void
+ init_local_tick (void)
+ {
+   if (!flag_random_seed)
+     {
+       /* Try urandom first. Time of day is too likely to collide. 
+ 	 In case of any error we just use the local tick. */
+-
++#ifndef __amigaos4__
+       int fd = open ("/dev/urandom", O_RDONLY);
+       if (fd >= 0)
+         {
+           if (read (fd, &random_seed, sizeof (random_seed))
+               != sizeof (random_seed))
+             random_seed = 0;
+           close (fd);
+         }
+-
++#endif
+       /* Now get the tick anyways  */
+ #ifdef HAVE_GETTIMEOFDAY
+       {
+ 	struct timeval tv;
+ 
+ 	gettimeofday (&tv, NULL);
+-- 
+2.11.0
+
