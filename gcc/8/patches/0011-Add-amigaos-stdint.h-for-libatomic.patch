@@ -1,7 +1,7 @@
-From 82efd160413842864b60c48e91db8b8691ce4c52 Mon Sep 17 00:00:00 2001
+From 8921059df13eb35226e2ffcf95f77a88b526630a Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Tue, 3 Apr 2018 19:52:01 +0200
-Subject: [PATCH 12/15] Add amigaos-stdint.h for libatomic.
+Subject: [PATCH 11/14] Add amigaos-stdint.h for libatomic.
 
 ---
  gcc/config.gcc                                      | 2 +-
@@ -10,7 +10,7 @@ Subject: [PATCH 12/15] Add amigaos-stdint.h for libatomic.
  copy gcc/config/{dragonfly-stdint.h => amigaos-stdint.h} (90%)
 
 diff --git a/gcc/config.gcc b/gcc/config.gcc
-index 04a24dd757685aeab26d60d14b1f56e1394170f8..297392334c4ef03b566c14f2c59213ab20ca60b1 100644
+index 16fde2c488613b80b27dc563869eb284d2928fa8..27eb8631c194ea848e42adb8c6e3fe7c45b9b94b 100644
 --- a/gcc/config.gcc
 +++ b/gcc/config.gcc
 @@ -2363,13 +2363,13 @@ nvptx-*)
@@ -20,8 +20,8 @@ index 04a24dd757685aeab26d60d14b1f56e1394170f8..297392334c4ef03b566c14f2c59213ab
  	use_gcc_stdint=wrap
  	;;
  powerpc-*-amigaos*)
--	tm_file="${tm_file} dbxelf.h elfos.h rs6000/sysv4.h rs6000/amigaos.h rs6000/e500.h"
-+	tm_file="${tm_file} dbxelf.h elfos.h amigaos-stdint.h rs6000/sysv4.h rs6000/amigaos.h rs6000/e500.h"
+-	tm_file="${tm_file} dbxelf.h elfos.h rs6000/sysv4.h rs6000/amigaos.h"
++	tm_file="${tm_file} dbxelf.h elfos.h amigaos-stdint.h rs6000/sysv4.h rs6000/amigaos.h"
  	tm_p_file="${tm_p_file} rs6000/amigaos-protos.h"
  	extra_options="${extra_options} rs6000/sysv4.opt rs6000/amigaos.opt"
  	tmake_file="rs6000/t-amigaos"
@@ -50,5 +50,5 @@ index d29dd8c54530f003c20786c9261159de83276d8e..854009ca098f9dff59be936425a565dd
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation; either version 3, or (at your option)
 -- 
-2.16.2
+2.11.0
 
