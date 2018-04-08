@@ -1,7 +1,7 @@
-From 766c0d3217802a4a9b8a1bd44e683182d63c229f Mon Sep 17 00:00:00 2001
+From 0da162ab6494a86ad4fe1359dd4b4a8083a48331 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Thu, 9 Jul 2015 06:54:37 +0200
-Subject: [PATCH 03/15] Disable .machine directive generation.
+Subject: [PATCH 03/14] Disable .machine directive generation.
 
 It breaks manual args to the assembler with different flavor,
 e.g., -Wa,-m440. This is probably not the right fix.
@@ -12,7 +12,7 @@ This reverts parts of a commit from 2015-03-03.
  1 file changed, 3 insertions(+)
 
 diff --git a/gcc/config/rs6000/rs6000.c b/gcc/config/rs6000/rs6000.c
-index 5deb6a2e6e64c14a6a6cecf14603bae236d73d9c..4df0e6b42a7372b9347697b7bd65d70c37179441 100644
+index 35a1a3c5fdaa728ccff1d969dba1e8c8ddfd0561..e7906a8f17c8a30b4bd536664979ae82ffc0501b 100644
 --- a/gcc/config/rs6000/rs6000.c
 +++ b/gcc/config/rs6000/rs6000.c
 @@ -6125,12 +6125,14 @@ rs6000_file_start (void)

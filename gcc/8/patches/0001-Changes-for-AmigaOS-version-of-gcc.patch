@@ -1,7 +1,7 @@
-From 87a2b602deddeebce4ce6c89353e3a17fbacfa39 Mon Sep 17 00:00:00 2001
+From 67bac1a7e0bc3980b923501c803792ebf2889c6f Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Tue, 17 Feb 2015 20:25:55 +0100
-Subject: [PATCH 01/15] Changes for AmigaOS version of gcc.
+Subject: [PATCH 01/14] Changes for AmigaOS version of gcc.
 
 ---
  fixincludes/configure                 |    1 +
@@ -12,8 +12,8 @@ Subject: [PATCH 01/15] Changes for AmigaOS version of gcc.
  gcc/config.gcc                        |    8 +
  gcc/config.host                       |    6 +
  gcc/config/rs6000/amigaos-protos.h    |   41 +
- gcc/config/rs6000/amigaos.c           |  463 +++++++++
- gcc/config/rs6000/amigaos.h           |  433 ++++++++
+ gcc/config/rs6000/amigaos.c           |  467 +++++++++
+ gcc/config/rs6000/amigaos.h           |  437 ++++++++
  gcc/config/rs6000/amigaos.opt         |   37 +
  gcc/config/rs6000/rs6000-builtin.def  |    7 +
  gcc/config/rs6000/rs6000.c            |  175 +++-
@@ -43,7 +43,7 @@ Subject: [PATCH 01/15] Changes for AmigaOS version of gcc.
  libstdc++-v3/crossconfig.m4           |    8 +
  libstdc++-v3/include/c_global/cstddef |    3 +
  libstdc++-v3/include/c_std/cstddef    |    3 +
- 39 files changed, 3893 insertions(+), 67 deletions(-)
+ 39 files changed, 3901 insertions(+), 67 deletions(-)
  create mode 100644 gcc/config/rs6000/amigaos-protos.h
  create mode 100644 gcc/config/rs6000/amigaos.c
  create mode 100644 gcc/config/rs6000/amigaos.h
@@ -107,7 +107,7 @@ index 20bee0494b1bad4e3ec34e2eae291cf6eadc3aa1..0f2d240c8cf50ed6901d2421ccb72b19
    -DDEFAULT_REAL_TARGET_MACHINE=\"$(real_target_noncanonical)\" \
    -DDEFAULT_TARGET_MACHINE=\"$(target_noncanonical)\" \
 diff --git a/gcc/c-family/c-attribs.c b/gcc/c-family/c-attribs.c
-index e0630885cca3610d6cc5453819355425c175e9e1..0722da8d3b2e461932574e8a27adec86b959e1d9 100644
+index e0630885cca3610d6cc5453819355425c175e9e1..ffba48ecddf12fbf073c34a7169fd0896cd4d6e0 100644
 --- a/gcc/c-family/c-attribs.c
 +++ b/gcc/c-family/c-attribs.c
 @@ -121,12 +121,13 @@ static tree handle_vector_size_attribute (tree *, tree, tree, int,
@@ -134,7 +134,7 @@ index e0630885cca3610d6cc5453819355425c175e9e1..0722da8d3b2e461932574e8a27adec86
 +  { "libcall",                0, 0, false, true, true, false,
 +                              handle_libcall_attribute, NULL },
 +  /* Similiar to libcall but doesn't imply linearvarargs. Can be handled as libcall here. */
-+  { "libcall2",               0, 0, false, true, true, false
++  { "libcall2",               0, 0, false, true, true, false,
 +                              handle_libcall_attribute, NULL },
    { "sentinel",               0, 1, false, true, true, false,
  			      handle_sentinel_attribute, NULL },
@@ -231,7 +231,7 @@ index ffd06447f1b555ca84e00b40bce0d00ad0433bb1..7bf360ddc98fa57be91b046f43e09568
  			     origtypes, function, fundecl);
    if (nargs < 0)
 diff --git a/gcc/config.gcc b/gcc/config.gcc
-index 75d0ae815fff90862707f2bf4f8808c47c0d70fd..16fde2c488613b80b27dc563869eb284d2928fa8 100644
+index 75d0ae815fff90862707f2bf4f8808c47c0d70fd..f64af0f789e8f89b328d8d4a6dc72ac21c5e62bd 100644
 --- a/gcc/config.gcc
 +++ b/gcc/config.gcc
 @@ -2362,12 +2362,20 @@ nvptx-*)
@@ -246,7 +246,7 @@ index 75d0ae815fff90862707f2bf4f8808c47c0d70fd..16fde2c488613b80b27dc563869eb284
 +	tm_p_file="${tm_p_file} rs6000/amigaos-protos.h"
 +	extra_options="${extra_options} rs6000/sysv4.opt rs6000/amigaos.opt"
 +	tmake_file="rs6000/t-amigaos"
-+	extra_objs=amigaos.o
++	extra_objs="$extra_objs amigaos.o"
 +	use_collect2=no
 +	;;
  # port not yet contributed
@@ -327,10 +327,10 @@ index 0000000000000000000000000000000000000000..eb5f8fc5f3d546b8d8e1cdd8118a3085
 +//#endif /* RTX_CODE */
 diff --git a/gcc/config/rs6000/amigaos.c b/gcc/config/rs6000/amigaos.c
 new file mode 100644
-index 0000000000000000000000000000000000000000..a6da7d543241e2fc8cf51a952633c62e19d7d875
+index 0000000000000000000000000000000000000000..ad8c0e64c056129afcd8bfa2a656749a2febfaaa
 --- /dev/null
 +++ b/gcc/config/rs6000/amigaos.c
-@@ -0,0 +1,463 @@
+@@ -0,0 +1,467 @@
 +/* Subroutines used for code generation on Amiga OS 4
 +   Copyright (C) 2003 Free Software Foundation, Inc.
 +   Contributed by Thomas Frieden (ThomasF@hyperion-entertainment.com)
@@ -360,6 +360,8 @@ index 0000000000000000000000000000000000000000..a6da7d543241e2fc8cf51a952633c62e
 +#include "tm.h"
 +#include "hash-set.h"
 +#include "inchash.h"
++#include "memmodel.h"
++#include "profile-count.h"
 +#include "rtl.h"
 +#include "regs.h"
 +#include "hard-reg-set.h"
@@ -383,6 +385,8 @@ index 0000000000000000000000000000000000000000..a6da7d543241e2fc8cf51a952633c62e
 +#include "langhooks.h"
 +#include "explow.h"
 +#include "emit-rtl.h"
++#include "stringpool.h"
++#include "attribs.h"
 +
 +#undef DEBUG
 +#ifdef DEBUG
@@ -796,10 +800,10 @@ index 0000000000000000000000000000000000000000..a6da7d543241e2fc8cf51a952633c62e
 +}
 diff --git a/gcc/config/rs6000/amigaos.h b/gcc/config/rs6000/amigaos.h
 new file mode 100644
-index 0000000000000000000000000000000000000000..0d06f2dd48c7d97bbd192b26d530b18bc3029665
+index 0000000000000000000000000000000000000000..1153ece337930f7bbf5f9978bf6f3faf2138bda6
 --- /dev/null
 +++ b/gcc/config/rs6000/amigaos.h
-@@ -0,0 +1,433 @@
+@@ -0,0 +1,437 @@
 +/* Definitions of target machine for GNU compiler, for AmigaOS.
 +   Copyright (C) 1997, 2003, 2005 Free Software Foundation, Inc.
 +
@@ -1195,12 +1199,14 @@ index 0000000000000000000000000000000000000000..0d06f2dd48c7d97bbd192b26d530b18b
 +  amigaos_init_builtins ()
 +
 +/* AmigaOS specific attribute */
++/* { name, min_len, max_len, decl_req, type_req, fn_type_req,
++       affects_type_identity, handler, exclude } */
 +#define SUBTARGET_ATTRIBUTE_TABLE \
-+  { "linearvarargs", 0, 0, false, true,  true, amigaos_handle_linearvarargs_attribute, false}, \
-+  { "lineartags", 0, 0, false, true, true, amigaos_handle_lineartags_attribute, false}, \
-+  { "baserel_restore", 0, 0, false, true, true, amigaos_handle_baserel_restore_attribute, false }, \
-+  { "force_no_baserel", 0, 0, true, false, false, amigaos_handle_force_no_baserel_attribute, false }, \
-+  { "check68kfuncptr", 0, 0, false, true, true, amigaos_handle_check68kfuncptr_attribute, false }
++  { "linearvarargs", 0, 0, false, true,  true, false, amigaos_handle_linearvarargs_attribute, NULL}, \
++  { "lineartags", 0, 0, false, true, true, false, amigaos_handle_lineartags_attribute, NULL}, \
++  { "baserel_restore", 0, 0, false, true, true, false, amigaos_handle_baserel_restore_attribute, NULL }, \
++  { "force_no_baserel", 0, 0, true, false, false, false, amigaos_handle_force_no_baserel_attribute, NULL }, \
++  { "check68kfuncptr", 0, 0, false, true, true, false, amigaos_handle_check68kfuncptr_attribute, NULL }
 +
 +/* Overrides */
 +/*
@@ -1224,12 +1230,14 @@ index 0000000000000000000000000000000000000000..0d06f2dd48c7d97bbd192b26d530b18b
 +#define EXPAND_BUILTIN_VA_START(VALIST, NEXTARG) \
 +  amigaos_expand_builtin_va_start (VALIST, NEXTARG)
 +
-+#undef SLOW_UNALIGNED_ACCESS
-+#define SLOW_UNALIGNED_ACCESS(MODE, ALIGN)				\
-+  (STRICT_ALIGNMENT							\
-+   || (((MODE) == SFmode) && (ALIGN) < 32)				\
-+   || (((MODE) == DFmode || (MODE) == TFmode || (MODE) == DImode)	\
-+       && (ALIGN) < 64))
++/*
++//#undef SLOW_UNALIGNED_ACCESS
++//#define SLOW_UNALIGNED_ACCESS(MODE, ALIGN)				\
++//  (STRICT_ALIGNMENT							\
++//   || (((MODE) == SFmode) && (ALIGN) < 32)				\
++//   || (((MODE) == DFmode || (MODE) == TFmode || (MODE) == DImode)	\
++//       && (ALIGN) < 64))
++*/
 +
 +/* This target uses the amigaos.opt file.  */
 +#define TARGET_USES_AMIGAOS_OPT 1
@@ -1295,7 +1303,7 @@ index 37f170d233f77e7d663613dc874582db2170c863..9fc236638dd961e7ba3dc8c020df5465
 +		    RS6000_BTC_MISC,		/* ATTR */	\
 +		    CODE_FOR_nothing)		/* ICODE */
 diff --git a/gcc/config/rs6000/rs6000.c b/gcc/config/rs6000/rs6000.c
-index 49ce4edebc301d01f0aec4ec9f4124250128a486..5deb6a2e6e64c14a6a6cecf14603bae236d73d9c 100644
+index 49ce4edebc301d01f0aec4ec9f4124250128a486..35a1a3c5fdaa728ccff1d969dba1e8c8ddfd0561 100644
 --- a/gcc/config/rs6000/rs6000.c
 +++ b/gcc/config/rs6000/rs6000.c
 @@ -141,12 +141,18 @@ typedef struct rs6000_stack {
@@ -1573,10 +1581,10 @@ index 49ce4edebc301d01f0aec4ec9f4124250128a486..5deb6a2e6e64c14a6a6cecf14603bae2
 +      && current_function_decl
 +      && lookup_attribute ("baserel_restore", TYPE_ATTRIBUTES (TREE_TYPE (current_function_decl))))
 +    {
-+      info_ptr->baserel_save_p = 1;
-+      info_ptr->baserel_size = reg_size;
++      info->baserel_save_p = 1;
++      info->baserel_size = reg_size;
 +      df_set_regs_ever_live(2,true);
-+      info_ptr->calls_p = 1;
++      info->calls_p = 1;
 +    }
 +#endif /* TARGET_BASEREL */
 +
