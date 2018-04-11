@@ -119,7 +119,8 @@ line path, you have access to the following commands:
  $ gild checkout gcc 6
  ```
  to checkout the version 6 branch of gcc and apply all adtools patches
- for this branch.
+ for this branch. The gild tool will attempt a shallow clone of the
+ remote repository if it doesn't exist locally.
 
  You should also invoke this command if you want to reapply the current
  set of patches (e.g., after pulling changed patch sets).
