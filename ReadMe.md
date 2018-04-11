@@ -122,7 +122,7 @@ line path, you have access to the following commands:
  for this branch.
 
  You should also invoke this command if you want to reapply the current
- set of patches (e.g., after pulling changed patch sets)
+ set of patches (e.g., after pulling changed patch sets).
 
 * ```gild genpatch```: will generate the patches between the base checkout
  and the current HEAD of the repo. The patches are written to the
