@@ -101,6 +101,7 @@ line path, you have access to the following commands:
  gcc 4.9
  gcc 5
  gcc 6
+ gcc 8
  ```
  shows that there are three components ```binutils```, ```coreutils```,
  and ```gcc```
