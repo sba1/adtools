@@ -109,7 +109,7 @@ line path, you have access to the following commands:
 * ```gild clone```: will fetch the external sources of all components into
  the respective ```repo``` directories. The checkout will not be affected.
 
-* ```gild checkout ```: will checkout for a specific component a specific
+* ```gild checkout```: will checkout for a specific component a specific
  branch to the working directory of the ```repo``` directory and apply
  the current patches for this branch. The result of this is what should
  be used for compiling. It can also be used to adjust the order and
