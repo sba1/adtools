@@ -383,10 +383,18 @@ upload-release: native-dist
 	lftp -e "put adtools-os4.lha && put ReadMe -o adtools-os4.readme && quit" ftp://main.aminet.net/new
 
 #
+# Cleanup clib2
+#
+
+.PHONY: clean-clib2
+clean-clib2:
+	$(MAKE) -C $(CLIB2_DIR) -f GNUmakefile.os4 clean
+
+#
 # Cleanup everything
 #
 .PHONY: clean
-clean:
+clean: clean-clib2
 	rm -Rf	\
 		binutils-cross-build-$(BINUTILS_VERSION) \
 		binutils-native-build-$(BINUTILS_VERSION) \
