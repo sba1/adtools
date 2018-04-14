@@ -1,4 +1,4 @@
-From 623452174d8804ef35f6553eadbf2a3fb1e98f34 Mon Sep 17 00:00:00 2001
+From 711325b7afc8811081af7f4740649bba357ab85d Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 14 Nov 2014 20:03:56 +0100
 Subject: [PATCH 02/14] Added new function attribute "lineartags" and pragma

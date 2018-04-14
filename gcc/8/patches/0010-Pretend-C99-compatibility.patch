@@ -1,4 +1,4 @@
-From e5f088915de0d75094461bd1415426d3c1042424 Mon Sep 17 00:00:00 2001
+From f6f9e9c03919ce001391f93cb61a318bed225966 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Sat, 4 Mar 2017 07:39:21 +0100
 Subject: [PATCH 10/14] Pretend C99 compatibility.
