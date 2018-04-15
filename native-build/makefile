@@ -281,6 +281,10 @@ define NL =
 
 endef
 
+#
+# Lists all executable files that are produced by the binutils steps
+# and that also should be reachable via a target alias prefix.
+#
 BINUTILS_EXES = \
 	addr2line \
 	ar \
