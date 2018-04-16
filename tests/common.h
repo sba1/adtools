@@ -45,9 +45,9 @@ static void init_mmu(void)
 	tlbwe();
 
 	/* Map 0xfe00_0000 to physical 0xf_e000_0000 which is the default CCSR. Use
-         *  qemu-system-ppc -M ppce500,dumpdtb=dump.dtb && dtc -I dtb -O dts dump.dtb | less
-         * to obtain the base address.
-         */
+	 *  qemu-system-ppc -M ppce500,dumpdtb=dump.dtb && dtc -I dtb -O dts dump.dtb | less
+	 * to obtain the base address.
+	 */
 	mtspr(MAS0, (1 << (63 - 35)) /* Select TLB1 */ | (1 << (63 - 47) /* Select entry 1 */));
 	mtspr(MAS1, (1 << (63 - 32)) | (0<<(63-51)) | (0x0 << (63 - 47)) | (/*11*/5 << (63 - 55)) /* Size 1MB */ );
 	mtspr(MAS2, (0xfe000 << (63 - 51)) | (1 << (63 - 62)) /* Guarded */ | (1 << (63 - 59)) /* Write through */);
@@ -62,7 +62,7 @@ static void init_mmu(void)
  */
 static void putchar(char c)
 {
-        static const unsigned int base = 0xfe000000 + 0x4500;
+	static const unsigned int base = 0xfe000000 + 0x4500;
 	((char*)base)[0] = c;
 }
 
