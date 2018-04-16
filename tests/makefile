@@ -29,7 +29,7 @@ test-thread: test-thread.cpp
 test-wchar: test-wchar.cpp
 	$(CPP) test-wchar.cpp -std=c++11 -mcrt=clib2 -o $@ -H
 
-test-aos4-extensions-simple: test-aos4-extensions-simple.c
+test-aos4-extensions-simple: test-aos4-extensions-simple.c common.h
 	$(CC) -Wa,-me500 -O0 $< -nostdinc -nostdlib -fno-builtin -o $@
 
 test-aos4-extensions-simple.out: test-aos4-extensions-simple
