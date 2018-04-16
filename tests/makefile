@@ -30,7 +30,10 @@ test-wchar: test-wchar.cpp
 	$(CPP) test-wchar.cpp -std=c++11 -mcrt=clib2 -o $@ -H
 
 test-aos4-extensions-simple: test-aos4-extensions-simple.c
-	$(CC) $< -nostdlib -o $@
+	$(CC) -Wa,-me500 -O0 $< -nostdinc -nostdlib -fno-builtin -o $@
+
+test-aos4-extensions-simple.out: test-aos4-extensions-simple
+	qemu-system-ppc -M ppce500 -kernel $< -serial file:$@ -nographic
 
 clean:
 	rm -Rf $(TESTS)

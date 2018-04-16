@@ -4,4 +4,4 @@
 /test-thread.o
 /test-wchar
 /*.map
-
+/*.out
