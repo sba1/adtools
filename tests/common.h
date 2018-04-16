@@ -37,7 +37,7 @@ static void init_mmu(void)
 {
 	/* Map 0x0 to physical 0x0 */
 	mtspr(MAS0, (1 << (63 - 35)) /* Select TLB1 */ | (0 << (63 - 47) /* Select entry 0 */));
-	mtspr(MAS1, (1 << (63 - 32)) | (0<<(63-51)) | (0x0 << (63 - 47)) | (11 << (63 - 55)) /* Size 4GB */ );
+	mtspr(MAS1, (1 << (63 - 32)) | (0<<(63-51)) | (0x0 << (63 - 47)) | (10 << (63 - 55)) /* Size 1GB */ );
 	mtspr(MAS2, (0x0 << (63 - 51)) | (1 << (63 - 62)) /* Guarded */ | (1 << (63 - 59)) /* Write through */);
 	mtspr(MAS3, (0x0 << (63 - 51)) | 0x3f); /* Real page number lower order bits */
 	mtspr(MAS7, 0x0); /* Real page number higher order bits */
