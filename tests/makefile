@@ -33,7 +33,8 @@ test-aos4-extensions-simple: test-aos4-extensions-simple.c
 	$(CC) -Wa,-me500 -O0 $< -nostdinc -nostdlib -fno-builtin -o $@
 
 test-aos4-extensions-simple.out: test-aos4-extensions-simple
-	qemu-system-ppc -M ppce500 -kernel $< -serial file:$@ -nographic
+	{ sleep 1; echo q; } | qemu-system-ppc -M ppce500 -kernel $< -serial file:$@ -nographic -monitor stdio || true
+	cat $@
 
 clean:
 	rm -Rf $(TESTS)
