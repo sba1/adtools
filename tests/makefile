@@ -45,5 +45,10 @@ run-test-aos4-extensions-simple: test-aos4-extensions-simple
 		false;\
 	fi
 
+test-baserel: test-baserel.c common.h
+	$(CC) -g -Wa,-me500 -O0 $< -nostdinc -nostdlib -fno-builtin -g -mbaserel -c -o $@.o
+	ppc-amigaos-objdump -Sr  $@.o >$@.S
+	$(CC) -g -Wa,-me500 -O0 $@.o -nostdinc -nostdlib -fno-builtin -g -mbaserel -o $@
+
 clean:
 	rm -Rf $(TESTS)
