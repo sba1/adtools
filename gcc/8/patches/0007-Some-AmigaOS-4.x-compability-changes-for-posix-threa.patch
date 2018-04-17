@@ -1,7 +1,7 @@
-From c59cb04c0e0fa7e6df776dc9a2433d36d255fa30 Mon Sep 17 00:00:00 2001
+From cc1734bb5242ea79cef9b62281c8c21428bcd635 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Thu, 21 Jan 2016 20:46:59 +0100
-Subject: [PATCH 07/14] Some AmigaOS 4.x compability changes for posix thread
+Subject: [PATCH 07/15] Some AmigaOS 4.x compability changes for posix thread
  support.
 
 ---
@@ -81,5 +81,5 @@ index e2f952f6c1cdf05237b1d6d6598b780b7f3c0cf4..9b15d7522e91061934693e1bce5bb272
  {
    if (__gthread_active_p ())
 -- 
-2.11.0
+2.16.2
 
