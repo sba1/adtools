@@ -3,5 +3,7 @@
 /test-thread.d
 /test-thread.o
 /test-wchar
+/*.actual
+/*.expected
 /*.map
 /*.out

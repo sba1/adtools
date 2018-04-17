@@ -1,8 +1,13 @@
-/* A simple test for all essential features of an
- * AmigaOS4 compiler.
- * The test is non-working. You need to view the
- * assembler output or machine code to verify the
- * correctness.
+/* A simple test for all essential features of an AmigaOS4 compiler.
+ *
+ * The test can be executed in bare metal environment, best via qemu.
+ *
+ * It shall produce following output
+ *
+ * ```stdout
+ * 1 100
+ * 5 10 20 30 40 50
+ * ```
  */
 
 #include "common.h"
@@ -29,10 +34,11 @@ void testvarg_test(int count, ...)
 	va_startlinear(ap, count);
 	ptr = va_getlinearva(ap, unsigned int *);
 
-	for (i=0; i < count; i++)
+	putuint(ptr[0]);
+	for (i=1; i < count; i++)
 	{
-		putuint(ptr[i]);
 		putchar(' ');
+		putuint(ptr[i]);
 	}
 
 	putchar('\n');

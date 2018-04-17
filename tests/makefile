@@ -32,9 +32,18 @@ test-wchar: test-wchar.cpp
 test-aos4-extensions-simple: test-aos4-extensions-simple.c common.h
 	$(CC) -Wa,-me500 -O0 $< -nostdinc -nostdlib -fno-builtin -o $@
 
-test-aos4-extensions-simple.out: test-aos4-extensions-simple
-	{ sleep 1; echo q; } | qemu-system-ppc -M ppce500 -kernel $< -serial file:$@ -nographic -monitor stdio || true
-	cat $@
+.PHONY: run-test-aos4-extensions-simple
+run-test-aos4-extensions-simple: test-aos4-extensions-simple
+# Extract expected stdout
+	<$<.c ./extract-stdout.py >$<.expected
+# Run the executable via qemu for maximal one second, catch the serial output
+	{ sleep 1; echo q; } | qemu-system-ppc -M ppce500 -kernel $< -serial file:$<.actual -nographic -monitor stdio >/dev/null || true
+# Compare expected vs. actual, and if it differs highlight difference.
+	@echo compare $<.actual $<.expected
+	@if [ $$(md5sum $<.actual $<.expected | cut -d ' ' -f 1 | sort -u | wc -l) != '1' ]; then \
+		wdiff -s $<.expected; $<.actual \
+		false;\
+	fi
 
 clean:
 	rm -Rf $(TESTS)
