@@ -80,6 +80,12 @@ static void putuint(unsigned int value)
 	int decimal;
 	int ignore_zeros = 1;
 
+	if (value == 0)
+	{
+		putchar('0');
+		return;
+	}
+
 	for (decimal = 1000000000; decimal; decimal /= 10)
 	{
 		int n = value / decimal;
