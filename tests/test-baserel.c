@@ -38,6 +38,7 @@ void write_to_global_data_with_restore(void)
 
 /******************************************************************************/
 
+__attribute__((baserel_restore))
 void _start(void)
 {
 	init_mmu();
