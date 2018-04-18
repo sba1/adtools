@@ -1,4 +1,16 @@
-/* A simple test for the so-called baserel features of an AmigaOS4 compiler. */
+/* A simple test for the so-called baserel features of an AmigaOS4 compiler.
+ *
+ * It shall produce following output
+ *
+ * ```stdout
+ * .data
+ * 3722304989
+ * 4008636142
+ * .bss
+ * 2271560481
+ * 305419896
+ * ```
+ */
 
 #include "common.h"
 
@@ -14,27 +26,32 @@ int data[10] =
 
 void write_to_global_bss(void)
 {
-	bss[0] = 0x87654321;
+	bss[0] = 2271560481; /* 0x87654321; */
 }
 
 __attribute__((baserel_restore))
 void write_to_global_bss_with_restore(void )
 {
-	bss[1] = 0x12345678;
+	bss[1] = 305419896; /* 0x12345678; */
 }
 
 /******************************************************************************/
 
 void write_to_global_data(void)
 {
-	data[0] = 0xDDDDDDDD;
+	data[0] = 3722304989; /* 0xDDDDDDDD; */
 }
 
 __attribute__((baserel_restore))
 void write_to_global_data_with_restore(void)
 {
-	data[1] = 0xEEEEEEEE;
+	data[1] = 4008636142; /* 0xEEEEEEEE; */
 }
+
+/******************************************************************************/
+
+/* This simulates the data space that is usually allocated dynamically */
+__attribute__((force_no_baserel)) int all_data[100];
 
 /******************************************************************************/
 
@@ -48,12 +65,24 @@ void _start(void)
 
 	write_to_global_data();
 	write_to_global_data_with_restore();
+
+	/* That's part of the .data section. It is always first, regardless of how we
+	 * arrange the global data */
+	puts(".data\n");
+	putuint(all_data[0]);
+	putchar('\n');
+	putuint(all_data[1]);
+	putchar('\n');
+
+	/* That's part of the .bss section */
+	puts(".bss\n");
+	putuint(all_data[10]);
+	putchar('\n');
+	putuint(all_data[11]);
+	putchar('\n');
 }
 
 /******************************************************************************/
-
-/* This simulates the data space that is usually allocated dynamically */
-__attribute__((force_no_baserel)) static int all_data[100];
 
 void __baserel_get_addr(void)
 {
