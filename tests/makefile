@@ -47,8 +47,8 @@ run-$(1): $(1)
 	{ sleep 1; echo q; } | qemu-system-ppc -M ppce500 -kernel $$< -serial file:$$<.actual -nographic -monitor stdio >/dev/null || true
 # Compare expected vs. actual, and if it differs highlight difference.
 	@echo compare $$<.actual $$<.expected
-	@if [ $$$$(md5sum $$<.actual $$<.expected | cut -d ' ' -f 1 | sort -u | wc -l) != '1' ]; then \
-		wdiff -s $$<.expected; $$<.actual \
+	if [ $$$$(md5sum $$<.actual $$<.expected | cut -d ' ' -f 1 | sort -u | wc -l) != '1' ]; then \
+		wdiff -s $$<.expected $$<.actual; \
 		false;\
 	fi
 endef
