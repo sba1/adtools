@@ -78,4 +78,6 @@ void _start(void)
 
 	test->test(100);
 	testvarg_test(5,10,20,30,40,50);
+
+	while (1);
 }
