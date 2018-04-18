@@ -32,18 +32,28 @@ test-wchar: test-wchar.cpp
 test-aos4-extensions-simple: test-aos4-extensions-simple.c common.h
 	$(CC) -Wa,-me500 -O0 $< -nostdinc -nostdlib -fno-builtin -o $@
 
-.PHONY: run-test-aos4-extensions-simple
-run-test-aos4-extensions-simple: test-aos4-extensions-simple
+#
+# Macro to insert targets and rules for executing a test
+# executable via QEMU.
+#
+# We will force the virtual machine to quit after one second.
+#
+define QEMU_RUN
+.PHONY: run-$(1)
+run-$(1): $(1)
 # Extract expected stdout
-	<$<.c ./extract-stdout.py >$<.expected
+	<$$<.c ./extract-stdout.py >$$<.expected
 # Run the executable via qemu for maximal one second, catch the serial output
-	{ sleep 1; echo q; } | qemu-system-ppc -M ppce500 -kernel $< -serial file:$<.actual -nographic -monitor stdio >/dev/null || true
+	{ sleep 1; echo q; } | qemu-system-ppc -M ppce500 -kernel $$< -serial file:$$<.actual -nographic -monitor stdio >/dev/null || true
 # Compare expected vs. actual, and if it differs highlight difference.
-	@echo compare $<.actual $<.expected
-	@if [ $$(md5sum $<.actual $<.expected | cut -d ' ' -f 1 | sort -u | wc -l) != '1' ]; then \
-		wdiff -s $<.expected; $<.actual \
+	@echo compare $$<.actual $$<.expected
+	@if [ $$$$(md5sum $$<.actual $$<.expected | cut -d ' ' -f 1 | sort -u | wc -l) != '1' ]; then \
+		wdiff -s $$<.expected; $$<.actual \
 		false;\
 	fi
+endef
+
+$(eval $(call QEMU_RUN,test-aos4-extensions-simple))
 
 test-baserel: test-baserel.c common.h
 	$(CC) -g -Wa,-me500 -O0 $< -nostdinc -nostdlib -fno-builtin -g -mbaserel -c -o $@.o
