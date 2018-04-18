@@ -60,5 +60,7 @@ test-baserel: test-baserel.c common.h
 	ppc-amigaos-objdump -Sr  $@.o >$@.S
 	$(CC) -g -Wa,-me500 -O0 $@.o -nostdinc -nostdlib -fno-builtin -g -mbaserel -o $@
 
+$(eval $(call QEMU_RUN,test-baserel))
+
 clean:
 	rm -Rf $(TESTS)
