@@ -63,7 +63,7 @@ static void init_mmu(void)
 static void putchar(char c)
 {
 	static const unsigned int base = 0xfe000000 + 0x4500;
-	((char*)base)[0] = c;
+	((volatile char*)base)[0] = c;
 }
 
 static void puts(const char *str)
