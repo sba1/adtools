@@ -1,0 +1,72 @@
+From 2f0ec8407a916a74972771549bf4fc77fb94f872 Mon Sep 17 00:00:00 2001
+From: Sebastian Bauer <mail@sebastianbauer.info>
+Date: Wed, 18 Apr 2018 09:12:12 +0200
+Subject: [PATCH 9/9] Fix handling of brel stuff.
+
+---
+ bfd/elf32-amigaos.c | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/bfd/elf32-amigaos.c b/bfd/elf32-amigaos.c
+index 9bf9535888f2345d60a8f802680ae03f41f67a5f..fa9333b7f1d953b5ebcf338bd465c75f99842bb3 100644
+--- a/bfd/elf32-amigaos.c
++++ b/bfd/elf32-amigaos.c
+@@ -7420,12 +7420,13 @@ ppc_elf_relocate_section (bfd *output_bfd,
+   struct elf_link_hash_entry **sym_hashes;
+   struct ppc_elf_link_hash_table *htab;
+   Elf_Internal_Rela *rel;
+   Elf_Internal_Rela *relend;
+   Elf_Internal_Rela outrel;
+   asection *got2, *sreloc = NULL;
++  asection *data_section = NULL;
+   bfd_vma *local_got_offsets;
+   bfd_boolean ret = TRUE;
+   bfd_vma d_offset = (bfd_big_endian (output_bfd) ? 2 : 0);
+   bfd_boolean is_vxworks_tls;
+ 
+ #ifdef DEBUG
+@@ -8609,24 +8610,24 @@ ppc_elf_relocate_section (bfd *output_bfd,
+ 		   sym_name,
+ 		   howto->name,
+ 		   name);
+ 	      }
+ 	  }
+ 	  break;
+-#if 0
++
+ 	case R_PPC_AMIGAOS_BREL:
+ 	case R_PPC_AMIGAOS_BREL_HI:
+ 	case R_PPC_AMIGAOS_BREL_LO:
+ 	case R_PPC_AMIGAOS_BREL_HA:
+ 	  {
+ 	    if (data_section == NULL)
+ 	      data_section = bfd_get_section_by_name (output_bfd, ".data");
+ 
+ 	    if (sec)
+ 	      {
+-		const char *name = bfd_get_section_name (abfd, sec->output_section);
++		const char *name = bfd_get_section_name (output_bfd, sec->output_section);
+ 		if (strcmp (name, ".sdata") != 0
+ 		    && strcmp (name, ".sbss") != 0
+ 		    && strcmp (name, ".data") != 0
+ 		    && strcmp (name, ".bss") != 0
+ 		    && strncmp (name, ".ctors", 6) != 0
+ 		    && strncmp (name, ".dtors", 6) != 0)
+@@ -8643,13 +8644,13 @@ ppc_elf_relocate_section (bfd *output_bfd,
+ 
+ 	    if (r_type == R_PPC_AMIGAOS_BREL_HA)
+ 	      addend += ((relocation + addend) & 0x8000) << 1;
+ 
+ 	    }
+ 	    break;
+-#endif
++
+ 	case R_PPC_VLE_LO16A:
+ 	  relocation = (relocation + addend) & 0xffff;
+ 	  ppc_elf_vle_split16 (output_bfd, contents, rel->r_offset,
+                                relocation, split16a_type);
+ 	  continue;
+ 
+-- 
+2.11.0
+

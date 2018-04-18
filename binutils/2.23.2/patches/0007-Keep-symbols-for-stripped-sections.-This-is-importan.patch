@@ -1,7 +1,7 @@
 From 035f3afce47e01ee70c7972a71a9dccea2b61e6f Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Thu, 3 Dec 2015 23:48:21 +0100
-Subject: [PATCH 7/8] Keep symbols for stripped sections. This is important for
+Subject: [PATCH 7/9] Keep symbols for stripped sections. This is important for
  _SDA_BASE_,
 
 ---

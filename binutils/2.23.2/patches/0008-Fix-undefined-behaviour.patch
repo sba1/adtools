@@ -1,7 +1,7 @@
 From 9592197f4e9723b6a435318b9c39521beab07c7b Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Wed, 15 Feb 2017 22:12:54 +0100
-Subject: [PATCH 8/8] Fix undefined behaviour.
+Subject: [PATCH 8/9] Fix undefined behaviour.
 
 This should ensure that the code compiles with more recent version of GCC.
 Changes have been backported from more recent version of binutils.
