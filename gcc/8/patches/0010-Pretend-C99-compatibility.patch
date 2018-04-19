@@ -1,4 +1,4 @@
-From 6c563650817a521ccb5943b43cd3f5d345ecfe95 Mon Sep 17 00:00:00 2001
+From 1f705577cfc58db1fd0d6c4690285ac7a4adc869 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Sat, 4 Mar 2017 07:39:21 +0100
 Subject: [PATCH 10/16] Pretend C99 compatibility.
@@ -107,5 +107,5 @@ index 10335017f0c4261c02b0b4d87c15b9a8572e6a61..fb5ae1889b288097f793396f35a9b65c
  } // extern "C++"
  
 -- 
-2.16.2
+2.11.0
 

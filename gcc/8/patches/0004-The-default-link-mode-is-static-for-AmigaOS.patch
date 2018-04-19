@@ -1,4 +1,4 @@
-From 0cf07ad9eb3cf6093e827b473c91c92ab731c26c Mon Sep 17 00:00:00 2001
+From 54713b27ae31a40bb4c0ad6d05576e390fa68fe2 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Wed, 2 Dec 2015 20:56:33 +0100
 Subject: [PATCH 04/16] The default link mode is static for AmigaOS.
@@ -47,5 +47,5 @@ index 443a1746da3791eb3d402fb947afa8d76fe2c049..bdba1ac68a0e4e042bf63ac34129e428
  	case OPT_static_libstdc__:
  	  library = library >= 0 ? 2 : library;
 -- 
-2.16.2
+2.11.0
 

@@ -1,4 +1,4 @@
-From 0332c9691c4557901975095d696894a1b010cc0a Mon Sep 17 00:00:00 2001
+From 2796f5bb992bb85c2e607f54ef5230f0a6d49747 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 14 Nov 2014 20:03:56 +0100
 Subject: [PATCH 02/16] Added new function attribute "lineartags" and pragma
@@ -372,5 +372,5 @@ index ad8c0e64c056129afcd8bfa2a656749a2febfaaa..179b546108634550fec0beee071d48c0
  amigaos_legitimize_baserel_address (rtx addr)
  {
 -- 
-2.16.2
+2.11.0
 

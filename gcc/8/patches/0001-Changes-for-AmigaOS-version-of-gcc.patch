@@ -1,4 +1,4 @@
-From 570e03a5fb1d79551aa1d3616ebcb331793b85f5 Mon Sep 17 00:00:00 2001
+From 7fd9207047e92e9ee1724d869c1ff186397739bf Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Tue, 17 Feb 2015 20:25:55 +0100
 Subject: [PATCH 01/16] Changes for AmigaOS version of gcc.
@@ -53,7 +53,7 @@ Subject: [PATCH 01/16] Changes for AmigaOS version of gcc.
  create mode 100644 libiberty/pex-amigaos.c
 
 diff --git a/fixincludes/configure b/fixincludes/configure
-index ab97983f327d487bb87e0e4130706dd54c4fc769..0ad5f7f3acbc24f09bb4f0499474989c69fb5fea 100755
+index e4b03fd588cd92280b658c76844a54a2e535641e..dbf098cf81c3db07943eb3897aa5f0991243c7f3 100755
 --- a/fixincludes/configure
 +++ b/fixincludes/configure
 @@ -4752,12 +4752,13 @@ else
@@ -231,7 +231,7 @@ index ffd06447f1b555ca84e00b40bce0d00ad0433bb1..7bf360ddc98fa57be91b046f43e09568
  			     origtypes, function, fundecl);
    if (nargs < 0)
 diff --git a/gcc/config.gcc b/gcc/config.gcc
-index 55c314afdbd3ad936792f681807ebb88ba494e6d..7f2d45dd5899940d681138794502f8a95476e353 100644
+index e58494c1c1737aa049960b0a15739d84a65416a0..cfbb662c0f0c1519eeeeebc6c3ac4d62670a015a 100644
 --- a/gcc/config.gcc
 +++ b/gcc/config.gcc
 @@ -2371,12 +2371,20 @@ nvptx-*)
@@ -1303,7 +1303,7 @@ index 37f170d233f77e7d663613dc874582db2170c863..9fc236638dd961e7ba3dc8c020df5465
 +		    RS6000_BTC_MISC,		/* ATTR */	\
 +		    CODE_FOR_nothing)		/* ICODE */
 diff --git a/gcc/config/rs6000/rs6000.c b/gcc/config/rs6000/rs6000.c
-index c74e2a39d80dcb9649876f683f434cbb5c4c3070..f5fe16fb8f24326ade26a9ee870caad23b88fb94 100644
+index fd11407367e6474dbae51e7891466925cc0367eb..dcab4eeace0ab6a6915acc980420371a80fc4186 100644
 --- a/gcc/config/rs6000/rs6000.c
 +++ b/gcc/config/rs6000/rs6000.c
 @@ -141,12 +141,18 @@ typedef struct rs6000_stack {
@@ -1524,7 +1524,7 @@ index c74e2a39d80dcb9649876f683f434cbb5c4c3070..f5fe16fb8f24326ade26a9ee870caad2
  rs6000_gimplify_va_arg (tree valist, tree type, gimple_seq *pre_p,
  			gimple_seq *post_p)
  {
-@@ -16682,12 +16755,20 @@ rs6000_expand_builtin (tree exp, rtx target, rtx subtarget ATTRIBUTE_UNUSED,
+@@ -16694,12 +16767,20 @@ rs6000_expand_builtin (tree exp, rtx target, rtx subtarget ATTRIBUTE_UNUSED,
        case CODE_FOR_xsiexpqp_kf:	icode = CODE_FOR_xsiexpqp_tf;	break;
        case CODE_FOR_xsiexpqpf_kf:	icode = CODE_FOR_xsiexpqpf_tf;	break;
        case CODE_FOR_xststdcqp_kf:	icode = CODE_FOR_xststdcqp_tf;	break;
@@ -1545,7 +1545,7 @@ index c74e2a39d80dcb9649876f683f434cbb5c4c3070..f5fe16fb8f24326ade26a9ee870caad2
        const char *name2 = (icode != CODE_FOR_nothing)
  			   ? get_insn_name ((int) icode)
  			   : "nothing";
-@@ -21820,13 +21901,22 @@ print_operand_address (FILE *file, rtx x)
+@@ -21832,13 +21913,22 @@ print_operand_address (FILE *file, rtx x)
  #endif
  #if TARGET_ELF
    else if (GET_CODE (x) == LO_SUM && REG_P (XEXP (x, 0))
@@ -1568,7 +1568,7 @@ index c74e2a39d80dcb9649876f683f434cbb5c4c3070..f5fe16fb8f24326ade26a9ee870caad2
      {
        /* This hack along with a corresponding hack in
  	 rs6000_output_addr_const_extra arranges to output addends
-@@ -24764,12 +24854,25 @@ rs6000_stack_info (void)
+@@ -24776,12 +24866,25 @@ rs6000_stack_info (void)
    info->altivec_size = 16 * (LAST_ALTIVEC_REGNO + 1
  				 - info->first_altivec_reg_save);
  
@@ -1594,7 +1594,7 @@ index c74e2a39d80dcb9649876f683f434cbb5c4c3070..f5fe16fb8f24326ade26a9ee870caad2
        || save_reg_p (CR4_REGNO))
      {
        info->cr_save_p = 1;
-@@ -24867,13 +24970,18 @@ rs6000_stack_info (void)
+@@ -24879,13 +24982,18 @@ rs6000_stack_info (void)
        info->lr_save_offset = 2*reg_size;
        break;
  
@@ -1613,7 +1613,7 @@ index c74e2a39d80dcb9649876f683f434cbb5c4c3070..f5fe16fb8f24326ade26a9ee870caad2
  	  info->vrsave_save_offset = info->cr_save_offset - info->vrsave_size;
  
  	  /* Align stack so vector save area is on a quadword boundary.  */
-@@ -24902,12 +25010,16 @@ rs6000_stack_info (void)
+@@ -24914,12 +25022,16 @@ rs6000_stack_info (void)
  				  + ehrd_size
  				  + ehcr_size
  				  + info->cr_size
@@ -1630,7 +1630,7 @@ index c74e2a39d80dcb9649876f683f434cbb5c4c3070..f5fe16fb8f24326ade26a9ee870caad2
  				   ABI_STACK_BOUNDARY / BITS_PER_UNIT);
  
    /* Determine if we need to save the link register.  */
-@@ -25011,12 +25123,17 @@ debug_stack_info (rs6000_stack_t *info)
+@@ -25023,12 +25135,17 @@ debug_stack_info (rs6000_stack_t *info)
    if (info->lr_save_p)
      fprintf (stderr, "\tlr_save_p           = %5d\n", info->lr_save_p);
  
@@ -1648,7 +1648,7 @@ index c74e2a39d80dcb9649876f683f434cbb5c4c3070..f5fe16fb8f24326ade26a9ee870caad2
    if (info->push_p)
      fprintf (stderr, "\tpush_p              = %5d\n", info->push_p);
  
-@@ -25043,12 +25160,17 @@ debug_stack_info (rs6000_stack_t *info)
+@@ -25055,12 +25172,17 @@ debug_stack_info (rs6000_stack_t *info)
    if (info->cr_save_p)
      fprintf (stderr, "\tcr_save_offset      = %5d\n", info->cr_save_offset);
  
@@ -1666,7 +1666,7 @@ index c74e2a39d80dcb9649876f683f434cbb5c4c3070..f5fe16fb8f24326ade26a9ee870caad2
  
    if (info->vars_size)
      fprintf (stderr, "\tvars_size           = " HOST_WIDE_INT_PRINT_DEC"\n",
-@@ -25069,12 +25191,17 @@ debug_stack_info (rs6000_stack_t *info)
+@@ -25081,12 +25203,17 @@ debug_stack_info (rs6000_stack_t *info)
    if (info->altivec_size)
      fprintf (stderr, "\taltivec_size        = %5d\n", info->altivec_size);
  
@@ -1684,7 +1684,7 @@ index c74e2a39d80dcb9649876f683f434cbb5c4c3070..f5fe16fb8f24326ade26a9ee870caad2
  
    if (info->cr_size)
      fprintf (stderr, "\tcr_size             = %5d\n", info->cr_size);
-@@ -27417,12 +27544,28 @@ rs6000_emit_prologue (void)
+@@ -27429,12 +27556,28 @@ rs6000_emit_prologue (void)
  			     sp_off - frame_off);
  
  	  offset += reg_size;
@@ -1713,7 +1713,7 @@ index c74e2a39d80dcb9649876f683f434cbb5c4c3070..f5fe16fb8f24326ade26a9ee870caad2
        rtvec p;
  
        for (i = 0; ; ++i)
-@@ -27878,12 +28021,19 @@ rs6000_emit_prologue (void)
+@@ -27890,12 +28033,19 @@ rs6000_emit_prologue (void)
  
        if (!info->lr_save_p)
  	emit_move_insn (lr, gen_rtx_REG (Pmode, 0));
@@ -1733,7 +1733,7 @@ index c74e2a39d80dcb9649876f683f434cbb5c4c3070..f5fe16fb8f24326ade26a9ee870caad2
       register values in the caller of this function.  This R2 may have
       already been changed from the value in the caller.
       We don't attempt to write accurate DWARF EH frame info for R2
-@@ -27939,12 +28089,17 @@ rs6000_output_savres_externs (FILE *file)
+@@ -27951,12 +28101,17 @@ rs6000_output_savres_externs (FILE *file)
  		     & REST_NOINLINE_FPRS_DOESNT_RESTORE_LR) == 0;
  	  int sel = SAVRES_FPR | (lr ? SAVRES_LR : 0);
  	  name = rs6000_savres_routine_name (regno, sel);
@@ -1751,7 +1751,7 @@ index c74e2a39d80dcb9649876f683f434cbb5c4c3070..f5fe16fb8f24326ade26a9ee870caad2
  
  static void
  rs6000_output_function_prologue (FILE *file)
-@@ -28821,12 +28976,30 @@ rs6000_emit_epilogue (int sibcall)
+@@ -28833,12 +28988,30 @@ rs6000_emit_epilogue (int sibcall)
  				      + reg_size * (int) i);
  
  	  emit_move_insn (gen_rtx_REG (reg_mode, regno), mem);
@@ -1797,7 +1797,7 @@ index b9b58a83fb3b866574a0e2ac9fc53a07d0844f22..e81515f190e6c83e587645ff4d210cde
 +/* Used by amigaos port */
 +void rs6000_va_start (tree valist, rtx nextarg);
 diff --git a/gcc/config/rs6000/rs6000.md b/gcc/config/rs6000/rs6000.md
-index 931c8086e8ce1fdee147e0db2fb9cdd28c134fa4..0cd5eab9464d9d3c82f5069da4141a9c378fe0ae 100644
+index 2b15cca88432938cfb1c751a2c3048a5785cea35..ab5e643655c8b86a7c55ee1a97af9fa512d7b0ca 100644
 --- a/gcc/config/rs6000/rs6000.md
 +++ b/gcc/config/rs6000/rs6000.md
 @@ -10155,12 +10155,37 @@
@@ -1880,7 +1880,7 @@ index 0000000000000000000000000000000000000000..15d9d3fd5a5f0c8109cd158242745fa5
 +MULTILIB_DIRNAMES = newlib clib2
 +#MULTILIB_REUSE = =mcrt=newlib
 diff --git a/gcc/cp/typeck.c b/gcc/cp/typeck.c
-index b449b1f7f53998bcf5ad866e6d1d9f84f8f9a4e1..923098472ae37547ee4659d9444dd0a70e307bc9 100644
+index f5081c1661c5811bd2d9e6100b6bcb34bf646f35..833d746ae7445ceb97e3da5a3e4ffa345f513e94 100644
 --- a/gcc/cp/typeck.c
 +++ b/gcc/cp/typeck.c
 @@ -3749,12 +3749,28 @@ cp_build_function_call_vec (tree function, vec<tree, va_gc> **params,
@@ -2111,7 +2111,7 @@ index 5571d05d93bc821a3e55af9e081b98e379ec0726..b63ea055671032161146e64b79fe9d91
  The RL78 back end supports the @code{saddr} variable attribute.  This
  specifies placement of the corresponding variable in the SADDR area,
 diff --git a/gcc/doc/invoke.texi b/gcc/doc/invoke.texi
-index 0194f48aced7519a892a18ce5647b26f811f2b8c..0fd4f4d62cec7ee4d68efcfabf3917d42f73696d 100644
+index 0f2c83964f49bdd011dec291538bd62ed2d048d6..6a50073fca36fc1a4ce6d011918ad93d177a9044 100644
 --- a/gcc/doc/invoke.texi
 +++ b/gcc/doc/invoke.texi
 @@ -1301,12 +1301,41 @@ See RS/6000 and PowerPC Options.
@@ -2156,7 +2156,7 @@ index 0194f48aced7519a892a18ce5647b26f811f2b8c..0fd4f4d62cec7ee4d68efcfabf3917d4
  @node Overall Options
  @section Options Controlling the Kind of Output
  
-@@ -14555,12 +14584,13 @@ platform.
+@@ -14554,12 +14583,13 @@ platform.
  * VMS Options::
  * VxWorks Options::
  * x86 Options::
@@ -2170,7 +2170,7 @@ index 0194f48aced7519a892a18ce5647b26f811f2b8c..0fd4f4d62cec7ee4d68efcfabf3917d4
  @node AArch64 Options
  @subsection AArch64 Options
  @cindex AArch64 Options
-@@ -28133,12 +28163,143 @@ These options are defined for Xstormy16:
+@@ -28124,12 +28154,143 @@ These options are defined for Xstormy16:
  @table @gcctabopt
  @item -msim
  @opindex msim
@@ -3208,17 +3208,16 @@ index 0000000000000000000000000000000000000000..0c61a108764c8501f8a2e9552c7c0749
 +  return 0;
 +}
 diff --git a/libstdc++-v3/configure b/libstdc++-v3/configure
-index ad6c506c60652685418adc7bbd7ec35f085d7b0a..c2c046fed09cd1a3fc131b1171a1be24ff527dcb 100755
+index 49d12887d522578b94d613ad7a8053161c11cbe4..de4e0e239361ef521dabeae9f76238465ee55cbd 100755
 --- a/libstdc++-v3/configure
 +++ b/libstdc++-v3/configure
 @@ -78288,12 +78288,171 @@ done
-     $as_echo "#define HAVE_SQRTF 1" >>confdefs.h
  
      $as_echo "#define HAVE_TANF 1" >>confdefs.h
  
      $as_echo "#define HAVE_TANHF 1" >>confdefs.h
  
-+    ;;
+     ;;
 +  *-amigaos*)
 +    for ac_header in nan.h ieeefp.h endian.h sys/isa_defs.h \
 +      machine/endian.h machine/param.h sys/machine.h sys/types.h \
@@ -3377,13 +3376,14 @@ index ad6c506c60652685418adc7bbd7ec35f085d7b0a..c2c046fed09cd1a3fc131b1171a1be24
 +
 +
 +
-     ;;
++    ;;
    *)
      as_fn_error "No support for this host/target combination." "$LINENO" 5
     ;;
  esac
  
-@@ -81634,34 +81793,1678 @@ $as_echo "$gxx_include_dir" >&6; }
+   fi
+@@ -81633,34 +81792,1678 @@ $as_echo "$gxx_include_dir" >&6; }
  
  
    WARN_FLAGS='-Wall -Wextra -Wwrite-strings -Wcast-qual -Wabi'
@@ -3397,7 +3397,7 @@ index ad6c506c60652685418adc7bbd7ec35f085d7b0a..c2c046fed09cd1a3fc131b1171a1be24
 -# Check whether --with-gcc-major-version-only was given.
 -if test "${with_gcc_major_version_only+set}" = set; then :
 -  withval=$with_gcc_major_version_only; if test x$with_gcc_major_version_only = xyes ; then
--        get_gcc_base_ver="sed -e 's/^\([0-9]*\).*\$\$/\1/'"
+-        get_gcc_base_ver="sed -e 's/^\([0-9]*\).*/\1/'"
 -      fi
 +# create libtool - libtool > 2.0:
 +: ${CONFIG_LT=./config.lt}
@@ -5055,7 +5055,7 @@ index ad6c506c60652685418adc7bbd7ec35f085d7b0a..c2c046fed09cd1a3fc131b1171a1be24
 +# Check whether --with-gcc-major-version-only was given.
 +if test "${with_gcc_major_version_only+set}" = set; then :
 +  withval=$with_gcc_major_version_only; if test x$with_gcc_major_version_only = xyes ; then
-+        get_gcc_base_ver="sed -e 's/^\([0-9]*\).*\$\$/\1/'"
++        get_gcc_base_ver="sed -e 's/^\([0-9]*\).*/\1/'"
 +      fi
 +
 +fi
@@ -5076,7 +5076,7 @@ index ad6c506c60652685418adc7bbd7ec35f085d7b0a..c2c046fed09cd1a3fc131b1171a1be24
  # that multilib installs will end up installed in the correct place.
  # The testsuite needs it for multilib-aware ABI baseline files.
  # To work around this not being passed down from config-ml.in ->
-@@ -82855,12 +84658,13 @@ fi
+@@ -82854,12 +84657,13 @@ fi
      TIMESTAMP='$TIMESTAMP'
      RM='$RM'
      ofile='$ofile'
@@ -5177,5 +5177,5 @@ index 9ae10100f8d60e900cde415bb7e96baebf35c85d..eb0f1fab6f81ac3f0e56c22ce85532c8
  
  #endif // _GLIBCXX_CSTDDEF
 -- 
-2.16.2
+2.11.0
 
