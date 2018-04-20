@@ -1,4 +1,3 @@
-typedef unsigned int u32;
 
 #define MAS0 624
 #define MAS1 625
