@@ -1,4 +1,13 @@
+/**
+ * This header contains code to do the initial MMU setup of an E500 PowerPC
+ * core. The setup is very simple as we will run only one test on an emulated
+ * machine. The file also provides some function for accessing the UART
+ * interface so tests can "communicate" with the outside world.
+ *
+ * (c) 2018 by Sebastian Bauer.
+ */
 
+/* Memory assist register used to program the MMU setup */
 #define MAS0 624
 #define MAS1 625
 #define MAS2 626
@@ -65,6 +74,9 @@ static void putchar(char c)
 	((volatile char*)base)[0] = c;
 }
 
+/**
+ * Put a null terminated sting to the (emulated) serial output.
+ */
 static void puts(const char *str)
 {
 	unsigned char c;
@@ -74,6 +86,9 @@ static void puts(const char *str)
 	}
 }
 
+/**
+ * Put an unsigned int value to the (emulated) serial output.
+ */
 static void putuint(unsigned int value)
 {
 	int decimal;

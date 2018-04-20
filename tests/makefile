@@ -34,7 +34,8 @@ test-aos4-extensions-simple: test-aos4-extensions-simple.c common.h
 
 #
 # Macro to insert targets and rules for executing a test
-# executable via QEMU.
+# executable via QEMU. The target is named run-$(1) and it
+# depends on $(1).
 #
 # We will force the virtual machine to quit after one second.
 #
@@ -46,6 +47,8 @@ run-$(1): $(1)
 # Run the executable via qemu for maximal one second, catch the serial output
 	{ sleep 1; echo q; } | qemu-system-ppc -M ppce500 -kernel $$< -serial file:$$<.actual -nographic -monitor stdio >/dev/null || true
 # Compare expected vs. actual, and if it differs highlight difference.
+# We first calculate the md5sums of the actual and expected output. If they match
+# everything is fine, otherwise we employ wdiff to highlight the difference
 	@echo compare $$<.actual $$<.expected
 	if [ $$$$(md5sum $$<.actual $$<.expected | cut -d ' ' -f 1 | sort -u | wc -l) != '1' ]; then \
 		wdiff -s $$<.expected $$<.actual; \
