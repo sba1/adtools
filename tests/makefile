@@ -72,26 +72,33 @@ run-$(1): $(1)
 	fi
 endef
 
+################################################################################
+
+# Pattern rule to prepare copies for different optimization levels
+test-%-o1.c : test-%.c
+	cp $< $@
+
+test-%-o3.c : test-%.c
+	cp $< $@
+
+################################################################################
+
 test-aos4-extensions-simple: test-aos4-extensions-simple.c common.h
 	$(call CC_PLAIN,-O0)
 
 $(eval $(call QEMU_RUN,test-aos4-extensions-simple))
+
+################################################################################
 
 test-baserel: test-baserel.c common.h
 	$(call CC_PLAIN,-O0 -mbaserel)
 
 $(eval $(call QEMU_RUN,test-baserel))
 
-test-baserel-o1.c: test-baserel.c
-	cp $< $@
-
 test-baserel-o1: test-baserel-o1.c common.h
 	$(call CC_PLAIN,-O1 -mbaserel)
 
 $(eval $(call QEMU_RUN,test-baserel-o1))
-
-test-baserel-o3.c: test-baserel.c
-	cp $< $@
 
 test-baserel-o3: test-baserel-o3.c common.h
 	$(call CC_PLAIN,-O3 -mbaserel)
