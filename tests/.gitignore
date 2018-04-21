@@ -4,6 +4,9 @@
 /test-thread.o
 /test-wchar
 /*.actual
+/*.c.*
 /*.expected
 /*.map
+/*.o
 /*.out
+/*.S
