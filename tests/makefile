@@ -32,6 +32,16 @@ test-wchar: test-wchar.cpp
 ################################################################################
 
 #
+# Macro to insert a recipe for compiling plain tests that run on a qemu target.
+# $(1) specifies some additional flags
+#
+define CC_PLAIN
+	$(CC) -g -Wa,-me500 $(1) $< -nostdinc -nostdlib -fno-builtin -g -c -o $@.o
+	ppc-amigaos-objdump -Sr  $@.o >$@.S
+	$(CC) -g -Wa,-me500 $(1) $@.o -nostdinc -nostdlib -fno-builtin -g -o $@
+endef
+
+#
 # Macro to insert targets and rules for executing a test
 # executable via QEMU. The target is named run-$(1) and it
 # depends on $(1).
@@ -56,14 +66,12 @@ run-$(1): $(1)
 endef
 
 test-aos4-extensions-simple: test-aos4-extensions-simple.c common.h
-	$(CC) -Wa,-me500 -O0 $< -nostdinc -nostdlib -fno-builtin -o $@
+	$(call CC_PLAIN,-O0)
 
 $(eval $(call QEMU_RUN,test-aos4-extensions-simple))
 
 test-baserel: test-baserel.c common.h
-	$(CC) -g -Wa,-me500 -O0 $< -nostdinc -nostdlib -fno-builtin -g -mbaserel -c -o $@.o
-	ppc-amigaos-objdump -Sr  $@.o >$@.S
-	$(CC) -g -Wa,-me500 -O0 $@.o -nostdinc -nostdlib -fno-builtin -g -mbaserel -o $@
+	$(call CC_PLAIN,-O0 -mbaserel)
 
 $(eval $(call QEMU_RUN,test-baserel))
 
@@ -71,9 +79,7 @@ test-baserel-o1.c: test-baserel.c
 	cp $< $@
 
 test-baserel-o1: test-baserel-o1.c common.h
-	$(CC) -g -Wa,-me500 -O1 $< -nostdinc -nostdlib -fno-builtin -g -mbaserel -c -o $@.o
-	ppc-amigaos-objdump -Sr  $@.o >$@.S
-	$(CC) -g -Wa,-me500 -O1 $@.o -nostdinc -nostdlib -fno-builtin -g -mbaserel -o $@
+	$(call CC_PLAIN,-O1 -mbaserel)
 
 $(eval $(call QEMU_RUN,test-baserel-o1))
 
