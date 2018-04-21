@@ -29,8 +29,7 @@ test-thread: test-thread.cpp
 test-wchar: test-wchar.cpp
 	$(CPP) test-wchar.cpp -std=c++11 -mcrt=clib2 -o $@ -H
 
-test-aos4-extensions-simple: test-aos4-extensions-simple.c common.h
-	$(CC) -Wa,-me500 -O0 $< -nostdinc -nostdlib -fno-builtin -o $@
+################################################################################
 
 #
 # Macro to insert targets and rules for executing a test
@@ -56,6 +55,9 @@ run-$(1): $(1)
 	fi
 endef
 
+test-aos4-extensions-simple: test-aos4-extensions-simple.c common.h
+	$(CC) -Wa,-me500 -O0 $< -nostdinc -nostdlib -fno-builtin -o $@
+
 $(eval $(call QEMU_RUN,test-aos4-extensions-simple))
 
 test-baserel: test-baserel.c common.h
@@ -74,6 +76,8 @@ test-baserel-o1: test-baserel-o1.c common.h
 	$(CC) -g -Wa,-me500 -O1 $@.o -nostdinc -nostdlib -fno-builtin -g -mbaserel -o $@
 
 $(eval $(call QEMU_RUN,test-baserel-o1))
+
+################################################################################
 
 clean:
 	rm -Rf $(TESTS)
