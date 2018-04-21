@@ -34,6 +34,8 @@ test-wchar: test-wchar.cpp
 .PHONY: run-all
 run-all: \
 	run-test-aos4-extensions-simple \
+	run-test-aos4-extensions-simple-o1 \
+	run-test-aos4-extensions-simple-o3 \
 	run-test-baserel \
 	run-test-baserel-o1 \
 	run-test-baserel-o3
@@ -83,25 +85,38 @@ test-%-o3.c : test-%.c
 
 ################################################################################
 
-test-aos4-extensions-simple: test-aos4-extensions-simple.c common.h
-	$(call CC_PLAIN,-O0)
+#
+# Generate different falvors of simple tests that are executed on a qemu-based
+# machine.
+#
+define QEMU_TARGETS
+$(1): $(1).c common.h
+	$$(call CC_PLAIN,-O0 $(2))
 
-$(eval $(call QEMU_RUN,test-aos4-extensions-simple))
+$(1)-o1: $(1)-o1.c common.h
+	$$(call CC_PLAIN,-O0 $(2))
+
+$(1)-o3: $(1)-o3.c common.h
+	$$(call CC_PLAIN,-O3 $(2))
+endef
 
 ################################################################################
 
-test-baserel: test-baserel.c common.h
-	$(call CC_PLAIN,-O0 -mbaserel)
+$(eval $(call QEMU_TARGETS,test-aos4-extensions-simple,))
+
+$(eval $(call QEMU_RUN,test-aos4-extensions-simple))
+
+$(eval $(call QEMU_RUN,test-aos4-extensions-simple-o1))
+
+$(eval $(call QEMU_RUN,test-aos4-extensions-simple-o3))
+
+################################################################################
+
+$(eval $(call QEMU_TARGETS,test-baserel,-mbaserel))
 
 $(eval $(call QEMU_RUN,test-baserel))
 
-test-baserel-o1: test-baserel-o1.c common.h
-	$(call CC_PLAIN,-O1 -mbaserel)
-
 $(eval $(call QEMU_RUN,test-baserel-o1))
-
-test-baserel-o3: test-baserel-o3.c common.h
-	$(call CC_PLAIN,-O3 -mbaserel)
 
 $(eval $(call QEMU_RUN,test-baserel-o3))
 
