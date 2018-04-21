@@ -35,7 +35,8 @@ test-wchar: test-wchar.cpp
 run-all: \
 	run-test-aos4-extensions-simple \
 	run-test-baserel \
-	run-test-baserel-o1
+	run-test-baserel-o1 \
+	run-test-baserel-o3
 
 #
 # Macro to insert a recipe for compiling plain tests that run on a qemu target.
@@ -88,6 +89,14 @@ test-baserel-o1: test-baserel-o1.c common.h
 	$(call CC_PLAIN,-O1 -mbaserel)
 
 $(eval $(call QEMU_RUN,test-baserel-o1))
+
+test-baserel-o3.c: test-baserel.c
+	cp $< $@
+
+test-baserel-o3: test-baserel-o3.c common.h
+	$(call CC_PLAIN,-O3 -mbaserel)
+
+$(eval $(call QEMU_RUN,test-baserel-o3))
 
 ################################################################################
 
