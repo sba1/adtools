@@ -31,6 +31,12 @@ test-wchar: test-wchar.cpp
 
 ################################################################################
 
+.PHONY: run-all
+run-all: \
+	run-test-aos4-extensions-simple \
+	run-test-baserel \
+	run-test-baserel-o1
+
 #
 # Macro to insert a recipe for compiling plain tests that run on a qemu target.
 # $(1) specifies some additional flags
