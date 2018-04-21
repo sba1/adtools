@@ -122,5 +122,11 @@ $(eval $(call QEMU_RUN,test-baserel-o3))
 
 ################################################################################
 
+$(eval $(call QEMU_TARGETS,test-baserel-large,-mbaserel))
+
+$(eval $(call QEMU_RUN,test-baserel-large))
+
+################################################################################
+
 clean:
 	rm -Rf $(TESTS)
