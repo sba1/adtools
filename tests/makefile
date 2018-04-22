@@ -98,6 +98,9 @@ $(1)-o1: $(1)-o1.c common.h
 
 $(1)-o3: $(1)-o3.c common.h
 	$$(call CC_PLAIN,-O3 $(2))
+
+# Add the test to our TESTS macro
+TESTS += $(1) $(1)-o1 $(1)-o3
 endef
 
 ################################################################################
