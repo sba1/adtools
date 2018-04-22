@@ -76,15 +76,6 @@ endef
 
 ################################################################################
 
-# Pattern rule to prepare copies for different optimization levels
-test-%-o1.c : test-%.c
-	cp $< $@
-
-test-%-o3.c : test-%.c
-	cp $< $@
-
-################################################################################
-
 #
 # Generate different falvors of simple tests that are executed on a qemu-based
 # machine.
@@ -93,10 +84,10 @@ define QEMU_TARGETS
 $(1): $(1).c common.h
 	$$(call CC_PLAIN,-O0 $(2))
 
-$(1)-o1: $(1)-o1.c common.h
+$(1)-o1: $(1).c common.h
 	$$(call CC_PLAIN,-O0 $(2))
 
-$(1)-o3: $(1)-o3.c common.h
+$(1)-o3: $(1).c common.h
 	$$(call CC_PLAIN,-O3 $(2))
 
 # Add the test to our TESTS macro
