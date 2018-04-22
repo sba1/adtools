@@ -128,5 +128,6 @@ $(eval $(call QEMU_RUN,test-baserel-large))
 
 ################################################################################
 
+.PHONY: clean
 clean:
 	rm -Rf $(TESTS)
