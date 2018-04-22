@@ -16,7 +16,7 @@ test-exceptions.o: test-exceptions.cpp
 test-exceptions: test-exceptions.o
 	$(CPP) $< -o $@ -ggdb -use-dynld
 
-test-std-string: test-std-string.c
+test-std-string: test-std-string.cpp
 	$(CPP) $< -o $@ -std=c++11 -U__STRICT_ANSI__
 
 test-dynld: test-dynld.c
