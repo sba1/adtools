@@ -137,6 +137,8 @@ clean:
 		$(TESTS) \
 		$(TESTS:%=%.o) \
 		$(TESTS:%=%.S) \
+		$(TESTS:%=%-o1.c) \
+		$(TESTS:%=%-o3.c) \
 		*.actual \
 		*.d \
 		*.expected
