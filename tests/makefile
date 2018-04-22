@@ -85,7 +85,7 @@ $(1): $(1).c common.h
 	$$(call CC_PLAIN,-O0 $(2))
 
 $(1)-o1: $(1).c common.h
-	$$(call CC_PLAIN,-O0 $(2))
+	$$(call CC_PLAIN,-O1 $(2))
 
 $(1)-o3: $(1).c common.h
 	$$(call CC_PLAIN,-O3 $(2))
