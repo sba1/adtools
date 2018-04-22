@@ -133,4 +133,10 @@ $(eval $(call QEMU_RUN,test-baserel-large))
 
 .PHONY: clean
 clean:
-	rm -Rf $(TESTS)
+	rm -Rf \
+		$(TESTS) \
+		$(TESTS:%=%.o) \
+		$(TESTS:%=%.S) \
+		*.actual \
+		*.d \
+		*.expected
