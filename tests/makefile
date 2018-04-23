@@ -4,6 +4,7 @@ CPP = ppc-amigaos-g++ -v
 TESTS = \
 	test-dynld \
 	test-exceptions \
+	test-lineartags.o \
 	test-std-string \
 	test-thread \
 	test-wchar
@@ -17,7 +18,7 @@ test-exceptions: test-exceptions.o
 	$(CPP) $< -o $@ -ggdb -use-dynld
 
 test-std-string: test-std-string.cpp
-	$(CPP) $< -o $@ -std=c++11 -U__STRICT_ANSI__
+	$(CPP) $< -o $@ -std=c++11 -mcrt=clib2 #-U__STRICT_ANSI__
 
 test-dynld: test-dynld.c
 	$(CC) $< -o $@ -fPIC -use-dynld -o $@
@@ -28,6 +29,9 @@ test-thread: test-thread.cpp
 
 test-wchar: test-wchar.cpp
 	$(CPP) test-wchar.cpp -std=c++11 -mcrt=clib2 -o $@ -H
+
+test-lineartags.o: test-lineartags.c
+	$(CC) test-lineartags.c -c
 
 ################################################################################
 
