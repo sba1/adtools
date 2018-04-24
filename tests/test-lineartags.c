@@ -1,4 +1,4 @@
-void TestTags(int tags, ...) __attribute__((lineartags));
+void TestTags(int type, ...) __attribute__((lineartags));
 
 struct S1;
 struct S2;
@@ -15,6 +15,6 @@ extern struct S2 *s2;
 
 int main(void)
 {
-	TestTags(TA_S1, s2, TA_S2, s1, 0, 0);
+	TestTags(0, TA_S1, s2, TA_S2, s1);
 	return 0;
 }
