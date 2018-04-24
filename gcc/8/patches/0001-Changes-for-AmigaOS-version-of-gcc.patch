@@ -1,7 +1,7 @@
-From 7195248082182b011b8d310534e68998cee86777 Mon Sep 17 00:00:00 2001
+From 346cb7e4e472b9f9625a5910ec85c3d0a0332611 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Tue, 17 Feb 2015 20:25:55 +0100
-Subject: [PATCH 01/17] Changes for AmigaOS version of gcc.
+Subject: [PATCH 01/19] Changes for AmigaOS version of gcc.
 
 ---
  fixincludes/configure                 |    1 +
@@ -5177,5 +5177,5 @@ index 9ae10100f8d60e900cde415bb7e96baebf35c85d..eb0f1fab6f81ac3f0e56c22ce85532c8
  
  #endif // _GLIBCXX_CSTDDEF
 -- 
-2.16.2
+2.14.2
 
