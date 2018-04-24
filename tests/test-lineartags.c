@@ -6,7 +6,7 @@ struct S2;
 enum {TA_Dummy = 0x12340000};
 
 #pragma amigaos tagtype(struct S1 *)
-enum {TA_S1 = TA_Dummy + 0x0D};
+enum {TA_S1 __attribute__((tagtype(struct S1 *))) = TA_Dummy + 0x0D};
 
 #pragma amigaos tagtype(struct S2 *)
 static const int TA_S2 = TA_Dummy + 0x0E;
