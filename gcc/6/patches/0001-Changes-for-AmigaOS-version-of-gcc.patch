@@ -1,7 +1,7 @@
-From f05d3f9ba003b8adadcc17c2dce49af8fb371f65 Mon Sep 17 00:00:00 2001
+From 8fb038d2b89d9dea0c2e1b2c983c1fbc356a429f Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Tue, 17 Feb 2015 20:25:55 +0100
-Subject: [PATCH 01/15] Changes for AmigaOS version of gcc.
+Subject: [PATCH 01/18] Changes for AmigaOS version of gcc.
 
 ---
  fixincludes/configure                 |    1 +
@@ -3204,13 +3204,14 @@ diff --git a/libstdc++-v3/configure b/libstdc++-v3/configure
 index 9bf152a015739ebbe2c93fc205754c2bb2ca545d..1aec69f6af1aa823b38945effc886b4c33cb917c 100755
 --- a/libstdc++-v3/configure
 +++ b/libstdc++-v3/configure
-@@ -78257,12 +78257,171 @@ done
+@@ -78256,12 +78256,171 @@ done
+     $as_echo "#define HAVE_SQRTF 1" >>confdefs.h
  
      $as_echo "#define HAVE_TANF 1" >>confdefs.h
  
      $as_echo "#define HAVE_TANHF 1" >>confdefs.h
  
-     ;;
++    ;;
 +  *-amigaos*)
 +    for ac_header in nan.h ieeefp.h endian.h sys/isa_defs.h \
 +      machine/endian.h machine/param.h sys/machine.h sys/types.h \
@@ -3369,13 +3370,12 @@ index 9bf152a015739ebbe2c93fc205754c2bb2ca545d..1aec69f6af1aa823b38945effc886b4c
 +
 +
 +
-+    ;;
+     ;;
    *)
      as_fn_error "No support for this host/target combination." "$LINENO" 5
     ;;
  esac
  
-   fi
 @@ -81445,43 +81604,1687 @@ $as_echo "$gxx_include_dir" >&6; }
  
  
@@ -5187,5 +5187,5 @@ index 58d4f4bb060de34ea2284d1b3ce908e360268a8a..21a77fcc3af4e3f05f2a79274dfa89c7
  
  #endif // _GLIBCXX_CSTDDEF
 -- 
-2.11.0
+2.14.2
 

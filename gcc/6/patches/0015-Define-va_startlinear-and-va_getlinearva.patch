@@ -1,7 +1,7 @@
-From e3382a3cf62571df89402542268cc17ec92f5ea8 Mon Sep 17 00:00:00 2001
+From 3ec821cc48399c1f4e7c43ff475ac1c84a0ac540 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Thu, 5 Apr 2018 19:56:45 +0200
-Subject: [PATCH 15/15] Define va_startlinear and va_getlinearva.
+Subject: [PATCH 15/18] Define va_startlinear and va_getlinearva.
 
 These were usually defined in the clibs' stdarg.h. As we have now
 changed the include path order, clibs' stdarg.h is never included.
@@ -41,5 +41,5 @@ index 65251522ad46df427b043031bedba5b3fdd81543..fd586e16a025870494e68ab3af210b63
     have no conflict with that.  */
  #ifndef _VA_LIST_
 -- 
-2.11.0
+2.14.2
 

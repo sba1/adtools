@@ -1,7 +1,7 @@
-From 3f3f933751d784b005d7d4d882e7b6d8e5f4e468 Mon Sep 17 00:00:00 2001
+From e30ebea5e51bec5ee88ed2d5496e4eb11cb7491f Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 14 Nov 2014 20:03:56 +0100
-Subject: [PATCH 02/15] Added new function attribute "lineartags" and pragma
+Subject: [PATCH 02/18] Added new function attribute "lineartags" and pragma
  "amigaos tagtype".
 
 Functions that have the lineartags attribute are assumed to be functions
@@ -372,5 +372,5 @@ index a6da7d543241e2fc8cf51a952633c62e19d7d875..797261177e46a34ac0aba97f2b9c2b8a
  amigaos_legitimize_baserel_address (rtx addr)
  {
 -- 
-2.11.0
+2.14.2
 
