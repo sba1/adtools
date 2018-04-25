@@ -1,7 +1,7 @@
-From f8fd13109802ce1ad6c5c92c704d28b3b867f762 Mon Sep 17 00:00:00 2001
+From 3fe7822e567c8a5f0570836679414cefa7aa2f68 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Wed, 2 Dec 2015 21:39:42 +0100
-Subject: [PATCH 05/11] Disable the usage of /dev/urandom when compiling for
+Subject: [PATCH 05/13] Disable the usage of /dev/urandom when compiling for
  AmigaOS.
 
 ---
@@ -69,5 +69,5 @@ index 237e24ef34ee2c5bfe8bfaeff77257c89c823884..310b65ab87b2d1142d8ea93a38cf7bbd
  
  	gettimeofday (&tv, NULL);
 -- 
-2.11.0
+2.14.2
 

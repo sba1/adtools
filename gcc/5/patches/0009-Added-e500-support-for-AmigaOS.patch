@@ -1,7 +1,7 @@
-From 97ff3c235c34c0d33c12b0a6378a6c9951cf6f74 Mon Sep 17 00:00:00 2001
+From e245aae3c445329adb668d444ee43a88b0b37df2 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Mon, 30 Jan 2017 20:49:17 +0100
-Subject: [PATCH 09/11] Added e500 support for AmigaOS.
+Subject: [PATCH 09/13] Added e500 support for AmigaOS.
 
 ---
  gcc/config.gcc | 2 +-
@@ -27,5 +27,5 @@ index d2fddca494b3ceb64655bddcc6126e490eef36d6..aed27a02ea3a89b63222e2fe199aa8e4
  	use_collect2=no
  	;;
 -- 
-2.11.0
+2.14.2
 
