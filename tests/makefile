@@ -1,6 +1,9 @@
 CC  = ppc-amigaos-gcc
 CPP = ppc-amigaos-g++ -v
 
+XGCC_DIR := $(shell make -s -C ../native-build print-xg-dir)
+XGCC := $(XGCC_DIR)/xgcc -B $(XGCC_DIR)
+
 TESTS = \
 	test-dynld \
 	test-exceptions \
@@ -31,7 +34,7 @@ test-wchar: test-wchar.cpp
 	$(CPP) test-wchar.cpp -std=c++11 -mcrt=clib2 -o $@ -H
 
 test-lineartags.o: test-lineartags.c
-	$(CC) test-lineartags.c -c
+	$(XGCC) test-lineartags.c -c
 
 ################################################################################
 
@@ -49,9 +52,9 @@ run-all: \
 # $(1) specifies some additional flags
 #
 define CC_PLAIN
-	$(CC) -g -Wa,-me500 $(1) $< -nostdinc -nostdlib -fno-builtin -g -c -o $@.o
+	$(XGCC) -g -Wa,-me500 $(1) $< -nostdinc -nostdlib -fno-builtin -g -c -o $@.o
 	ppc-amigaos-objdump -Sr  $@.o >$@.S
-	$(CC) -g -Wa,-me500 $(1) $@.o -nostdinc -nostdlib -fno-builtin -g -o $@
+	$(XGCC) -g -Wa,-me500 $(1) $@.o -nostdinc -nostdlib -fno-builtin -g -o $@
 endef
 
 #
