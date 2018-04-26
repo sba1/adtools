@@ -1,7 +1,7 @@
-From 06b24dde7c2d02d5a59ff6c07a26474638879fe0 Mon Sep 17 00:00:00 2001
+From 460da67c6cf2c6f3ad180a8ae3f7d242ef99b087 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Sat, 4 Mar 2017 07:39:21 +0100
-Subject: [PATCH 10/19] Pretend C99 compatibility.
+Subject: [PATCH 10/20] Pretend C99 compatibility.
 
 At least newlib is not fully C99 compatible because it doesn't expose
 various C99 function if __STRICT_ANSI__ is declared. Also it misses
@@ -107,5 +107,5 @@ index 10335017f0c4261c02b0b4d87c15b9a8572e6a61..fb5ae1889b288097f793396f35a9b65c
  } // extern "C++"
  
 -- 
-2.14.2
+2.16.2
 
