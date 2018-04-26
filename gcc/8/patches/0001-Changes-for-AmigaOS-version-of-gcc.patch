@@ -1,4 +1,4 @@
-From ce2338b443f226205b5dcd9e1cf3c447d43688ba Mon Sep 17 00:00:00 2001
+From a9a7dfc113f752c23ad7e3bef258e601cea5b06a Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Tue, 17 Feb 2015 20:25:55 +0100
 Subject: [PATCH 01/20] Changes for AmigaOS version of gcc.
@@ -1303,7 +1303,7 @@ index 37f170d233f77e7d663613dc874582db2170c863..9fc236638dd961e7ba3dc8c020df5465
 +		    RS6000_BTC_MISC,		/* ATTR */	\
 +		    CODE_FOR_nothing)		/* ICODE */
 diff --git a/gcc/config/rs6000/rs6000.c b/gcc/config/rs6000/rs6000.c
-index fd11407367e6474dbae51e7891466925cc0367eb..dcab4eeace0ab6a6915acc980420371a80fc4186 100644
+index ddc61bdaffe78a979d83340f5978f2c3ccfcd01e..0406f6c3a5715a6fa80d0f6547ffcb3792b4395c 100644
 --- a/gcc/config/rs6000/rs6000.c
 +++ b/gcc/config/rs6000/rs6000.c
 @@ -141,12 +141,18 @@ typedef struct rs6000_stack {
@@ -1524,7 +1524,7 @@ index fd11407367e6474dbae51e7891466925cc0367eb..dcab4eeace0ab6a6915acc980420371a
  rs6000_gimplify_va_arg (tree valist, tree type, gimple_seq *pre_p,
  			gimple_seq *post_p)
  {
-@@ -16694,12 +16767,20 @@ rs6000_expand_builtin (tree exp, rtx target, rtx subtarget ATTRIBUTE_UNUSED,
+@@ -16707,12 +16780,20 @@ rs6000_expand_builtin (tree exp, rtx target, rtx subtarget ATTRIBUTE_UNUSED,
        case CODE_FOR_xsiexpqp_kf:	icode = CODE_FOR_xsiexpqp_tf;	break;
        case CODE_FOR_xsiexpqpf_kf:	icode = CODE_FOR_xsiexpqpf_tf;	break;
        case CODE_FOR_xststdcqp_kf:	icode = CODE_FOR_xststdcqp_tf;	break;
@@ -1545,7 +1545,7 @@ index fd11407367e6474dbae51e7891466925cc0367eb..dcab4eeace0ab6a6915acc980420371a
        const char *name2 = (icode != CODE_FOR_nothing)
  			   ? get_insn_name ((int) icode)
  			   : "nothing";
-@@ -21832,13 +21913,22 @@ print_operand_address (FILE *file, rtx x)
+@@ -21846,13 +21927,22 @@ print_operand_address (FILE *file, rtx x)
  #endif
  #if TARGET_ELF
    else if (GET_CODE (x) == LO_SUM && REG_P (XEXP (x, 0))
@@ -1568,7 +1568,7 @@ index fd11407367e6474dbae51e7891466925cc0367eb..dcab4eeace0ab6a6915acc980420371a
      {
        /* This hack along with a corresponding hack in
  	 rs6000_output_addr_const_extra arranges to output addends
-@@ -24776,12 +24866,25 @@ rs6000_stack_info (void)
+@@ -24790,12 +24880,25 @@ rs6000_stack_info (void)
    info->altivec_size = 16 * (LAST_ALTIVEC_REGNO + 1
  				 - info->first_altivec_reg_save);
  
@@ -1594,7 +1594,7 @@ index fd11407367e6474dbae51e7891466925cc0367eb..dcab4eeace0ab6a6915acc980420371a
        || save_reg_p (CR4_REGNO))
      {
        info->cr_save_p = 1;
-@@ -24879,13 +24982,18 @@ rs6000_stack_info (void)
+@@ -24893,13 +24996,18 @@ rs6000_stack_info (void)
        info->lr_save_offset = 2*reg_size;
        break;
  
@@ -1613,7 +1613,7 @@ index fd11407367e6474dbae51e7891466925cc0367eb..dcab4eeace0ab6a6915acc980420371a
  	  info->vrsave_save_offset = info->cr_save_offset - info->vrsave_size;
  
  	  /* Align stack so vector save area is on a quadword boundary.  */
-@@ -24914,12 +25022,16 @@ rs6000_stack_info (void)
+@@ -24928,12 +25036,16 @@ rs6000_stack_info (void)
  				  + ehrd_size
  				  + ehcr_size
  				  + info->cr_size
@@ -1630,7 +1630,7 @@ index fd11407367e6474dbae51e7891466925cc0367eb..dcab4eeace0ab6a6915acc980420371a
  				   ABI_STACK_BOUNDARY / BITS_PER_UNIT);
  
    /* Determine if we need to save the link register.  */
-@@ -25023,12 +25135,17 @@ debug_stack_info (rs6000_stack_t *info)
+@@ -25037,12 +25149,17 @@ debug_stack_info (rs6000_stack_t *info)
    if (info->lr_save_p)
      fprintf (stderr, "\tlr_save_p           = %5d\n", info->lr_save_p);
  
@@ -1648,7 +1648,7 @@ index fd11407367e6474dbae51e7891466925cc0367eb..dcab4eeace0ab6a6915acc980420371a
    if (info->push_p)
      fprintf (stderr, "\tpush_p              = %5d\n", info->push_p);
  
-@@ -25055,12 +25172,17 @@ debug_stack_info (rs6000_stack_t *info)
+@@ -25069,12 +25186,17 @@ debug_stack_info (rs6000_stack_t *info)
    if (info->cr_save_p)
      fprintf (stderr, "\tcr_save_offset      = %5d\n", info->cr_save_offset);
  
@@ -1666,7 +1666,7 @@ index fd11407367e6474dbae51e7891466925cc0367eb..dcab4eeace0ab6a6915acc980420371a
  
    if (info->vars_size)
      fprintf (stderr, "\tvars_size           = " HOST_WIDE_INT_PRINT_DEC"\n",
-@@ -25081,12 +25203,17 @@ debug_stack_info (rs6000_stack_t *info)
+@@ -25095,12 +25217,17 @@ debug_stack_info (rs6000_stack_t *info)
    if (info->altivec_size)
      fprintf (stderr, "\taltivec_size        = %5d\n", info->altivec_size);
  
@@ -1684,7 +1684,7 @@ index fd11407367e6474dbae51e7891466925cc0367eb..dcab4eeace0ab6a6915acc980420371a
  
    if (info->cr_size)
      fprintf (stderr, "\tcr_size             = %5d\n", info->cr_size);
-@@ -27429,12 +27556,28 @@ rs6000_emit_prologue (void)
+@@ -27443,12 +27570,28 @@ rs6000_emit_prologue (void)
  			     sp_off - frame_off);
  
  	  offset += reg_size;
@@ -1713,7 +1713,7 @@ index fd11407367e6474dbae51e7891466925cc0367eb..dcab4eeace0ab6a6915acc980420371a
        rtvec p;
  
        for (i = 0; ; ++i)
-@@ -27890,12 +28033,19 @@ rs6000_emit_prologue (void)
+@@ -27904,12 +28047,19 @@ rs6000_emit_prologue (void)
  
        if (!info->lr_save_p)
  	emit_move_insn (lr, gen_rtx_REG (Pmode, 0));
@@ -1733,7 +1733,7 @@ index fd11407367e6474dbae51e7891466925cc0367eb..dcab4eeace0ab6a6915acc980420371a
       register values in the caller of this function.  This R2 may have
       already been changed from the value in the caller.
       We don't attempt to write accurate DWARF EH frame info for R2
-@@ -27951,12 +28101,17 @@ rs6000_output_savres_externs (FILE *file)
+@@ -27965,12 +28115,17 @@ rs6000_output_savres_externs (FILE *file)
  		     & REST_NOINLINE_FPRS_DOESNT_RESTORE_LR) == 0;
  	  int sel = SAVRES_FPR | (lr ? SAVRES_LR : 0);
  	  name = rs6000_savres_routine_name (regno, sel);
@@ -1751,7 +1751,7 @@ index fd11407367e6474dbae51e7891466925cc0367eb..dcab4eeace0ab6a6915acc980420371a
  
  static void
  rs6000_output_function_prologue (FILE *file)
-@@ -28833,12 +28988,30 @@ rs6000_emit_epilogue (int sibcall)
+@@ -28847,12 +29002,30 @@ rs6000_emit_epilogue (int sibcall)
  				      + reg_size * (int) i);
  
  	  emit_move_insn (gen_rtx_REG (reg_mode, regno), mem);
@@ -1880,10 +1880,10 @@ index 0000000000000000000000000000000000000000..15d9d3fd5a5f0c8109cd158242745fa5
 +MULTILIB_DIRNAMES = newlib clib2
 +#MULTILIB_REUSE = =mcrt=newlib
 diff --git a/gcc/cp/typeck.c b/gcc/cp/typeck.c
-index f5081c1661c5811bd2d9e6100b6bcb34bf646f35..833d746ae7445ceb97e3da5a3e4ffa345f513e94 100644
+index 907d31d9786c8eeceba74d98190117f9a2779cd5..49802c6daa1abd5ef35e9224e023d4012930706c 100644
 --- a/gcc/cp/typeck.c
 +++ b/gcc/cp/typeck.c
-@@ -3749,12 +3749,28 @@ cp_build_function_call_vec (tree function, vec<tree, va_gc> **params,
+@@ -3754,12 +3754,28 @@ cp_build_function_call_vec (tree function, vec<tree, va_gc> **params,
  
        return error_mark_node;
      }
@@ -2111,7 +2111,7 @@ index 5571d05d93bc821a3e55af9e081b98e379ec0726..b63ea055671032161146e64b79fe9d91
  The RL78 back end supports the @code{saddr} variable attribute.  This
  specifies placement of the corresponding variable in the SADDR area,
 diff --git a/gcc/doc/invoke.texi b/gcc/doc/invoke.texi
-index 0f2c83964f49bdd011dec291538bd62ed2d048d6..6a50073fca36fc1a4ce6d011918ad93d177a9044 100644
+index 444159178a76e58f3fbcc4d1c7de981c4fddc623..352dd1f49ea91f9b9f6642aa3ee5feaedcf544c3 100644
 --- a/gcc/doc/invoke.texi
 +++ b/gcc/doc/invoke.texi
 @@ -1301,12 +1301,41 @@ See RS/6000 and PowerPC Options.
@@ -2156,7 +2156,7 @@ index 0f2c83964f49bdd011dec291538bd62ed2d048d6..6a50073fca36fc1a4ce6d011918ad93d
  @node Overall Options
  @section Options Controlling the Kind of Output
  
-@@ -14554,12 +14583,13 @@ platform.
+@@ -14559,12 +14588,13 @@ platform.
  * VMS Options::
  * VxWorks Options::
  * x86 Options::
@@ -2170,7 +2170,7 @@ index 0f2c83964f49bdd011dec291538bd62ed2d048d6..6a50073fca36fc1a4ce6d011918ad93d
  @node AArch64 Options
  @subsection AArch64 Options
  @cindex AArch64 Options
-@@ -28124,12 +28154,143 @@ These options are defined for Xstormy16:
+@@ -28112,12 +28142,143 @@ These options are defined for Xstormy16:
  @table @gcctabopt
  @item -msim
  @opindex msim
@@ -2315,10 +2315,10 @@ index 0f2c83964f49bdd011dec291538bd62ed2d048d6..6a50073fca36fc1a4ce6d011918ad93d
  These options are supported for Xtensa targets:
  
 diff --git a/gcc/expr.c b/gcc/expr.c
-index cf5b63172f1cddcb0c1ea4ba6bd488c2e3b817df..8bebb35f3c270507767896faebf4d3f4ec200f43 100644
+index c9e6bf228a41bcf5929030186e9fa11029759882..6fc6da1a029bd91d7da32bee287035bf17d3f2cd 100644
 --- a/gcc/expr.c
 +++ b/gcc/expr.c
-@@ -8359,13 +8359,12 @@ expand_expr_real_2 (sepops ops, rtx target, machine_mode tmode,
+@@ -8360,13 +8360,12 @@ expand_expr_real_2 (sepops ops, rtx target, machine_mode tmode,
    tree treeop0, treeop1, treeop2;
  #define REDUCE_BIT_FIELD(expr)	(reduce_bit_field			  \
  				 ? reduce_to_bit_field_precision ((expr), \
@@ -3208,7 +3208,7 @@ index 0000000000000000000000000000000000000000..0c61a108764c8501f8a2e9552c7c0749
 +  return 0;
 +}
 diff --git a/libstdc++-v3/configure b/libstdc++-v3/configure
-index 49d12887d522578b94d613ad7a8053161c11cbe4..de4e0e239361ef521dabeae9f76238465ee55cbd 100755
+index ba094be6f15ba38a4959c74f9102a514123e571f..0789c9f050c0e282cf99f0e1ee807b50832e00e5 100755
 --- a/libstdc++-v3/configure
 +++ b/libstdc++-v3/configure
 @@ -78287,12 +78287,171 @@ done
@@ -5177,5 +5177,5 @@ index 9ae10100f8d60e900cde415bb7e96baebf35c85d..eb0f1fab6f81ac3f0e56c22ce85532c8
  
  #endif // _GLIBCXX_CSTDDEF
 -- 
-2.16.2
+2.14.2
 

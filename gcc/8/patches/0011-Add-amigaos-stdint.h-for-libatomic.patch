@@ -1,4 +1,4 @@
-From e5b8f96cc11fcfcdb1ebafa7c765a1757038fb6c Mon Sep 17 00:00:00 2001
+From 185dfb2e20e1b7b278aee2c02c594827694cbd5f Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Tue, 3 Apr 2018 19:52:01 +0200
 Subject: [PATCH 11/20] Add amigaos-stdint.h for libatomic.
@@ -50,5 +50,5 @@ index d29dd8c54530f003c20786c9261159de83276d8e..854009ca098f9dff59be936425a565dd
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation; either version 3, or (at your option)
 -- 
-2.16.2
+2.14.2
 

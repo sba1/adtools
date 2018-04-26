@@ -1,4 +1,4 @@
-From 5cf07797de6489f1df76b307413f9c324ba8838b Mon Sep 17 00:00:00 2001
+From 69aa6849dfd96961ffdc236739a2023d2050f3e4 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Tue, 24 Apr 2018 06:29:13 +0200
 Subject: [PATCH 19/20] Add tagtype attribute that can be passed to enum
@@ -163,5 +163,5 @@ index f88bfe5f879cb4ca09f067d907ec36ef0b4c2da3..0ed2a2b9ca1abe33f6534008f0c9592a
  /* Overrides */
  
 -- 
-2.16.2
+2.14.2
 

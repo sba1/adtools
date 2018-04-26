@@ -1,4 +1,4 @@
-From 699afa79f46b01a8657d162f3f1373824c75ea21 Mon Sep 17 00:00:00 2001
+From 9140ce0bac76b5ccefe75fd59d7ad2bd7c9daab7 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Wed, 2 Dec 2015 21:39:42 +0100
 Subject: [PATCH 05/20] Disable the usage of /dev/urandom when compiling for
@@ -67,5 +67,5 @@ index b066bcc72297fad53dcea3f5e605a0c87c6402a2..ffcaddd6544eb98df75b45369f74bfb3
  }
  
 -- 
-2.16.2
+2.14.2
 

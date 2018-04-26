@@ -1,4 +1,4 @@
-From 1073a14f3dd6078f0d2e92a7a2468924954011af Mon Sep 17 00:00:00 2001
+From b7f4c17a89eea4c66650d9be287b964ea0f7858b Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Sat, 5 Dec 2015 13:17:26 +0100
 Subject: [PATCH 06/20] Expand arg zero on AmigaOS using the PROGDIR: assign.
@@ -37,5 +37,5 @@ index 2fe3d2eb7dcb2cb71e24a2fe2e01f637ea2ce727..f1c28df80dd2173d3a98f152e4d9e5d5
    set_up_specs ();
    putenv_COLLECT_GCC (argv[0]);
 -- 
-2.16.2
+2.14.2
 

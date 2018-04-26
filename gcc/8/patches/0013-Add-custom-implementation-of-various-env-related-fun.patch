@@ -1,4 +1,4 @@
-From 632d6ba0f43ffa668ac263f2f392c44df2421e49 Mon Sep 17 00:00:00 2001
+From 128e2f89ea9e4ffbeac49d2bcab3b99c130864c3 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Wed, 4 Apr 2018 23:50:48 +0200
 Subject: [PATCH 13/20] Add custom implementation of various env-related
@@ -204,5 +204,5 @@ index 0000000000000000000000000000000000000000..dc9a460737538d74558bb43c21c21e61
 +	return lvar->lv_Value;
 +}
 -- 
-2.16.2
+2.14.2
 
