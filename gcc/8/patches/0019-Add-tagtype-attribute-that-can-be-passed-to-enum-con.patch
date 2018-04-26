@@ -1,7 +1,7 @@
-From 69aa6849dfd96961ffdc236739a2023d2050f3e4 Mon Sep 17 00:00:00 2001
+From 14c824b1ccac0fcc2fc6ff556dc285621ac51259 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Tue, 24 Apr 2018 06:29:13 +0200
-Subject: [PATCH 19/20] Add tagtype attribute that can be passed to enum
+Subject: [PATCH 19/19] Add tagtype attribute that can be passed to enum
  constants.
 
 The tagtype attribute can be applied to enum constants in order to annotate
@@ -102,10 +102,10 @@ index 5a0b8006e2f6b6b8877e092994567233077594f1..df81cfa81701262bebfbad60b580ab75
  
  //#endif /* TREE_CODE */
 diff --git a/gcc/config/rs6000/amigaos.c b/gcc/config/rs6000/amigaos.c
-index 77a3acbea1fd73b3144e29bb378f10ae9404b4d7..2cabd894b0337a4f5119192d41dcbf42386d287c 100644
+index a7cfaaa2ca4ac913d78e3240aa994a65c2e4b03f..db803847e90047b90c8c88e3aa9b50c8ccf73489 100644
 --- a/gcc/config/rs6000/amigaos.c
 +++ b/gcc/config/rs6000/amigaos.c
-@@ -470,12 +470,38 @@ amigaos_handle_check68kfuncptr_attribute (tree *node, tree name,
+@@ -496,12 +496,38 @@ amigaos_handle_check68kfuncptr_attribute (tree *node, tree name,
        *no_add_attrs = true;
      }
  

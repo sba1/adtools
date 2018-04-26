@@ -1,7 +1,7 @@
-From 9eed1372abf550b4476c74feb4c8aa85be7a2399 Mon Sep 17 00:00:00 2001
+From f86199e2b81498aa5929c4be39f628f4e976b240 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 14 Nov 2014 20:03:56 +0100
-Subject: [PATCH 02/20] Added new function attribute "lineartags" and pragma
+Subject: [PATCH 02/19] Added new function attribute "lineartags" and pragma
  "amigaos tagtype".
 
 Functions that have the lineartags attribute are assumed to be functions
@@ -10,18 +10,15 @@ that follow a specific tag is assumed to be a certain type. If this is
 not the case, the compiler will warn.
 
 The compiler can be taught about that types via the new pragma
-#pragma amigaos tagtype(TYPE)
 which is written before an "enum" or a "static const int" that defines
 the number of the tag.
 
 For instance:
 
-#pragma amigaos tagtype(struct Screen *)
 static const int WA_CustomScreen = WA_Dummy + 0x0D;
 
  or
 
-#pragma amigaos tagtype(struct Screen *)
 enum {WA_CustomScreen = WA_Dummy + 0x0D};
 
 is possible now.
@@ -32,10 +29,10 @@ functions.
 ---
  gcc/c-family/c-pragma.c            |  10 +++
  gcc/c/c-parser.c                   | 129 +++++++++++++++++++++++++++++++++++++
- gcc/c/c-typeck.c                   |  24 +++++++
+ gcc/c/c-typeck.c                   |  26 ++++++++
  gcc/config/rs6000/amigaos-protos.h |   1 +
- gcc/config/rs6000/amigaos.c        |   7 ++
- 5 files changed, 171 insertions(+)
+ gcc/config/rs6000/amigaos.c        |  33 ++++++++++
+ 5 files changed, 199 insertions(+)
 
 diff --git a/gcc/c-family/c-pragma.c b/gcc/c-family/c-pragma.c
 index 84e4341ee5f0594515ff564d39a9073ed9f42466..d22bf0ae4c2ae578274b52e71e1e5d942cc18179 100644
@@ -263,7 +260,7 @@ index 47720861d3f22ea1ec414c0f134004b355798df3..2402da0ce1d38d16739ca90860022268
    c_parser_skip_to_pragma_eol (parser);
  
 diff --git a/gcc/c/c-typeck.c b/gcc/c/c-typeck.c
-index 7bf360ddc98fa57be91b046f43e09568643b0618..0d6fa12c64dd31d00ce4a693f528d585ea532056 100644
+index 7bf360ddc98fa57be91b046f43e09568643b0618..ee96f8c75a6be19169d22327ef8c384dad59406d 100644
 --- a/gcc/c/c-typeck.c
 +++ b/gcc/c/c-typeck.c
 @@ -3235,12 +3235,14 @@ convert_arguments (location_t loc, vec<location_t> arg_loc, tree typelist,
@@ -296,7 +293,7 @@ index 7bf360ddc98fa57be91b046f43e09568643b0618..0d6fa12c64dd31d00ce4a693f528d585
      {
        tree type = typetail ? TREE_VALUE (typetail) : 0;
        tree valtype = TREE_TYPE (val);
-@@ -3357,12 +3361,32 @@ convert_arguments (location_t loc, vec<location_t> arg_loc, tree typelist,
+@@ -3357,12 +3361,34 @@ convert_arguments (location_t loc, vec<location_t> arg_loc, tree typelist,
  	      {
  		promote_float_arg = false;
  		break;
@@ -304,9 +301,11 @@ index 7bf360ddc98fa57be91b046f43e09568643b0618..0d6fa12c64dd31d00ce4a693f528d585
  	}
  
 +      /* If this is a function call with linear tags try to improve the expected
-+       * type on base of recorded tag <-> type mapping.
++       * type on base of recorded tag <-> type mapping, but only if we don't know
++       * the expected type (e.g. on a var) or if the expected type is an integer.
++       * The latter case usually happens on the first tag item.
 +       */
-+      if (lineartags && type == NULL_TREE)
++      if (lineartags && (type == NULL_TREE || TREE_CODE(type) == INTEGER_TYPE))
 +        {
 +          extern tree amigaos_get_type_associated_tagtype(tree type);
 +
@@ -348,20 +347,46 @@ index eb5f8fc5f3d546b8d8e1cdd8118a3085079df50e..3b8c994cdbd192eaf7112c780f0106a4
  extern int amigaos_baserel_operand(rtx x);
  extern int amigaos_not_baserel_tree_p(tree decl);
 diff --git a/gcc/config/rs6000/amigaos.c b/gcc/config/rs6000/amigaos.c
-index ad8c0e64c056129afcd8bfa2a656749a2febfaaa..179b546108634550fec0beee071d48c0d0680b5f 100644
+index ad8c0e64c056129afcd8bfa2a656749a2febfaaa..85c03f28e37d64865360692a14fcc8a197b55395 100644
 --- a/gcc/config/rs6000/amigaos.c
 +++ b/gcc/config/rs6000/amigaos.c
-@@ -346,12 +346,19 @@ amigaos_handle_linearvarargs_attribute (tree *node, tree name,
+@@ -346,12 +346,45 @@ amigaos_handle_linearvarargs_attribute (tree *node, tree name,
        *no_add_attrs = true;
      }
  
    return NULL_TREE;
  }
  
++/* Handle a lineartags attribute. This enables tag verifications */
 +tree
-+amigaos_handle_lineartags_attribute (tree *node, tree name, tree args, int flags, bool *no_add_attrs)
++amigaos_handle_lineartags_attribute (tree *node, tree name, tree args, int flags ATTRIBUTE_UNUSED, bool *no_add_attrs)
 +{
-+  /* TODO: This function should applied only to functions or methods */
++  if (TREE_CODE (*node) != FUNCTION_TYPE)
++    {
++      warning (0, "%s attribute only applies to functions",
++	       IDENTIFIER_POINTER (name));
++      *no_add_attrs = true;
++    }
++  tree fn = *node;
++  tree arglist = TYPE_ARG_TYPES(fn);
++  int arg = 0;
++  bool is_varargs = true;
++
++  while (arglist != NULL_TREE)
++    {
++      /* The void_type marks the end of a non-varargs function */
++      if (TREE_VALUE(arglist) == void_type_node)
++        is_varargs = false;
++
++      arglist = TREE_CHAIN (arglist);
++      arg++;
++    }
++
++  if (!is_varargs && arg == 2)
++    {
++      warning (0, "%s attribute only applies to varargs functions or functions with at least two arguments",
++	       IDENTIFIER_POINTER (name));
++    }
 +  return NULL_TREE;
 +}
 +

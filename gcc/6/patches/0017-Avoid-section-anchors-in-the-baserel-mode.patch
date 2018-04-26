@@ -1,7 +1,7 @@
-From 4fc60ab6b865c56e31b9ca612668da58b086f69c Mon Sep 17 00:00:00 2001
+From c3ba0f13965006149b244b33067cee8fdb88ed2e Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Thu, 19 Apr 2018 21:00:30 +0200
-Subject: [PATCH 17/19] Avoid section anchors in the baserel mode.
+Subject: [PATCH 17/18] Avoid section anchors in the baserel mode.
 
 ---
  gcc/config/rs6000/amigaos-protos.h |  1 +
@@ -25,10 +25,10 @@ index 3b8c994cdbd192eaf7112c780f0106a4d96cbb90..5a0b8006e2f6b6b8877e092994567233
  //#endif /* TREE_CODE */
  //#endif /* RTX_CODE */
 diff --git a/gcc/config/rs6000/amigaos.c b/gcc/config/rs6000/amigaos.c
-index 797261177e46a34ac0aba97f2b9c2b8af8df2e72..0340831f2211e4224090ac6388eab7ea3c52eae8 100644
+index 0749b33bab279bebf7146a7592c4fc02b69816d2..3a2588bab04f023eeb31b4244a29701207692e7e 100644
 --- a/gcc/config/rs6000/amigaos.c
 +++ b/gcc/config/rs6000/amigaos.c
-@@ -465,6 +465,23 @@ amigaos_handle_check68kfuncptr_attribute (tree *node, tree name,
+@@ -491,6 +491,23 @@ amigaos_handle_check68kfuncptr_attribute (tree *node, tree name,
  	       IDENTIFIER_POINTER (name));
        *no_add_attrs = true;
      }
