@@ -1,0 +1,87 @@
+From 127ff3ec0ae5bdd9e5a9c4d6e16945d97f61d2bf Mon Sep 17 00:00:00 2001
+From: Sebastian Bauer <mail@sebastianbauer.info>
+Date: Thu, 26 Apr 2018 20:49:02 +0200
+Subject: [PATCH 19/19] Check validity of lineartags and begin type checking
+ also for int params.
+
+---
+ gcc/c/c-typeck.c            |  6 ++++--
+ gcc/config/rs6000/amigaos.c | 30 ++++++++++++++++++++++++++++--
+ 2 files changed, 32 insertions(+), 4 deletions(-)
+
+diff --git a/gcc/c/c-typeck.c b/gcc/c/c-typeck.c
+index 6877ebad2478c879e70207abaa9e36461f3b5858..806cebcb23ca0e7bf18318ea13ea3cd4aee4e373 100644
+--- a/gcc/c/c-typeck.c
++++ b/gcc/c/c-typeck.c
+@@ -3267,15 +3267,17 @@ convert_arguments (location_t loc, vec<location_t> arg_loc, tree typelist,
+       val = c_fully_fold (val, false, NULL);
+       STRIP_TYPE_NOPS (val);
+ 
+       val = require_complete_type (val);
+ 
+       /* If this is a function call with linear tags try to improve the expected
+-       * type on base of recorded tag <-> type mapping.
++       * type on base of recorded tag <-> type mapping, but only if we don't know
++       * the expected type (e.g. on a var) or if the expected type is an integer.
++       * The latter case usually happens on the first tag item.
+        */
+-      if (lineartags && type == 0)
++      if (lineartags && (type == NULL_TREE || TREE_CODE(type) == INTEGER_TYPE))
+         {
+           extern tree amigaos_get_type_associated_tagtype(tree type);
+ 
+           if (prev_tagtype)
+             {
+               type = prev_tagtype;
+diff --git a/gcc/config/rs6000/amigaos.c b/gcc/config/rs6000/amigaos.c
+index 0340831f2211e4224090ac6388eab7ea3c52eae8..3a2588bab04f023eeb31b4244a29701207692e7e 100644
+--- a/gcc/config/rs6000/amigaos.c
++++ b/gcc/config/rs6000/amigaos.c
+@@ -342,16 +342,42 @@ amigaos_handle_linearvarargs_attribute (tree *node, tree name,
+       *no_add_attrs = true;
+     }
+ 
+   return NULL_TREE;
+ }
+ 
++/* Handle a lineartags attribute. This enables tag verifications */
+ tree
+-amigaos_handle_lineartags_attribute (tree *node, tree name, tree args, int flags, bool *no_add_attrs)
++amigaos_handle_lineartags_attribute (tree *node, tree name, tree args, int flags ATTRIBUTE_UNUSED, bool *no_add_attrs)
+ {
+-  /* TODO: This function should applied only to functions or methods */
++  if (TREE_CODE (*node) != FUNCTION_TYPE)
++    {
++      warning (0, "%s attribute only applies to functions",
++	       IDENTIFIER_POINTER (name));
++      *no_add_attrs = true;
++    }
++  tree fn = *node;
++  tree arglist = TYPE_ARG_TYPES(fn);
++  int arg = 0;
++  bool is_varargs = true;
++
++  while (arglist != NULL_TREE)
++    {
++      /* The void_type marks the end of a non-varargs function */
++      if (TREE_VALUE(arglist) == void_type_node)
++        is_varargs = false;
++
++      arglist = TREE_CHAIN (arglist);
++      arg++;
++    }
++
++  if (!is_varargs && arg == 2)
++    {
++      warning (0, "%s attribute only applies to varargs functions or functions with at least two arguments",
++	       IDENTIFIER_POINTER (name));
++    }
+   return NULL_TREE;
+ }
+ 
+ 
+ /* Generate code for base relative access */
+ 
+-- 
+2.14.2
+

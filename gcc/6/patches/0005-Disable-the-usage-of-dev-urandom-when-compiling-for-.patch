@@ -1,7 +1,7 @@
-From 588ccc27cddf05844c72dcfa0c616976f81dd99a Mon Sep 17 00:00:00 2001
+From 502a196f846b966397b8e13927c3450b945b9a9a Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Wed, 2 Dec 2015 21:39:42 +0100
-Subject: [PATCH 05/18] Disable the usage of /dev/urandom when compiling for
+Subject: [PATCH 05/19] Disable the usage of /dev/urandom when compiling for
  AmigaOS.
 
 ---

@@ -1,7 +1,7 @@
-From 9908705365dd87a86642174ba8e8e29e149483db Mon Sep 17 00:00:00 2001
+From b7d671dba721856838be5115c5ed67e9994211cd Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Thu, 19 Apr 2018 21:00:30 +0200
-Subject: [PATCH 13/13] Avoid section anchors in the baserel mode.
+Subject: [PATCH 13/14] Avoid section anchors in the baserel mode.
 
 ---
  gcc/config/rs6000/amigaos-protos.h |  1 +

@@ -1,7 +1,7 @@
-From 8fb038d2b89d9dea0c2e1b2c983c1fbc356a429f Mon Sep 17 00:00:00 2001
+From f30820be7080924536b6520c4b368cefcd0b6721 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Tue, 17 Feb 2015 20:25:55 +0100
-Subject: [PATCH 01/18] Changes for AmigaOS version of gcc.
+Subject: [PATCH 01/19] Changes for AmigaOS version of gcc.
 
 ---
  fixincludes/configure                 |    1 +

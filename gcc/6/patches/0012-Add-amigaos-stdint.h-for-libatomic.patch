@@ -1,7 +1,7 @@
-From 129d7aad10a7fd3badda48515861ea860ef54ba5 Mon Sep 17 00:00:00 2001
+From 1b86e2e4fd575ef1850e02f2f44a1f7ae917eef0 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Tue, 3 Apr 2018 19:52:01 +0200
-Subject: [PATCH 12/18] Add amigaos-stdint.h for libatomic.
+Subject: [PATCH 12/19] Add amigaos-stdint.h for libatomic.
 
 ---
  gcc/config.gcc                                      | 2 +-
