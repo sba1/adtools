@@ -142,6 +142,14 @@ endif
 CLIB2_DIR=downloads/clib2/library
 
 #
+# Prints the folder where the basic xg (xgcc or xg++) compilers
+# can be round.
+#
+.PHONY: print-xg-dir
+print-xg-dir:
+	@echo $(XGCC_DIR)
+
+#
 # Build only xgcc, no other stuff like libstdc++ etc.
 #
 xgcc-done-$(GCC_VERSION): includes-done binutils-cross-done-$(BINUTILS_VERSION)
