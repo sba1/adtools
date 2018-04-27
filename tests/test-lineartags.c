@@ -1,4 +1,4 @@
-void TestTags(int type, ...) __attribute__((lineartags));
+void TestTags(int type, ...) __attribute__((checktags));
 
 struct S1;
 struct S2;
