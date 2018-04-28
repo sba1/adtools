@@ -33,8 +33,8 @@ test-thread: test-thread.cpp
 test-wchar: test-wchar.cpp
 	$(CPP) test-wchar.cpp -std=c++11 -mcrt=clib2 -o $@ -H
 
-test-lineartags.o: test-lineartags.c
-	$(XGCC) test-lineartags.c -c
+test-checktags.o: test-checktags.c
+	$(XGCC) $< -c
 
 ################################################################################
 
