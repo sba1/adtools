@@ -1,7 +1,7 @@
 From 97a0bede3bf39801ae1e49e82a630733897695ea Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Thu, 9 Jul 2015 06:54:37 +0200
-Subject: [PATCH 03/21] Disable .machine directive generation.
+Subject: [PATCH 03/22] Disable .machine directive generation.
 
 It breaks manual args to the assembler with different flavor,
 e.g., -Wa,-m440. This is probably not the right fix.
