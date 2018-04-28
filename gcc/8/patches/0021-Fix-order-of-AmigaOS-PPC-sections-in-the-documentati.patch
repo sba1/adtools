@@ -1,0 +1,332 @@
+From 4c16e7687bed7621d6f9dc50d6c468d13816fc9b Mon Sep 17 00:00:00 2001
+From: Sebastian Bauer <mail@sebastianbauer.info>
+Date: Sat, 28 Apr 2018 08:09:58 +0200
+Subject: [PATCH 21/21] Fix order of AmigaOS PPC sections in the documentation.
+
+---
+ gcc/doc/invoke.texi | 264 ++++++++++++++++++++++++++--------------------------
+ 1 file changed, 132 insertions(+), 132 deletions(-)
+
+diff --git a/gcc/doc/invoke.texi b/gcc/doc/invoke.texi
+index 352dd1f49ea91f9b9f6642aa3ee5feaedcf544c3..3a7fe4352fc063a5326e042ad1cf0cdda18299c2 100644
+--- a/gcc/doc/invoke.texi
++++ b/gcc/doc/invoke.texi
+@@ -14531,12 +14531,13 @@ platform.
+ @c It should be the same order and spelling as these options are listed
+ @c in Machine Dependent Options
+ 
+ @menu
+ * AArch64 Options::
+ * Adapteva Epiphany Options::
++* AmigaOS PPC options::
+ * ARC Options::
+ * ARM Options::
+ * AVR Options::
+ * Blackfin Options::
+ * C6X Options::
+ * CRIS Options::
+@@ -14588,13 +14589,12 @@ platform.
+ * VMS Options::
+ * VxWorks Options::
+ * x86 Options::
+ * x86 Windows Options::
+ * Xstormy16 Options::
+ * Xtensa Options::
+-* AmigaOS PPC options::
+ * zSeries Options::
+ @end menu
+ 
+ @node AArch64 Options
+ @subsection AArch64 Options
+ @cindex AArch64 Options
+@@ -15072,12 +15072,143 @@ Allowable values for @var{reg} are @samp{r43} and @samp{r63},
+ which specify use of that register as a fixed register,
+ and @samp{none}, which means that no register is used for this
+ purpose.  The default is @option{-m1reg-none}.
+ 
+ @end table
+ 
++@node AmigaOS PPC options
++@subsection AmigaOS PPC options
++@cindex AmigaOS PPC options
++
++@table @gcctabopt
++
++@item -mcrt=@var{crt}
++@opindex mcrt
++
++Select the C runtime library to use. The same option must be used for
++both compiling and linking. Some of the possible values are @samp{default},
++@samp{clib2}, @samp{clib2-ts} (thread-safe variant of clib2) and @samp{newlib}.
++Each option makes available an appropriate define, for example
++@code{__CLIB2__}, @code{__NEWLIB__} etc. Additionally, @samp{clib2-ts} option
++provides the @code{__THREAD_SAFE} define.
++
++@item -mbaserel
++@opindex mbaserel
++
++Generate code to access all non-constant data relative to register @code{r2}.
++The executable should also be linked with @option{-mbaserel} option.
++
++This option is useful for creating shared libraries for which all
++openers have a separate copy of non-constant data but share the constant
++data. A better way to do this is by using interface cloning, but
++sometimes this is not possible, for example when some package is being
++ported in form of shared library.
++
++This option can also be used to create residentable programs with
++special startup code.
++
++The startup code or the appropriate interface setup method should use
++@code{CopyDataSegment} function from @samp{elf.library} v51.8 or later to
++copy and relocate the data segment that each instance should have a copy of
++and then set up @code{r2} (and/or @code{EnvironmentVector} interface field
++for libraries) appropriately:
++
++@smallexample
++Elf32_Handle handle = NULL;
++BPTR seg = IDOS->GetProcSegList(NULL);
++
++if (seg)
++@{
++    IDOS->GetSegListInfoTags(seg, GSLI_ElfHandle, &handle, TAG_DONE);
++
++    if (handle
++        && (handle = IElf->OpenElfTags(OET_ElfHandle, handle, TAG_DONE)))
++    @{
++        uint32 offset;
++        uint8 *data = IElf->CopyDataSegment(handle, &offset);
++
++        if (data)
++        @{
++            /* @r{Store @code{data} somewhere since it will be required}
++             * @r{in the cleanup stage}
++             */
++
++            CurrentInterface->Data.EnvironmentVector = data + offset;
++
++            /* @r{Optionally, set r2 to the same value as @code{EnvironmentVector}} if the
++             * @r{current method will call functions access instance local data. This is}
++             * @r{not necessary if the current method will only call interface methods}
++             * @r{which have @code{baserel_restore} attribute (see below).}
++             */
++
++            IElf->CloseElfTags(handle, CET_ReClose, TRUE, TAG_DONE);
++        @}
++        else
++            /* Data was not allocated */;
++    @}
++    else
++        /* ELF handle couldn't be obtained */;
++@}
++else
++    /* Process segment list was not retrieved */;
++
++@end smallexample
++
++The copied data segment should be freed in the cleanup stage using the
++same procedure to obtain the ELF handle and then @code{FreeDataSegmentCopy}
++should be called with the value @code{CopyDataSegment} returned (@emph{not}
++with the value that @code{EnvironmentVector} contains).
++
++Interface methods should include @code{baserel_restore} attribute in their
++definition. When this attribute is present, the compiler will call
++@code{__baserel_get_addr} function in the function prologue. This function
++should set up @code{r2} register and must not modify any other registers
++except @code{r2}. Since it will be called in function prologue, register
++@code{r3} will contain the the first argument of the function. For
++interfaces, this is the interface pointer through which
++@code{EnvironmentVector} field can be accessed. Previous contents
++of register @code{r2} will be restored in the function epilogue.
++
++One possible implementation of @code{__baserel_get_addr} function:
++
++@smallexample
++asm("\n\
++     text\n\
++     globl __baserel_get_addr\n\
++
++__baserel_get_addr:\n\
++     lwz 2, 48(3) /* @r{Fetch EnvironmentVector from struct Interface *} */\n\
++     blr\n\
++");
++@end smallexample
++
++If some non-constant variable needs to be shared by all instances, it
++can be declared with @code{force_no_baserel} attribute. The variable will
++still be present in instance local data area that was created on
++startup, but the compiler will generate code to access it in the
++original data section for all instances. Because of that, the
++declaration of the variable with this attribute must be available to the
++compiler whenever the variable is accessed, otherwise it will generate
++code to access instance local copy of that variable which is probably
++not the desired behaviour. Additionally, some sort of access arbitration
++is probably required.
++
++@item -mno-baserel
++@opindex mno-baserel
++
++Generate absolute data access. This is the default.
++
++@item -mcheck68kfuncptr
++@opindex mcheck68kfuncptr
++
++Causes each function call through a function pointer to be performed as
++if the function pointer was declared with the @samp{check68kfuncptr}
++function attribute. @xref{Function Attributes}.
++
++@end table
++
+ @node ARC Options
+ @subsection ARC Options
+ @cindex ARC options
+ 
+ The following options control the architecture variant for which code
+ is being compiled:
+@@ -28142,143 +28273,12 @@ These options are defined for Xstormy16:
+ @table @gcctabopt
+ @item -msim
+ @opindex msim
+ Choose startup files and linker script suitable for the simulator.
+ @end table
+ 
+-@node AmigaOS PPC options
+-@subsection AmigaOS PPC options
+-@cindex AmigaOS PPC options
+-
+-@table @gcctabopt
+-
+-@item -mcrt=@var{crt}
+-@opindex mcrt
+-
+-Select the C runtime library to use. The same option must be used for
+-both compiling and linking. Some of the possible values are @samp{default},
+-@samp{clib2}, @samp{clib2-ts} (thread-safe variant of clib2) and @samp{newlib}.
+-Each option makes available an appropriate define, for example
+-@code{__CLIB2__}, @code{__NEWLIB__} etc. Additionally, @samp{clib2-ts} option
+-provides the @code{__THREAD_SAFE} define.
+-
+-@item -mbaserel
+-@opindex mbaserel
+-
+-Generate code to access all non-constant data relative to register @code{r2}.
+-The executable should also be linked with @option{-mbaserel} option.
+-
+-This option is useful for creating shared libraries for which all
+-openers have a separate copy of non-constant data but share the constant
+-data. A better way to do this is by using interface cloning, but
+-sometimes this is not possible, for example when some package is being
+-ported in form of shared library.
+-
+-This option can also be used to create residentable programs with
+-special startup code.
+-
+-The startup code or the appropriate interface setup method should use
+-@code{CopyDataSegment} function from @samp{elf.library} v51.8 or later to
+-copy and relocate the data segment that each instance should have a copy of
+-and then set up @code{r2} (and/or @code{EnvironmentVector} interface field
+-for libraries) appropriately:
+-
+-@smallexample
+-Elf32_Handle handle = NULL;
+-BPTR seg = IDOS->GetProcSegList(NULL);
+-
+-if (seg)
+-@{
+-    IDOS->GetSegListInfoTags(seg, GSLI_ElfHandle, &handle, TAG_DONE);
+-
+-    if (handle
+-        && (handle = IElf->OpenElfTags(OET_ElfHandle, handle, TAG_DONE)))
+-    @{
+-        uint32 offset;
+-        uint8 *data = IElf->CopyDataSegment(handle, &offset);
+-
+-        if (data)
+-        @{
+-            /* @r{Store @code{data} somewhere since it will be required}
+-             * @r{in the cleanup stage}
+-             */
+-
+-            CurrentInterface->Data.EnvironmentVector = data + offset;
+-
+-            /* @r{Optionally, set r2 to the same value as @code{EnvironmentVector}} if the
+-             * @r{current method will call functions access instance local data. This is}
+-             * @r{not necessary if the current method will only call interface methods}
+-             * @r{which have @code{baserel_restore} attribute (see below).}
+-             */
+-
+-            IElf->CloseElfTags(handle, CET_ReClose, TRUE, TAG_DONE);
+-        @}
+-        else
+-            /* Data was not allocated */;
+-    @}
+-    else
+-        /* ELF handle couldn't be obtained */;
+-@}
+-else
+-    /* Process segment list was not retrieved */;
+-
+-@end smallexample
+-
+-The copied data segment should be freed in the cleanup stage using the
+-same procedure to obtain the ELF handle and then @code{FreeDataSegmentCopy}
+-should be called with the value @code{CopyDataSegment} returned (@emph{not}
+-with the value that @code{EnvironmentVector} contains).
+-
+-Interface methods should include @code{baserel_restore} attribute in their
+-definition. When this attribute is present, the compiler will call
+-@code{__baserel_get_addr} function in the function prologue. This function
+-should set up @code{r2} register and must not modify any other registers
+-except @code{r2}. Since it will be called in function prologue, register
+-@code{r3} will contain the the first argument of the function. For
+-interfaces, this is the interface pointer through which
+-@code{EnvironmentVector} field can be accessed. Previous contents
+-of register @code{r2} will be restored in the function epilogue.
+-
+-One possible implementation of @code{__baserel_get_addr} function:
+-
+-@smallexample
+-asm("\n\
+-     text\n\
+-     globl __baserel_get_addr\n\
+-
+-__baserel_get_addr:\n\
+-     lwz 2, 48(3) /* @r{Fetch EnvironmentVector from struct Interface *} */\n\
+-     blr\n\
+-");
+-@end smallexample
+-
+-If some non-constant variable needs to be shared by all instances, it
+-can be declared with @code{force_no_baserel} attribute. The variable will
+-still be present in instance local data area that was created on
+-startup, but the compiler will generate code to access it in the
+-original data section for all instances. Because of that, the
+-declaration of the variable with this attribute must be available to the
+-compiler whenever the variable is accessed, otherwise it will generate
+-code to access instance local copy of that variable which is probably
+-not the desired behaviour. Additionally, some sort of access arbitration
+-is probably required.
+-
+-@item -mno-baserel
+-@opindex mno-baserel
+-
+-Generate absolute data access. This is the default.
+-
+-@item -mcheck68kfuncptr
+-@opindex mcheck68kfuncptr
+-
+-Causes each function call through a function pointer to be performed as
+-if the function pointer was declared with the @samp{check68kfuncptr}
+-function attribute. @xref{Function Attributes}.
+-
+-@end table
+-
+ @node Xtensa Options
+ @subsection Xtensa Options
+ @cindex Xtensa Options
+ 
+ These options are supported for Xtensa targets:
+ 
+-- 
+2.14.2
+
