@@ -1,0 +1,31 @@
+From 03753c333ee48ee246a39c3d0ad733af5275f390 Mon Sep 17 00:00:00 2001
+From: Sebastian Bauer <bauer@jpk.com>
+Date: Mon, 30 Apr 2018 20:25:52 +0200
+Subject: [PATCH 12/12] Fix pointer comparision bug.
+
+---
+ binutils/stabs.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/binutils/stabs.c b/binutils/stabs.c
+index 1e7e3f2e3aafd4b8dbf4faa7212ed2008ad686de..cd1f2aa200af6a1cab3b68fc9a1295c85547df7e 100644
+--- a/binutils/stabs.c
++++ b/binutils/stabs.c
+@@ -2694,13 +2694,13 @@ parse_stab_members (void *dhandle, struct stab_handle *info,
+ 		  bad_stab (orig);
+ 		  goto fail;
+ 		}
+ 	      ++*pp;
+ 	      voffset &= 0x7fffffff;
+ 
+-	      if (**pp == ';' || *pp == '\0')
++	      if (**pp == ';' || **pp == '\0')
+ 		{
+ 		  /* Must be g++ version 1.  */
+ 		  context = DEBUG_TYPE_NULL;
+ 		}
+ 	      else
+ 		{
+-- 
+2.16.2
+

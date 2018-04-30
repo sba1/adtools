@@ -1,0 +1,1885 @@
+From 1685e6f9cba88e00ffc97144b6643315de77b2ae Mon Sep 17 00:00:00 2001
+From: Sebastian Bauer <bauer@jpk.com>
+Date: Mon, 30 Apr 2018 20:23:31 +0200
+Subject: [PATCH 11/12] Fix bad function cast warnings.
+
+These happen with newer gcc version.
+---
+ bfd/aout-target.h     |   2 +-
+ bfd/aout-tic30.c      |   2 +-
+ bfd/binary.c          |   2 +-
+ bfd/coff-alpha.c      |  14 ++--
+ bfd/coff-mips.c       |  14 ++--
+ bfd/coffcode.h        |   6 +-
+ bfd/elf-m10300.c      |   2 +-
+ bfd/elf32-cr16.c      |   2 +-
+ bfd/elf32-i370.c      |   6 +-
+ bfd/elf32-lm32.c      |   3 +-
+ bfd/elf32-m32r.c      |   2 +-
+ bfd/elf32-score.c     |   2 +-
+ bfd/elf32-score7.c    |   2 +-
+ bfd/elf32-xstormy16.c |   2 +-
+ bfd/elf32-xtensa.c    |   2 +-
+ bfd/elf64-alpha.c     |   2 +-
+ bfd/elf64-hppa.c      |   2 +-
+ bfd/elf64-ia64-vms.c  |   2 +-
+ bfd/elf64-mmix.c      |   2 +-
+ bfd/elf64-sh64.c      |   2 +-
+ bfd/elfnn-ia64.c      |   2 +-
+ bfd/elfxx-target.h    |  12 ++--
+ bfd/i386msdos.c       |   2 +-
+ bfd/ieee.c            |   9 +--
+ bfd/ihex.c            |   4 +-
+ bfd/libaout.h         |   2 +-
+ bfd/libbfd-in.h       | 183 ++++++++++++++++++++++++++------------------------
+ bfd/libbfd.c          |   2 +-
+ bfd/libbfd.h          | 183 ++++++++++++++++++++++++++------------------------
+ bfd/libecoff.h        |   6 +-
+ bfd/mach-o-target.c   |   2 +-
+ bfd/mmo.c             |   2 +-
+ bfd/nlm-target.h      |   2 +-
+ bfd/oasys.c           |  12 ++--
+ bfd/pef.c             |   3 +-
+ bfd/plugin.c          |   2 +-
+ bfd/ppcboot.c         |   2 +-
+ bfd/som.c             |   3 +-
+ bfd/srec.c            |   2 +-
+ bfd/tekhex.c          |   2 +-
+ bfd/verilog.c         |   2 +-
+ bfd/versados.c        |   3 +-
+ bfd/vms-alpha.c       |  12 +---
+ bfd/xsym.c            |   2 +-
+ gas/config/obj-elf.c  |   6 +-
+ 45 files changed, 280 insertions(+), 255 deletions(-)
+
+diff --git a/bfd/aout-target.h b/bfd/aout-target.h
+index f6e8bd2e2dc00017896c1636332659095e44da78..0bee256fa2356228c0d8bec2805aaa8246efaf32 100644
+--- a/bfd/aout-target.h
++++ b/bfd/aout-target.h
+@@ -566,13 +566,13 @@ MY_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
+ 
+ #ifndef MY_bfd_is_local_label_name
+ #define MY_bfd_is_local_label_name bfd_generic_is_local_label_name
+ #endif
+ 
+ #ifndef MY_bfd_is_target_special_symbol
+-#define MY_bfd_is_target_special_symbol ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
++#define MY_bfd_is_target_special_symbol ((bfd_boolean (*) (bfd *, asymbol *)) (bfd_boolean (*)) bfd_false)
+ #endif
+ 
+ #ifndef MY_bfd_free_cached_info
+ #define MY_bfd_free_cached_info NAME (aout, bfd_free_cached_info)
+ #endif
+ 
+diff --git a/bfd/aout-tic30.c b/bfd/aout-tic30.c
+index f3b0d36a3d8298cc7c9300de61eabfae192d9c66..339c52d0a91d0543ccaa40993f37ec865f3c09e8 100644
+--- a/bfd/aout-tic30.c
++++ b/bfd/aout-tic30.c
+@@ -1025,13 +1025,13 @@ tic30_aout_set_arch_mach (bfd *abfd,
+ #ifndef MY_bfd_is_local_label_name
+ #define MY_bfd_is_local_label_name bfd_generic_is_local_label_name
+ #endif
+ 
+ #ifndef MY_bfd_is_target_special_symbol
+ #define MY_bfd_is_target_special_symbol  \
+-  ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
++  ((bfd_boolean (*) (bfd *, asymbol *)) (bfd_boolean (*)) bfd_false)
+ #endif
+ 
+ #ifndef MY_bfd_free_cached_info
+ #define MY_bfd_free_cached_info NAME (aout, bfd_free_cached_info)
+ #endif
+ 
+diff --git a/bfd/binary.c b/bfd/binary.c
+index 700c862f93d68fd5270482eb73703147a2a9d279..8b10c9d7505de03cbf01b964c3b9b7d51dee45b9 100644
+--- a/bfd/binary.c
++++ b/bfd/binary.c
+@@ -206,13 +206,13 @@ binary_get_symbol_info (bfd *ignore_abfd ATTRIBUTE_UNUSED,
+ #define binary_get_lineno                  _bfd_nosymbols_get_lineno
+ #define binary_find_nearest_line           _bfd_nosymbols_find_nearest_line
+ #define binary_find_inliner_info           _bfd_nosymbols_find_inliner_info
+ #define binary_bfd_make_debug_symbol       _bfd_nosymbols_bfd_make_debug_symbol
+ #define binary_read_minisymbols            _bfd_generic_read_minisymbols
+ #define binary_minisymbol_to_symbol        _bfd_generic_minisymbol_to_symbol
+-#define binary_bfd_is_target_special_symbol ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
++#define binary_bfd_is_target_special_symbol ((bfd_boolean (*) (bfd *, asymbol *)) (bfd_boolean (*)) bfd_false)
+ 
+ /* Set the architecture of a binary file.  */
+ #define binary_set_arch_mach _bfd_generic_set_arch_mach
+ 
+ /* Write section contents of a binary file.  */
+ 
+diff --git a/bfd/coff-alpha.c b/bfd/coff-alpha.c
+index 62e5c9c6f03d84d48c6493de2483bb6bddd03b9d..b944e5e908c621996d1042f57e0e6921db3de6c1 100644
+--- a/bfd/coff-alpha.c
++++ b/bfd/coff-alpha.c
+@@ -2230,19 +2230,19 @@ alpha_ecoff_get_elt_at_index (bfd *abfd, symindex sym_index)
+    target vector points to this.  */
+ 
+ static const struct ecoff_backend_data alpha_ecoff_backend_data =
+ {
+   /* COFF backend structure.  */
+   {
+-    (void (*) (bfd *,void *,int,int,int,int,void *)) bfd_void, /* aux_in */
+-    (void (*) (bfd *,void *,void *)) bfd_void, /* sym_in */
+-    (void (*) (bfd *,void *,void *)) bfd_void, /* lineno_in */
+-    (unsigned (*) (bfd *,void *,int,int,int,int,void *)) bfd_void,/*aux_out*/
+-    (unsigned (*) (bfd *,void *,void *)) bfd_void, /* sym_out */
+-    (unsigned (*) (bfd *,void *,void *)) bfd_void, /* lineno_out */
+-    (unsigned (*) (bfd *,void *,void *)) bfd_void, /* reloc_out */
++    (void (*) (bfd *, void *, int, int, int, int, void *)) (void (*)) bfd_void, /* aux_in */
++    (void (*) (bfd *, void *, void *)) (void (*)) bfd_void, /* sym_in */
++    (void (*) (bfd *, void *, void *)) (void (*)) bfd_void, /* lineno_in */
++    (unsigned (*) (bfd *, void *, int, int, int, int, void *)) (unsigned (*)) bfd_0u,/*aux_out*/
++    (unsigned (*) (bfd *, void *, void *)) (unsigned (*)) bfd_0u, /* sym_out */
++    (unsigned (*) (bfd *, void *, void *)) (unsigned (*)) bfd_0u, /* lineno_out */
++    (unsigned (*) (bfd *, void *, void *)) (unsigned (*)) bfd_0u, /* reloc_out */
+     alpha_ecoff_swap_filehdr_out, alpha_ecoff_swap_aouthdr_out,
+     alpha_ecoff_swap_scnhdr_out,
+     FILHSZ, AOUTSZ, SCNHSZ, 0, 0, 0, 0, FILNMLEN, TRUE, 
+     ECOFF_NO_LONG_SECTION_NAMES, 4, FALSE, 2,
+     alpha_ecoff_swap_filehdr_in, alpha_ecoff_swap_aouthdr_in,
+     alpha_ecoff_swap_scnhdr_in, NULL,
+diff --git a/bfd/coff-mips.c b/bfd/coff-mips.c
+index cdcdde2bcf25848b4939203f1bb261fc8cce1bc2..2a62718e171fff15ccbd434576b24c7460a7d2bb 100644
+--- a/bfd/coff-mips.c
++++ b/bfd/coff-mips.c
+@@ -1243,19 +1243,19 @@ mips_relocate_section (bfd *output_bfd,
+    target vector points to this.  */
+ 
+ static const struct ecoff_backend_data mips_ecoff_backend_data =
+ {
+   /* COFF backend structure.  */
+   {
+-    (void (*) (bfd *,void *,int,int,int,int,void *)) bfd_void, /* aux_in */
+-    (void (*) (bfd *,void *,void *)) bfd_void, /* sym_in */
+-    (void (*) (bfd *,void *,void *)) bfd_void, /* lineno_in */
+-    (unsigned (*) (bfd *,void *,int,int,int,int,void *)) bfd_void,/*aux_out*/
+-    (unsigned (*) (bfd *,void *,void *)) bfd_void, /* sym_out */
+-    (unsigned (*) (bfd *,void *,void *)) bfd_void, /* lineno_out */
+-    (unsigned (*) (bfd *,void *,void *)) bfd_void, /* reloc_out */
++    (void (*) (bfd *,void *,int,int,int,int,void *)) (void (*)) bfd_void, /* aux_in */
++    (void (*) (bfd *,void *,void *)) (void (*)) bfd_void, /* sym_in */
++    (void (*) (bfd *,void *,void *)) (void (*)) bfd_void, /* lineno_in */
++    (unsigned (*) (bfd *,void *,int,int,int,int,void *)) (unsigned (*)) bfd_0u,/*aux_out*/
++    (unsigned (*) (bfd *,void *,void *)) (unsigned (*)) bfd_0u, /* sym_out */
++    (unsigned (*) (bfd *,void *,void *)) (unsigned (*)) bfd_0u, /* lineno_out */
++    (unsigned (*) (bfd *,void *,void *)) (unsigned (*)) bfd_0u, /* reloc_out */
+     mips_ecoff_swap_filehdr_out, mips_ecoff_swap_aouthdr_out,
+     mips_ecoff_swap_scnhdr_out,
+     FILHSZ, AOUTSZ, SCNHSZ, 0, 0, 0, 0, FILNMLEN, TRUE, 
+     ECOFF_NO_LONG_SECTION_NAMES, 4, FALSE, 2,
+     mips_ecoff_swap_filehdr_in, mips_ecoff_swap_aouthdr_in,
+     mips_ecoff_swap_scnhdr_in, NULL,
+diff --git a/bfd/coffcode.h b/bfd/coffcode.h
+index 62eeb20d763011d1b8fd534173e03f99f7e02af5..7713e1a453fa4c1f3a65634b975d69a8b930925d 100644
+--- a/bfd/coffcode.h
++++ b/bfd/coffcode.h
+@@ -1947,13 +1947,13 @@ coff_set_alignment_hook (bfd *abfd, asection *section, void * scnhdr)
+     }
+ }
+ 
+ #else /* ! RS6000COFF_C */
+ 
+ #define coff_set_alignment_hook \
+-  ((void (*) (bfd *, asection *, void *)) bfd_void)
++  ((void (*) (bfd *, asection *, void *)) (void (*)) bfd_void)
+ 
+ #endif /* ! RS6000COFF_C */
+ #endif /* ! COFF_WITH_PE */
+ #endif /* ! COFF_ALIGN_IN_SECTION_HEADER */
+ 
+ #ifndef coff_mkobject
+@@ -2469,13 +2469,13 @@ symname_in_debug_hook (bfd * abfd ATTRIBUTE_UNUSED, struct internal_syment *sym)
+   return SYMNAME_IN_DEBUG (sym) != 0;
+ }
+ 
+ #else
+ 
+ #define symname_in_debug_hook \
+-  (bfd_boolean (*) (bfd *, struct internal_syment *)) bfd_false
++  (bfd_boolean (*) (bfd *, struct internal_syment *)) (bfd_boolean (*)) bfd_false
+ 
+ #endif
+ 
+ #ifdef RS6000COFF_C
+ 
+ #ifdef XCOFF64
+@@ -5622,13 +5622,13 @@ static bfd_coff_backend_data ticoff1_swap_table =
+ 
+ #ifndef coff_bfd_is_local_label_name
+ #define coff_bfd_is_local_label_name	    _bfd_coff_is_local_label_name
+ #endif
+ 
+ #ifndef coff_bfd_is_target_special_symbol
+-#define coff_bfd_is_target_special_symbol   ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
++#define coff_bfd_is_target_special_symbol   ((bfd_boolean (*) (bfd *, asymbol *)) (bfd_boolean (*)) bfd_false)
+ #endif
+ 
+ #ifndef coff_read_minisymbols
+ #define coff_read_minisymbols		    _bfd_generic_read_minisymbols
+ #endif
+ 
+diff --git a/bfd/elf-m10300.c b/bfd/elf-m10300.c
+index 709ea161eb1a026d8f14910277ac4326537128f7..4565713861328b1bbf3d300f46ba2099839dab10 100644
+--- a/bfd/elf-m10300.c
++++ b/bfd/elf-m10300.c
+@@ -5600,13 +5600,13 @@ mn10300_elf_mkobject (bfd *abfd)
+   _bfd_mn10300_elf_create_dynamic_sections
+ #define elf_backend_adjust_dynamic_symbol \
+   _bfd_mn10300_elf_adjust_dynamic_symbol
+ #define elf_backend_size_dynamic_sections \
+   _bfd_mn10300_elf_size_dynamic_sections
+ #define elf_backend_omit_section_dynsym \
+-  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) bfd_true)
++  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) (bfd_boolean (*)) bfd_true)
+ #define elf_backend_finish_dynamic_symbol \
+   _bfd_mn10300_elf_finish_dynamic_symbol
+ #define elf_backend_finish_dynamic_sections \
+   _bfd_mn10300_elf_finish_dynamic_sections
+ #define elf_backend_copy_indirect_symbol \
+   _bfd_mn10300_copy_indirect_symbol
+diff --git a/bfd/elf32-cr16.c b/bfd/elf32-cr16.c
+index 97fa5691e600ce61f87230e13512f705a8693c58..f32d3fa6c4990f8c60ccc9a5d844171abf4bcba7 100644
+--- a/bfd/elf32-cr16.c
++++ b/bfd/elf32-cr16.c
+@@ -2980,13 +2980,13 @@ _bfd_cr16_elf_reloc_type_class (const Elf_Internal_Rela *rela)
+                                   _bfd_cr16_elf_create_dynamic_sections
+ #define elf_backend_adjust_dynamic_symbol \
+                                   _bfd_cr16_elf_adjust_dynamic_symbol
+ #define elf_backend_size_dynamic_sections \
+                                   _bfd_cr16_elf_size_dynamic_sections
+ #define elf_backend_omit_section_dynsym \
+-      ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) bfd_true)
++      ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) (bfd_boolean (*)) bfd_true)
+ #define elf_backend_finish_dynamic_symbol \
+                                    _bfd_cr16_elf_finish_dynamic_symbol
+ #define elf_backend_finish_dynamic_sections \
+                                    _bfd_cr16_elf_finish_dynamic_sections
+ 
+ #define elf_backend_reloc_type_class   _bfd_cr16_elf_reloc_type_class
+diff --git a/bfd/elf32-i370.c b/bfd/elf32-i370.c
+index 5998db755a6290f2151ba666c4ab76e0e4707331..bcaf3338b34ac4d770c92bcf54ea24020b3b9ff6 100644
+--- a/bfd/elf32-i370.c
++++ b/bfd/elf32-i370.c
+@@ -1383,16 +1383,16 @@ i370_elf_relocate_section (bfd *output_bfd,
+ #define elf_backend_fake_sections		i370_elf_fake_sections
+ #define elf_backend_section_from_shdr		i370_elf_section_from_shdr
+ #define elf_backend_adjust_dynamic_symbol	i370_elf_adjust_dynamic_symbol
+ #define elf_backend_check_relocs		i370_elf_check_relocs
+ #define elf_backend_post_process_headers	_bfd_elf_set_osabi
+ 
+-static int
+-i370_noop (void)
++static bfd_boolean
++i370_noop (bfd * abfd ATTRIBUTE_UNUSED, ...)
+ {
+-  return 1;
++  return TRUE;
+ }
+ 
+ #define elf_backend_finish_dynamic_symbol \
+   (bfd_boolean (*) \
+      (bfd *, struct bfd_link_info *, struct elf_link_hash_entry *, \
+       Elf_Internal_Sym *)) i370_noop
+diff --git a/bfd/elf32-lm32.c b/bfd/elf32-lm32.c
+index 8d530a4cf31345c404391c4098d752bd8e585d94..85e2a35e1b8ab0578abde4d94b8adc885a5d4871 100644
+--- a/bfd/elf32-lm32.c
++++ b/bfd/elf32-lm32.c
+@@ -2833,13 +2833,14 @@ lm32_elf_fdpic_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
+ #define elf_backend_got_header_size             12
+ #define bfd_elf32_bfd_link_hash_table_create    lm32_elf_link_hash_table_create
+ #define elf_backend_check_relocs                lm32_elf_check_relocs
+ #define elf_backend_reloc_type_class            lm32_elf_reloc_type_class
+ #define elf_backend_copy_indirect_symbol        lm32_elf_copy_indirect_symbol
+ #define elf_backend_size_dynamic_sections       lm32_elf_size_dynamic_sections
+-#define elf_backend_omit_section_dynsym         ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) bfd_true)
++#define elf_backend_omit_section_dynsym		\
++  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) (bfd_boolean (*)) bfd_true)
+ #define elf_backend_create_dynamic_sections     lm32_elf_create_dynamic_sections
+ #define elf_backend_finish_dynamic_sections     lm32_elf_finish_dynamic_sections
+ #define elf_backend_adjust_dynamic_symbol       lm32_elf_adjust_dynamic_symbol
+ #define elf_backend_finish_dynamic_symbol       lm32_elf_finish_dynamic_symbol
+ #define elf_backend_relocate_section            lm32_elf_relocate_section
+ 
+diff --git a/bfd/elf32-m32r.c b/bfd/elf32-m32r.c
+index e3e3bb051b5e300b87a6bc69dcb35998c150f24b..a4a2378c2c358e065966dbf8ede37220cd469268 100644
+--- a/bfd/elf32-m32r.c
++++ b/bfd/elf32-m32r.c
+@@ -4024,13 +4024,13 @@ m32r_elf_reloc_type_class (const Elf_Internal_Rela *rela)
+ #define elf_backend_check_relocs                m32r_elf_check_relocs
+ 
+ #define elf_backend_create_dynamic_sections     m32r_elf_create_dynamic_sections
+ #define bfd_elf32_bfd_link_hash_table_create    m32r_elf_link_hash_table_create
+ #define elf_backend_size_dynamic_sections       m32r_elf_size_dynamic_sections
+ #define elf_backend_omit_section_dynsym \
+-  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) bfd_true)
++  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) (bfd_boolean (*)) bfd_true)
+ #define elf_backend_finish_dynamic_sections     m32r_elf_finish_dynamic_sections
+ #define elf_backend_adjust_dynamic_symbol       m32r_elf_adjust_dynamic_symbol
+ #define elf_backend_finish_dynamic_symbol       m32r_elf_finish_dynamic_symbol
+ #define elf_backend_reloc_type_class            m32r_elf_reloc_type_class
+ #define elf_backend_copy_indirect_symbol        m32r_elf_copy_indirect_symbol
+ 
+diff --git a/bfd/elf32-score.c b/bfd/elf32-score.c
+index 01a602b1a4f95775744fc4bdc896b3f6eb491c30..55bb6fe306fa3b71b462f092d2573ad8da7ca797 100644
+--- a/bfd/elf32-score.c
++++ b/bfd/elf32-score.c
+@@ -4460,13 +4460,13 @@ _bfd_score_elf_common_definition (Elf_Internal_Sym *sym)
+   _bfd_score_elf_adjust_dynamic_symbol
+ #define elf_backend_always_size_sections \
+   _bfd_score_elf_always_size_sections
+ #define elf_backend_size_dynamic_sections \
+   _bfd_score_elf_size_dynamic_sections
+ #define elf_backend_omit_section_dynsym \
+-  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) bfd_true)
++  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) (bfd_boolean (*)) bfd_true)
+ #define elf_backend_create_dynamic_sections \
+   _bfd_score_elf_create_dynamic_sections
+ #define elf_backend_finish_dynamic_symbol \
+   _bfd_score_elf_finish_dynamic_symbol
+ #define elf_backend_finish_dynamic_sections \
+   _bfd_score_elf_finish_dynamic_sections
+diff --git a/bfd/elf32-score7.c b/bfd/elf32-score7.c
+index 3615a1e7b57c1d3b29f82fb7c4ccdc21441da0af..fe59230080de62dea8c06b1a4f480af394353e5b 100644
+--- a/bfd/elf32-score7.c
++++ b/bfd/elf32-score7.c
+@@ -3865,7 +3865,7 @@ s7_elf32_score_new_section_hook (bfd *abfd, asection *sec)
+   sec->used_by_bfd = sdata;
+ 
+   return _bfd_elf_new_section_hook (abfd, sec);
+ }
+ 
+ #define elf_backend_omit_section_dynsym \
+-  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) bfd_true)
++  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) (bfd_boolean (*)) bfd_true)
+diff --git a/bfd/elf32-xstormy16.c b/bfd/elf32-xstormy16.c
+index c657b84a46c9572d999207c1ad99a95cb85793a3..facedf64f1787f20bc6947f7766dfded4b76f866 100644
+--- a/bfd/elf32-xstormy16.c
++++ b/bfd/elf32-xstormy16.c
+@@ -1019,13 +1019,13 @@ xstormy16_elf_gc_mark_hook (asection *sec,
+ #define elf_backend_relocate_section		xstormy16_elf_relocate_section
+ #define elf_backend_gc_mark_hook		xstormy16_elf_gc_mark_hook
+ #define elf_backend_check_relocs                xstormy16_elf_check_relocs
+ #define elf_backend_always_size_sections \
+   xstormy16_elf_always_size_sections
+ #define elf_backend_omit_section_dynsym \
+-  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) bfd_true)
++  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) (bfd_boolean (*)) bfd_true)
+ #define elf_backend_finish_dynamic_sections \
+   xstormy16_elf_finish_dynamic_sections
+ 
+ #define elf_backend_can_gc_sections		1
+ #define elf_backend_rela_normal			1
+ 
+diff --git a/bfd/elf32-xtensa.c b/bfd/elf32-xtensa.c
+index 2de9480db8ebfd197f1666c7385738d6c0999f88..f8640f57e02f057fd8033c6f3cdb89dc35fb3175 100644
+--- a/bfd/elf32-xtensa.c
++++ b/bfd/elf32-xtensa.c
+@@ -10814,12 +10814,12 @@ static const struct bfd_elf_special_section elf_xtensa_special_sections[] =
+ #define elf_backend_object_p		     elf_xtensa_object_p
+ #define elf_backend_reloc_type_class	     elf_xtensa_reloc_type_class
+ #define elf_backend_relocate_section	     elf_xtensa_relocate_section
+ #define elf_backend_size_dynamic_sections    elf_xtensa_size_dynamic_sections
+ #define elf_backend_always_size_sections     elf_xtensa_always_size_sections
+ #define elf_backend_omit_section_dynsym \
+-  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) bfd_true)
++  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) (bfd_boolean (*)) bfd_true)
+ #define elf_backend_special_sections	     elf_xtensa_special_sections
+ #define elf_backend_action_discarded	     elf_xtensa_action_discarded
+ #define elf_backend_copy_indirect_symbol     elf_xtensa_copy_indirect_symbol
+ 
+ #include "elf32-target.h"
+diff --git a/bfd/elf64-alpha.c b/bfd/elf64-alpha.c
+index deb03c183c0c6294c85263f528010c0e07f18449..54a298f82cce13df1feea9552a4da7cc3f47e713 100644
+--- a/bfd/elf64-alpha.c
++++ b/bfd/elf64-alpha.c
+@@ -5465,13 +5465,13 @@ static const struct elf_size_info alpha_elf_size_info =
+   elf64_alpha_copy_indirect_symbol
+ #define elf_backend_always_size_sections \
+   elf64_alpha_always_size_sections
+ #define elf_backend_size_dynamic_sections \
+   elf64_alpha_size_dynamic_sections
+ #define elf_backend_omit_section_dynsym \
+-  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) bfd_true)
++  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) (bfd_boolean (*)) bfd_true)
+ #define elf_backend_relocate_section \
+   elf64_alpha_relocate_section
+ #define elf_backend_finish_dynamic_symbol \
+   elf64_alpha_finish_dynamic_symbol
+ #define elf_backend_finish_dynamic_sections \
+   elf64_alpha_finish_dynamic_sections
+diff --git a/bfd/elf64-hppa.c b/bfd/elf64-hppa.c
+index 62efef3979dc2912a5669bb56464ace20d9b552e..39d5497cdd15b25c30f455b163547932b5153115 100644
+--- a/bfd/elf64-hppa.c
++++ b/bfd/elf64-hppa.c
+@@ -4041,13 +4041,13 @@ const struct elf_size_info hppa64_elf_size_info =
+ 
+ #define elf_backend_create_dynamic_sections \
+ 					elf64_hppa_create_dynamic_sections
+ #define elf_backend_post_process_headers	elf64_hppa_post_process_headers
+ 
+ #define elf_backend_omit_section_dynsym \
+-  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) bfd_true)
++  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) (bfd_boolean (*)) bfd_true)
+ #define elf_backend_adjust_dynamic_symbol \
+ 					elf64_hppa_adjust_dynamic_symbol
+ 
+ #define elf_backend_size_dynamic_sections \
+ 					elf64_hppa_size_dynamic_sections
+ 
+diff --git a/bfd/elf64-ia64-vms.c b/bfd/elf64-ia64-vms.c
+index ef7837409bec86af9c5bddf33d8d899b8ac1b392..07f0245d8fa72f1f4e5d8a61802c365b2037254d 100644
+--- a/bfd/elf64-ia64-vms.c
++++ b/bfd/elf64-ia64-vms.c
+@@ -5461,13 +5461,13 @@ static const struct elf_size_info elf64_ia64_vms_size_info = {
+ 	elf64_ia64_check_relocs
+ #define elf_backend_adjust_dynamic_symbol \
+ 	elf64_ia64_adjust_dynamic_symbol
+ #define elf_backend_size_dynamic_sections \
+ 	elf64_ia64_size_dynamic_sections
+ #define elf_backend_omit_section_dynsym \
+-  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) bfd_true)
++  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) (bfd_boolean (*)) bfd_true)
+ #define elf_backend_relocate_section \
+ 	elf64_ia64_relocate_section
+ #define elf_backend_finish_dynamic_symbol \
+ 	elf64_ia64_finish_dynamic_symbol
+ #define elf_backend_finish_dynamic_sections \
+ 	elf64_ia64_finish_dynamic_sections
+diff --git a/bfd/elf64-mmix.c b/bfd/elf64-mmix.c
+index 3195075f008e7e08b3f1843c7895b7fc118673ef..0a74c581c83ef8f26fffbeeef8448dbee2aae716 100644
+--- a/bfd/elf64-mmix.c
++++ b/bfd/elf64-mmix.c
+@@ -2912,13 +2912,13 @@ mmix_elf_relax_section (bfd *abfd,
+ 	mmix_elf_link_output_symbol_hook
+ #define elf_backend_add_symbol_hook	mmix_elf_add_symbol_hook
+ 
+ #define elf_backend_check_relocs	mmix_elf_check_relocs
+ #define elf_backend_symbol_processing	mmix_elf_symbol_processing
+ #define elf_backend_omit_section_dynsym \
+-  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) bfd_true)
++  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) (bfd_boolean (*)) bfd_true)
+ 
+ #define bfd_elf64_bfd_is_local_label_name \
+ 	mmix_elf_is_local_label_name
+ 
+ #define elf_backend_may_use_rel_p	0
+ #define elf_backend_may_use_rela_p	1
+diff --git a/bfd/elf64-sh64.c b/bfd/elf64-sh64.c
+index ce5436d0d948668ba489b96753db55e515cb376e..fde209cf83a93b707d60e13973f1c3c82f0113bc 100644
+--- a/bfd/elf64-sh64.c
++++ b/bfd/elf64-sh64.c
+@@ -4007,13 +4007,13 @@ static const struct bfd_elf_special_section sh64_elf64_special_sections[]=
+ 					sh64_elf64_link_hash_table_create
+ #define elf_backend_adjust_dynamic_symbol \
+ 					sh64_elf64_adjust_dynamic_symbol
+ #define elf_backend_size_dynamic_sections \
+ 					sh64_elf64_size_dynamic_sections
+ #define elf_backend_omit_section_dynsym \
+-  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) bfd_true)
++  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) (bfd_boolean (*)) bfd_true)
+ #define elf_backend_finish_dynamic_symbol \
+ 					sh64_elf64_finish_dynamic_symbol
+ #define elf_backend_finish_dynamic_sections \
+ 					sh64_elf64_finish_dynamic_sections
+ #define elf_backend_special_sections	sh64_elf64_special_sections
+ 
+diff --git a/bfd/elfnn-ia64.c b/bfd/elfnn-ia64.c
+index 7021ff5355907263eac116b34256eacb81cfb98d..7f06df0a99dd1463397cdce8dd3f8039d1480430 100644
+--- a/bfd/elfnn-ia64.c
++++ b/bfd/elfnn-ia64.c
+@@ -5026,13 +5026,13 @@ elfNN_hpux_backend_symbol_processing (bfd *abfd ATTRIBUTE_UNUSED,
+ 	elfNN_ia64_check_relocs
+ #define elf_backend_adjust_dynamic_symbol \
+ 	elfNN_ia64_adjust_dynamic_symbol
+ #define elf_backend_size_dynamic_sections \
+ 	elfNN_ia64_size_dynamic_sections
+ #define elf_backend_omit_section_dynsym \
+-  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) bfd_true)
++  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) (bfd_boolean (*)) bfd_true)
+ #define elf_backend_relocate_section \
+ 	elfNN_ia64_relocate_section
+ #define elf_backend_finish_dynamic_symbol \
+ 	elfNN_ia64_finish_dynamic_symbol
+ #define elf_backend_finish_dynamic_sections \
+ 	elfNN_ia64_finish_dynamic_sections
+diff --git a/bfd/elfxx-target.h b/bfd/elfxx-target.h
+index 5a6cae02ee3f5eb5370eb8a6cb88e1a5132b370b..cdbfc3b997b660aede997fb2a461256d01c03c57 100644
+--- a/bfd/elfxx-target.h
++++ b/bfd/elfxx-target.h
+@@ -110,13 +110,13 @@
+ #define elf_backend_default_execstack 1
+ #endif
+ 
+ #define bfd_elfNN_bfd_debug_info_start	bfd_void
+ #define bfd_elfNN_bfd_debug_info_end	bfd_void
+ #define bfd_elfNN_bfd_debug_info_accumulate \
+-  ((void (*) (bfd*, struct bfd_section *)) bfd_void)
++  ((void (*) (bfd*, struct bfd_section *)) (void (*)) bfd_void)
+ 
+ #ifndef bfd_elfNN_bfd_get_relocated_section_contents
+ #define bfd_elfNN_bfd_get_relocated_section_contents \
+   bfd_generic_get_relocated_section_contents
+ #endif
+ 
+@@ -177,13 +177,13 @@
+ #ifndef bfd_elfNN_bfd_lookup_section_flags
+ #define bfd_elfNN_bfd_lookup_section_flags bfd_elf_lookup_section_flags
+ #endif
+ 
+ #ifndef bfd_elfNN_bfd_make_debug_symbol
+ #define bfd_elfNN_bfd_make_debug_symbol \
+-  ((asymbol * (*) (bfd *, void *, unsigned long)) bfd_nullvoidptr)
++  ((asymbol * (*) (bfd *, void *, unsigned long)) (asymbol * (*)) bfd_nullvoidptr)
+ #endif
+ 
+ #ifndef bfd_elfNN_bfd_copy_private_symbol_data
+ #define bfd_elfNN_bfd_copy_private_symbol_data \
+   _bfd_elf_copy_private_symbol_data
+ #endif
+@@ -203,24 +203,24 @@
+ #ifndef bfd_elfNN_bfd_print_private_bfd_data
+ #define bfd_elfNN_bfd_print_private_bfd_data \
+   _bfd_elf_print_private_bfd_data
+ #endif
+ #ifndef bfd_elfNN_bfd_merge_private_bfd_data
+ #define bfd_elfNN_bfd_merge_private_bfd_data \
+-  ((bfd_boolean (*) (bfd *, bfd *)) bfd_true)
++  ((bfd_boolean (*) (bfd *, bfd *)) (bfd_boolean (*)) bfd_true)
+ #endif
+ #ifndef bfd_elfNN_bfd_set_private_flags
+ #define bfd_elfNN_bfd_set_private_flags \
+-  ((bfd_boolean (*) (bfd *, flagword)) bfd_true)
++  ((bfd_boolean (*) (bfd *, flagword)) (bfd_boolean (*)) bfd_true)
+ #endif
+ #ifndef bfd_elfNN_bfd_is_local_label_name
+ #define bfd_elfNN_bfd_is_local_label_name _bfd_elf_is_local_label_name
+ #endif
+ #ifndef bfd_elfNN_bfd_is_target_special_symbol
+ #define bfd_elfNN_bfd_is_target_special_symbol \
+-  ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
++  ((bfd_boolean (*) (bfd *, asymbol *)) (bfd_boolean (*)) bfd_false)
+ #endif
+ 
+ #ifndef bfd_elfNN_get_dynamic_reloc_upper_bound
+ #define bfd_elfNN_get_dynamic_reloc_upper_bound \
+   _bfd_elf_get_dynamic_reloc_upper_bound
+ #endif
+@@ -430,13 +430,13 @@
+ #endif
+ #ifndef elf_backend_size_dynamic_sections
+ #define elf_backend_size_dynamic_sections 0
+ #endif
+ #ifndef elf_backend_init_index_section
+ #define elf_backend_init_index_section \
+- ((void (*) (bfd *, struct bfd_link_info *)) bfd_void)
++  ((void (*) (bfd *, struct bfd_link_info *)) (void (*)) bfd_void)
+ #endif
+ #ifndef elf_backend_relocate_section
+ #define elf_backend_relocate_section	0
+ #endif
+ #ifndef elf_backend_finish_dynamic_symbol
+ #define elf_backend_finish_dynamic_symbol	0
+diff --git a/bfd/i386msdos.c b/bfd/i386msdos.c
+index ed7d896135bbf6f6e9316125d3b16f8faccbdc59..787732257553957b4ddf7e26e1a6795494494e1b 100644
+--- a/bfd/i386msdos.c
++++ b/bfd/i386msdos.c
+@@ -165,13 +165,13 @@ msdos_set_section_contents (bfd *abfd,
+ #define msdos_canonicalize_symtab _bfd_nosymbols_canonicalize_symtab
+ #define msdos_print_symbol _bfd_nosymbols_print_symbol
+ #define msdos_get_symbol_info _bfd_nosymbols_get_symbol_info
+ #define msdos_find_nearest_line _bfd_nosymbols_find_nearest_line
+ #define msdos_find_inliner_info _bfd_nosymbols_find_inliner_info
+ #define msdos_get_lineno _bfd_nosymbols_get_lineno
+-#define msdos_bfd_is_target_special_symbol ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
++#define msdos_bfd_is_target_special_symbol ((bfd_boolean (*) (bfd *, asymbol *)) (bfd_boolean (*)) bfd_false)
+ #define msdos_bfd_is_local_label_name _bfd_nosymbols_bfd_is_local_label_name
+ #define msdos_bfd_make_debug_symbol _bfd_nosymbols_bfd_make_debug_symbol
+ #define msdos_read_minisymbols _bfd_nosymbols_read_minisymbols
+ #define msdos_minisymbol_to_symbol _bfd_nosymbols_minisymbol_to_symbol
+ 
+ #define msdos_canonicalize_reloc _bfd_norelocs_canonicalize_reloc
+diff --git a/bfd/ieee.c b/bfd/ieee.c
+index de1e926721164cf32fdd7bddb1aae138b5e381e0..5b46679e848f3dc78ce2f8a22e31728a80bea611 100644
+--- a/bfd/ieee.c
++++ b/bfd/ieee.c
+@@ -3739,25 +3739,26 @@ ieee_sizeof_headers (bfd *abfd ATTRIBUTE_UNUSED,
+ 
+ #define ieee_slurp_armap bfd_true
+ #define ieee_slurp_extended_name_table bfd_true
+ #define ieee_construct_extended_name_table \
+   ((bfd_boolean (*) \
+     (bfd *, char **, bfd_size_type *, const char **)) \
+-   bfd_true)
++   (bfd_boolean (*)) bfd_true)
+ #define ieee_truncate_arname bfd_dont_truncate_arname
+ #define ieee_write_armap \
+   ((bfd_boolean (*) \
+     (bfd *, unsigned int, struct orl *, unsigned int, int)) \
+-   bfd_true)
++   (bfd_boolean (*)) bfd_true)
+ #define ieee_read_ar_hdr bfd_nullvoidptr
+-#define ieee_write_ar_hdr ((bfd_boolean (*) (bfd *, bfd *)) bfd_false)
++#define ieee_write_ar_hdr \
++  ((bfd_boolean (*) (bfd *, bfd *)) (bfd_boolean (*)) bfd_false)
+ #define ieee_update_armap_timestamp bfd_true
+ #define ieee_get_elt_at_index _bfd_generic_get_elt_at_index
+ 
+ #define ieee_bfd_is_target_special_symbol  \
+-  ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
++  ((bfd_boolean (*) (bfd *, asymbol *)) (bfd_boolean (*)) bfd_false)
+ #define ieee_bfd_is_local_label_name bfd_generic_is_local_label_name
+ #define ieee_get_lineno _bfd_nosymbols_get_lineno
+ #define ieee_bfd_make_debug_symbol _bfd_nosymbols_bfd_make_debug_symbol
+ #define ieee_read_minisymbols _bfd_generic_read_minisymbols
+ #define ieee_minisymbol_to_symbol _bfd_generic_minisymbol_to_symbol
+ 
+diff --git a/bfd/ihex.c b/bfd/ihex.c
+index 09f756a1c2c11e57c5da15a6ff96491275575b86..639e70823d66c4ad8308b07872be7232e355bc34 100644
+--- a/bfd/ihex.c
++++ b/bfd/ihex.c
+@@ -912,17 +912,17 @@ ihex_sizeof_headers (bfd *abfd ATTRIBUTE_UNUSED,
+ 
+ #define	ihex_close_and_cleanup                    _bfd_generic_close_and_cleanup
+ #define ihex_bfd_free_cached_info                 _bfd_generic_bfd_free_cached_info
+ #define ihex_new_section_hook                     _bfd_generic_new_section_hook
+ #define ihex_get_section_contents_in_window       _bfd_generic_get_section_contents_in_window
+ #define ihex_get_symtab_upper_bound               bfd_0l
+-#define ihex_canonicalize_symtab                  ((long (*) (bfd *, asymbol **)) bfd_0l)
++#define ihex_canonicalize_symtab                  ((long (*) (bfd *, asymbol **)) (long (*)) bfd_0l)
+ #define ihex_make_empty_symbol                    _bfd_generic_make_empty_symbol
+ #define ihex_print_symbol                         _bfd_nosymbols_print_symbol
+ #define ihex_get_symbol_info                      _bfd_nosymbols_get_symbol_info
+-#define ihex_bfd_is_target_special_symbol         ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
++#define ihex_bfd_is_target_special_symbol         ((bfd_boolean (*) (bfd *, asymbol *)) (bfd_boolean (*)) bfd_false)
+ #define ihex_bfd_is_local_label_name              _bfd_nosymbols_bfd_is_local_label_name
+ #define ihex_get_lineno                           _bfd_nosymbols_get_lineno
+ #define ihex_find_nearest_line                    _bfd_nosymbols_find_nearest_line
+ #define ihex_find_inliner_info                    _bfd_nosymbols_find_inliner_info
+ #define ihex_bfd_make_debug_symbol                _bfd_nosymbols_bfd_make_debug_symbol
+ #define ihex_read_minisymbols                     _bfd_nosymbols_read_minisymbols
+diff --git a/bfd/libaout.h b/bfd/libaout.h
+index ed2ec45a5d58a0bbdf69d2dad04e18a84bf82361..c8a51e8b79e4b5965b253a8ea9ece81236ac588e 100644
+--- a/bfd/libaout.h
++++ b/bfd/libaout.h
+@@ -617,13 +617,13 @@ extern bfd_boolean NAME (aout, bfd_free_cached_info)
+ #ifndef aout_32_bfd_is_local_label_name
+ #define aout_32_bfd_is_local_label_name bfd_generic_is_local_label_name
+ #endif
+ 
+ #ifndef aout_32_bfd_is_target_special_symbol
+ #define aout_32_bfd_is_target_special_symbol \
+-  ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
++  ((bfd_boolean (*) (bfd *, asymbol *)) (bfd_boolean (*)) bfd_false)
+ #endif
+ 
+ #ifndef WRITE_HEADERS
+ #define WRITE_HEADERS(abfd, execp)					      \
+       {									      \
+ 	bfd_size_type text_size; /* Dummy vars.  */			      \
+diff --git a/bfd/libbfd-in.h b/bfd/libbfd-in.h
+index c424fe2510e297803dc64cba09bd4c3a7a1cdf08..ecde47a94a3e99b142d3bfafe4c59f59be5d3270 100644
+--- a/bfd/libbfd-in.h
++++ b/bfd/libbfd-in.h
+@@ -126,76 +126,76 @@ extern void *bfd_alloc2
+ extern void *bfd_zalloc2
+   (bfd *, bfd_size_type, bfd_size_type);
+ extern void bfd_release
+   (bfd *, void *);
+ 
+ bfd * _bfd_create_empty_archive_element_shell
+-  (bfd *obfd);
++  (bfd *);
+ bfd * _bfd_look_for_bfd_in_cache
+   (bfd *, file_ptr);
+ bfd_boolean _bfd_add_bfd_to_archive_cache
+   (bfd *, file_ptr, bfd *);
+ bfd_boolean _bfd_generic_mkarchive
+-  (bfd *abfd);
++  (bfd *);
+ char *_bfd_append_relative_path
+-  (bfd *arch, char *elt_name);
++  (bfd *, char *);
+ const bfd_target *bfd_generic_archive_p
+-  (bfd *abfd);
++  (bfd *);
+ bfd_boolean bfd_slurp_armap
+-  (bfd *abfd);
++  (bfd *);
+ bfd_boolean bfd_slurp_bsd_armap_f2
+-  (bfd *abfd);
++  (bfd *);
+ #define bfd_slurp_bsd_armap bfd_slurp_armap
+ #define bfd_slurp_coff_armap bfd_slurp_armap
+ bfd_boolean _bfd_slurp_extended_name_table
+-  (bfd *abfd);
++  (bfd *);
+ extern bfd_boolean _bfd_construct_extended_name_table
+   (bfd *, bfd_boolean, char **, bfd_size_type *);
+ bfd_boolean _bfd_write_archive_contents
+-  (bfd *abfd);
++  (bfd *);
+ bfd_boolean _bfd_compute_and_write_armap
+-  (bfd *, unsigned int elength);
++  (bfd *, unsigned int);
+ bfd *_bfd_get_elt_at_filepos
+-  (bfd *archive, file_ptr filepos);
++  (bfd *, file_ptr);
+ extern bfd *_bfd_generic_get_elt_at_index
+   (bfd *, symindex);
+ bfd * _bfd_new_bfd
+   (void);
+ void _bfd_delete_bfd
+   (bfd *);
+ bfd_boolean _bfd_free_cached_info
+   (bfd *);
+ 
+-bfd_boolean bfd_false
+-  (bfd *ignore);
+-bfd_boolean bfd_true
+-  (bfd *ignore);
+-void *bfd_nullvoidptr
+-  (bfd *ignore);
+-int bfd_0
+-  (bfd *ignore);
+-unsigned int bfd_0u
+-  (bfd *ignore);
+-long bfd_0l
+-  (bfd *ignore);
+-long _bfd_n1
+-  (bfd *ignore);
+-void bfd_void
+-  (bfd *ignore);
++extern bfd_boolean bfd_false
++  (bfd *);
++extern bfd_boolean bfd_true
++  (bfd *);
++extern void * bfd_nullvoidptr
++  (bfd *);
++extern int bfd_0
++  (bfd *);
++extern unsigned int bfd_0u
++  (bfd *);
++extern long bfd_0l
++  (bfd *);
++extern long _bfd_n1
++  (bfd *);
++extern void bfd_void
++  (bfd *);
+ 
+ bfd *_bfd_new_bfd_contained_in
+   (bfd *);
+ const bfd_target *_bfd_dummy_target
+-  (bfd *abfd);
++  (bfd *);
+ 
+ void bfd_dont_truncate_arname
+-  (bfd *abfd, const char *filename, char *hdr);
++  (bfd *, const char *, char *);
+ void bfd_bsd_truncate_arname
+-  (bfd *abfd, const char *filename, char *hdr);
++  (bfd *, const char *, char *);
+ void bfd_gnu_truncate_arname
+-  (bfd *abfd, const char *filename, char *hdr);
++  (bfd *, const char *, char *);
+ 
+ bfd_boolean bsd_write_armap
+   (bfd *arch, unsigned int elength, struct orl *map, unsigned int orl_count,
+    int stridx);
+ 
+ bfd_boolean coff_write_armap
+@@ -216,13 +216,13 @@ extern bfd_boolean _bfd_generic_write_ar_hdr
+   (bfd *, bfd *);
+ 
+ extern bfd_boolean _bfd_bsd44_write_ar_hdr
+   (bfd *, bfd *);
+ 
+ bfd * bfd_generic_openr_next_archived_file
+-  (bfd *archive, bfd *last_file);
++  (bfd *, bfd *);
+ 
+ int bfd_generic_stat_arch_elt
+   (bfd *, struct stat *);
+ 
+ #define _bfd_read_ar_hdr(abfd) \
+   BFD_SEND (abfd, _bfd_read_ar_hdr_fn, (abfd))
+@@ -242,25 +242,25 @@ extern bfd_boolean _bfd_generic_get_section_contents_in_window
+   (bfd *, asection *, bfd_window *, file_ptr, bfd_size_type);
+ 
+ /* Generic routines to use for BFD_JUMP_TABLE_COPY.  Use
+    BFD_JUMP_TABLE_COPY (_bfd_generic).  */
+ 
+ #define _bfd_generic_bfd_copy_private_bfd_data \
+-  ((bfd_boolean (*) (bfd *, bfd *)) bfd_true)
++  ((bfd_boolean (*) (bfd *, bfd *)) (bfd_boolean (*)) bfd_true)
+ #define _bfd_generic_bfd_merge_private_bfd_data \
+-  ((bfd_boolean (*) (bfd *, bfd *)) bfd_true)
++  ((bfd_boolean (*) (bfd *, bfd *)) (bfd_boolean (*)) bfd_true)
+ #define _bfd_generic_bfd_set_private_flags \
+-  ((bfd_boolean (*) (bfd *, flagword)) bfd_true)
++  ((bfd_boolean (*) (bfd *, flagword)) (bfd_boolean (*)) bfd_true)
+ #define _bfd_generic_bfd_copy_private_section_data \
+-  ((bfd_boolean (*) (bfd *, asection *, bfd *, asection *)) bfd_true)
++  ((bfd_boolean (*) (bfd *, asection *, bfd *, asection *)) (bfd_boolean (*)) bfd_true)
+ #define _bfd_generic_bfd_copy_private_symbol_data \
+-  ((bfd_boolean (*) (bfd *, asymbol *, bfd *, asymbol *)) bfd_true)
++  ((bfd_boolean (*) (bfd *, asymbol *, bfd *, asymbol *)) (bfd_boolean (*)) bfd_true)
+ #define _bfd_generic_bfd_copy_private_header_data \
+-  ((bfd_boolean (*) (bfd *, bfd *)) bfd_true)
++  ((bfd_boolean (*) (bfd *, bfd *)) (bfd_boolean (*)) bfd_true)
+ #define _bfd_generic_bfd_print_private_bfd_data \
+-  ((bfd_boolean (*) (bfd *, void *)) bfd_true)
++  ((bfd_boolean (*) (bfd *, void *)) (bfd_boolean (*)) bfd_true)
+ 
+ extern bfd_boolean _bfd_generic_init_private_section_data
+   (bfd *, asection *, bfd *, asection *, struct bfd_link_info *);
+ 
+ /* Routines to use for BFD_JUMP_TABLE_CORE when there is no core file
+    support.  Use BFD_JUMP_TABLE_CORE (_bfd_nocore).  */
+@@ -278,25 +278,25 @@ extern int _bfd_nocore_core_file_pid
+    file support.  Use BFD_JUMP_TABLE_ARCHIVE (_bfd_noarchive).  */
+ 
+ #define _bfd_noarchive_slurp_armap bfd_false
+ #define _bfd_noarchive_slurp_extended_name_table bfd_false
+ #define _bfd_noarchive_construct_extended_name_table \
+   ((bfd_boolean (*) (bfd *, char **, bfd_size_type *, const char **)) \
+-   bfd_false)
++   (bfd_boolean (*)) bfd_false)
+ #define _bfd_noarchive_truncate_arname \
+-  ((void (*) (bfd *, const char *, char *)) bfd_void)
++  ((void (*) (bfd *, const char *, char *)) (void (*)) bfd_void)
+ #define _bfd_noarchive_write_armap \
+   ((bfd_boolean (*) (bfd *, unsigned int, struct orl *, unsigned int, int)) \
+-   bfd_false)
++   (bfd_boolean (*)) bfd_false)
+ #define _bfd_noarchive_read_ar_hdr bfd_nullvoidptr
+ #define _bfd_noarchive_write_ar_hdr \
+-  ((bfd_boolean (*) (bfd *, bfd *)) bfd_false)
++  ((bfd_boolean (*) (bfd *, bfd *)) (bfd_boolean (*)) bfd_false)
+ #define _bfd_noarchive_openr_next_archived_file \
+-  ((bfd *(*) (bfd *, bfd *)) bfd_nullvoidptr)
++  ((bfd * (*) (bfd *, bfd *)) (bfd * (*)) bfd_nullvoidptr)
+ #define _bfd_noarchive_get_elt_at_index \
+-  ((bfd *(*) (bfd *, symindex)) bfd_nullvoidptr)
++  ((bfd * (*) (bfd *, symindex)) (bfd * (*)) bfd_nullvoidptr)
+ #define _bfd_noarchive_generic_stat_arch_elt bfd_generic_stat_arch_elt
+ #define _bfd_noarchive_update_armap_timestamp bfd_false
+ 
+ /* Routines to use for BFD_JUMP_TABLE_ARCHIVE to get BSD style
+    archives.  Use BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_bsd).  */
+ 
+@@ -374,139 +374,150 @@ extern int _bfd_vms_lib_generic_stat_arch_elt (bfd *, struct stat *);
+ #define _bfd_vms_lib_update_armap_timestamp bfd_true
+ 
+ /* Extra routines for VMS style archives.  */
+ 
+ extern symindex _bfd_vms_lib_find_symbol (bfd *, const char *);
+ extern bfd *_bfd_vms_lib_get_imagelib_file (bfd *);
+-extern const bfd_target *_bfd_vms_lib_alpha_archive_p (bfd *abfd);
+-extern const bfd_target *_bfd_vms_lib_ia64_archive_p (bfd *abfd);
+-extern bfd_boolean _bfd_vms_lib_alpha_mkarchive (bfd *abfd);
+-extern bfd_boolean _bfd_vms_lib_ia64_mkarchive (bfd *abfd);
++extern const bfd_target *_bfd_vms_lib_alpha_archive_p (bfd *);
++extern const bfd_target *_bfd_vms_lib_ia64_archive_p (bfd *);
++extern bfd_boolean _bfd_vms_lib_alpha_mkarchive (bfd *);
++extern bfd_boolean _bfd_vms_lib_ia64_mkarchive (bfd *);
+ 
+ /* Routines to use for BFD_JUMP_TABLE_SYMBOLS where there is no symbol
+    support.  Use BFD_JUMP_TABLE_SYMBOLS (_bfd_nosymbols).  */
+ 
+ #define _bfd_nosymbols_get_symtab_upper_bound _bfd_n1
+ #define _bfd_nosymbols_canonicalize_symtab \
+-  ((long (*) (bfd *, asymbol **)) _bfd_n1)
++  ((long (*) (bfd *, asymbol **)) (long (*)) _bfd_n1)
+ #define _bfd_nosymbols_make_empty_symbol _bfd_generic_make_empty_symbol
+ #define _bfd_nosymbols_print_symbol \
+-  ((void (*) (bfd *, void *, asymbol *, bfd_print_symbol_type)) bfd_void)
++  ((void (*) (bfd *, void *, asymbol *, bfd_print_symbol_type)) (void (*)) bfd_void)
+ #define _bfd_nosymbols_get_symbol_info \
+-  ((void (*) (bfd *, asymbol *, symbol_info *)) bfd_void)
++  ((void (*) (bfd *, asymbol *, symbol_info *)) (void (*)) bfd_void)
+ #define _bfd_nosymbols_bfd_is_local_label_name \
+-  ((bfd_boolean (*) (bfd *, const char *)) bfd_false)
++  ((bfd_boolean (*) (bfd *, const char *)) (bfd_boolean (*)) bfd_false)
+ #define _bfd_nosymbols_bfd_is_target_special_symbol \
+-  ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
++  ((bfd_boolean (*) (bfd *, asymbol *)) (bfd_boolean (*)) bfd_false)
+ #define _bfd_nosymbols_get_lineno \
+-  ((alent *(*) (bfd *, asymbol *)) bfd_nullvoidptr)
++  ((alent *(*) (bfd *, asymbol *)) (alent * (*)) bfd_nullvoidptr)
+ #define _bfd_nosymbols_find_nearest_line \
+   ((bfd_boolean (*) (bfd *, asection *, asymbol **, bfd_vma, const char **, \
+ 		     const char **, unsigned int *)) \
+-   bfd_false)
++   (bfd_boolean (*)) bfd_false)
+ #define _bfd_nosymbols_find_inliner_info \
+   ((bfd_boolean (*) (bfd *, const char **, const char **, unsigned int *)) \
+-   bfd_false)
++   (bfd_boolean (*)) bfd_false)
+ #define _bfd_nosymbols_bfd_make_debug_symbol \
+-  ((asymbol *(*) (bfd *, void *, unsigned long)) bfd_nullvoidptr)
++  ((asymbol * (*) (bfd *, void *, unsigned long)) \
++   (asymbol * (*)) bfd_nullvoidptr)
+ #define _bfd_nosymbols_read_minisymbols \
+-  ((long (*) (bfd *, bfd_boolean, void **, unsigned int *)) _bfd_n1)
++  ((long (*) (bfd *, bfd_boolean, void **, unsigned int *)) \
++   (long (*)) _bfd_n1)
+ #define _bfd_nosymbols_minisymbol_to_symbol \
+-  ((asymbol *(*) (bfd *, bfd_boolean, const void *, asymbol *)) \
+-   bfd_nullvoidptr)
++  ((asymbol * (*) (bfd *, bfd_boolean, const void *, asymbol *)) \
++   (asymbol * (*)) bfd_nullvoidptr)
+ 
+ /* Routines to use for BFD_JUMP_TABLE_RELOCS when there is no reloc
+    support.  Use BFD_JUMP_TABLE_RELOCS (_bfd_norelocs).  */
+ 
+ extern long _bfd_norelocs_get_reloc_upper_bound (bfd *, asection *);
+ extern long _bfd_norelocs_canonicalize_reloc (bfd *, asection *,
+ 					      arelent **, asymbol **);
+ #define _bfd_norelocs_bfd_reloc_type_lookup \
+-  ((reloc_howto_type *(*) (bfd *, bfd_reloc_code_real_type)) bfd_nullvoidptr)
++  ((reloc_howto_type * (*) (bfd *, bfd_reloc_code_real_type)) \
++   (reloc_howto_type * (*)) bfd_nullvoidptr)
+ #define _bfd_norelocs_bfd_reloc_name_lookup \
+-  ((reloc_howto_type *(*) (bfd *, const char *)) bfd_nullvoidptr)
++  ((reloc_howto_type * (*) (bfd *, const char *)) \
++   (reloc_howto_type * (*)) bfd_nullvoidptr)
+ 
+ /* Routines to use for BFD_JUMP_TABLE_WRITE for targets which may not
+    be written.  Use BFD_JUMP_TABLE_WRITE (_bfd_nowrite).  */
+ 
+ #define _bfd_nowrite_set_arch_mach \
+   ((bfd_boolean (*) (bfd *, enum bfd_architecture, unsigned long)) \
+-   bfd_false)
++   (bfd_boolean (*)) bfd_false)
+ #define _bfd_nowrite_set_section_contents \
+   ((bfd_boolean (*) (bfd *, asection *, const void *, file_ptr, bfd_size_type)) \
+-   bfd_false)
++   (bfd_boolean (*)) bfd_false)
+ 
+ /* Generic routines to use for BFD_JUMP_TABLE_WRITE.  Use
+    BFD_JUMP_TABLE_WRITE (_bfd_generic).  */
+ 
+ #define _bfd_generic_set_arch_mach bfd_default_set_arch_mach
+ extern bfd_boolean _bfd_generic_set_section_contents
+   (bfd *, asection *, const void *, file_ptr, bfd_size_type);
+ 
+ /* Routines to use for BFD_JUMP_TABLE_LINK for targets which do not
+    support linking.  Use BFD_JUMP_TABLE_LINK (_bfd_nolink).  */
+ 
+ #define _bfd_nolink_sizeof_headers \
+-  ((int (*) (bfd *, struct bfd_link_info *)) bfd_0)
++  ((int (*) (bfd *, struct bfd_link_info *)) (int (*)) bfd_0)
+ #define _bfd_nolink_bfd_get_relocated_section_contents \
+-  ((bfd_byte *(*) (bfd *, struct bfd_link_info *, struct bfd_link_order *, \
++  ((bfd_byte * (*) (bfd *, struct bfd_link_info *, struct bfd_link_order *, \
+ 		   bfd_byte *, bfd_boolean, asymbol **)) \
+-   bfd_nullvoidptr)
++   (bfd_byte * (*)) bfd_nullvoidptr)
+ #define _bfd_nolink_bfd_relax_section \
+   ((bfd_boolean (*) \
+     (bfd *, asection *, struct bfd_link_info *, bfd_boolean *)) \
+-   bfd_false)
++   (bfd_boolean (*)) bfd_false)
+ #define _bfd_nolink_bfd_gc_sections \
+   ((bfd_boolean (*) (bfd *, struct bfd_link_info *)) \
+-   bfd_false)
++   (bfd_boolean (*)) bfd_false)
+ #define _bfd_nolink_bfd_lookup_section_flags \
+   ((bfd_boolean (*) (struct bfd_link_info *, struct flag_info *, asection *)) \
+-   bfd_0)
++   (bfd_boolean (*)) bfd_false)
+ #define _bfd_nolink_bfd_merge_sections \
+   ((bfd_boolean (*) (bfd *, struct bfd_link_info *)) \
+-   bfd_false)
++   (bfd_boolean (*)) bfd_false)
+ #define _bfd_nolink_bfd_is_group_section \
+   ((bfd_boolean (*) (bfd *, const struct bfd_section *)) \
+-   bfd_false)
++   (bfd_boolean (*)) bfd_false)
+ #define _bfd_nolink_bfd_discard_group \
+   ((bfd_boolean (*) (bfd *, struct bfd_section *)) \
+-   bfd_false)
++   (bfd_boolean (*)) bfd_false)
+ #define _bfd_nolink_bfd_link_hash_table_create \
+   ((struct bfd_link_hash_table *(*) (bfd *)) bfd_nullvoidptr)
+ #define _bfd_nolink_bfd_link_hash_table_free \
+   ((void (*) (struct bfd_link_hash_table *)) bfd_void)
+ #define _bfd_nolink_bfd_link_add_symbols \
+-  ((bfd_boolean (*) (bfd *, struct bfd_link_info *)) bfd_false)
++  ((bfd_boolean (*) (bfd *, struct bfd_link_info *)) \
++   (bfd_boolean (*)) bfd_false)
+ #define _bfd_nolink_bfd_link_just_syms \
+-  ((void (*) (asection *, struct bfd_link_info *)) bfd_void)
++  ((void (*) (asection *, struct bfd_link_info *)) \
++   (void (*)) bfd_void)
+ #define _bfd_nolink_bfd_copy_link_hash_symbol_type \
+   ((void (*) (bfd *, struct bfd_link_hash_entry *, \
+-	      struct bfd_link_hash_entry *)) bfd_void)
++	      struct bfd_link_hash_entry *)) \
++   (void (*)) bfd_void)
+ #define _bfd_nolink_bfd_final_link \
+-  ((bfd_boolean (*) (bfd *, struct bfd_link_info *)) bfd_false)
++  ((bfd_boolean (*) (bfd *, struct bfd_link_info *)) \
++   (bfd_boolean (*)) bfd_false)
+ #define _bfd_nolink_bfd_link_split_section \
+-  ((bfd_boolean (*) (bfd *, struct bfd_section *)) bfd_false)
++  ((bfd_boolean (*) (bfd *, struct bfd_section *)) \
++   (bfd_boolean (*)) bfd_false)
+ #define _bfd_nolink_section_already_linked \
+-  ((bfd_boolean (*) (bfd *, asection *, \
+-		     struct bfd_link_info *)) bfd_false)
++  ((bfd_boolean (*) (bfd *, asection *, struct bfd_link_info *)) \
++   (bfd_boolean (*)) bfd_false)
+ #define _bfd_nolink_bfd_define_common_symbol \
+   ((bfd_boolean (*) (bfd *, struct bfd_link_info *, \
+-		     struct bfd_link_hash_entry *)) bfd_false)
++		     struct bfd_link_hash_entry *)) \
++   (bfd_boolean (*)) bfd_false)
+ 
+ /* Routines to use for BFD_JUMP_TABLE_DYNAMIC for targets which do not
+    have dynamic symbols or relocs.  Use BFD_JUMP_TABLE_DYNAMIC
+    (_bfd_nodynamic).  */
+ 
+ #define _bfd_nodynamic_get_dynamic_symtab_upper_bound _bfd_n1
+ #define _bfd_nodynamic_canonicalize_dynamic_symtab \
+-  ((long (*) (bfd *, asymbol **)) _bfd_n1)
++  ((long (*) (bfd *, asymbol **)) (long (*)) _bfd_n1)
+ #define _bfd_nodynamic_get_synthetic_symtab \
+-  ((long (*) (bfd *, long, asymbol **, long, asymbol **, asymbol **)) _bfd_n1)
++  ((long (*) (bfd *, long, asymbol **, long, asymbol **, asymbol **)) \
++   (long (*)) _bfd_n1)
+ #define _bfd_nodynamic_get_dynamic_reloc_upper_bound _bfd_n1
+ #define _bfd_nodynamic_canonicalize_dynamic_reloc \
+-  ((long (*) (bfd *, arelent **, asymbol **)) _bfd_n1)
++  ((long (*) (bfd *, arelent **, asymbol **)) (long (*)) _bfd_n1)
+ 
+ /* Generic routine to determine of the given symbol is a local
+    label.  */
+ extern bfd_boolean bfd_generic_is_local_label_name
+   (bfd *, const char *);
+ 
+@@ -525,14 +536,14 @@ extern bfd_boolean _bfd_stab_section_find_nearest_line
+ extern bfd_boolean _bfd_dwarf1_find_nearest_line
+   (bfd *, asection *, asymbol **, bfd_vma, const char **,
+    const char **, unsigned int *);
+ 
+ struct dwarf_debug_section
+ {
+-  const char *uncompressed_name;
+-  const char *compressed_name;
++  const char * uncompressed_name;
++  const char * compressed_name;
+ };
+ 
+ /* Map of uncompressed DWARF debug section name to compressed one.  It
+    is terminated by NULL uncompressed_name.  */
+ 
+ extern const struct dwarf_debug_section dwarf_debug_sections[];
+diff --git a/bfd/libbfd.c b/bfd/libbfd.c
+index 553c729562acaa497dff6eb67dc3c2b995538ae7..fc49a02d4701a48a5d7e528a0c43faa6845070d7 100644
+--- a/bfd/libbfd.c
++++ b/bfd/libbfd.c
+@@ -83,13 +83,13 @@ bfd_0u (bfd *ignore ATTRIBUTE_UNUSED)
+    return 0;
+ }
+ 
+ long
+ bfd_0l (bfd *ignore ATTRIBUTE_UNUSED)
+ {
+-  return 0;
++  return 0l;
+ }
+ 
+ /* A routine which is used in target vectors for unsupported
+    operations which return -1 on error.  */
+ 
+ long
+diff --git a/bfd/libbfd.h b/bfd/libbfd.h
+index 3cb9b36fe2379a5d7f118472e106c151d6153aea..4f8f1354983642b3d68864281fb8c6a850385731 100644
+--- a/bfd/libbfd.h
++++ b/bfd/libbfd.h
+@@ -131,76 +131,76 @@ extern void *bfd_alloc2
+ extern void *bfd_zalloc2
+   (bfd *, bfd_size_type, bfd_size_type);
+ extern void bfd_release
+   (bfd *, void *);
+ 
+ bfd * _bfd_create_empty_archive_element_shell
+-  (bfd *obfd);
++  (bfd *);
+ bfd * _bfd_look_for_bfd_in_cache
+   (bfd *, file_ptr);
+ bfd_boolean _bfd_add_bfd_to_archive_cache
+   (bfd *, file_ptr, bfd *);
+ bfd_boolean _bfd_generic_mkarchive
+-  (bfd *abfd);
++  (bfd *);
+ char *_bfd_append_relative_path
+-  (bfd *arch, char *elt_name);
++  (bfd *, char *);
+ const bfd_target *bfd_generic_archive_p
+-  (bfd *abfd);
++  (bfd *);
+ bfd_boolean bfd_slurp_armap
+-  (bfd *abfd);
++  (bfd *);
+ bfd_boolean bfd_slurp_bsd_armap_f2
+-  (bfd *abfd);
++  (bfd *);
+ #define bfd_slurp_bsd_armap bfd_slurp_armap
+ #define bfd_slurp_coff_armap bfd_slurp_armap
+ bfd_boolean _bfd_slurp_extended_name_table
+-  (bfd *abfd);
++  (bfd *);
+ extern bfd_boolean _bfd_construct_extended_name_table
+   (bfd *, bfd_boolean, char **, bfd_size_type *);
+ bfd_boolean _bfd_write_archive_contents
+-  (bfd *abfd);
++  (bfd *);
+ bfd_boolean _bfd_compute_and_write_armap
+-  (bfd *, unsigned int elength);
++  (bfd *, unsigned int);
+ bfd *_bfd_get_elt_at_filepos
+-  (bfd *archive, file_ptr filepos);
++  (bfd *, file_ptr);
+ extern bfd *_bfd_generic_get_elt_at_index
+   (bfd *, symindex);
+ bfd * _bfd_new_bfd
+   (void);
+ void _bfd_delete_bfd
+   (bfd *);
+ bfd_boolean _bfd_free_cached_info
+   (bfd *);
+ 
+-bfd_boolean bfd_false
+-  (bfd *ignore);
+-bfd_boolean bfd_true
+-  (bfd *ignore);
+-void *bfd_nullvoidptr
+-  (bfd *ignore);
+-int bfd_0
+-  (bfd *ignore);
+-unsigned int bfd_0u
+-  (bfd *ignore);
+-long bfd_0l
+-  (bfd *ignore);
+-long _bfd_n1
+-  (bfd *ignore);
+-void bfd_void
+-  (bfd *ignore);
++extern bfd_boolean bfd_false
++  (bfd *);
++extern bfd_boolean bfd_true
++  (bfd *);
++extern void * bfd_nullvoidptr
++  (bfd *);
++extern int bfd_0
++  (bfd *);
++extern unsigned int bfd_0u
++  (bfd *);
++extern long bfd_0l
++  (bfd *);
++extern long _bfd_n1
++  (bfd *);
++extern void bfd_void
++  (bfd *);
+ 
+ bfd *_bfd_new_bfd_contained_in
+   (bfd *);
+ const bfd_target *_bfd_dummy_target
+-  (bfd *abfd);
++  (bfd *);
+ 
+ void bfd_dont_truncate_arname
+-  (bfd *abfd, const char *filename, char *hdr);
++  (bfd *, const char *, char *);
+ void bfd_bsd_truncate_arname
+-  (bfd *abfd, const char *filename, char *hdr);
++  (bfd *, const char *, char *);
+ void bfd_gnu_truncate_arname
+-  (bfd *abfd, const char *filename, char *hdr);
++  (bfd *, const char *, char *);
+ 
+ bfd_boolean bsd_write_armap
+   (bfd *arch, unsigned int elength, struct orl *map, unsigned int orl_count,
+    int stridx);
+ 
+ bfd_boolean coff_write_armap
+@@ -221,13 +221,13 @@ extern bfd_boolean _bfd_generic_write_ar_hdr
+   (bfd *, bfd *);
+ 
+ extern bfd_boolean _bfd_bsd44_write_ar_hdr
+   (bfd *, bfd *);
+ 
+ bfd * bfd_generic_openr_next_archived_file
+-  (bfd *archive, bfd *last_file);
++  (bfd *, bfd *);
+ 
+ int bfd_generic_stat_arch_elt
+   (bfd *, struct stat *);
+ 
+ #define _bfd_read_ar_hdr(abfd) \
+   BFD_SEND (abfd, _bfd_read_ar_hdr_fn, (abfd))
+@@ -247,25 +247,25 @@ extern bfd_boolean _bfd_generic_get_section_contents_in_window
+   (bfd *, asection *, bfd_window *, file_ptr, bfd_size_type);
+ 
+ /* Generic routines to use for BFD_JUMP_TABLE_COPY.  Use
+    BFD_JUMP_TABLE_COPY (_bfd_generic).  */
+ 
+ #define _bfd_generic_bfd_copy_private_bfd_data \
+-  ((bfd_boolean (*) (bfd *, bfd *)) bfd_true)
++  ((bfd_boolean (*) (bfd *, bfd *)) (bfd_boolean (*)) bfd_true)
+ #define _bfd_generic_bfd_merge_private_bfd_data \
+-  ((bfd_boolean (*) (bfd *, bfd *)) bfd_true)
++  ((bfd_boolean (*) (bfd *, bfd *)) (bfd_boolean (*)) bfd_true)
+ #define _bfd_generic_bfd_set_private_flags \
+-  ((bfd_boolean (*) (bfd *, flagword)) bfd_true)
++  ((bfd_boolean (*) (bfd *, flagword)) (bfd_boolean (*)) bfd_true)
+ #define _bfd_generic_bfd_copy_private_section_data \
+-  ((bfd_boolean (*) (bfd *, asection *, bfd *, asection *)) bfd_true)
++  ((bfd_boolean (*) (bfd *, asection *, bfd *, asection *)) (bfd_boolean (*)) bfd_true)
+ #define _bfd_generic_bfd_copy_private_symbol_data \
+-  ((bfd_boolean (*) (bfd *, asymbol *, bfd *, asymbol *)) bfd_true)
++  ((bfd_boolean (*) (bfd *, asymbol *, bfd *, asymbol *)) (bfd_boolean (*)) bfd_true)
+ #define _bfd_generic_bfd_copy_private_header_data \
+-  ((bfd_boolean (*) (bfd *, bfd *)) bfd_true)
++  ((bfd_boolean (*) (bfd *, bfd *)) (bfd_boolean (*)) bfd_true)
+ #define _bfd_generic_bfd_print_private_bfd_data \
+-  ((bfd_boolean (*) (bfd *, void *)) bfd_true)
++  ((bfd_boolean (*) (bfd *, void *)) (bfd_boolean (*)) bfd_true)
+ 
+ extern bfd_boolean _bfd_generic_init_private_section_data
+   (bfd *, asection *, bfd *, asection *, struct bfd_link_info *);
+ 
+ /* Routines to use for BFD_JUMP_TABLE_CORE when there is no core file
+    support.  Use BFD_JUMP_TABLE_CORE (_bfd_nocore).  */
+@@ -283,25 +283,25 @@ extern int _bfd_nocore_core_file_pid
+    file support.  Use BFD_JUMP_TABLE_ARCHIVE (_bfd_noarchive).  */
+ 
+ #define _bfd_noarchive_slurp_armap bfd_false
+ #define _bfd_noarchive_slurp_extended_name_table bfd_false
+ #define _bfd_noarchive_construct_extended_name_table \
+   ((bfd_boolean (*) (bfd *, char **, bfd_size_type *, const char **)) \
+-   bfd_false)
++   (bfd_boolean (*)) bfd_false)
+ #define _bfd_noarchive_truncate_arname \
+-  ((void (*) (bfd *, const char *, char *)) bfd_void)
++  ((void (*) (bfd *, const char *, char *)) (void (*)) bfd_void)
+ #define _bfd_noarchive_write_armap \
+   ((bfd_boolean (*) (bfd *, unsigned int, struct orl *, unsigned int, int)) \
+-   bfd_false)
++   (bfd_boolean (*)) bfd_false)
+ #define _bfd_noarchive_read_ar_hdr bfd_nullvoidptr
+ #define _bfd_noarchive_write_ar_hdr \
+-  ((bfd_boolean (*) (bfd *, bfd *)) bfd_false)
++  ((bfd_boolean (*) (bfd *, bfd *)) (bfd_boolean (*)) bfd_false)
+ #define _bfd_noarchive_openr_next_archived_file \
+-  ((bfd *(*) (bfd *, bfd *)) bfd_nullvoidptr)
++  ((bfd * (*) (bfd *, bfd *)) (bfd * (*)) bfd_nullvoidptr)
+ #define _bfd_noarchive_get_elt_at_index \
+-  ((bfd *(*) (bfd *, symindex)) bfd_nullvoidptr)
++  ((bfd * (*) (bfd *, symindex)) (bfd * (*)) bfd_nullvoidptr)
+ #define _bfd_noarchive_generic_stat_arch_elt bfd_generic_stat_arch_elt
+ #define _bfd_noarchive_update_armap_timestamp bfd_false
+ 
+ /* Routines to use for BFD_JUMP_TABLE_ARCHIVE to get BSD style
+    archives.  Use BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_bsd).  */
+ 
+@@ -379,139 +379,150 @@ extern int _bfd_vms_lib_generic_stat_arch_elt (bfd *, struct stat *);
+ #define _bfd_vms_lib_update_armap_timestamp bfd_true
+ 
+ /* Extra routines for VMS style archives.  */
+ 
+ extern symindex _bfd_vms_lib_find_symbol (bfd *, const char *);
+ extern bfd *_bfd_vms_lib_get_imagelib_file (bfd *);
+-extern const bfd_target *_bfd_vms_lib_alpha_archive_p (bfd *abfd);
+-extern const bfd_target *_bfd_vms_lib_ia64_archive_p (bfd *abfd);
+-extern bfd_boolean _bfd_vms_lib_alpha_mkarchive (bfd *abfd);
+-extern bfd_boolean _bfd_vms_lib_ia64_mkarchive (bfd *abfd);
++extern const bfd_target *_bfd_vms_lib_alpha_archive_p (bfd *);
++extern const bfd_target *_bfd_vms_lib_ia64_archive_p (bfd *);
++extern bfd_boolean _bfd_vms_lib_alpha_mkarchive (bfd *);
++extern bfd_boolean _bfd_vms_lib_ia64_mkarchive (bfd *);
+ 
+ /* Routines to use for BFD_JUMP_TABLE_SYMBOLS where there is no symbol
+    support.  Use BFD_JUMP_TABLE_SYMBOLS (_bfd_nosymbols).  */
+ 
+ #define _bfd_nosymbols_get_symtab_upper_bound _bfd_n1
+ #define _bfd_nosymbols_canonicalize_symtab \
+-  ((long (*) (bfd *, asymbol **)) _bfd_n1)
++  ((long (*) (bfd *, asymbol **)) (long (*)) _bfd_n1)
+ #define _bfd_nosymbols_make_empty_symbol _bfd_generic_make_empty_symbol
+ #define _bfd_nosymbols_print_symbol \
+-  ((void (*) (bfd *, void *, asymbol *, bfd_print_symbol_type)) bfd_void)
++  ((void (*) (bfd *, void *, asymbol *, bfd_print_symbol_type)) (void (*)) bfd_void)
+ #define _bfd_nosymbols_get_symbol_info \
+-  ((void (*) (bfd *, asymbol *, symbol_info *)) bfd_void)
++  ((void (*) (bfd *, asymbol *, symbol_info *)) (void (*)) bfd_void)
+ #define _bfd_nosymbols_bfd_is_local_label_name \
+-  ((bfd_boolean (*) (bfd *, const char *)) bfd_false)
++  ((bfd_boolean (*) (bfd *, const char *)) (bfd_boolean (*)) bfd_false)
+ #define _bfd_nosymbols_bfd_is_target_special_symbol \
+-  ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
++  ((bfd_boolean (*) (bfd *, asymbol *)) (bfd_boolean (*)) bfd_false)
+ #define _bfd_nosymbols_get_lineno \
+-  ((alent *(*) (bfd *, asymbol *)) bfd_nullvoidptr)
++  ((alent *(*) (bfd *, asymbol *)) (alent * (*)) bfd_nullvoidptr)
+ #define _bfd_nosymbols_find_nearest_line \
+   ((bfd_boolean (*) (bfd *, asection *, asymbol **, bfd_vma, const char **, \
+ 		     const char **, unsigned int *)) \
+-   bfd_false)
++   (bfd_boolean (*)) bfd_false)
+ #define _bfd_nosymbols_find_inliner_info \
+   ((bfd_boolean (*) (bfd *, const char **, const char **, unsigned int *)) \
+-   bfd_false)
++   (bfd_boolean (*)) bfd_false)
+ #define _bfd_nosymbols_bfd_make_debug_symbol \
+-  ((asymbol *(*) (bfd *, void *, unsigned long)) bfd_nullvoidptr)
++  ((asymbol * (*) (bfd *, void *, unsigned long)) \
++   (asymbol * (*)) bfd_nullvoidptr)
+ #define _bfd_nosymbols_read_minisymbols \
+-  ((long (*) (bfd *, bfd_boolean, void **, unsigned int *)) _bfd_n1)
++  ((long (*) (bfd *, bfd_boolean, void **, unsigned int *)) \
++   (long (*)) _bfd_n1)
+ #define _bfd_nosymbols_minisymbol_to_symbol \
+-  ((asymbol *(*) (bfd *, bfd_boolean, const void *, asymbol *)) \
+-   bfd_nullvoidptr)
++  ((asymbol * (*) (bfd *, bfd_boolean, const void *, asymbol *)) \
++   (asymbol * (*)) bfd_nullvoidptr)
+ 
+ /* Routines to use for BFD_JUMP_TABLE_RELOCS when there is no reloc
+    support.  Use BFD_JUMP_TABLE_RELOCS (_bfd_norelocs).  */
+ 
+ extern long _bfd_norelocs_get_reloc_upper_bound (bfd *, asection *);
+ extern long _bfd_norelocs_canonicalize_reloc (bfd *, asection *,
+ 					      arelent **, asymbol **);
+ #define _bfd_norelocs_bfd_reloc_type_lookup \
+-  ((reloc_howto_type *(*) (bfd *, bfd_reloc_code_real_type)) bfd_nullvoidptr)
++  ((reloc_howto_type * (*) (bfd *, bfd_reloc_code_real_type)) \
++   (reloc_howto_type * (*)) bfd_nullvoidptr)
+ #define _bfd_norelocs_bfd_reloc_name_lookup \
+-  ((reloc_howto_type *(*) (bfd *, const char *)) bfd_nullvoidptr)
++  ((reloc_howto_type * (*) (bfd *, const char *)) \
++   (reloc_howto_type * (*)) bfd_nullvoidptr)
+ 
+ /* Routines to use for BFD_JUMP_TABLE_WRITE for targets which may not
+    be written.  Use BFD_JUMP_TABLE_WRITE (_bfd_nowrite).  */
+ 
+ #define _bfd_nowrite_set_arch_mach \
+   ((bfd_boolean (*) (bfd *, enum bfd_architecture, unsigned long)) \
+-   bfd_false)
++   (bfd_boolean (*)) bfd_false)
+ #define _bfd_nowrite_set_section_contents \
+   ((bfd_boolean (*) (bfd *, asection *, const void *, file_ptr, bfd_size_type)) \
+-   bfd_false)
++   (bfd_boolean (*)) bfd_false)
+ 
+ /* Generic routines to use for BFD_JUMP_TABLE_WRITE.  Use
+    BFD_JUMP_TABLE_WRITE (_bfd_generic).  */
+ 
+ #define _bfd_generic_set_arch_mach bfd_default_set_arch_mach
+ extern bfd_boolean _bfd_generic_set_section_contents
+   (bfd *, asection *, const void *, file_ptr, bfd_size_type);
+ 
+ /* Routines to use for BFD_JUMP_TABLE_LINK for targets which do not
+    support linking.  Use BFD_JUMP_TABLE_LINK (_bfd_nolink).  */
+ 
+ #define _bfd_nolink_sizeof_headers \
+-  ((int (*) (bfd *, struct bfd_link_info *)) bfd_0)
++  ((int (*) (bfd *, struct bfd_link_info *)) (int (*)) bfd_0)
+ #define _bfd_nolink_bfd_get_relocated_section_contents \
+-  ((bfd_byte *(*) (bfd *, struct bfd_link_info *, struct bfd_link_order *, \
++  ((bfd_byte * (*) (bfd *, struct bfd_link_info *, struct bfd_link_order *, \
+ 		   bfd_byte *, bfd_boolean, asymbol **)) \
+-   bfd_nullvoidptr)
++   (bfd_byte * (*)) bfd_nullvoidptr)
+ #define _bfd_nolink_bfd_relax_section \
+   ((bfd_boolean (*) \
+     (bfd *, asection *, struct bfd_link_info *, bfd_boolean *)) \
+-   bfd_false)
++   (bfd_boolean (*)) bfd_false)
+ #define _bfd_nolink_bfd_gc_sections \
+   ((bfd_boolean (*) (bfd *, struct bfd_link_info *)) \
+-   bfd_false)
++   (bfd_boolean (*)) bfd_false)
+ #define _bfd_nolink_bfd_lookup_section_flags \
+   ((bfd_boolean (*) (struct bfd_link_info *, struct flag_info *, asection *)) \
+-   bfd_0)
++   (bfd_boolean (*)) bfd_false)
+ #define _bfd_nolink_bfd_merge_sections \
+   ((bfd_boolean (*) (bfd *, struct bfd_link_info *)) \
+-   bfd_false)
++   (bfd_boolean (*)) bfd_false)
+ #define _bfd_nolink_bfd_is_group_section \
+   ((bfd_boolean (*) (bfd *, const struct bfd_section *)) \
+-   bfd_false)
++   (bfd_boolean (*)) bfd_false)
+ #define _bfd_nolink_bfd_discard_group \
+   ((bfd_boolean (*) (bfd *, struct bfd_section *)) \
+-   bfd_false)
++   (bfd_boolean (*)) bfd_false)
+ #define _bfd_nolink_bfd_link_hash_table_create \
+   ((struct bfd_link_hash_table *(*) (bfd *)) bfd_nullvoidptr)
+ #define _bfd_nolink_bfd_link_hash_table_free \
+   ((void (*) (struct bfd_link_hash_table *)) bfd_void)
+ #define _bfd_nolink_bfd_link_add_symbols \
+-  ((bfd_boolean (*) (bfd *, struct bfd_link_info *)) bfd_false)
++  ((bfd_boolean (*) (bfd *, struct bfd_link_info *)) \
++   (bfd_boolean (*)) bfd_false)
+ #define _bfd_nolink_bfd_link_just_syms \
+-  ((void (*) (asection *, struct bfd_link_info *)) bfd_void)
++  ((void (*) (asection *, struct bfd_link_info *)) \
++   (void (*)) bfd_void)
+ #define _bfd_nolink_bfd_copy_link_hash_symbol_type \
+   ((void (*) (bfd *, struct bfd_link_hash_entry *, \
+-	      struct bfd_link_hash_entry *)) bfd_void)
++	      struct bfd_link_hash_entry *)) \
++   (void (*)) bfd_void)
+ #define _bfd_nolink_bfd_final_link \
+-  ((bfd_boolean (*) (bfd *, struct bfd_link_info *)) bfd_false)
++  ((bfd_boolean (*) (bfd *, struct bfd_link_info *)) \
++   (bfd_boolean (*)) bfd_false)
+ #define _bfd_nolink_bfd_link_split_section \
+-  ((bfd_boolean (*) (bfd *, struct bfd_section *)) bfd_false)
++  ((bfd_boolean (*) (bfd *, struct bfd_section *)) \
++   (bfd_boolean (*)) bfd_false)
+ #define _bfd_nolink_section_already_linked \
+-  ((bfd_boolean (*) (bfd *, asection *, \
+-		     struct bfd_link_info *)) bfd_false)
++  ((bfd_boolean (*) (bfd *, asection *, struct bfd_link_info *)) \
++   (bfd_boolean (*)) bfd_false)
+ #define _bfd_nolink_bfd_define_common_symbol \
+   ((bfd_boolean (*) (bfd *, struct bfd_link_info *, \
+-		     struct bfd_link_hash_entry *)) bfd_false)
++		     struct bfd_link_hash_entry *)) \
++   (bfd_boolean (*)) bfd_false)
+ 
+ /* Routines to use for BFD_JUMP_TABLE_DYNAMIC for targets which do not
+    have dynamic symbols or relocs.  Use BFD_JUMP_TABLE_DYNAMIC
+    (_bfd_nodynamic).  */
+ 
+ #define _bfd_nodynamic_get_dynamic_symtab_upper_bound _bfd_n1
+ #define _bfd_nodynamic_canonicalize_dynamic_symtab \
+-  ((long (*) (bfd *, asymbol **)) _bfd_n1)
++  ((long (*) (bfd *, asymbol **)) (long (*)) _bfd_n1)
+ #define _bfd_nodynamic_get_synthetic_symtab \
+-  ((long (*) (bfd *, long, asymbol **, long, asymbol **, asymbol **)) _bfd_n1)
++  ((long (*) (bfd *, long, asymbol **, long, asymbol **, asymbol **)) \
++   (long (*)) _bfd_n1)
+ #define _bfd_nodynamic_get_dynamic_reloc_upper_bound _bfd_n1
+ #define _bfd_nodynamic_canonicalize_dynamic_reloc \
+-  ((long (*) (bfd *, arelent **, asymbol **)) _bfd_n1)
++  ((long (*) (bfd *, arelent **, asymbol **)) (long (*)) _bfd_n1)
+ 
+ /* Generic routine to determine of the given symbol is a local
+    label.  */
+ extern bfd_boolean bfd_generic_is_local_label_name
+   (bfd *, const char *);
+ 
+@@ -530,14 +541,14 @@ extern bfd_boolean _bfd_stab_section_find_nearest_line
+ extern bfd_boolean _bfd_dwarf1_find_nearest_line
+   (bfd *, asection *, asymbol **, bfd_vma, const char **,
+    const char **, unsigned int *);
+ 
+ struct dwarf_debug_section
+ {
+-  const char *uncompressed_name;
+-  const char *compressed_name;
++  const char * uncompressed_name;
++  const char * compressed_name;
+ };
+ 
+ /* Map of uncompressed DWARF debug section name to compressed one.  It
+    is terminated by NULL uncompressed_name.  */
+ 
+ extern const struct dwarf_debug_section dwarf_debug_sections[];
+diff --git a/bfd/libecoff.h b/bfd/libecoff.h
+index 8afdccb0ce836a12820f74302563820c1a9bd78f..d2f935f757223aa000655a0193602d3ea13929d9 100644
+--- a/bfd/libecoff.h
++++ b/bfd/libecoff.h
+@@ -275,13 +275,13 @@ extern bfd_boolean _bfd_ecoff_write_armap
+ #define _bfd_ecoff_openr_next_archived_file \
+   bfd_generic_openr_next_archived_file
+ #define _bfd_ecoff_get_elt_at_index _bfd_generic_get_elt_at_index
+ #define _bfd_ecoff_generic_stat_arch_elt bfd_generic_stat_arch_elt
+ #define _bfd_ecoff_update_armap_timestamp bfd_true
+ #define _bfd_ecoff_bfd_is_target_special_symbol  \
+-  ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
++  ((bfd_boolean (*) (bfd *, asymbol *)) (bfd_boolean (*)) bfd_false)
+ 
+ extern long _bfd_ecoff_get_symtab_upper_bound (bfd *);
+ extern long _bfd_ecoff_canonicalize_symtab (bfd *, asymbol **);
+ extern asymbol *_bfd_ecoff_make_empty_symbol (bfd *);
+ extern void _bfd_ecoff_print_symbol
+   (bfd *, void *, asymbol *, bfd_print_symbol_type);
+@@ -297,13 +297,13 @@ extern bfd_boolean _bfd_ecoff_find_nearest_line
+ #define _bfd_ecoff_read_minisymbols _bfd_generic_read_minisymbols
+ #define _bfd_ecoff_minisymbol_to_symbol _bfd_generic_minisymbol_to_symbol
+ #define _bfd_ecoff_find_inliner_info _bfd_nosymbols_find_inliner_info
+ 
+ #define _bfd_ecoff_get_reloc_upper_bound coff_get_reloc_upper_bound
+ extern long _bfd_ecoff_canonicalize_reloc
+-  (bfd *, asection *, arelent **, asymbol **symbols);
++  (bfd *, asection *, arelent **, asymbol **);
+ /* ecoff_bfd_reloc_type_lookup defined by backend. */
+ 
+ extern bfd_boolean _bfd_ecoff_set_arch_mach
+   (bfd *, enum bfd_architecture, unsigned long);
+ extern bfd_boolean _bfd_ecoff_set_section_contents
+   (bfd *, asection *, const void * location, file_ptr, bfd_size_type);
+@@ -323,13 +323,13 @@ extern bfd_boolean _bfd_ecoff_bfd_final_link
+   (bfd *, struct bfd_link_info *);
+ 
+ /* Hook functions for the generic COFF section reading code.  */
+ 
+ extern void * _bfd_ecoff_mkobject_hook (bfd *, void *, void *);
+ #define _bfd_ecoff_set_alignment_hook \
+-  ((void (*) (bfd *, asection *, void *)) bfd_void)
++  ((void (*) (bfd *, asection *, void *)) (void (*)) bfd_void)
+ extern bfd_boolean _bfd_ecoff_set_arch_mach_hook
+   (bfd *, void *);
+ extern bfd_boolean _bfd_ecoff_no_long_sections
+   (bfd *abfd, int enable);
+ extern bfd_boolean _bfd_ecoff_styp_to_sec_flags
+   (bfd *, void *, const char *, asection *, flagword *);
+diff --git a/bfd/mach-o-target.c b/bfd/mach-o-target.c
+index a2aa573c4f20e6e5b647a02b0ad4f1a578131e5e..5bd3e34a9268efc1dff5c2a906cedddb484bb7c3 100644
+--- a/bfd/mach-o-target.c
++++ b/bfd/mach-o-target.c
+@@ -25,13 +25,13 @@
+ #ifndef MACH_O_TARGET_COMMON_DEFINED
+ #define MACH_O_TARGET_COMMON_DEFINED
+ 
+ #define bfd_mach_o_bfd_free_cached_info               _bfd_generic_bfd_free_cached_info
+ #define bfd_mach_o_get_section_contents_in_window     _bfd_generic_get_section_contents_in_window
+ #define bfd_mach_o_bfd_print_private_bfd_data	      _bfd_generic_bfd_print_private_bfd_data
+-#define bfd_mach_o_bfd_is_target_special_symbol       ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
++#define bfd_mach_o_bfd_is_target_special_symbol	      ((bfd_boolean (*) (bfd *, asymbol *)) (bfd_boolean (*)) bfd_false)
+ #define bfd_mach_o_bfd_is_local_label_name            bfd_generic_is_local_label_name
+ #define bfd_mach_o_get_lineno                         _bfd_nosymbols_get_lineno
+ #define bfd_mach_o_find_inliner_info                  _bfd_nosymbols_find_inliner_info
+ #define bfd_mach_o_bfd_make_debug_symbol              _bfd_nosymbols_bfd_make_debug_symbol
+ #define bfd_mach_o_read_minisymbols                   _bfd_generic_read_minisymbols
+ #define bfd_mach_o_minisymbol_to_symbol               _bfd_generic_minisymbol_to_symbol
+diff --git a/bfd/mmo.c b/bfd/mmo.c
+index dc45f31b705e34c1f41449249f98b56d712fea0d..89700efc9e6da8e1b74eff5b42619170c0a76012 100644
+--- a/bfd/mmo.c
++++ b/bfd/mmo.c
+@@ -3168,13 +3168,13 @@ mmo_write_object_contents (bfd *abfd)
+ #define mmo_bfd_free_cached_info _bfd_generic_bfd_free_cached_info
+ 
+ /* Perhaps we need to adjust this one; mmo labels (originally) without a
+    leading ':' might more appropriately be called local.  */
+ #define mmo_bfd_is_local_label_name bfd_generic_is_local_label_name
+ #define mmo_bfd_is_target_special_symbol  \
+-  ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
++  ((bfd_boolean (*) (bfd *, asymbol *)) (bfd_boolean (*)) bfd_false)
+ 
+ /* Is this one really used or defined by anyone?  */
+ #define mmo_get_lineno _bfd_nosymbols_get_lineno
+ 
+ /* FIXME: We can do better on this one, if we have a dwarf2 .debug_line
+    section or if MMO line numbers are implemented.  */
+diff --git a/bfd/nlm-target.h b/bfd/nlm-target.h
+index 9a3b7bef09e29a8b6eb3026ecf19a9625977c2c7..c87f20b5c55ab67239d57e783984fc0eb0717731 100644
+--- a/bfd/nlm-target.h
++++ b/bfd/nlm-target.h
+@@ -24,13 +24,13 @@
+ #define nlm_get_symtab_upper_bound              nlmNAME (get_symtab_upper_bound)
+ #define nlm_canonicalize_symtab                 nlmNAME (canonicalize_symtab)
+ #define nlm_make_empty_symbol                   nlmNAME (make_empty_symbol)
+ #define nlm_print_symbol                        nlmNAME (print_symbol)
+ #define nlm_get_symbol_info                     nlmNAME (get_symbol_info)
+ #define nlm_bfd_is_local_label_name             bfd_generic_is_local_label_name
+-#define nlm_bfd_is_target_special_symbol ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
++#define nlm_bfd_is_target_special_symbol ((bfd_boolean (*) (bfd *, asymbol *)) (bfd_boolean (*)) bfd_false)
+ #define nlm_get_lineno                          _bfd_nosymbols_get_lineno
+ #define nlm_find_nearest_line                   _bfd_nosymbols_find_nearest_line
+ #define nlm_find_inliner_info                   _bfd_nosymbols_find_inliner_info
+ #define nlm_bfd_make_debug_symbol               _bfd_nosymbols_bfd_make_debug_symbol
+ #define nlm_read_minisymbols                    _bfd_generic_read_minisymbols
+ #define nlm_minisymbol_to_symbol                _bfd_generic_minisymbol_to_symbol
+diff --git a/bfd/oasys.c b/bfd/oasys.c
+index ebb12e844e24ca5a7ffa0c35f7370ebf7385855f..fd8a6af3201bce81a89cf0ea355f7af01ee3f354 100644
+--- a/bfd/oasys.c
++++ b/bfd/oasys.c
+@@ -1175,21 +1175,25 @@ oasys_sizeof_headers (bfd *abfd ATTRIBUTE_UNUSED,
+ }
+ 
+ #define	oasys_close_and_cleanup                    _bfd_generic_close_and_cleanup
+ #define oasys_bfd_free_cached_info                 _bfd_generic_bfd_free_cached_info
+ #define oasys_slurp_armap                          bfd_true
+ #define oasys_slurp_extended_name_table            bfd_true
+-#define oasys_construct_extended_name_table        ((bfd_boolean (*) (bfd *, char **, bfd_size_type *, const char **)) bfd_true)
++#define oasys_construct_extended_name_table	   \
++  ((bfd_boolean (*) (bfd *, char **, bfd_size_type *, const char **)) (bfd_boolean (*)) bfd_true)
+ #define oasys_truncate_arname                      bfd_dont_truncate_arname
+-#define oasys_write_armap                          ((bfd_boolean (*) (bfd *, unsigned int, struct orl *, unsigned int, int)) bfd_true)
++#define oasys_write_armap			   \
++  ((bfd_boolean (*) (bfd *, unsigned int, struct orl *, unsigned int, int)) (bfd_boolean (*)) bfd_true)
+ #define oasys_read_ar_hdr                          bfd_nullvoidptr
+-#define oasys_write_ar_hdr ((bfd_boolean (*) (bfd *, bfd *)) bfd_false)
++#define oasys_write_ar_hdr                         \
++  ((bfd_boolean (*) (bfd *, bfd *)) (bfd_boolean (*)) bfd_false)
+ #define oasys_get_elt_at_index                     _bfd_generic_get_elt_at_index
+ #define oasys_update_armap_timestamp               bfd_true
+ #define oasys_bfd_is_local_label_name              bfd_generic_is_local_label_name
+-#define oasys_bfd_is_target_special_symbol         ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
++#define oasys_bfd_is_target_special_symbol	   \
++  ((bfd_boolean (*) (bfd *, asymbol *)) (bfd_boolean (*)) bfd_false)
+ #define oasys_get_lineno                           _bfd_nosymbols_get_lineno
+ #define oasys_bfd_make_debug_symbol                _bfd_nosymbols_bfd_make_debug_symbol
+ #define oasys_read_minisymbols                     _bfd_generic_read_minisymbols
+ #define oasys_minisymbol_to_symbol                 _bfd_generic_minisymbol_to_symbol
+ #define oasys_bfd_reloc_type_lookup                _bfd_norelocs_bfd_reloc_type_lookup
+ #define oasys_bfd_reloc_name_lookup          _bfd_norelocs_bfd_reloc_name_lookup
+diff --git a/bfd/pef.c b/bfd/pef.c
+index ca4c4548a91719954c7d2fe5e4fc83858647df19..946332e2a8508c259e836c2d557814010440156e 100644
+--- a/bfd/pef.c
++++ b/bfd/pef.c
+@@ -36,13 +36,14 @@
+ #endif
+ 
+ #define bfd_pef_close_and_cleanup                   _bfd_generic_close_and_cleanup
+ #define bfd_pef_bfd_free_cached_info                _bfd_generic_bfd_free_cached_info
+ #define bfd_pef_new_section_hook                    _bfd_generic_new_section_hook
+ #define bfd_pef_bfd_is_local_label_name             bfd_generic_is_local_label_name
+-#define bfd_pef_bfd_is_target_special_symbol ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
++#define bfd_pef_bfd_is_target_special_symbol        \
++  ((bfd_boolean (*) (bfd *, asymbol *)) (bfd_boolean (*)) bfd_false)
+ #define bfd_pef_get_lineno                          _bfd_nosymbols_get_lineno
+ #define bfd_pef_find_nearest_line                   _bfd_nosymbols_find_nearest_line
+ #define bfd_pef_find_inliner_info                   _bfd_nosymbols_find_inliner_info
+ #define bfd_pef_bfd_make_debug_symbol               _bfd_nosymbols_bfd_make_debug_symbol
+ #define bfd_pef_read_minisymbols                    _bfd_generic_read_minisymbols
+ #define bfd_pef_minisymbol_to_symbol                _bfd_generic_minisymbol_to_symbol
+diff --git a/bfd/plugin.c b/bfd/plugin.c
+index 8d2c4b2014f782d23444e5280059e62cbba40a74..f768a2827a5f3fe79d9f9216aab5060285eaed7b 100644
+--- a/bfd/plugin.c
++++ b/bfd/plugin.c
+@@ -78,13 +78,13 @@ dlerror (void)
+ #define bfd_plugin_bfd_copy_private_header_data       _bfd_generic_bfd_copy_private_header_data
+ #define bfd_plugin_bfd_merge_private_bfd_data         _bfd_generic_bfd_merge_private_bfd_data
+ #define bfd_plugin_bfd_copy_private_header_data       _bfd_generic_bfd_copy_private_header_data
+ #define bfd_plugin_bfd_set_private_flags              _bfd_generic_bfd_set_private_flags
+ #define bfd_plugin_core_file_matches_executable_p     generic_core_file_matches_executable_p
+ #define bfd_plugin_bfd_is_local_label_name            _bfd_nosymbols_bfd_is_local_label_name
+-#define bfd_plugin_bfd_is_target_special_symbol       ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
++#define bfd_plugin_bfd_is_target_special_symbol	      ((bfd_boolean (*) (bfd *, asymbol *)) (bfd_boolean (*)) bfd_false)
+ #define bfd_plugin_get_lineno                         _bfd_nosymbols_get_lineno
+ #define bfd_plugin_find_nearest_line                  _bfd_nosymbols_find_nearest_line
+ #define bfd_plugin_find_inliner_info                  _bfd_nosymbols_find_inliner_info
+ #define bfd_plugin_bfd_make_debug_symbol              _bfd_nosymbols_bfd_make_debug_symbol
+ #define bfd_plugin_read_minisymbols                   _bfd_generic_read_minisymbols
+ #define bfd_plugin_minisymbol_to_symbol               _bfd_generic_minisymbol_to_symbol
+diff --git a/bfd/ppcboot.c b/bfd/ppcboot.c
+index b0718d8c7936d8d27599171233b31f53f4b54457..bd558855cf8995c225478020ac6c204ae0509268 100644
+--- a/bfd/ppcboot.c
++++ b/bfd/ppcboot.c
+@@ -325,13 +325,13 @@ ppcboot_get_symbol_info (bfd *ignore_abfd ATTRIBUTE_UNUSED,
+ 			 symbol_info *ret)
+ {
+   bfd_symbol_info (symbol, ret);
+ }
+ 
+ #define ppcboot_bfd_is_target_special_symbol \
+-  ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
++  ((bfd_boolean (*) (bfd *, asymbol *)) (bfd_boolean (*)) bfd_false)
+ #define ppcboot_bfd_is_local_label_name bfd_generic_is_local_label_name
+ #define ppcboot_get_lineno _bfd_nosymbols_get_lineno
+ #define ppcboot_find_nearest_line _bfd_nosymbols_find_nearest_line
+ #define ppcboot_find_inliner_info _bfd_nosymbols_find_inliner_info
+ #define ppcboot_bfd_make_debug_symbol _bfd_nosymbols_bfd_make_debug_symbol
+ #define ppcboot_read_minisymbols _bfd_generic_read_minisymbols
+diff --git a/bfd/som.c b/bfd/som.c
+index efaf400dc1cd166eac321cb3752675a68c7f5deb..32419014ef036f5fc1a73f613e872a8420b35b8e 100644
+--- a/bfd/som.c
++++ b/bfd/som.c
+@@ -6722,13 +6722,14 @@ som_bfd_link_split_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
+ #define som_get_elt_at_index		        _bfd_generic_get_elt_at_index
+ #define som_generic_stat_arch_elt	        bfd_generic_stat_arch_elt
+ #define som_truncate_arname		        bfd_bsd_truncate_arname
+ #define som_slurp_extended_name_table	        _bfd_slurp_extended_name_table
+ #define som_construct_extended_name_table       _bfd_archive_coff_construct_extended_name_table
+ #define som_update_armap_timestamp	        bfd_true
+-#define som_bfd_is_target_special_symbol   ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
++#define som_bfd_is_target_special_symbol        \
++  ((bfd_boolean (*) (bfd *, asymbol *)) (bfd_boolean (*)) bfd_false)
+ #define som_get_lineno			        _bfd_nosymbols_get_lineno
+ #define som_bfd_make_debug_symbol	        _bfd_nosymbols_bfd_make_debug_symbol
+ #define som_read_minisymbols		        _bfd_generic_read_minisymbols
+ #define som_minisymbol_to_symbol	        _bfd_generic_minisymbol_to_symbol
+ #define som_get_section_contents_in_window      _bfd_generic_get_section_contents_in_window
+ #define som_bfd_get_relocated_section_contents  bfd_generic_get_relocated_section_contents
+diff --git a/bfd/srec.c b/bfd/srec.c
+index 5aa48b338893fafce9e380fa639edb20a353f739..9d6fdcea625cd09d611b8444220c5a37aab2ba98 100644
+--- a/bfd/srec.c
++++ b/bfd/srec.c
+@@ -1238,13 +1238,13 @@ srec_print_symbol (bfd *abfd,
+     }
+ }
+ 
+ #define	srec_close_and_cleanup                    _bfd_generic_close_and_cleanup
+ #define srec_bfd_free_cached_info                 _bfd_generic_bfd_free_cached_info
+ #define srec_new_section_hook                     _bfd_generic_new_section_hook
+-#define srec_bfd_is_target_special_symbol         ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
++#define srec_bfd_is_target_special_symbol	  ((bfd_boolean (*) (bfd *, asymbol *)) (bfd_boolean (*)) bfd_false)
+ #define srec_bfd_is_local_label_name              bfd_generic_is_local_label_name
+ #define srec_get_lineno                           _bfd_nosymbols_get_lineno
+ #define srec_find_nearest_line                    _bfd_nosymbols_find_nearest_line
+ #define srec_find_inliner_info                    _bfd_nosymbols_find_inliner_info
+ #define srec_make_empty_symbol                    _bfd_generic_make_empty_symbol
+ #define srec_bfd_make_debug_symbol                _bfd_nosymbols_bfd_make_debug_symbol
+diff --git a/bfd/tekhex.c b/bfd/tekhex.c
+index 0ed7b5032b8283973eecf01049de044ced4a79cf..50e4b4e5d7e73c8d2f3fa0eb288df1c66d84bf24 100644
+--- a/bfd/tekhex.c
++++ b/bfd/tekhex.c
+@@ -929,13 +929,13 @@ tekhex_print_symbol (bfd *abfd,
+     }
+ }
+ 
+ #define	tekhex_close_and_cleanup                    _bfd_generic_close_and_cleanup
+ #define tekhex_bfd_free_cached_info                 _bfd_generic_bfd_free_cached_info
+ #define tekhex_new_section_hook                     _bfd_generic_new_section_hook
+-#define tekhex_bfd_is_target_special_symbol ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
++#define tekhex_bfd_is_target_special_symbol ((bfd_boolean (*) (bfd *, asymbol *)) (bfd_boolean (*)) bfd_false)
+ #define tekhex_bfd_is_local_label_name               bfd_generic_is_local_label_name
+ #define tekhex_get_lineno                           _bfd_nosymbols_get_lineno
+ #define tekhex_find_nearest_line                    _bfd_nosymbols_find_nearest_line
+ #define tekhex_find_inliner_info                    _bfd_nosymbols_find_inliner_info
+ #define tekhex_bfd_make_debug_symbol                _bfd_nosymbols_bfd_make_debug_symbol
+ #define tekhex_read_minisymbols                     _bfd_generic_read_minisymbols
+diff --git a/bfd/verilog.c b/bfd/verilog.c
+index a2d3ca7855ae6fa6eb6af147ed55d801004ce0e4..cd3838139744c146ef07353e9c4be4bc3ef6b7ff 100644
+--- a/bfd/verilog.c
++++ b/bfd/verilog.c
+@@ -291,13 +291,13 @@ verilog_mkobject (bfd *abfd)
+   return TRUE;
+ }
+ 
+ #define	verilog_close_and_cleanup                    _bfd_generic_close_and_cleanup
+ #define verilog_bfd_free_cached_info                 _bfd_generic_bfd_free_cached_info
+ #define verilog_new_section_hook                     _bfd_generic_new_section_hook
+-#define verilog_bfd_is_target_special_symbol         ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
++#define verilog_bfd_is_target_special_symbol         ((bfd_boolean (*) (bfd *, asymbol *)) (bfd_boolean (*)) bfd_false)
+ #define verilog_bfd_is_local_label_name              bfd_generic_is_local_label_name
+ #define verilog_get_lineno                           _bfd_nosymbols_get_lineno
+ #define verilog_find_nearest_line                    _bfd_nosymbols_find_nearest_line
+ #define verilog_find_inliner_info                    _bfd_nosymbols_find_inliner_info
+ #define verilog_make_empty_symbol                    _bfd_generic_make_empty_symbol
+ #define verilog_bfd_make_debug_symbol                _bfd_nosymbols_bfd_make_debug_symbol
+diff --git a/bfd/versados.c b/bfd/versados.c
+index ae6f671392bc16bd62b057fd1ccab1ab2c9030dd..57915269d97386c088619cb4c1162cb848757d4c 100644
+--- a/bfd/versados.c
++++ b/bfd/versados.c
+@@ -788,13 +788,14 @@ versados_canonicalize_reloc (bfd *abfd,
+   return section->reloc_count;
+ }
+ 
+ #define	versados_close_and_cleanup                    _bfd_generic_close_and_cleanup
+ #define versados_bfd_free_cached_info                 _bfd_generic_bfd_free_cached_info
+ #define versados_new_section_hook                     _bfd_generic_new_section_hook
+-#define versados_bfd_is_target_special_symbol   ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
++#define versados_bfd_is_target_special_symbol	      \
++  ((bfd_boolean (*) (bfd *, asymbol *)) (bfd_boolean (*)) bfd_false)
+ #define versados_bfd_is_local_label_name              bfd_generic_is_local_label_name
+ #define versados_get_lineno                           _bfd_nosymbols_get_lineno
+ #define versados_find_nearest_line                    _bfd_nosymbols_find_nearest_line
+ #define versados_find_inliner_info                    _bfd_nosymbols_find_inliner_info
+ #define versados_make_empty_symbol                    _bfd_generic_make_empty_symbol
+ #define versados_bfd_make_debug_symbol                _bfd_nosymbols_bfd_make_debug_symbol
+diff --git a/bfd/vms-alpha.c b/bfd/vms-alpha.c
+index 8b98560743731a3d8983e9800cd8c4407c589a38..e76752cb9fda7735e6a715a59c3ff32b4dfd8cb0 100644
+--- a/bfd/vms-alpha.c
++++ b/bfd/vms-alpha.c
+@@ -9290,12 +9290,14 @@ bfd_vms_set_section_flags (bfd *abfd ATTRIBUTE_UNUSED,
+ struct vms_private_data_struct *
+ bfd_vms_get_data (bfd *abfd)
+ {
+   return (struct vms_private_data_struct *)abfd->tdata.any;
+ }
+ 
++#define vms_bfd_is_target_special_symbol \
++  ((bfd_boolean (*) (bfd *, asymbol *)) (bfd_boolean (*)) bfd_false)
+ #define vms_bfd_is_target_special_symbol ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
+ #define vms_bfd_link_just_syms            _bfd_generic_link_just_syms
+ #define vms_bfd_copy_link_hash_symbol_type \
+   _bfd_generic_copy_link_hash_symbol_type
+ #define vms_bfd_is_group_section          bfd_generic_is_group_section
+ #define vms_bfd_discard_group             bfd_generic_discard_group
+@@ -9310,21 +9312,13 @@ bfd_vms_get_data (bfd *abfd)
+ #define vms_bfd_set_private_flags         _bfd_generic_bfd_set_private_flags
+ #define vms_bfd_merge_private_bfd_data    _bfd_generic_bfd_merge_private_bfd_data
+ 
+ /* Symbols table.  */
+ #define alpha_vms_make_empty_symbol        _bfd_generic_make_empty_symbol
+ #define alpha_vms_bfd_is_target_special_symbol \
+-   ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
+-#define alpha_vms_print_symbol             vms_print_symbol
+-#define alpha_vms_get_symbol_info          vms_get_symbol_info
+-#define alpha_vms_read_minisymbols         _bfd_generic_read_minisymbols
+-#define alpha_vms_minisymbol_to_symbol     _bfd_generic_minisymbol_to_symbol
+-#define alpha_vms_get_lineno               _bfd_nosymbols_get_lineno
+-#define alpha_vms_find_inliner_info        _bfd_nosymbols_find_inliner_info
+-#define alpha_vms_bfd_make_debug_symbol    _bfd_nosymbols_bfd_make_debug_symbol
+-#define alpha_vms_find_nearest_line        _bfd_vms_find_nearest_dst_line
++   ((bfd_boolean (*) (bfd *, asymbol *)) (bfd_boolean (*)) bfd_false)
+ #define alpha_vms_bfd_is_local_label_name  vms_bfd_is_local_label_name
+ 
+ /* Generic table.  */
+ #define alpha_vms_close_and_cleanup	   vms_close_and_cleanup
+ #define alpha_vms_bfd_free_cached_info	   vms_bfd_free_cached_info
+ #define alpha_vms_new_section_hook	   vms_new_section_hook
+diff --git a/bfd/xsym.c b/bfd/xsym.c
+index e0819a9b1a8249854c28b8a4893128a978c6e9a8..eaf2b2966f064fb20437d84f8e6814cac1fdcbd7 100644
+--- a/bfd/xsym.c
++++ b/bfd/xsym.c
+@@ -28,13 +28,13 @@
+ #include "libbfd.h"
+ 
+ #define bfd_sym_close_and_cleanup                   _bfd_generic_close_and_cleanup
+ #define bfd_sym_bfd_free_cached_info                _bfd_generic_bfd_free_cached_info
+ #define bfd_sym_new_section_hook                    _bfd_generic_new_section_hook
+ #define bfd_sym_bfd_is_local_label_name             bfd_generic_is_local_label_name
+-#define bfd_sym_bfd_is_target_special_symbol       ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
++#define bfd_sym_bfd_is_target_special_symbol       ((bfd_boolean (*) (bfd *, asymbol *)) (bfd_boolean(*)) bfd_false)
+ #define bfd_sym_get_lineno                          _bfd_nosymbols_get_lineno
+ #define bfd_sym_find_nearest_line                   _bfd_nosymbols_find_nearest_line
+ #define bfd_sym_find_inliner_info                   _bfd_nosymbols_find_inliner_info
+ #define bfd_sym_bfd_make_debug_symbol               _bfd_nosymbols_bfd_make_debug_symbol
+ #define bfd_sym_read_minisymbols                    _bfd_generic_read_minisymbols
+ #define bfd_sym_minisymbol_to_symbol                _bfd_generic_minisymbol_to_symbol
+diff --git a/gas/config/obj-elf.c b/gas/config/obj-elf.c
+index 7e1e773bcc42aac8b01a0466c1d6af1c05e29bd9..a5bd04003017c5f8ed77545a67330fcf7ea0bfca 100644
+--- a/gas/config/obj-elf.c
++++ b/gas/config/obj-elf.c
+@@ -107,21 +107,21 @@ static const pseudo_typeS elf_pseudo_table[] =
+   {"symver", obj_elf_symver, 0},
+ 
+   /* A GNU extension to change subsection only.  */
+   {"subsection", obj_elf_subsection, 0},
+ 
+   /* These are GNU extensions to aid in garbage collecting C++ vtables.  */
+-  {"vtable_inherit", (void (*) (int)) &obj_elf_vtable_inherit, 0},
+-  {"vtable_entry", (void (*) (int)) &obj_elf_vtable_entry, 0},
++  {"vtable_inherit", (void *) &obj_elf_vtable_inherit, 0},
++  {"vtable_entry", (void *) &obj_elf_vtable_entry, 0},
+ 
+   /* These are used for dwarf.  */
+   {"2byte", cons, 2},
+   {"4byte", cons, 4},
+   {"8byte", cons, 8},
+   /* These are used for dwarf2.  */
+-  { "file", (void (*) (int)) dwarf2_directive_file, 0 },
++  { "file", (void *) dwarf2_directive_file, 0 },
+   { "loc",  dwarf2_directive_loc,  0 },
+   { "loc_mark_labels", dwarf2_directive_loc_mark_labels, 0 },
+ 
+   /* We need to trap the section changing calls to handle .previous.  */
+   {"data", obj_elf_data, 0},
+   {"offset", obj_elf_struct, 0},
+-- 
+2.16.2
+

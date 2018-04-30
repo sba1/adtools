@@ -1,7 +1,7 @@
-From 1678a95339b8893195b307a953a0053ceeca0133 Mon Sep 17 00:00:00 2001
+From ebed185e98704dd95fbf04d9852feaf4841061e8 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Sat, 14 Feb 2015 14:54:44 +0100
-Subject: [PATCH 1/9] Changes for various Amiga targets.
+Subject: [PATCH 01/12] Changes for various Amiga targets.
 
 ---
  bfd/ChangeLog-9697                                |   64 +
@@ -10094,22 +10094,22 @@ index 6454a8350da35adf6ed1e2209d9e4774ab7c50e3..9bf9535888f2345d60a8f802680ae03f
  		       that is better than breaking tests for a NULL
  		       function pointer.  */
  		    sym->st_value = 0;
-@@ -9275,12 +9435,15 @@ ppc_elf_finish_dynamic_symbol (bfd *output_bfd,
+@@ -9274,12 +9434,15 @@ ppc_elf_finish_dynamic_symbol (bfd *output_bfd,
+       rela.r_info = ELF32_R_INFO (h->dynindx, R_PPC_COPY);
        rela.r_addend = 0;
        loc = s->contents + s->reloc_count++ * sizeof (Elf32_External_Rela);
        bfd_elf32_swap_reloca_out (output_bfd, &rela, loc);
      }
  
- #ifdef DEBUG
++#ifdef DEBUG
 +      fprintf (stderr, " SYM_VAL(%p) ", (void *)SYM_VAL(h));
 +#endif
-+#ifdef DEBUG
+ #ifdef DEBUG
    fprintf (stderr, "\n");
  #endif
  
    return TRUE;
  }
- 
 @@ -9735,16 +9898,14 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
  	return FALSE;
      }
@@ -18115,13 +18115,14 @@ diff --git a/bfd/reloc.c b/bfd/reloc.c
 index 47d052d1345847a7178f4c7ebe4f529396ae0a4f..6c3bb68f2da65b201b6288b8709fd60d9b0d5b2c 100644
 --- a/bfd/reloc.c
 +++ b/bfd/reloc.c
-@@ -2803,12 +2803,20 @@ ENUMX
+@@ -2802,12 +2802,20 @@ ENUMX
+ ENUMX
    BFD_RELOC_PPC_EMB_RELST_HA
  ENUMX
    BFD_RELOC_PPC_EMB_BIT_FLD
  ENUMX
    BFD_RELOC_PPC_EMB_RELSDA
- ENUMX
++ENUMX
 +  BFD_RELOC_PPC_MORPHOS_DREL
 +ENUMX
 +  BFD_RELOC_PPC_MORPHOS_DREL_LO
@@ -18129,20 +18130,20 @@ index 47d052d1345847a7178f4c7ebe4f529396ae0a4f..6c3bb68f2da65b201b6288b8709fd60d
 +  BFD_RELOC_PPC_MORPHOS_DREL_HI
 +ENUMX
 +  BFD_RELOC_PPC_MORPHOS_DREL_HA
-+ENUMX
+ ENUMX
    BFD_RELOC_PPC_VLE_REL8
  ENUMX
    BFD_RELOC_PPC_VLE_REL15
  ENUMX
    BFD_RELOC_PPC_VLE_REL24
- ENUMX
-@@ -2973,12 +2981,23 @@ ENUMX
+@@ -2972,12 +2980,23 @@ ENUMX
+   BFD_RELOC_PPC64_DTPREL16_HIGHEST
  ENUMX
    BFD_RELOC_PPC64_DTPREL16_HIGHESTA
  ENUMDOC
    PowerPC and PowerPC64 thread-local storage relocations.
  
- ENUM
++ENUM
 +  BFD_RELOC_PPC_AMIGAOS_BREL
 +ENUMX
 +  BFD_RELOC_PPC_AMIGAOS_BREL_LO
@@ -18153,13 +18154,12 @@ index 47d052d1345847a7178f4c7ebe4f529396ae0a4f..6c3bb68f2da65b201b6288b8709fd60d
 +ENUMDOC
 +  AmigaOS4 PowerPC specific base-relative relocations.
 +
-+ENUM
+ ENUM
    BFD_RELOC_I370_D12
  ENUMDOC
    IBM 370/390 relocations
  
  ENUM
-   BFD_RELOC_CTOR
 diff --git a/bfd/targets.c b/bfd/targets.c
 index fa206d24bef3a22255f6be42221647db3142eb06..9df24504bab564048f724fbbb641ca13c5805602 100644
 --- a/bfd/targets.c
@@ -21172,7 +21172,7 @@ index 56ebb6c565bea35df43565b53206156270a41b66..8a9746c927a3e8b7007cdec9c7f16e47
    n_fixups++;
  
    fixP = (fixS *) obstack_alloc (&notes, sizeof (fixS));
-@@ -188,14 +189,17 @@ fix_new_internal (fragS *frag,		/* Which frag?  */
+@@ -188,13 +189,16 @@ fix_new_internal (fragS *frag,		/* Which frag?  */
  #ifdef USING_CGEN
    fixP->fx_cgen.insn = NULL;
    fixP->fx_cgen.opinfo = 0;
@@ -21182,14 +21182,13 @@ index 56ebb6c565bea35df43565b53206156270a41b66..8a9746c927a3e8b7007cdec9c7f16e47
 +#ifndef TC_PPC
 +  fixP->tc_fix_data = baserel;
    TC_INIT_FIX_DATA (fixP);
- #endif
 +#endif
+ #endif
  
    as_where (&fixP->fx_file, &fixP->fx_line);
  
    {
  
-     fixS **seg_fix_rootP = (frags_chained
 @@ -232,29 +236,31 @@ fixS *
  fix_new (fragS *frag,		/* Which frag?  */
  	 int where,			/* Where in that frag?  */
@@ -26023,19 +26022,21 @@ diff --git a/ld/ldmain.c b/ld/ldmain.c
 index 73353309c3595a2e53e160cbf2bcfd215a92aab2..8b7513d8e83264c0cb236781cdb753181612fb14 100644
 --- a/ld/ldmain.c
 +++ b/ld/ldmain.c
-@@ -408,16 +408,23 @@ main (int argc, char **argv)
+@@ -406,18 +406,25 @@ main (int argc, char **argv)
+ 	    }
+ 	}
      }
  
    lang_process ();
  
-   /* Print error messages for any missing symbols, for any warning
-      symbols, and possibly multiple definitions.  */
++  /* Print error messages for any missing symbols, for any warning
++     symbols, and possibly multiple definitions.  */
 +#ifdef __amigaos4__
 +  /* Make all files executable, even relocatable files */
 +    link_info.output_bfd->flags |= EXEC_P;
 +#else
-+  /* Print error messages for any missing symbols, for any warning
-+     symbols, and possibly multiple definitions.  */
+   /* Print error messages for any missing symbols, for any warning
+      symbols, and possibly multiple definitions.  */
    if (link_info.relocatable)
      link_info.output_bfd->flags &= ~EXEC_P;
    else
@@ -27428,5 +27429,5 @@ index bc2dd491592e56fb664cdf96fc32491c08e1e075..bc40541b7c5aecc30a7a74fd61f29225
     Seperate from reg_names since 'spu', 'fpl' look weird.  */
  static char *const reg_half_names[] =
 -- 
-2.11.0
+2.16.2
 

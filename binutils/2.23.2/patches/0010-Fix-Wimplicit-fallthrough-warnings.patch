@@ -1,0 +1,724 @@
+From 30a8825b0e8a4f2074859bccea4430b99987b2ea Mon Sep 17 00:00:00 2001
+From: Sebastian Bauer <bauer@jpk.com>
+Date: Mon, 30 Apr 2018 19:34:12 +0200
+Subject: [PATCH 10/12] Fix -Wimplicit-fallthrough warnings.
+
+These appear with recent versions of gcc.
+---
+ bfd/coffgen.c        | 4 ++--
+ bfd/elf.c            | 2 +-
+ bfd/elf32-amigaos.c  | 1 +
+ bfd/elf32-ppc.c      | 1 +
+ bfd/elflink.c        | 1 +
+ bfd/reloc.c          | 3 +++
+ bfd/srec.c           | 2 ++
+ binutils/cxxfilt.c   | 2 +-
+ binutils/debug.c     | 1 +
+ binutils/dwarf.c     | 3 +++
+ binutils/elfcomm.c   | 2 ++
+ binutils/elfedit.c   | 2 +-
+ binutils/nm.c        | 2 +-
+ binutils/objcopy.c   | 8 ++++----
+ binutils/objdump.c   | 1 +
+ binutils/readelf.c   | 9 +++++----
+ binutils/stabs.c     | 1 +
+ binutils/strings.c   | 2 +-
+ gas/config/obj-elf.c | 1 +
+ gas/config/tc-ppc.c  | 5 ++++-
+ gas/depend.c         | 4 ++--
+ gas/dw2gencfi.c      | 1 +
+ gas/expr.c           | 2 ++
+ gprof/gprof.c        | 2 ++
+ ld/lexsup.c          | 2 ++
+ 25 files changed, 46 insertions(+), 18 deletions(-)
+
+diff --git a/bfd/coffgen.c b/bfd/coffgen.c
+index 509119b075d9d2ec2d3a6ce4310e7e8f72c96e2b..72a72213b65626727386b8a7746487026446b691 100644
+--- a/bfd/coffgen.c
++++ b/bfd/coffgen.c
+@@ -2039,13 +2039,13 @@ coff_print_symbol (bfd *abfd,
+ 			fprintf (file, " checksum 0x%lx assoc %d comdat %d",
+ 				 auxp->u.auxent.x_scn.x_checksum,
+ 				 auxp->u.auxent.x_scn.x_associated,
+ 				 auxp->u.auxent.x_scn.x_comdat);
+ 		      break;
+ 		    }
+-		    /* Otherwise fall through.  */
++		    /* Fall through.  */
+ 		case C_EXT:
+ 		case C_AIX_WEAKEXT:
+ 		  if (ISFCN (combined->u.syment.n_type))
+ 		    {
+ 		      long next, llnos;
+ 
+@@ -2059,13 +2059,13 @@ coff_print_symbol (bfd *abfd,
+ 			       "AUX tagndx %ld ttlsiz 0x%lx lnnos %ld next %ld",
+ 			       tagndx,
+ 			       (unsigned long) auxp->u.auxent.x_sym.x_misc.x_fsize,
+ 			       llnos, next);
+ 		      break;
+ 		    }
+-		  /* Otherwise fall through.  */
++		  /* Fall through.  */
+ 		default:
+ 		  fprintf (file, "AUX lnno %d size 0x%x tagndx %ld",
+ 			   auxp->u.auxent.x_sym.x_misc.x_lnsz.x_lnno,
+ 			   auxp->u.auxent.x_sym.x_misc.x_lnsz.x_size,
+ 			   tagndx);
+ 		  if (auxp->fix_end)
+diff --git a/bfd/elf.c b/bfd/elf.c
+index 062967e151a2ae870237dab8475699ec0f736110..73f959c17e7a2ace28a2c784dc8749b962469219 100644
+--- a/bfd/elf.c
++++ b/bfd/elf.c
+@@ -1579,13 +1579,13 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
+ 	    {
+ 	    case bfd_arch_i386:
+ 	    case bfd_arch_sparc:
+ 	      if (hdr->sh_link == (SHN_LORESERVE & 0xffff) /* SHN_BEFORE */
+ 		  || hdr->sh_link == ((SHN_LORESERVE + 1) & 0xffff) /* SHN_AFTER */)
+ 		break;
+-	      /* Otherwise fall through.  */
++	      /* Fall through.  */
+ 	    default:
+ 	      return FALSE;
+ 	    }
+ 	}
+       else if (elf_elfsections (abfd)[hdr->sh_link] == NULL)
+ 	return FALSE;
+diff --git a/bfd/elf32-amigaos.c b/bfd/elf32-amigaos.c
+index fa9333b7f1d953b5ebcf338bd465c75f99842bb3..4f0c37c97accbb9a00762fc2e04c56ea0942d483 100644
+--- a/bfd/elf32-amigaos.c
++++ b/bfd/elf32-amigaos.c
+@@ -5040,12 +5040,13 @@ ppc_elf_gc_sweep_hook (bfd *abfd,
+ 	case R_PPC_ADDR14_BRTAKEN:
+ 	case R_PPC_ADDR14_BRNTAKEN:
+ 	case R_PPC_UADDR32:
+ 	case R_PPC_UADDR16:
+ 	  if (info->shared)
+ 	    break;
++	  /* Fall thru */
+ 
+ 	case R_PPC_PLT32:
+ 	case R_PPC_PLTREL24:
+ 	case R_PPC_PLTREL32:
+ 	case R_PPC_PLT16_LO:
+ 	case R_PPC_PLT16_HI:
+diff --git a/bfd/elf32-ppc.c b/bfd/elf32-ppc.c
+index 5c92c53da7b3dec8f85a0a0b930190635f89dcfb..9166631ac66055c2621682b157f741bfc68c7f78 100644
+--- a/bfd/elf32-ppc.c
++++ b/bfd/elf32-ppc.c
+@@ -4949,12 +4949,13 @@ ppc_elf_gc_sweep_hook (bfd *abfd,
+ 	case R_PPC_ADDR14_BRTAKEN:
+ 	case R_PPC_ADDR14_BRNTAKEN:
+ 	case R_PPC_UADDR32:
+ 	case R_PPC_UADDR16:
+ 	  if (info->shared)
+ 	    break;
++	  /* Fall thru */
+ 
+ 	case R_PPC_PLT32:
+ 	case R_PPC_PLTREL24:
+ 	case R_PPC_PLTREL32:
+ 	case R_PPC_PLT16_LO:
+ 	case R_PPC_PLT16_HI:
+diff --git a/bfd/elflink.c b/bfd/elflink.c
+index f10801b99e366ad956faf039401cfcbf0c42aaa1..2716afaf7c1dfae4ab44b73377ec6b20195d4c84 100644
+--- a/bfd/elflink.c
++++ b/bfd/elflink.c
+@@ -7680,12 +7680,13 @@ eval_symbol (bfd_vma *result,
+       ++sym;
+       *result = strtoul (sym, (char **) symp, 16);
+       return TRUE;
+ 
+     case 'S':
+       symbol_is_section = TRUE;
++      /* Fall through. */
+     case 's':
+       ++sym;
+       symlen = strtol (sym, (char **) symp, 10);
+       sym = *symp + 1; /* Skip the trailing ':'.  */
+ 
+       if (symend < sym || symlen + 1 > sizeof (symbuf))
+diff --git a/bfd/reloc.c b/bfd/reloc.c
+index 6c3bb68f2da65b201b6288b8709fd60d9b0d5b2c..a2c2281ecdcd2cf81797ff096e9f179bdd219962 100644
+--- a/bfd/reloc.c
++++ b/bfd/reloc.c
+@@ -6618,19 +6618,22 @@ bfd_default_reloc_type_lookup (bfd *abfd, bfd_reloc_code_real_type code)
+       /* The type of reloc used in a ctor, which will be as wide as the
+ 	 address - so either a 64, 32, or 16 bitter.  */
+       switch (bfd_arch_bits_per_address (abfd))
+ 	{
+ 	case 64:
+ 	  BFD_FAIL ();
++	  /* Fall through. */
+ 	case 32:
+ 	  return &bfd_howto_32;
+ 	case 16:
+ 	  BFD_FAIL ();
++	  /* Fall through. */
+ 	default:
+ 	  BFD_FAIL ();
+ 	}
++      /* Fall through. */
+     default:
+       BFD_FAIL ();
+     }
+   return NULL;
+ }
+ 
+diff --git a/bfd/srec.c b/bfd/srec.c
+index 6226773387252b3d4e9f5df43e832e5a937e9161..5aa48b338893fafce9e380fa639edb20a353f739 100644
+--- a/bfd/srec.c
++++ b/bfd/srec.c
+@@ -957,16 +957,18 @@ srec_write_record (bfd *abfd,
+   switch (type)
+     {
+     case 3:
+     case 7:
+       TOHEX (dst, (address >> 24), check_sum);
+       dst += 2;
++      /* Fall through. */
+     case 8:
+     case 2:
+       TOHEX (dst, (address >> 16), check_sum);
+       dst += 2;
++      /* Fall through. */
+     case 9:
+     case 1:
+     case 0:
+       TOHEX (dst, (address >> 8), check_sum);
+       dst += 2;
+       TOHEX (dst, (address), check_sum);
+diff --git a/binutils/cxxfilt.c b/binutils/cxxfilt.c
+index 770df9baf6e0307a9e53f3dca0cd38119f295251..8660b6cd6d96e712d64cd06f8bc18d789764f6de 100644
+--- a/binutils/cxxfilt.c
++++ b/binutils/cxxfilt.c
+@@ -85,13 +85,13 @@ print_demangler_list (FILE *stream)
+        ++demangler)
+     fprintf (stream, ",%s", demangler->demangling_style_name);
+ 
+   fprintf (stream, "}");
+ }
+ 
+-static void
++static void __attribute__((noreturn))
+ usage (FILE *stream, int status)
+ {
+   fprintf (stream, "\
+ Usage: %s [options] [mangled names]\n", program_name);
+   fprintf (stream, "\
+ Options are:\n\
+diff --git a/binutils/debug.c b/binutils/debug.c
+index ee0d62e8ff9218cc3b854ed04d80112088402b94..1d6420dbc1225e41b05d80afa57deb59d0c54020 100644
+--- a/binutils/debug.c
++++ b/binutils/debug.c
+@@ -3153,12 +3153,13 @@ debug_type_samep (struct debug_handle *info, struct debug_type_s *t1,
+ 
+     case DEBUG_KIND_RANGE:
+       ret = (t1->u.krange->lower == t2->u.krange->lower
+ 	     && t1->u.krange->upper == t2->u.krange->upper
+ 	     && debug_type_samep (info, t1->u.krange->type,
+ 				  t2->u.krange->type));
++      break;
+ 
+     case DEBUG_KIND_ARRAY:
+       ret = (t1->u.karray->lower == t2->u.karray->lower
+ 	     && t1->u.karray->upper == t2->u.karray->upper
+ 	     && t1->u.karray->stringp == t2->u.karray->stringp
+ 	     && debug_type_samep (info, t1->u.karray->element_type,
+diff --git a/binutils/dwarf.c b/binutils/dwarf.c
+index 9fc4a594cfe83693f44f686fc752987b3e2a5653..381b2c46816b98bbe9d0aff3cf23cf0bb2fc494e 100644
+--- a/binutils/dwarf.c
++++ b/binutils/dwarf.c
+@@ -1506,12 +1506,13 @@ read_and_display_attr_value (unsigned long attribute,
+       && debug_info_p != NULL)
+     {
+       switch (attribute)
+ 	{
+ 	case DW_AT_frame_base:
+ 	  have_frame_base = 1;
++	  /* Fall through. */
+ 	case DW_AT_location:
+ 	case DW_AT_string_length:
+ 	case DW_AT_return_addr:
+ 	case DW_AT_data_member_location:
+ 	case DW_AT_vtable_elem_location:
+ 	case DW_AT_segment:
+@@ -1765,12 +1766,13 @@ read_and_display_attr_value (unsigned long attribute,
+ 	case 1:  printf ("(column major)"); break;
+ 	}
+       break;
+ 
+     case DW_AT_frame_base:
+       have_frame_base = 1;
++      /* Fall through. */
+     case DW_AT_location:
+     case DW_AT_string_length:
+     case DW_AT_return_addr:
+     case DW_AT_data_member_location:
+     case DW_AT_vtable_elem_location:
+     case DW_AT_segment:
+@@ -6007,12 +6009,13 @@ dwarf_select_sections_by_letters (const char *letters)
+       case 'R':
+ 	do_debug_ranges = 1;
+ 	break;
+ 
+       case 'F':
+ 	do_debug_frames_interp = 1;
++	/* Fall through. */
+       case 'f':
+ 	do_debug_frames = 1;
+ 	break;
+ 
+       case 'm':
+ 	do_debug_macinfo = 1;
+diff --git a/binutils/elfcomm.c b/binutils/elfcomm.c
+index a50b1ece382621b4ad786fb7f7440a975ccc4391..cb59aeb43f9427e7727ee97a812d6cd3f143e935 100644
+--- a/binutils/elfcomm.c
++++ b/binutils/elfcomm.c
+@@ -160,12 +160,13 @@ byte_get_little_endian (unsigned char *field, int size)
+ 	   place it into a 4 byte wide field.  Since this is a little
+ 	   endian source we can just use the 4 byte extraction code.  */
+ 	return  ((unsigned long) (field[0]))
+ 	  |    (((unsigned long) (field[1])) << 8)
+ 	  |    (((unsigned long) (field[2])) << 16)
+ 	  |    (((unsigned long) (field[3])) << 24);
++      /* Fall through. */
+ 
+     default:
+       error (_("Unhandled data length: %d\n"), size);
+       abort ();
+     }
+ }
+@@ -209,12 +210,13 @@ byte_get_big_endian (unsigned char *field, int size)
+ 	  field += 4;
+ 	  return ((unsigned long) (field[3]))
+ 	    |   (((unsigned long) (field[2])) << 8)
+ 	    |   (((unsigned long) (field[1])) << 16)
+ 	    |   (((unsigned long) (field[0])) << 24);
+ 	}
++      /* Fall through. */
+ 
+     default:
+       error (_("Unhandled data length: %d\n"), size);
+       abort ();
+     }
+ }
+diff --git a/binutils/elfedit.c b/binutils/elfedit.c
+index d9e23a12b50aff292b5e09a0e66101995451752b..f0752d89bc4b26f658ce94a69da45c14a560ae96 100644
+--- a/binutils/elfedit.c
++++ b/binutils/elfedit.c
+@@ -626,13 +626,13 @@ static struct option options[] =
+   {"output-osabi",	required_argument, 0, OPTION_OUTPUT_OSABI},
+   {"version",		no_argument, 0, 'v'},
+   {"help",		no_argument, 0, 'h'},
+   {0,			no_argument, 0, 0}
+ };
+ 
+-static void
++static void __attribute__((noreturn))
+ usage (FILE *stream, int exit_status)
+ {
+   fprintf (stream, _("Usage: %s <option(s)> elffile(s)\n"),
+ 	   program_name);
+   fprintf (stream, _(" Update the ELF header of ELF files\n"));
+   fprintf (stream, _(" The options are:\n"));
+diff --git a/binutils/nm.c b/binutils/nm.c
+index ad38e27c8a834d5ee06e8c0024af959726e9cbdb..17ea6c5561ee2a09e1df314248d82769ac0b6db0 100644
+--- a/binutils/nm.c
++++ b/binutils/nm.c
+@@ -217,13 +217,13 @@ static struct option long_options[] =
+   {"version", no_argument, &show_version, 1},
+   {0, no_argument, 0, 0}
+ };
+ 
+ /* Some error-reporting functions.  */
+ 
+-static void
++static void __attribute__((noreturn))
+ usage (FILE *stream, int status)
+ {
+   fprintf (stream, _("Usage: %s [option(s)] [file(s)]\n"), program_name);
+   fprintf (stream, _(" List symbols in [file(s)] (a.out by default).\n"));
+   fprintf (stream, _(" The options are:\n\
+   -a, --debug-syms       Display debugger-only symbols\n\
+diff --git a/binutils/objcopy.c b/binutils/objcopy.c
+index 8750db51279ec56080aba114cd61780d061b168f..1618ae50b195d176a758bb5dde3337634db3e9e4 100644
+--- a/binutils/objcopy.c
++++ b/binutils/objcopy.c
+@@ -481,13 +481,13 @@ static void copy_section (bfd *, asection *, void *);
+ static void get_sections (bfd *, asection *, void *);
+ static int compare_section_lma (const void *, const void *);
+ static void mark_symbols_used_in_relocations (bfd *, asection *, void *);
+ static bfd_boolean write_debugging_info (bfd *, void *, long *, asymbol ***);
+ static const char *lookup_sym_redefinition (const char *);
+ 
+-static void
++static void __attribute__((noreturn))
+ copy_usage (FILE *stream, int exit_status)
+ {
+   fprintf (stream, _("Usage: %s [option(s)] in-file [out-file]\n"), program_name);
+   fprintf (stream, _(" Copies a binary file, possibly transforming it in the process\n"));
+   fprintf (stream, _(" The options are:\n"));
+   fprintf (stream, _("\
+@@ -606,13 +606,13 @@ copy_usage (FILE *stream, int exit_status)
+   list_supported_targets (program_name, stream);
+   if (REPORT_BUGS_TO[0] && exit_status == 0)
+     fprintf (stream, _("Report bugs to %s\n"), REPORT_BUGS_TO);
+   exit (exit_status);
+ }
+ 
+-static void
++static void __attribute__((noreturn))
+ strip_usage (FILE *stream, int exit_status)
+ {
+   fprintf (stream, _("Usage: %s <option(s)> in-file(s)\n"), program_name);
+   fprintf (stream, _(" Removes symbols and sections from files\n"));
+   fprintf (stream, _(" The options are:\n"));
+   fprintf (stream, _("\
+@@ -3680,22 +3680,22 @@ copy_main (int argc, char *argv[])
+ 
+ 	    val = parse_vma (s + 1, option);
+ 
+ 	    switch (*s)
+ 	      {
+ 	      case '=': what = CHANGE_SET; break;
+-	      case '-': val  = - val; /* Drop through.  */
++	      case '-': val  = - val; /* Fall through.  */
+ 	      case '+': what = CHANGE_MODIFY; break;
+ 	      }
+ 
+ 	    switch (c)
+ 	      {
+ 	      case OPTION_CHANGE_SECTION_ADDRESS:
+ 		p->change_vma = what;
+ 		p->vma_val    = val;
+-		/* Drop through.  */
++		/* Fall through.  */
+ 
+ 	      case OPTION_CHANGE_SECTION_LMA:
+ 		p->change_lma = what;
+ 		p->lma_val    = val;
+ 		break;
+ 
+diff --git a/binutils/objdump.c b/binutils/objdump.c
+index d985ba33c9f837ddb9ae1681e42908faf4d5ee51..c787721bc7815b0f4ad32c00126f6b3b3350d029 100644
+--- a/binutils/objdump.c
++++ b/binutils/objdump.c
+@@ -3658,12 +3658,13 @@ main (int argc, char **argv)
+ 	  dump_section_headers = TRUE;
+ 	  seenflag = TRUE;
+ 	  break;
+ 	case 'H':
+ 	  usage (stdout, 0);
+ 	  seenflag = TRUE;
++	  /* Fall through. */
+ 	case 'v':
+ 	case 'V':
+ 	  show_version = TRUE;
+ 	  seenflag = TRUE;
+ 	  break;
+ 
+diff --git a/binutils/readelf.c b/binutils/readelf.c
+index f52d7168af3bc6559bd2483ff1fc126da385b38d..da98fe4684f3fffc99251e6d4e655424196ed5a1 100644
+--- a/binutils/readelf.c
++++ b/binutils/readelf.c
+@@ -354,30 +354,30 @@ print_vma (bfd_vma vma, print_mode mode)
+   int nc = 0;
+ 
+   switch (mode)
+     {
+     case FULL_HEX:
+       nc = printf ("0x");
+-      /* Drop through.  */
++      /* Fall through.  */
+ 
+     case LONG_HEX:
+ #ifdef BFD64
+       if (is_32bit_elf)
+ 	return nc + printf ("%8.8" BFD_VMA_FMT "x", vma);
+ #endif
+       printf_vma (vma);
+       return nc + 16;
+ 
+     case DEC_5:
+       if (vma <= 99999)
+ 	return printf ("%5" BFD_VMA_FMT "d", vma);
+-      /* Drop through.  */
++      /* Fall through.  */
+ 
+     case PREFIX_HEX:
+       nc = printf ("0x");
+-      /* Drop through.  */
++      /* Fall through.  */
+ 
+     case HEX:
+       return nc + printf ("%" BFD_VMA_FMT "x", vma);
+ 
+     case DEC:
+       return printf ("%" BFD_VMA_FMT "d", vma);
+@@ -3507,13 +3507,13 @@ parse_args (int argc, char ** argv)
+ 	case 'W':
+ 	  do_wide++;
+ 	  break;
+ 	default:
+ 	  /* xgettext:c-format */
+ 	  error (_("Invalid option '-%c'\n"), c);
+-	  /* Drop through.  */
++	  /* Fall through.  */
+ 	case '?':
+ 	  usage (stderr);
+ 	}
+     }
+ 
+   if (!do_dynamic && !do_syms && !do_reloc && !do_unwind && !do_sections
+@@ -8092,12 +8092,13 @@ process_dynamic_section (FILE * file)
+ 	case DT_STRSZ	:
+ 	case DT_RELSZ	:
+ 	case DT_RELAENT	:
+ 	case DT_SYMENT	:
+ 	case DT_RELENT	:
+ 	  dynamic_info[entry->d_tag] = entry->d_un.d_val;
++	  /* Fall through. */
+ 	case DT_PLTPADSZ:
+ 	case DT_MOVEENT	:
+ 	case DT_MOVESZ	:
+ 	case DT_INIT_ARRAYSZ:
+ 	case DT_FINI_ARRAYSZ:
+ 	case DT_GNU_CONFLICTSZ:
+diff --git a/binutils/stabs.c b/binutils/stabs.c
+index 04c345252db63583691fc89d155c1bfda7f1c765..1e7e3f2e3aafd4b8dbf4faa7212ed2008ad686de 100644
+--- a/binutils/stabs.c
++++ b/binutils/stabs.c
+@@ -3427,12 +3427,13 @@ stab_xcoff_builtin_type (void *dhandle, struct stab_handle *info,
+       name = "unsigned int";
+       rettype = debug_make_int_type (dhandle, 4, TRUE);
+       break;
+     case 9:
+       name = "unsigned";
+       rettype = debug_make_int_type (dhandle, 4, TRUE);
++      break;
+     case 10:
+       name = "unsigned long";
+       rettype = debug_make_int_type (dhandle, 4, TRUE);
+       break;
+     case 11:
+       name = "void";
+diff --git a/binutils/strings.c b/binutils/strings.c
+index 3eed63adad544b39b174f89b00eefc6e73f18806..67a830ea109d7b4df9c3b39caeb905b0d7870158 100644
+--- a/binutils/strings.c
++++ b/binutils/strings.c
+@@ -127,13 +127,13 @@ typedef struct
+ } filename_and_size_t;
+ 
+ static void strings_a_section (bfd *, asection *, void *);
+ static bfd_boolean strings_object_file (const char *);
+ static bfd_boolean strings_file (char *file);
+ static void print_strings (const char *, FILE *, file_ptr, int, int, char *);
+-static void usage (FILE *, int);
++static void usage (FILE *, int) __attribute__ ((noreturn));
+ static long get_char (FILE *, file_ptr *, int *, char **);
+ 
+ int main (int, char **);
+ 
+ int
+ main (int argc, char **argv)
+diff --git a/gas/config/obj-elf.c b/gas/config/obj-elf.c
+index bb8d9d1ebee6b76deee86848202fd06d5b1a4dfa..7e1e773bcc42aac8b01a0466c1d6af1c05e29bd9 100644
+--- a/gas/config/obj-elf.c
++++ b/gas/config/obj-elf.c
+@@ -785,12 +785,13 @@ obj_elf_parse_section_letters (char *str, size_t len, bfd_boolean *is_clone)
+ 		{
+ 		  attr |= SHF_STRINGS;
+ 		  str++, len--;
+ 		}
+ 	      break;
+ 	    }
++	  /* Fall through. */
+ 	default:
+ 	  {
+ 	    char *bad_msg = _("unrecognized .section attribute: want a,e,w,x,M,S,G,T");
+ #ifdef md_elf_section_letter
+ 	    bfd_vma md_attr = md_elf_section_letter (*str, &bad_msg);
+ 	    if (md_attr != (bfd_vma) -1)
+diff --git a/gas/config/tc-ppc.c b/gas/config/tc-ppc.c
+index 14346e30661d408d5dba4d456cc274f2f4dc3820..9114e0163e922ac3ea5690739acfa2b653e36b69 100644
+--- a/gas/config/tc-ppc.c
++++ b/gas/config/tc-ppc.c
+@@ -6386,14 +6386,14 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
+       switch (fixP->fx_r_type)
+ 	{
+ #ifdef OBJ_ELF
+ 	case BFD_RELOC_PPC64_ADDR16_LO_DS:
+ 	  if (fixP->fx_pcrel)
+ 	    goto bad_pcrel;
+-	  /* fall through */
+ #endif
++	  /* fall through */
+ 	case BFD_RELOC_LO16:
+ 	  if (fixP->fx_pcrel)
+ 	    fixP->fx_r_type = BFD_RELOC_LO16_PCREL;
+ 	  /* fall through */
+ 	case BFD_RELOC_LO16_PCREL:
+ 	  fieldval = SEX16 (value);
+@@ -6726,27 +6726,30 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
+ 	  break;
+ 
+ 	  /* These can appear with @l etc. in data.  */
+ 	case BFD_RELOC_LO16:
+ 	  if (fixP->fx_pcrel)
+ 	    fixP->fx_r_type = BFD_RELOC_LO16_PCREL;
++	  /* Fall through. */
+ 	case BFD_RELOC_LO16_PCREL:
+ 	  size = 2;
+ 	  break;
+ 
+ 	case BFD_RELOC_HI16:
+ 	  if (fixP->fx_pcrel)
+ 	    fixP->fx_r_type = BFD_RELOC_HI16_PCREL;
++	  /* Fall through. */
+ 	case BFD_RELOC_HI16_PCREL:
+ 	  size = 2;
+ 	  fieldval = PPC_HI (value);
+ 	  break;
+ 
+ 	case BFD_RELOC_HI16_S:
+ 	  if (fixP->fx_pcrel)
+ 	    fixP->fx_r_type = BFD_RELOC_HI16_S_PCREL;
++	  /* Fall through. */
+ 	case BFD_RELOC_HI16_S_PCREL:
+ 	  size = 2;
+ 	  fieldval = PPC_HA (value);
+ 	  break;
+ 
+ 	case BFD_RELOC_PPC64_HIGHER:
+diff --git a/gas/depend.c b/gas/depend.c
+index 7a3c54c4e115a3336de9c3cdea0d1420138df2f3..f1cc783d7fcee8d91d55cb181c1d1621d8d71ea6 100644
+--- a/gas/depend.c
++++ b/gas/depend.c
+@@ -119,14 +119,14 @@ quote_string_for_make (FILE *file, char *src)
+ 	  goto ordinary_char;
+ 
+ 	case '$':
+ 	  if (file)
+ 	    putc (c, file);
+ 	  i++;
+-	  /* Fall through.  This can mishandle things like "$(" but
+-	     there's no easy fix.  */
++	  /* Fall through. */
++	  /* This can mishandle things like "$(" but there's no easy fix. */
+ 	default:
+ 	ordinary_char:
+ 	  /* This can mishandle characters in the string "\0\n%*?[\\~";
+ 	     exactly which chars are mishandled depends on the `make' version.
+ 	     We know of no portable solution for this;
+ 	     even GNU make 3.76.1 doesn't solve the problem entirely.
+diff --git a/gas/dw2gencfi.c b/gas/dw2gencfi.c
+index 163b8dea74f4b0e26c132f0546b0398053158e5e..37eec973788e0aff1ff76378a8ad22d1d0fd7c38 100644
+--- a/gas/dw2gencfi.c
++++ b/gas/dw2gencfi.c
+@@ -998,12 +998,13 @@ dot_cfi_val_encoded_addr (int ignored ATTRIBUTE_UNUSED)
+     {
+     case O_symbol:
+       break;
+     case O_constant:
+       if ((encoding & 0x70) != DW_EH_PE_pcrel)
+         break;
++      /* Fall through. */
+     default:
+       encoding = DW_EH_PE_omit;
+       break;
+     }
+ 
+   insn_ptr->u.ea.encoding = encoding;
+diff --git a/gas/expr.c b/gas/expr.c
+index 105153ede326cf3b3ba059c31c118779d6545773..38a1f5358b77728e0534674c16f5a3fcc0e8e7d4 100644
+--- a/gas/expr.c
++++ b/gas/expr.c
+@@ -914,12 +914,13 @@ operand (expressionS *expressionP, enum expr_mode mode)
+ 	      break;
+ 
+ 	    is_0f_float:
+ 	      /* Fall through.  */
+ 	      ;
+ 	    }
++	    /* Fall through.  */
+ 
+ 	case 'd':
+ 	case 'D':
+ 	  if (flag_m68k_mri || NUMBERS_WITH_SUFFIX)
+ 	    {
+ 	      integer_constant (0, expressionP);
+@@ -1005,12 +1006,13 @@ operand (expressionS *expressionP, enum expr_mode mode)
+       /* Fall through.  */
+ #endif
+     case '~':
+       /* '~' is permitted to start a label on the Delta.  */
+       if (is_name_beginner (c))
+ 	goto isname;
++      /* Fall through. */
+     case '!':
+     case '-':
+     case '+':
+       {
+ #ifdef md_operator
+       unary:
+diff --git a/gprof/gprof.c b/gprof/gprof.c
+index 8d545389c5d6bc84339ef89f2092fedd34eb5c8d..dd7f7087fe7df00305b251ecf543d401e3ffc09a 100644
+--- a/gprof/gprof.c
++++ b/gprof/gprof.c
+@@ -253,17 +253,19 @@ main (int argc, char **argv)
+ 	  break;
+ 	case 'D':
+ 	  ignore_non_functions = TRUE;
+ 	  break;
+ 	case 'E':
+ 	  sym_id_add (optarg, EXCL_TIME);
++	  /* Fall through. */
+ 	case 'e':
+ 	  sym_id_add (optarg, EXCL_GRAPH);
+ 	  break;
+ 	case 'F':
+ 	  sym_id_add (optarg, INCL_TIME);
++	  /* Fall through. */
+ 	case 'f':
+ 	  sym_id_add (optarg, INCL_GRAPH);
+ 	  break;
+ 	case 'g':
+ 	  sym_id_add (optarg, EXCL_FLAT);
+ 	  break;
+diff --git a/ld/lexsup.c b/ld/lexsup.c
+index 4dc10131beda701728cb7671da86ffb8bee39a3e..327b7e39008941320e10c8a17dd6b4fb13dae16d 100644
+--- a/ld/lexsup.c
++++ b/ld/lexsup.c
+@@ -649,12 +649,13 @@ parse_args (unsigned argc, char **argv)
+ 	case '?':
+ 	  einfo (_("%P: unrecognized option '%s'\n"), argv[last_optind]);
+ 	  /* Fall through.  */
+ 
+ 	default:
+ 	  einfo (_("%P%F: use the --help option for usage information\n"));
++	  break;
+ 
+ 	case 1:			/* File name.  */
+ 	  lang_add_input_file (optarg, lang_input_file_is_file_enum, NULL);
+ 	  break;
+ 
+ 	case OPTION_IGNORE:
+@@ -1487,12 +1488,13 @@ parse_args (unsigned argc, char **argv)
+   switch (command_line.dynamic_list)
+     {
+     case dynamic_list_unset:
+       break;
+     case dynamic_list_data:
+       link_info.dynamic_data = TRUE;
++      /* Fall through. */
+     case dynamic_list:
+       link_info.dynamic = TRUE;
+       break;
+     }
+ 
+   if (! link_info.shared)
+-- 
+2.16.2
+
