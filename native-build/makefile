@@ -27,12 +27,10 @@ BINUTILS_SRC_DIR=../binutils/repo
 
 GCC_SRC_DIR=../gcc/repo
 GCC_VERSION:=$(shell cat $(GCC_SRC_DIR)/gcc/BASE-VER)
+GCC_DEV_PHASE=$(shell cat ${GCC_SRC_DIR}/gcc/DEV-PHASE)
 
 SDK_URL=http://www.hyperion-entertainment.biz/index.php?option=com_registration&amp;view=download&amp;format=raw&amp;file=69&amp;Itemid=82
 SDK_VERSION=53.30
-
-CLIB2_URL=https://github.com/sba1/clib2-1
-CLIB2_SHA1=b874ff71deb55016a20f87483beb1ecbe226c55e
 
 # Native tools
 COREUTILS_SRC_DIR=../coreutils/repo
@@ -40,6 +38,10 @@ COREUTILS_VERSION=5.2.1
 
 # Distribution version, used as middle part of a distribution archive
 DIST_VERSION=$(shell date +%Y%m%d)-$(shell git rev-list --count HEAD)
+
+CLIB2_URL=https://github.com/sba1/clib2-1
+CLIB2_SHA1=b874ff71deb55016a20f87483beb1ecbe226c55e
+CLIB2_RELEASE_ARCHIVE_NAME=adtools-os4-clib2-$(DIST_VERSION).lha
 
 CROSS_PREFIX?=$(ROOT_DIR)/root-cross
 # This assumes that cross prefix is absolute
@@ -270,7 +272,9 @@ ReadMe: ReadMe.mak
 			ADTOOLS_COMMIT_SHA1='$(shell git rev-list HEAD -1)',\
 			BINUTILS_VERSION='$(BINUTILS_VERSION)',\
 			GCC_VERSION='$(GCC_VERSION)',\
-			COREUTILS_VERSION='$(COREUTILS_VERSION)'\
+			GCC_DEV_PHASE='$(GCC_DEV_PHASE)',\
+			COREUTILS_VERSION='$(COREUTILS_VERSION)',\
+			CLIB2_RELEASE_ARCHIVE_NAME='$(CLIB2_RELEASE_ARCHIVE_NAME)'\
 		)\
 	" >$@.utf8
 	iconv --from-code=UTF8 --to-code=ISO-8859-15 $@.utf8 >$@
@@ -384,7 +388,7 @@ native-dist: native-strip-really
 # Clib2 distribution
 #
 clib2-dist: clib2-cross-done-$(GCC_VERSION)
-	cd root-cross/ppc-amigaos/SDK && lha ao5 $(realpath .)/adtools-os4-clib2-$(DIST_VERSION).lha clib2
+	cd root-cross/ppc-amigaos/SDK && lha ao5 $(realpath .)/$(CLIB2_RELEASE_ARCHIVE_NAME) clib2
 
 #
 # Upload the binary archive to the main Aminet server

@@ -7,8 +7,11 @@ Kurz:          GCC-basierte Toolchain für AmigaOS 4.x
 Requires:      OS 4.1
 Version:       ${DIST_VERSION}
 
-This archive includes native AmigaOS 4.1 compiles of binutils ${BINUTILS_VERSION}, gcc ${GCC_VERSION}, and
-coreutils ${COREUTILS_VERSION} based on https://github.com/sba/sba1/adtools version ${DIST_VERSION}
+This archive includes native AmigaOS 4.1 compiles of
+ * binutils ${BINUTILS_VERSION},
+ * gcc ${GCC_VERSION} (${GCC_DEV_PHASE}), and
+ * coreutils ${COREUTILS_VERSION}
+based on https://github.com/sba/sba1/adtools version ${DIST_VERSION}
 commit ${ADTOOLS_COMMIT_SHA1}.
 
 In order to install it on your Amiga, extract the archive to a destination of your
@@ -30,3 +33,15 @@ the issue tracker at https://github.com/sba1/adtools/issues for reporting bugs.
 Note that the plan is to split the project and move the parts to separate subprojects
 at https://github.com/adtools/. One other goal is to include the projects or updated
 ones as part of one of the next AmigaOS SDK.
+
+About the C++ support
+=====================
+
+C++-support using clib2 clib (enabled via -mcrt=clib2) is much better than with
+the newlib clib at the moment. If you encounter any errors when compiling C++
+projects using newlib, also try clib2. To be successful, you should use the
+accompanying clib2 release archive ${CLIB2_RELEASE_ARCHIVE_NAME} and install its
+contents into the SDK: folder.
+
+Also for C++, it is recommended not to use the shared objects feature (aka
+dynload) for now. The reason is that the C++-ABI may change in the future.
