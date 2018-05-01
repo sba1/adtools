@@ -352,7 +352,7 @@ BINUTILS_EXES = \
 #
 # Install native compiler into /gcc. Needs write access to this directory
 #
-native-install: coreutils-native-done gcc-native-done-$(GCC_VERSION) ReadMe
+native-install: coreutils-native-done gcc-native-done-$(GCC_VERSION) ReadMe doc
 	rm -Rf /gcc/*
 	PATH="$(CROSS_PREFIX)/bin:$(PATH)" $(MAKE) -C binutils-native-build-$(BINUTILS_VERSION) install
 # Create copies of few files that usually are also accessible via a filename with the target alias prefix
@@ -369,6 +369,8 @@ native-install: coreutils-native-done gcc-native-done-$(GCC_VERSION) ReadMe
 #	# Move lib archives (e.g., libgcc.a into the proper directory)
 #	cd /gcc/lib/gcc ; for lib in `find -name *.a -o -name *.so`; do mkdir -p `dirname $$lib`/lib; mv $$lib `dirname $$lib`/lib ; done
 	cp ReadMe /gcc
+	mkdir -p /gcc/doc
+	cp doc/* /gcc/doc
 
 #
 # Similar to native-install but deploys the components in separate directories
