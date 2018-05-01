@@ -413,12 +413,14 @@ native-strip-really:
 #
 # Native distribution archive
 #
+DIST_FOLDER:=adtools-os4-$(DIST_VERSION)
+
 native-dist: native-strip-really
-	rm -f $(realpath .)/adtools-os4-$(DIST_VERSION).lha
-	rm -Rf /tmp/adtools-os4-$(DIST_VERSION)
-	mkdir /tmp/adtools-os4-$(DIST_VERSION)
-	cp -pR /gcc/* /tmp/adtools-os4-$(DIST_VERSION)
-	cd /tmp && lha ao5 $(realpath .)/adtools-os4-$(DIST_VERSION).lha adtools-os4-$(DIST_VERSION)/*
+	rm -f $(realpath .)/$(DIST_FOLDER).lha
+	rm -Rf /tmp/$(DIST_FOLDER)
+	mkdir /tmp/$(DIST_FOLDER)
+	cp -pR /gcc/* /tmp/$(DIST_FOLDER)
+	cd /tmp && lha ao5 $(realpath .)/$(DIST_FOLDER).lha $(DIST_FOLDER)/*
 
 #
 # Clib2 distribution
