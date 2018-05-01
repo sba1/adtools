@@ -265,24 +265,31 @@ GCC_BASE_BRANCH_NAME=$(GCC_BRANCH_NAME)-base
 .PHONY: doc
 doc:
 	rm -Rf $@
-	mkdir -p $@
+	mkdir -p $@/tmp/orig
+	mkdir -p $@/tmp/patched
+
+	echo "@set version-GCC $(GCC_VERSION)-adtools" >$@/tmp/orig/gcc-vers.texi
+	echo "@set srcdir $(ROOT_DIR)/$(GCC_BASE_BRANCH_NAME)/gcc" >>$@/tmp/orig/gcc-vers.texi
+	echo "@set BUGURL https://github.com/sba1/adtools/issues" >>$@/tmp/orig/gcc-vers.texi
+
+	echo "@set version-GCC $(GCC_VERSION)-adtools" >$@/tmp/patched/gcc-vers.texi
+	echo "@set srcdir $(GCC_SRC_DIR)/gcc" >>$@/tmp/patched/gcc-vers.texi
+	echo "@set BUGURL https://github.com/sba1/adtools/issues" >>$@/tmp/patched/gcc-vers.texi
+
+	# Checkout base branch as worktree
 	cd $(GCC_SRC_DIR) && git worktree add -f $(ROOT_DIR)/$(GCC_BASE_BRANCH_NAME) $(GCC_BASE_BRANCH_NAME) || true
 	cd $(ROOT_DIR)/$(GCC_BASE_BRANCH_NAME) && git checkout $(GCC_BASE_BRANCH_NAME)
-	echo "@set version-GCC $(GCC_VERSION)-adtools" >$@/gcc-vers.texi
-	echo "@set srcdir $(ROOT_DIR)/$(GCC_BASE_BRANCH_NAME)/gcc" >>$@/gcc-vers.texi
-	echo "@set BUGURL https://github.com/sba1/adtools/issues" >>$@/gcc-vers.texi
-	makeinfo --plaintext -I $(GCC_BASE_BRANCH_NAME)/gcc/doc -I $(GCC_BASE_BRANCH_NAME)/gcc/doc/include -I $@ -o $@/gcc-orig.txt $(GCC_BASE_BRANCH_NAME)/gcc/doc/gcc.texi
-	makeinfo --plaintext -I $(GCC_BASE_BRANCH_NAME)/gcc/doc -I $(GCC_BASE_BRANCH_NAME)/gcc/doc/include -I $@ -o $@/cpp-orig.txt $(GCC_BASE_BRANCH_NAME)/gcc/doc/cpp.texi
 
-	echo "@set version-GCC $(GCC_VERSION)-adtools" >$@/gcc-vers.texi
-	echo "@set srcdir $(GCC_SRC_DIR)/gcc" >>$@/gcc-vers.texi
-	echo "@set BUGURL https://github.com/sba1/adtools/issues" >>$@/gcc-vers.texi
-	makeinfo --plaintext -I $(GCC_SRC_DIR)/gcc/doc -I $(GCC_SRC_DIR)/gcc/doc/include -I $@ -o $@/gcc.txt $(GCC_SRC_DIR)/gcc/doc/gcc.texi
-	makeinfo --plaintext -I $(GCC_SRC_DIR)/gcc/doc -I $(GCC_SRC_DIR)/gcc/doc/include -I $@ -o $@/cpp.txt $(GCC_SRC_DIR)/gcc/doc/cpp.texi
+	makeinfo --plaintext -I $(GCC_BASE_BRANCH_NAME)/gcc/doc -I $(GCC_BASE_BRANCH_NAME)/gcc/doc/include -I $@/tmp/orig -o $@/tmp/orig/gcc.txt $(GCC_BASE_BRANCH_NAME)/gcc/doc/gcc.texi
+	makeinfo --plaintext -I $(GCC_BASE_BRANCH_NAME)/gcc/doc -I $(GCC_BASE_BRANCH_NAME)/gcc/doc/include -I $@/tmp/orig -o $@/tmp/orig/cpp.txt $(GCC_BASE_BRANCH_NAME)/gcc/doc/cpp.texi
 
-	cd $@ && bash -c "wdiff -n -w $$'\033[30;41m' -x $$'\033[0m' -y $$'\033[30;42m' -z $$'\033[0m' gcc-orig.txt gcc.txt >gcc-changes.txt" || true
-	cd $@ && bash -c "wdiff -n -w $$'\033[30;41m' -x $$'\033[0m' -y $$'\033[30;42m' -z $$'\033[0m' cpp-orig.txt cpp.txt >cpp-changes.txt" || true
+	makeinfo --plaintext -I $(GCC_SRC_DIR)/gcc/doc -I $(GCC_SRC_DIR)/gcc/doc/include -I $@/tmp/patched -o $@/tmp/patched/gcc.txt $(GCC_SRC_DIR)/gcc/doc/gcc.texi
+	makeinfo --plaintext -I $(GCC_SRC_DIR)/gcc/doc -I $(GCC_SRC_DIR)/gcc/doc/include -I $@/tmp/patched -o $@/tmp/patched/cpp.txt $(GCC_SRC_DIR)/gcc/doc/cpp.texi
 
+	cd $@/tmp && bash -c "wdiff -n -w $$'\033[30;41m' -x $$'\033[0m' -y $$'\033[30;42m' -z $$'\033[0m' orig/gcc.txt patched/gcc.txt >../gcc.txt" || true
+	cd $@/tmp && bash -c "wdiff -n -w $$'\033[30;41m' -x $$'\033[0m' -y $$'\033[30;42m' -z $$'\033[0m' orig/cpp.txt patched/cpp.txt >../cpp.txt" || true
+
+	rm -Rf $@/tmp
 #
 # Target for generating the ReadMe used for Aminet
 #
