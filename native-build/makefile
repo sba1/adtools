@@ -28,6 +28,7 @@ BINUTILS_SRC_DIR=../binutils/repo
 GCC_SRC_DIR=../gcc/repo
 GCC_VERSION:=$(shell cat $(GCC_SRC_DIR)/gcc/BASE-VER)
 GCC_DEV_PHASE=$(shell cat ${GCC_SRC_DIR}/gcc/DEV-PHASE)
+GCC_BRANCH_NAME:=$(shell bash -c "cd $(GCC_SRC_DIR) && git symbolic-ref --short HEAD")
 
 SDK_URL=http://www.hyperion-entertainment.biz/index.php?option=com_registration&amp;view=download&amp;format=raw&amp;file=69&amp;Itemid=82
 SDK_VERSION=53.30
@@ -255,6 +256,27 @@ endif
 #	cd coreutils-native-build ; PATH="$(CROSS_PREFIX)/bin:$(PATH)" CPPFLAGS="-mcrt=clib2" LDFLAGS="-mcrt=clib2" LIBS="-lunix -lnet" $(realpath $(COREUTILS_SRC_DIR))/configure --prefix=/gcc --host=ppc-amigaos
 	PATH="$(CROSS_PREFIX)/bin:$(PATH)" $(MAKE) -C coreutils-native-build
 	touch $@
+
+
+GCC_BASE_BRANCH_NAME=$(GCC_BRANCH_NAME)-base
+#
+# Build the main docs
+#
+.PHONY: doc
+doc:
+	rm -Rf $@
+	mkdir -p $@
+	cd $(GCC_SRC_DIR) && git worktree add -f $(ROOT_DIR)/$(GCC_BASE_BRANCH_NAME) $(GCC_BASE_BRANCH_NAME) || true
+	cd $(ROOT_DIR)/$(GCC_BASE_BRANCH_NAME) && git checkout $(GCC_BASE_BRANCH_NAME)
+	echo "@set version-GCC $(GCC_VERSION)-adtools" >$@/gcc-vers.texi
+	echo "@set srcdir $(ROOT_DIR)/$(GCC_BASE_BRANCH_NAME)/gcc" >>$@/gcc-vers.texi
+	echo "@set BUGURL https://github.com/sba1/adtools/issues" >>$@/gcc-vers.texi
+	makeinfo --plaintext -I $(GCC_BASE_BRANCH_NAME)/gcc/doc -I $(GCC_BASE_BRANCH_NAME)/gcc/doc/include -I $@ -o $@/gcc-orig.txt $(GCC_BASE_BRANCH_NAME)/gcc/doc/gcc.texi
+	echo "@set version-GCC $(GCC_VERSION)-adtools" >$@/gcc-vers.texi
+	echo "@set srcdir $(GCC_SRC_DIR)/gcc" >>$@/gcc-vers.texi
+	echo "@set BUGURL https://github.com/sba1/adtools/issues" >>$@/gcc-vers.texi
+	makeinfo --plaintext -I $(GCC_SRC_DIR)/gcc/doc -I $(GCC_SRC_DIR)/gcc/doc/include -I $@ -o $@/gcc.txt $(GCC_SRC_DIR)/gcc/doc/gcc.texi
+	cd $@ && bash -c "wdiff -n -w $$'\033[30;41m' -x $$'\033[0m' -y $$'\033[30;42m' -z $$'\033[0m' gcc-orig.txt gcc.txt >gcc-changes.txt" || true
 
 #
 # Target for generating the ReadMe used for Aminet

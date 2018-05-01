@@ -7,6 +7,7 @@ repo
 *.log
 68k-build/sources
 native-build/binutils-cross-build-*
+native-build/doc
 native-build/gcc-cross-build-*
 native-build/root-cross
 native-build/downloads
