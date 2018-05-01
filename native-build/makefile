@@ -272,11 +272,16 @@ doc:
 	echo "@set srcdir $(ROOT_DIR)/$(GCC_BASE_BRANCH_NAME)/gcc" >>$@/gcc-vers.texi
 	echo "@set BUGURL https://github.com/sba1/adtools/issues" >>$@/gcc-vers.texi
 	makeinfo --plaintext -I $(GCC_BASE_BRANCH_NAME)/gcc/doc -I $(GCC_BASE_BRANCH_NAME)/gcc/doc/include -I $@ -o $@/gcc-orig.txt $(GCC_BASE_BRANCH_NAME)/gcc/doc/gcc.texi
+	makeinfo --plaintext -I $(GCC_BASE_BRANCH_NAME)/gcc/doc -I $(GCC_BASE_BRANCH_NAME)/gcc/doc/include -I $@ -o $@/cpp-orig.txt $(GCC_BASE_BRANCH_NAME)/gcc/doc/cpp.texi
+
 	echo "@set version-GCC $(GCC_VERSION)-adtools" >$@/gcc-vers.texi
 	echo "@set srcdir $(GCC_SRC_DIR)/gcc" >>$@/gcc-vers.texi
 	echo "@set BUGURL https://github.com/sba1/adtools/issues" >>$@/gcc-vers.texi
 	makeinfo --plaintext -I $(GCC_SRC_DIR)/gcc/doc -I $(GCC_SRC_DIR)/gcc/doc/include -I $@ -o $@/gcc.txt $(GCC_SRC_DIR)/gcc/doc/gcc.texi
+	makeinfo --plaintext -I $(GCC_SRC_DIR)/gcc/doc -I $(GCC_SRC_DIR)/gcc/doc/include -I $@ -o $@/cpp.txt $(GCC_SRC_DIR)/gcc/doc/cpp.texi
+
 	cd $@ && bash -c "wdiff -n -w $$'\033[30;41m' -x $$'\033[0m' -y $$'\033[30;42m' -z $$'\033[0m' gcc-orig.txt gcc.txt >gcc-changes.txt" || true
+	cd $@ && bash -c "wdiff -n -w $$'\033[30;41m' -x $$'\033[0m' -y $$'\033[30;42m' -z $$'\033[0m' cpp-orig.txt cpp.txt >cpp-changes.txt" || true
 
 #
 # Target for generating the ReadMe used for Aminet
