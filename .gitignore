@@ -12,6 +12,7 @@ native-build/gcc-cross-build-*
 native-build/root-cross
 native-build/downloads
 native-build/*-done*
+native-build/*-base
 native-build/binutils-native-build-*
 native-build/gcc-native-build-*
 native-build/coreutils-native-build*
