@@ -1,4 +1,4 @@
-From d920b619e7984e70bd168792bf0a91244391f371 Mon Sep 17 00:00:00 2001
+From ec924410a719861cb6bfe46d7035a4448e43293d Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Wed, 2 Dec 2015 20:56:33 +0100
 Subject: [PATCH 04/22] The default link mode is static for AmigaOS.

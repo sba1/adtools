@@ -1,4 +1,4 @@
-From d20b63dd6aaaf13ae559911aeee546568fa0444f Mon Sep 17 00:00:00 2001
+From e3c2072c8aaa31510000e54919f964c8e3000cf6 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Sun, 29 Apr 2018 00:08:22 +0200
 Subject: [PATCH 22/22] Provide a documentation for checktags and tagtype
@@ -9,7 +9,7 @@ Subject: [PATCH 22/22] Provide a documentation for checktags and tagtype
  1 file changed, 28 insertions(+)
 
 diff --git a/gcc/doc/extend.texi b/gcc/doc/extend.texi
-index b63ea055671032161146e64b79fe9d915d50e068..76430028650474e2a878d8d1f7005758abc3fb1f 100644
+index b63ea055671032161146e64b79fe9d915d50e068..b2ad5f7589c9b84a292c5aa28634c7fe3e5a85f4 100644
 --- a/gcc/doc/extend.texi
 +++ b/gcc/doc/extend.texi
 @@ -3678,12 +3678,24 @@ int VARARGS68K __amigaos4_check68k_trampoline(int num_args,
@@ -54,7 +54,7 @@ index b63ea055671032161146e64b79fe9d915d50e068..76430028650474e2a878d8d1f7005758
 +
 +@smallexample
 +enum @{
-+  WA_CustomScreen __attribute__((struct Screen *))
++  WA_CustomScreen __attribute__((tagtype(struct Screen *)))
 +@};
 +@end smallexample
 +

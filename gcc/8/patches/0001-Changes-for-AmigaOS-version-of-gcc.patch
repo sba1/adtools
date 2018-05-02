@@ -1,4 +1,4 @@
-From 4aa4ee1db33d2efbd5e7e312f2fb13d94d225980 Mon Sep 17 00:00:00 2001
+From 89990f6119f3dce04e6860ba7582a75e903cbcf3 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Tue, 17 Feb 2015 20:25:55 +0100
 Subject: [PATCH 01/22] Changes for AmigaOS version of gcc.
@@ -231,10 +231,10 @@ index ffd06447f1b555ca84e00b40bce0d00ad0433bb1..7bf360ddc98fa57be91b046f43e09568
  			     origtypes, function, fundecl);
    if (nargs < 0)
 diff --git a/gcc/config.gcc b/gcc/config.gcc
-index e58494c1c1737aa049960b0a15739d84a65416a0..cfbb662c0f0c1519eeeeebc6c3ac4d62670a015a 100644
+index a5defb0f005875b4c7bd3cf6f485eb3543a38439..2eb83eb597c8b379d247db7779454ae1b3148e19 100644
 --- a/gcc/config.gcc
 +++ b/gcc/config.gcc
-@@ -2371,12 +2371,20 @@ nvptx-*)
+@@ -2372,12 +2372,20 @@ nvptx-*)
  	fi
  	;;
  pdp11-*-*)
@@ -1880,10 +1880,10 @@ index 0000000000000000000000000000000000000000..15d9d3fd5a5f0c8109cd158242745fa5
 +MULTILIB_DIRNAMES = newlib clib2
 +#MULTILIB_REUSE = =mcrt=newlib
 diff --git a/gcc/cp/typeck.c b/gcc/cp/typeck.c
-index 907d31d9786c8eeceba74d98190117f9a2779cd5..49802c6daa1abd5ef35e9224e023d4012930706c 100644
+index d881a95322c45b6c21f7ad736fa712f927a0fa48..d5a2d1f120ddb8074d6d641af40b210e2a8d5f76 100644
 --- a/gcc/cp/typeck.c
 +++ b/gcc/cp/typeck.c
-@@ -3754,12 +3754,28 @@ cp_build_function_call_vec (tree function, vec<tree, va_gc> **params,
+@@ -3765,12 +3765,28 @@ cp_build_function_call_vec (tree function, vec<tree, va_gc> **params,
  
        return error_mark_node;
      }

@@ -1,4 +1,4 @@
-From f5e3ca2f86bde1c9f9822b875f1dc76c70086346 Mon Sep 17 00:00:00 2001
+From 7d3fb14e01a86303d47fd6565eeeb4e3fda74ec4 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 27 Apr 2018 22:48:18 +0200
 Subject: [PATCH 20/22] Rename lineartags to checktags.
