@@ -438,8 +438,8 @@ clib2-dist: clib2-cross-done-$(GCC_VERSION)
 #
 .PHONY: upload-release
 upload-release: native-dist
-	ln -s adtools-os4-$(DIST_VERSION).lha adtools-os4.lha
-	lftp -e "put adtools-os4.lha && put ReadMe -o adtools-os4.readme && quit" ftp://main.aminet.net/new
+	ln -s $(DIST_FOLDER).lha adtools-$(GCC_BRANCH_NAME)-os4.lha
+	lftp -e "put adtools-$(GCC_BRANCH_NAME)-os4.lha && put ReadMe -o adtools-$(GCC_BRANCH_NAME)-os4.readme && quit" ftp://main.aminet.net/new
 
 #
 # Cleanup clib2
