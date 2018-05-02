@@ -413,7 +413,7 @@ native-strip-really:
 #
 # Native distribution archive
 #
-DIST_FOLDER:=adtools-os4-$(DIST_VERSION)
+DIST_FOLDER:=adtools-os4-$(GCC_BRANCH_NAME)-$(DIST_VERSION)
 
 native-dist: native-strip-really
 	rm -f $(realpath .)/$(DIST_FOLDER).lha
