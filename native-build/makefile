@@ -33,7 +33,7 @@ ifneq ($(GCC_DEV_PHASE),)
 GCC_DEV_PHASE:= ($(GCC_DEV_PHASE))
 endif
 
-GCC_BRANCH_NAME:=$(shell bash -c "cd $(GCC_SRC_DIR) && git symbolic-ref --short HEAD")
+GCC_BRANCH_NAME:=$(word 1, $(subst ., , $(GCC_VERSION)))
 
 SDK_URL=http://www.hyperion-entertainment.biz/index.php?option=com_registration&amp;view=download&amp;format=raw&amp;file=69&amp;Itemid=82
 SDK_VERSION=53.30
