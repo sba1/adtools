@@ -41,7 +41,8 @@ C++-support using clib2 clib (enabled via -mcrt=clib2) is much better than with
 the newlib clib at the moment. If you encounter any errors when compiling C++
 projects using newlib, also try clib2. To be successful, you should use the
 accompanying clib2 release archive ${CLIB2_RELEASE_ARCHIVE_NAME} and install its
-contents into the SDK: folder.
+contents into the SDK: folder. You can find this (unofficial) archive at
+https://dl.bintray.com/sba1/adtools-native/.
 
 Also for C++, it is recommended not to use the shared objects feature (aka
 dynload) for now. The reason is that the C++-ABI may change in the future.
