@@ -9,7 +9,7 @@ Version:       ${DIST_VERSION}
 
 This archive includes native AmigaOS 4.1 compiles of
  * binutils ${BINUTILS_VERSION},
- * gcc ${GCC_VERSION} (${GCC_DEV_PHASE}), and
+ * gcc ${GCC_VERSION}${GCC_DEV_PHASE}, and
  * coreutils ${COREUTILS_VERSION}
 based on https://github.com/sba/sba1/adtools version ${DIST_VERSION}
 commit ${ADTOOLS_COMMIT_SHA1}.

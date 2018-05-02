@@ -27,7 +27,12 @@ BINUTILS_SRC_DIR=../binutils/repo
 
 GCC_SRC_DIR=../gcc/repo
 GCC_VERSION:=$(shell cat $(GCC_SRC_DIR)/gcc/BASE-VER)
-GCC_DEV_PHASE=$(shell cat ${GCC_SRC_DIR}/gcc/DEV-PHASE)
+GCC_DEV_PHASE:=$(shell cat ${GCC_SRC_DIR}/gcc/DEV-PHASE)
+
+ifneq ($(GCC_DEV_PHASE),)
+GCC_DEV_PHASE:= ($(GCC_DEV_PHASE))
+endif
+
 GCC_BRANCH_NAME:=$(shell bash -c "cd $(GCC_SRC_DIR) && git symbolic-ref --short HEAD")
 
 SDK_URL=http://www.hyperion-entertainment.biz/index.php?option=com_registration&amp;view=download&amp;format=raw&amp;file=69&amp;Itemid=82
