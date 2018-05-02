@@ -46,3 +46,10 @@ https://dl.bintray.com/sba1/adtools-native/.
 
 Also for C++, it is recommended not to use the shared objects feature (aka
 dynload) for now. The reason is that the C++-ABI may change in the future.
+
+Changes of the AmigaOS version
+==============================
+
+In the doc folder, there is some usual gcc documentation provided. This is actually
+a diff of the original documentation, so AmigaOS-relevant changes are easily
+recognizable.
