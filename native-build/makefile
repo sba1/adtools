@@ -140,8 +140,8 @@ else
 XGCC_DIR=$(abspath .)/gcc-cross-build-$(GCC_VERSION)/gcc
 XGCC=$(XGCC_DIR)/xgcc
 XGCC_CC=$(XGCC) -B $(XGCC_DIR)
-XAR=$(abspath .)/root-cross/bin/ppc-amigaos-ar -q
-XRANLIB=$(abspath .)/root-cross/bin/ppc-amigaos-ranlib
+XAR=$(CROSS_PREFIX)/bin/ppc-amigaos-ar -q
+XRANLIB=$(CROSS_PREFIX)/bin/ppc-amigaos-ranlib
 
 CLIB2_CROSS_DONE_DEPENDENCY=xgcc-done-$(GCC_VERSION)
 
@@ -176,11 +176,11 @@ clib2-cross-done-$(GCC_VERSION): $(CLIB2_CROSS_DONE_DEPENDENCY)
 # Build clib2 using xgcc that have just been built
 	$(MAKE) -C $(CLIB2_DIR) -f GNUmakefile.os4 CC="$(XGCC_CC)" AR="$(XAR)" RANLIB="$(XRANLIB)"
 # Copy clib2 libs and includes
-	rm -Rf root-cross/ppc-amigaos/SDK/clib2/lib root-cross/ppc-amigaos/SDK/clib2/include
-	mkdir -p root-cross/ppc-amigaos/SDK/clib2/lib
-	mkdir -p root-cross/ppc-amigaos/SDK/clib2/include
-	cp -Rp $(CLIB2_DIR)/include/* root-cross/ppc-amigaos/SDK/clib2/include
-	cp -Rp $(CLIB2_DIR)/lib/* root-cross/ppc-amigaos/SDK/clib2/lib
+	rm -Rf $(CROSS_PREFIX)/ppc-amigaos/SDK/clib2/lib $(CROSS_PREFIX)/ppc-amigaos/SDK/clib2/include
+	mkdir -p $(CROSS_PREFIX)/ppc-amigaos/SDK/clib2/lib
+	mkdir -p $(CROSS_PREFIX)/ppc-amigaos/SDK/clib2/include
+	cp -Rp $(CLIB2_DIR)/include/* $(CROSS_PREFIX)/ppc-amigaos/SDK/clib2/include
+	cp -Rp $(CLIB2_DIR)/lib/* $(CROSS_PREFIX)/ppc-amigaos/SDK/clib2/lib
 	touch $@
 
 #
