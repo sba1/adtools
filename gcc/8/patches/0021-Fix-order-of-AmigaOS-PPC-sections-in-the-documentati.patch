@@ -1,4 +1,4 @@
-From f37ce899f27b6b3602697e1a340ba54c6767fc59 Mon Sep 17 00:00:00 2001
+From 8ee7d53224b888d1637c637035e1d05e9713ab55 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Sat, 28 Apr 2018 08:09:58 +0200
 Subject: [PATCH 21/23] Fix order of AmigaOS PPC sections in the documentation.
@@ -328,5 +328,5 @@ index 352dd1f49ea91f9b9f6642aa3ee5feaedcf544c3..3a7fe4352fc063a5326e042ad1cf0cdd
  These options are supported for Xtensa targets:
  
 -- 
-2.16.2
+2.14.2
 
