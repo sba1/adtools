@@ -450,10 +450,23 @@ clean-clib2:
 	$(MAKE) -C $(CLIB2_DIR) -f GNUmakefile.os4 clean
 
 #
+# Cleanup gcc only
+#
+
+.PHONY: clean-gcc
+clean-gcc:
+	rm -Rf \
+		xgcc-done-$(GCC_VERSION) \
+		gcc-cross-build-$(GCC_VERSION) \
+		gcc-cross-done-$(GCC_VERSION) \
+		gcc-native-build-$(GCC_VERSION) \
+		gcc-native-done-$(GCC_VERSION)
+
+#
 # Cleanup everything
 #
 .PHONY: clean
-clean: clean-clib2
+clean: clean-clib2 clean-gcc
 	rm -Rf	\
 		binutils-cross-build-$(BINUTILS_VERSION) \
 		binutils-native-build-$(BINUTILS_VERSION) \
@@ -462,11 +475,7 @@ clean: clean-clib2
 		binutils-cross-build-done-$(BINUTILS_VERSION) \
 		binutils-cross-done-$(BINUTILS_VERSION) \
 		binutils-native-done-$(BINUTILS_VERSION) \
-		gcc-cross-build-$(GCC_VERSION) \
-		xgcc-done-$(GCC_VERSION) \
 		clib2-cross-done-$(GCC_VERSION) \
-		gcc-cross-done-$(GCC_VERSION) gcc-native-build-$(GCC_VERSION) \
-		gcc-native-done-$(GCC_VERSION) \
 		includes-done \
 		libraries-done \
 		root-native \
