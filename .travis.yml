@@ -62,6 +62,6 @@ after_failure:
  - tail -n 1000 /tmp/build2.out
  - tail -n 1000 /tmp/dpkg.out
  - export DIST_VERSION=$(make -C native-build print-dist-version)
- - cat /tmp/build.out /tmp/build2.out /tmp/dpkg.out >/build-$DIST_VERSION.out
+ - cat /tmp/build.out /tmp/build2.out /tmp/dpkg.out >"/build-$DIST_VERSION.out"
  - rm /tmp/build.out /tmp/build2.out /tmp/dpkg.out
  - ./bin/logdeploy $DIST_VERSION
