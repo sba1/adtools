@@ -1,7 +1,7 @@
-From 78784d24e2c011cbac93c6c161c5b22a7a0bbdd3 Mon Sep 17 00:00:00 2001
+From 7f247efd7b9bdaf2906b4eaaa3dd83918afba513 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Sat, 5 Dec 2015 13:17:26 +0100
-Subject: [PATCH 06/22] Expand arg zero on AmigaOS using the PROGDIR: assign.
+Subject: [PATCH 06/23] Expand arg zero on AmigaOS using the PROGDIR: assign.
 
 This should make sure that the proper relative paths are computed during
 process_command().
@@ -37,5 +37,5 @@ index 2fe3d2eb7dcb2cb71e24a2fe2e01f637ea2ce727..f1c28df80dd2173d3a98f152e4d9e5d5
    set_up_specs ();
    putenv_COLLECT_GCC (argv[0]);
 -- 
-2.14.2
+2.16.2
 

@@ -1,154 +1,100 @@
-From 8fdb5140a15f11454f2dcb5c151cdfc9d105b953 Mon Sep 17 00:00:00 2001
+From c6920a78c8d008b16eb37118c9708d8d5a14ed3a Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 3 Mar 2017 08:52:48 +0100
-Subject: [PATCH 09/22] Enable libatomic for ppc-amigaos.
+Subject: [PATCH 09/23] Enable libatomic for ppc-amigaos.
 
 It is not really finished yet.
 ---
- libatomic/config/amigaos/host-config.h |  55 ++++++++++++++++++
- libatomic/config/amigaos/lock.c        | 102 +++++++++++++++++++++++++++++++++
- libatomic/configure.tgt                |   4 ++
- 3 files changed, 161 insertions(+)
- create mode 100644 libatomic/config/amigaos/host-config.h
- create mode 100644 libatomic/config/amigaos/lock.c
+ libatomic/config/{posix => amigaos}/host-config.h |  2 +-
+ libatomic/config/{posix => amigaos}/lock.c        | 64 +++++++++--------------
+ libatomic/configure.tgt                           |  4 ++
+ 3 files changed, 30 insertions(+), 40 deletions(-)
+ copy libatomic/config/{posix => amigaos}/host-config.h (96%)
+ copy libatomic/config/{posix => amigaos}/lock.c (68%)
 
-diff --git a/libatomic/config/amigaos/host-config.h b/libatomic/config/amigaos/host-config.h
-new file mode 100644
-index 0000000000000000000000000000000000000000..879758e4eb5594a79b8ee2d25564b19a6f51cd31
---- /dev/null
+diff --git a/libatomic/config/posix/host-config.h b/libatomic/config/amigaos/host-config.h
+similarity index 96%
+copy from libatomic/config/posix/host-config.h
+copy to libatomic/config/amigaos/host-config.h
+index f141af17598ecb4e2c0ce2c97d4bc78101af4472..879758e4eb5594a79b8ee2d25564b19a6f51cd31 100644
+--- a/libatomic/config/posix/host-config.h
 +++ b/libatomic/config/amigaos/host-config.h
-@@ -0,0 +1,55 @@
+@@ -1,7 +1,7 @@
+-/* Copyright (C) 2012-2018 Free Software Foundation, Inc.
 +/* Copyright (C) 2012-2015 Free Software Foundation, Inc.
-+   Contributed by Richard Henderson <rth@redhat.com>.
-+
-+   This file is part of the GNU Atomic Library (libatomic).
-+
-+   Libatomic is free software; you can redistribute it and/or modify it
-+   under the terms of the GNU General Public License as published by
-+   the Free Software Foundation; either version 3 of the License, or
-+   (at your option) any later version.
-+
-+   Libatomic is distributed in the hope that it will be useful, but WITHOUT ANY
-+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-+   FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
-+   more details.
-+
-+   Under Section 7 of GPL version 3, you are granted additional
-+   permissions described in the GCC Runtime Library Exception, version
-+   3.1, as published by the Free Software Foundation.
-+
-+   You should have received a copy of the GNU General Public License and
-+   a copy of the GCC Runtime Library Exception along with this program;
-+   see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
-+   <http://www.gnu.org/licenses/>.  */
-+
-+/* Included after all more target-specific host-config.h.  */
-+
-+
-+#ifndef protect_start_end
-+# ifdef HAVE_ATTRIBUTE_VISIBILITY
-+#  pragma GCC visibility push(hidden)
-+# endif
-+
-+void libat_lock_1 (void *ptr);
-+void libat_unlock_1 (void *ptr);
-+
-+static inline UWORD
-+protect_start (void *ptr)
-+{
-+  libat_lock_1 (ptr);
-+  return 0;
-+}
-+
-+static inline void
-+protect_end (void *ptr, UWORD dummy UNUSED)
-+{
-+  libat_unlock_1 (ptr);
-+}
-+
-+# define protect_start_end 1
-+# ifdef HAVE_ATTRIBUTE_VISIBILITY
-+#  pragma GCC visibility pop
-+# endif
-+#endif /* protect_start_end */
-+
-+#include_next <host-config.h>
-diff --git a/libatomic/config/amigaos/lock.c b/libatomic/config/amigaos/lock.c
-new file mode 100644
-index 0000000000000000000000000000000000000000..ffd09f50095429f844bfe6bf7bec8741f56f1a28
---- /dev/null
+    Contributed by Richard Henderson <rth@redhat.com>.
+ 
+    This file is part of the GNU Atomic Library (libatomic).
+ 
+    Libatomic is free software; you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+diff --git a/libatomic/config/posix/lock.c b/libatomic/config/amigaos/lock.c
+similarity index 68%
+copy from libatomic/config/posix/lock.c
+copy to libatomic/config/amigaos/lock.c
+index 13b2bdc930aa2dce47022df97c003eb548c51e21..ffd09f50095429f844bfe6bf7bec8741f56f1a28 100644
+--- a/libatomic/config/posix/lock.c
 +++ b/libatomic/config/amigaos/lock.c
-@@ -0,0 +1,102 @@
+@@ -1,7 +1,7 @@
+-/* Copyright (C) 2012-2018 Free Software Foundation, Inc.
 +/* Copyright (C) 2012-2015 Free Software Foundation, Inc.
-+   Contributed by Richard Henderson <rth@redhat.com>.
-+
-+   This file is part of the GNU Atomic Library (libatomic).
-+
-+   Libatomic is free software; you can redistribute it and/or modify it
-+   under the terms of the GNU General Public License as published by
-+   the Free Software Foundation; either version 3 of the License, or
-+   (at your option) any later version.
-+
-+   Libatomic is distributed in the hope that it will be useful, but WITHOUT ANY
-+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-+   FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
-+   more details.
-+
-+   Under Section 7 of GPL version 3, you are granted additional
-+   permissions described in the GCC Runtime Library Exception, version
-+   3.1, as published by the Free Software Foundation.
-+
-+   You should have received a copy of the GNU General Public License and
-+   a copy of the GCC Runtime Library Exception along with this program;
-+   see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
-+   <http://www.gnu.org/licenses/>.  */
-+
-+#include "libatomic_i.h"
-+
+    Contributed by Richard Henderson <rth@redhat.com>.
+ 
+    This file is part of the GNU Atomic Library (libatomic).
+ 
+    Libatomic is free software; you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+@@ -20,14 +20,15 @@
+    You should have received a copy of the GNU General Public License and
+    a copy of the GCC Runtime Library Exception along with this program;
+    see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
+    <http://www.gnu.org/licenses/>.  */
+ 
+ #include "libatomic_i.h"
+-#include <pthread.h>
+ 
 +#define UWORD UWORD_
 +#include <proto/exec.h>
-+
-+/* The target page size.  Must be no larger than the runtime page size,
-+   lest locking fail with virtual address aliasing (i.e. a page mmaped
-+   at two locations).  */
-+#ifndef PAGE_SIZE
-+#define PAGE_SIZE	4096
-+#endif
-+
-+/* The target cacheline size.  This is an optimization; the padding that
-+   should be applied to the locks to keep them from interfering.  */
-+#ifndef CACHLINE_SIZE
-+#define CACHLINE_SIZE	64
-+#endif
-+
-+/* The granularity at which locks are applied.  Almost certainly the
-+   cachline size is the right thing to use here.  */
-+#ifndef WATCH_SIZE
-+#define WATCH_SIZE	CACHLINE_SIZE
-+#endif
-+
-+struct lock
-+{
+ 
+ /* The target page size.  Must be no larger than the runtime page size,
+    lest locking fail with virtual address aliasing (i.e. a page mmaped
+    at two locations).  */
+ #ifndef PAGE_SIZE
+ #define PAGE_SIZE	4096
+@@ -44,73 +45,58 @@
+ #ifndef WATCH_SIZE
+ #define WATCH_SIZE	CACHLINE_SIZE
+ #endif
+ 
+ struct lock
+ {
+-  pthread_mutex_t mutex;
+-  char pad[sizeof(pthread_mutex_t) < CACHLINE_SIZE
+-	   ? CACHLINE_SIZE - sizeof(pthread_mutex_t)
 +  struct SignalSemaphore sem;
 +  char initialized;
 +  char pad[sizeof(struct SignalSemaphore) + 1 < CACHLINE_SIZE
 +	   ? CACHLINE_SIZE - sizeof(struct SignalSemaphore) - 1
-+	   : 0];
-+};
-+
+ 	   : 0];
+ };
+ 
 +/* TODO: Use a constructor to initialize the semaphore */
-+#define NLOCKS		(PAGE_SIZE / WATCH_SIZE)
+ #define NLOCKS		(PAGE_SIZE / WATCH_SIZE)
+-static struct lock locks[NLOCKS] = {
+-  [0 ... NLOCKS-1].mutex = PTHREAD_MUTEX_INITIALIZER
+-};
 +static struct lock locks[NLOCKS];
-+
-+static inline uintptr_t 
-+addr_hash (void *ptr)
-+{
-+  return ((uintptr_t)ptr / WATCH_SIZE) % NLOCKS;
-+}
-+
-+void
-+libat_lock_1 (void *ptr)
-+{
+ 
+ static inline uintptr_t 
+ addr_hash (void *ptr)
+ {
+   return ((uintptr_t)ptr / WATCH_SIZE) % NLOCKS;
+ }
+ 
+ void
+ libat_lock_1 (void *ptr)
+ {
+-  pthread_mutex_lock (&locks[addr_hash (ptr)].mutex);
 +  struct lock *l = &locks[addr_hash (ptr)];
 +  IExec->Forbid();
 +  if (!l->initialized)
@@ -158,27 +104,57 @@ index 0000000000000000000000000000000000000000..ffd09f50095429f844bfe6bf7bec8741
 +  }
 +  IExec->Permit();
 +  IExec->ObtainSemaphore(&l->sem);
-+}
-+
-+void
-+libat_unlock_1 (void *ptr)
-+{
+ }
+ 
+ void
+ libat_unlock_1 (void *ptr)
+ {
+-  pthread_mutex_unlock (&locks[addr_hash (ptr)].mutex);
 +  struct lock *l = &locks[addr_hash (ptr)];
 +  IExec->ReleaseSemaphore(&l->sem);
-+}
-+
+ }
+ 
 +#if 0
 +
 +/* TODO: Implement me when needed */
-+void
-+libat_lock_n (void *ptr, size_t n)
-+{
-+}
-+
-+void
-+libat_unlock_n (void *ptr, size_t n)
-+{
-+}
+ void
+ libat_lock_n (void *ptr, size_t n)
+ {
+-  uintptr_t h = addr_hash (ptr);
+-  size_t i = 0;
+-
+-  /* Don't lock more than all the locks we have.  */
+-  if (n > PAGE_SIZE)
+-    n = PAGE_SIZE;
+-
+-  do
+-    {
+-      pthread_mutex_lock (&locks[h].mutex);
+-      if (++h == NLOCKS)
+-	h = 0;
+-      i += WATCH_SIZE;
+-    }
+-  while (i < n);
+ }
+ 
+ void
+ libat_unlock_n (void *ptr, size_t n)
+ {
+-  uintptr_t h = addr_hash (ptr);
+-  size_t i = 0;
+-
+-  if (n > PAGE_SIZE)
+-    n = PAGE_SIZE;
+-
+-  do
+-    {
+-      pthread_mutex_unlock (&locks[h].mutex);
+-      if (++h == NLOCKS)
+-	h = 0;
+-      i += WATCH_SIZE;
+-    }
+-  while (i < n);
+ }
 +
 +#endif
 diff --git a/libatomic/configure.tgt b/libatomic/configure.tgt
@@ -203,5 +179,5 @@ index ea8c34f8c710cc40b5646b665c24cc0933a92c73..03e6e94311c5150894a802637eaa4781
  	# If the target supports disabling interrupts, we can work in
  	# kernel-mode, given the system is not multi-processor.
 -- 
-2.14.2
+2.16.2
 

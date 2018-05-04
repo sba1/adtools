@@ -1,0 +1,220 @@
+From a88df640522b68983063de33a0bc72cad922be74 Mon Sep 17 00:00:00 2001
+From: Sebastian Bauer <mail@sebastianbauer.info>
+Date: Fri, 4 May 2018 18:22:24 +0200
+Subject: [PATCH 23/23] Add amigaos thread model.
+
+It does the same as the single-thread model for now.
+---
+ config/gthr.m4                           |  1 +
+ gcc/configure                            |  2 +-
+ gcc/configure.ac                         |  2 +-
+ libgcc/configure                         |  1 +
+ libgcc/{gthr-single.h => gthr-amigaos.h} |  0
+ libstdc++-v3/configure                   | 15 ++++++++-------
+ 6 files changed, 12 insertions(+), 9 deletions(-)
+ copy libgcc/{gthr-single.h => gthr-amigaos.h} (100%)
+
+diff --git a/config/gthr.m4 b/config/gthr.m4
+index 7b29f1f3327c9fdde23f15a507757e6a234cd196..6f61465461d6f70a717eb9205062d5aee7375726 100644
+--- a/config/gthr.m4
++++ b/config/gthr.m4
+@@ -9,12 +9,13 @@ dnl Define header location by thread model
+ 
+ dnl usage: GCC_AC_THREAD_HEADER([thread_model])
+ AC_DEFUN([GCC_AC_THREAD_HEADER],
+ [
+ case $1 in
+     aix)	thread_header=config/rs6000/gthr-aix.h ;;
++    amigaos)	thread_header=gthr-amigaos.h ;;
+     dce)	thread_header=config/pa/gthr-dce.h ;;
+     lynx)	thread_header=config/gthr-lynx.h ;;
+     mipssde)	thread_header=config/mips/gthr-mipssde.h ;;
+     posix)	thread_header=gthr-posix.h ;;
+     rtems)	thread_header=config/gthr-rtems.h ;;
+     single)	thread_header=gthr-single.h ;;
+diff --git a/gcc/configure b/gcc/configure
+index 6121e163259dd6c09188b48218b3fec63d41b2f8..04f420fe61c2a65c7c4adfc36ca07ec7ab6c074b 100755
+--- a/gcc/configure
++++ b/gcc/configure
+@@ -11689,13 +11689,13 @@ case ${enable_threads} in
+     target_thread_file='single'
+     ;;
+   yes)
+     # default
+     target_thread_file='single'
+     ;;
+-  aix | dce | lynx | mipssde | posix | rtems | \
++  aix | amigaos | dce | lynx | mipssde | posix | rtems | \
+   single | tpf | vxworks | win32)
+     target_thread_file=${enable_threads}
+     ;;
+   *)
+     echo "${enable_threads} is an unknown thread package" 1>&2
+     exit 1
+diff --git a/gcc/configure.ac b/gcc/configure.ac
+index b066cc609e1c2615e66307d5439f765a4f3b286b..1a10e06f5a6254864f5a7dcad0a360077d7c9d10 100644
+--- a/gcc/configure.ac
++++ b/gcc/configure.ac
+@@ -1608,13 +1608,13 @@ case ${enable_threads} in
+     target_thread_file='single'
+     ;;
+   yes)
+     # default
+     target_thread_file='single'
+     ;;
+-  aix | dce | lynx | mipssde | posix | rtems | \
++  aix | amigaos | dce | lynx | mipssde | posix | rtems | \
+   single | tpf | vxworks | win32)
+     target_thread_file=${enable_threads}
+     ;;
+   *)
+     echo "${enable_threads} is an unknown thread package" 1>&2
+     exit 1
+diff --git a/libgcc/configure b/libgcc/configure
+index b2f3f8708441e473b8e2941c4748748b6c7c40b8..5e486be60eef6666e1d8c548163bce5d02b94a0a 100644
+--- a/libgcc/configure
++++ b/libgcc/configure
+@@ -5439,12 +5439,13 @@ tm_file="${tm_file_}"
+ 
+ 
+ # Map from thread model to thread header.
+ 
+ case $target_thread_file in
+     aix)	thread_header=config/rs6000/gthr-aix.h ;;
++    amigaos)	thread_header=gthr-amigaos.h ;;
+     dce)	thread_header=config/pa/gthr-dce.h ;;
+     lynx)	thread_header=config/gthr-lynx.h ;;
+     mipssde)	thread_header=config/mips/gthr-mipssde.h ;;
+     posix)	thread_header=gthr-posix.h ;;
+     rtems)	thread_header=config/gthr-rtems.h ;;
+     single)	thread_header=gthr-single.h ;;
+diff --git a/libgcc/gthr-single.h b/libgcc/gthr-amigaos.h
+similarity index 100%
+copy from libgcc/gthr-single.h
+copy to libgcc/gthr-amigaos.h
+diff --git a/libstdc++-v3/configure b/libstdc++-v3/configure
+index 0789c9f050c0e282cf99f0e1ee807b50832e00e5..22fb42c3142901a281b718ac09b04c0ad9e74627 100755
+--- a/libstdc++-v3/configure
++++ b/libstdc++-v3/configure
+@@ -15175,12 +15175,13 @@ $as_echo_n "checking for thread model used by GCC... " >&6; }
+   target_thread_file=`$CXX -v 2>&1 | sed -n 's/^Thread model: //p'`
+   { $as_echo "$as_me:${as_lineno-$LINENO}: result: $target_thread_file" >&5
+ $as_echo "$target_thread_file" >&6; }
+ 
+ case $target_thread_file in
+     aix)	thread_header=config/rs6000/gthr-aix.h ;;
++    amigaos)	thread_header=gthr-amigaos.h ;;
+     dce)	thread_header=config/pa/gthr-dce.h ;;
+     lynx)	thread_header=config/gthr-lynx.h ;;
+     mipssde)	thread_header=config/mips/gthr-mipssde.h ;;
+     posix)	thread_header=gthr-posix.h ;;
+     rtems)	thread_header=config/gthr-rtems.h ;;
+     single)	thread_header=gthr-single.h ;;
+@@ -15395,13 +15396,13 @@ $as_echo "$glibcxx_cv_atomic_long_long" >&6; }
+   # Compile unoptimized.
+   CXXFLAGS='-O0 -S'
+ 
+   # Fake what AC_TRY_COMPILE does.
+ 
+     cat > conftest.$ac_ext << EOF
+-#line 15401 "configure"
++#line 15402 "configure"
+ int main()
+ {
+   typedef bool atomic_type;
+   atomic_type c1;
+   atomic_type c2;
+   atomic_type c3(0);
+@@ -15430,13 +15431,13 @@ $as_echo_n "checking for atomic builtins for bool... " >&6; }
+     fi
+     { $as_echo "$as_me:${as_lineno-$LINENO}: result: $glibcxx_cv_atomic_bool" >&5
+ $as_echo "$glibcxx_cv_atomic_bool" >&6; }
+     rm -f conftest*
+ 
+     cat > conftest.$ac_ext << EOF
+-#line 15436 "configure"
++#line 15437 "configure"
+ int main()
+ {
+   typedef short atomic_type;
+   atomic_type c1;
+   atomic_type c2;
+   atomic_type c3(0);
+@@ -15465,13 +15466,13 @@ $as_echo_n "checking for atomic builtins for short... " >&6; }
+     fi
+     { $as_echo "$as_me:${as_lineno-$LINENO}: result: $glibcxx_cv_atomic_short" >&5
+ $as_echo "$glibcxx_cv_atomic_short" >&6; }
+     rm -f conftest*
+ 
+     cat > conftest.$ac_ext << EOF
+-#line 15471 "configure"
++#line 15472 "configure"
+ int main()
+ {
+   // NB: _Atomic_word not necessarily int.
+   typedef int atomic_type;
+   atomic_type c1;
+   atomic_type c2;
+@@ -15501,13 +15502,13 @@ $as_echo_n "checking for atomic builtins for int... " >&6; }
+     fi
+     { $as_echo "$as_me:${as_lineno-$LINENO}: result: $glibcxx_cv_atomic_int" >&5
+ $as_echo "$glibcxx_cv_atomic_int" >&6; }
+     rm -f conftest*
+ 
+     cat > conftest.$ac_ext << EOF
+-#line 15507 "configure"
++#line 15508 "configure"
+ int main()
+ {
+   typedef long long atomic_type;
+   atomic_type c1;
+   atomic_type c2;
+   atomic_type c3(0);
+@@ -15582,13 +15583,13 @@ $as_echo "$as_me: WARNING: Performance of certain classes will degrade as a resu
+ 
+ 
+   # Fake what AC_TRY_COMPILE does, without linking as this is
+   # unnecessary for this test.
+ 
+     cat > conftest.$ac_ext << EOF
+-#line 15588 "configure"
++#line 15589 "configure"
+ int main()
+ {
+   _Decimal32 d1;
+   _Decimal64 d2;
+   _Decimal128 d3;
+   return 0;
+@@ -15624,13 +15625,13 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+ 
+ 
+   # Fake what AC_TRY_COMPILE does, without linking as this is
+   # unnecessary for this test.
+ 
+     cat > conftest.$ac_ext << EOF
+-#line 15630 "configure"
++#line 15631 "configure"
+ template<typename T1, typename T2>
+   struct same
+   { typedef T2 type; };
+ 
+ template<typename T>
+   struct same<T, T>;
+@@ -15658,13 +15659,13 @@ $as_echo "#define _GLIBCXX_USE_INT128 1" >>confdefs.h
+     fi
+     { $as_echo "$as_me:${as_lineno-$LINENO}: result: $enable_int128" >&5
+ $as_echo "$enable_int128" >&6; }
+     rm -f conftest*
+ 
+     cat > conftest.$ac_ext << EOF
+-#line 15664 "configure"
++#line 15665 "configure"
+ template<typename T1, typename T2>
+   struct same
+   { typedef T2 type; };
+ 
+ template<typename T>
+   struct same<T, T>;
+-- 
+2.16.2
+
