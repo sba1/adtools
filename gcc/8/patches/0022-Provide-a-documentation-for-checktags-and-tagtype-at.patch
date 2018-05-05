@@ -1,4 +1,4 @@
-From 10934154a13736e7c15d9b0a99ff56ad7f72cb5e Mon Sep 17 00:00:00 2001
+From 9cce85835cfc5ee6e1d875f245455956c2c35089 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Sun, 29 Apr 2018 00:08:22 +0200
 Subject: [PATCH 22/23] Provide a documentation for checktags and tagtype
