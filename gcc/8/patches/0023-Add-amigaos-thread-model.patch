@@ -1,4 +1,4 @@
-From 1d8a0ebf5d683121b473440646bb4cda4e8f89cb Mon Sep 17 00:00:00 2001
+From 04ff90c428d845b54276e5327d6cbde9a3b2d05e Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 4 May 2018 18:22:24 +0200
 Subject: [PATCH 23/23] Add amigaos thread model.
@@ -10,11 +10,11 @@ It is work in progress.
  gcc/configure.ac               |   2 +-
  libgcc/config/rs6000/t-amigaos |   5 +
  libgcc/configure               |   1 +
- libgcc/gthr-amigaos-native.c   | 220 ++++++++++++++++++++++++++
- libgcc/gthr-amigaos-single.c   | 135 ++++++++++++++++
- libgcc/gthr-amigaos.h          | 339 +++++++++++++++++++++++++++++++++++++++++
+ libgcc/gthr-amigaos-native.c   | 504 +++++++++++++++++++++++++++++++++++++++++
+ libgcc/gthr-amigaos-single.c   | 135 +++++++++++
+ libgcc/gthr-amigaos.h          | 339 +++++++++++++++++++++++++++
  libstdc++-v3/configure         |  15 +-
- 9 files changed, 711 insertions(+), 9 deletions(-)
+ 9 files changed, 995 insertions(+), 9 deletions(-)
  create mode 100644 libgcc/gthr-amigaos-native.c
  create mode 100644 libgcc/gthr-amigaos-single.c
  create mode 100644 libgcc/gthr-amigaos.h
@@ -111,10 +111,10 @@ index b2f3f8708441e473b8e2941c4748748b6c7c40b8..5e486be60eef6666e1d8c548163bce5d
      single)	thread_header=gthr-single.h ;;
 diff --git a/libgcc/gthr-amigaos-native.c b/libgcc/gthr-amigaos-native.c
 new file mode 100644
-index 0000000000000000000000000000000000000000..a38c3f6597cd7ef1dfd93145095e5b77355451dc
+index 0000000000000000000000000000000000000000..f80874130ca74be99933d146d57148d41f314a66
 --- /dev/null
 +++ b/libgcc/gthr-amigaos-native.c
-@@ -0,0 +1,220 @@
+@@ -0,0 +1,504 @@
 +/**
 + * This is the native implementation of gcc threads abstraction. The advantage
 + * over the pthreads one is that no pthreads.library is needed.
@@ -125,7 +125,14 @@ index 0000000000000000000000000000000000000000..a38c3f6597cd7ef1dfd93145095e5b77
 +#include <assert.h>
 +#include <errno.h>
 +#include <stdint.h>
++#include <string.h>
++
++#include <proto/dos.h>
 +#include <proto/exec.h>
++
++/******************************************************************************/
++
++#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 +
 +/******************************************************************************/
 +
@@ -204,27 +211,154 @@ index 0000000000000000000000000000000000000000..a38c3f6597cd7ef1dfd93145095e5b77
 +
 +/******************************************************************************/
 +
-+int UNUSED
-+__gthread_key_create (__gthread_key_t *__key UNUSED, void (*__func) (void *) UNUSED)
++/* We keep the entries of each key organized as a single linked list */
++struct keyentry
 +{
-+  return 0;
++  struct keyentry *next;
++  struct Task *task;
++  const void *data;
++};
++
++typedef struct keyentry keyentry_t;
++
++typedef struct
++{
++  struct SignalSemaphore sem;
++
++  /* Each key is a single slot */
++  keyentry_t **keyentries;
++
++  /* How many new keys */
++  int num_key_entries;
++
++  /* How many keys are allocated in total */
++  int num_key_entries_allocated;
++
++  /* Pool from which all key entries are allocated */
++  APTR keyentry_pool;
++
++  int num_threads;
++} keystore_t;
++
++static keystore_t *keystore;
++static __gthread_once_t keystore_once = __GTHREAD_ONCE_INIT;
++
++/**
++ * Initialize our keystore.
++ */
++static void init_keystore(void)
++{
++  if (!(keystore = (keystore_t *)IExec->AllocVec (sizeof(*keystore), MEMF_CLEAR)))
++    return;
++  IExec->InitSemaphore(&keystore->sem);
++
++  if (!(keystore->keyentry_pool = IExec->AllocSysObjectTags(ASOT_ITEMPOOL, ASOITEM_ItemSize, sizeof(keyentry_t), TAG_DONE)))
++    goto bailout;
++  return;
++bailout:
++  if (keystore)
++    IExec->FreeVec(keystore);
++  keystore = NULL;
 +}
 +
-+int UNUSED
-+__gthread_key_delete (__gthread_key_t __key UNUSED)
++int _gthread_key_create (__gthread_key_t *__key, void (*destroy) (void *))
 +{
-+  return 0;
-+}
++  /* Initialize our private keystore, but only once */
++  __gthread_once (&keystore_once, init_keystore);
 +
-+void *
-+__gthread_getspecific (__gthread_key_t __key UNUSED)
-+{
++  if (!keystore)
++    return ENOMEM;
++
++  IExec->ObtainSemaphore (&keystore->sem);
++  if (keystore->num_key_entries >= keystore->num_key_entries_allocated)
++    {
++      keyentry_t **new_keyentries;
++      int new_num_key_entries_allocated = keystore->num_key_entries_allocated * 2 + 4;
++
++      if (!(new_keyentries = (keyentry_t**)IExec->AllocVec (sizeof(**new_keyentries) * keystore->num_key_entries_allocated, 0)))
++        {
++          IExec->ReleaseSemaphore (&keystore->sem);
++          return ENOMEM;
++        }
++      if (keystore->keyentries)
++        {
++          memcpy (new_keyentries, keystore->keyentries, keystore->num_key_entries * sizeof(*new_keyentries));
++          IExec->FreeVec (keystore->keyentries);
++        }
++      keystore->keyentries = new_keyentries;
++      keystore->num_key_entries_allocated = new_num_key_entries_allocated;
++    }
++  keystore->keyentries[keystore->num_key_entries] = NULL;
++  __key->id = keystore->num_key_entries++;
++  __key->destroy = destroy;
++
++  IExec->ReleaseSemaphore (&keystore->sem);
 +  return 0;
 +}
 +
 +int
-+__gthread_setspecific (__gthread_key_t __key UNUSED, const void *__v UNUSED)
++__gthread_key_delete (__gthread_key_t __key)
 +{
++  IExec->ObtainSemaphore (&keystore->sem);
++
++  /* TODO: Free the occupied storage for each entry */
++  keystore->keyentries[__key.id] = NULL;
++
++  IExec->ReleaseSemaphore (&keystore->sem);
++  return 0;
++}
++
++/**
++ * Find the key entry that corresponds to id and task.
++ *
++ * @return the key entry or NULL.
++ */
++static keyentry_t *find_keyentry(int id, struct Task *task)
++{
++  keyentry_t *entry;
++  entry = keystore->keyentries[id];
++  while (entry)
++    {
++      if (entry->task == task)
++          break;
++      entry = entry->next;
++    }
++  return entry;
++}
++
++void *
++__gthread_getspecific (__gthread_key_t __key)
++{
++  struct Task *this_task = IExec->FindTask(NULL);
++  keyentry_t *entry;
++
++  IExec->ObtainSemaphoreShared (&keystore->sem);
++  entry = find_keyentry(__key.id, this_task);
++  IExec->ReleaseSemaphore (&keystore->sem);
++  return entry?(void*)entry->data:NULL;
++}
++
++int
++__gthread_setspecific (__gthread_key_t __key, const void *__v)
++{
++  struct Task *this_task = IExec->FindTask(NULL);
++  keyentry_t *entry;
++
++  IExec->ObtainSemaphore (&keystore->sem);
++  if (!(entry = find_keyentry(__key.id, this_task)))
++    {
++      if (!(entry = IExec->ItemPoolAlloc(keystore->keyentry_pool)))
++        {
++          IExec->ReleaseSemaphore (&keystore->sem);
++          return ENOMEM;
++        }
++      entry->task = this_task;
++      entry->data = NULL;
++      entry->next = keystore->keyentries[__key.id];
++      keystore->keyentries[__key.id] = entry;
++    }
++  entry->data = __v;
++  IExec->ReleaseSemaphore (&keystore->sem);
 +  return 0;
 +}
 +
@@ -303,32 +437,182 @@ index 0000000000000000000000000000000000000000..a38c3f6597cd7ef1dfd93145095e5b77
 +
 +/******************************************************************************/
 +
++/* We keep the entries of each key organized as a single linked list */
++struct threadentry
++{
++  struct threadentry *next;
++
++  struct Process *process;
++  int id;
++
++  /* The task that is going to join us */
++  struct Task *joiner_task;
++
++  /* The call to entry() has already been returned */
++  int finished;
++
++  /* Valid if finished is set */
++  void *result;
++
++  /* Thread is detached (and cannot be joined) */
++  int detached;
++
++  void *(*entry) (void*);
++  void *args;
++};
++
++typedef struct threadentry threadentry_t;
++
++typedef struct
++{
++  struct SignalSemaphore sem;
++
++  /* Singlely-linked list of threads */
++  threadentry_t *threads;
++
++  int next_thread_id;
++} threadstore_t;
++
++static threadstore_t *threadstore;
++static __gthread_once_t threadstore_once = __GTHREAD_ONCE_INIT;
++
++/**
++ * Initialize our threadstore.
++ */
++static void init_threadstore(void)
++{
++  if (!(threadstore = (threadstore_t *)IExec->AllocVec (sizeof(*threadstore), MEMF_CLEAR)))
++    return;
++  IExec->InitSemaphore(&threadstore->sem);
++
++  return;
++bailout:
++  if (threadstore)
++    IExec->FreeVec(threadstore);
++  threadstore = NULL;
++}
++
++static int __gthread_entry(STRPTR args UNUSED, int32 length UNUSED, APTR execbase UNUSED)
++{
++  threadentry_t *thr = ((struct Process*)IExec->FindTask(NULL))->pr_Task.tc_UserData;
++
++  /* Wait for the parent task to enqueue the process in the global list */
++  while (!(IExec->Wait(SIGBREAKF_CTRL_F) & SIGBREAKF_CTRL_F));
++
++  thr->result = thr->entry(thr->args);
++  thr->finished = 1;
++  return 0;
++}
++
 +int
 +__gthread_create (__gthread_t *thread, void *(*func) (void*), void *args)
 +{
++  int thread_id;
++  threadentry_t *threadentry;
++
++  /* Initialize our private threadstore, but only once */
++  __gthread_once (&threadstore_once, init_threadstore);
++
++  if (!threadstore)
++    return ENOMEM;
++
++  if (!(threadentry = IExec->AllocVec (sizeof (*thread), MEMF_CLEAR)))
++    return ENOMEM;
++
++  IExec->ObtainSemaphore (&threadstore->sem);
++  thread_id = threadstore->next_thread_id++;
++  IExec->ReleaseSemaphore (&threadstore->sem);
++
++  threadentry->id = thread_id;
++  threadentry->entry = func;
++  threadentry->args = args;
++
++  threadentry->process = IDOS->CreateNewProcTags(
++                NP_Entry, __gthread_entry,
++                NP_Child, TRUE,
++                NP_UserData, (int32)threadentry,
++                TAG_DONE);
++
++  IExec->ObtainSemaphore (&threadstore->sem);
++  threadentry->next = threadstore->threads;
++  threadstore->threads = threadentry;
++  IExec->ReleaseSemaphore (&threadstore->sem);
++
++  /* Signal that we have enqueued the task */
++  IExec->Signal(&threadentry->process->pr_Task, SIGBREAKF_CTRL_F);
++
++  *thread = thread_id;
 +  return 0;
++}
++
++static threadentry_t *find_threadentry_by_process (struct Process *process)
++{
++  threadentry_t *thr;
++  thr = threadstore->threads;
++  while (thr)
++    {
++      if (thr->process == process)
++          break;
++      thr = thr->next;
++    }
++  return thr;
++}
++
++
++static threadentry_t *find_threadentry_by_id (__gthread_t id)
++{
++  threadentry_t *thr;
++  thr = threadstore->threads;
++  while (thr)
++    {
++      if (thr->id == id)
++          break;
++      thr = thr->next;
++    }
++  return thr;
 +}
 +
 +int
 +__gthread_join (__gthread_t thread, void **value_ptr)
 +{
++  threadentry_t *thr = find_threadentry_by_id (thread);
++  if (!thr)
++    return ESRCH;
++
++  /* FIXME: This is very ugly, use SIGF_SINGLE */
++  while (!thr->finished)
++    IDOS->Delay(1);
++
++  if (thr->finished)
++    *value_ptr = thr->result;
 +  return 0;
 +}
 +
 +int
 +__gthread_detach (__gthread_t thread)
 +{
++  threadentry_t *thr = find_threadentry_by_id (thread);
++  thr->detached = 1;
 +  return 0;
 +}
 +
 +int
 +__gthread_equal (__gthread_t t1, __gthread_t t2)
 +{
-+  return 0;
++  return t1 == t2;
 +}
 +
 +__gthread_t __gthread_self (void)
 +{
++  struct Task *task = IExec->FindTask(NULL);
++  static threadentry_t *thr;
++
++  if ((thr = find_threadentry_by_process ((struct Process *)task)))
++    {
++      return thr->id;
++    }
++
++  /* FIXME: Record this thread */
 +  return 0;
 +}
 +
@@ -478,7 +762,7 @@ index 0000000000000000000000000000000000000000..ecf04721f0a57d14f4d111ccbfde124b
 +#endif
 diff --git a/libgcc/gthr-amigaos.h b/libgcc/gthr-amigaos.h
 new file mode 100644
-index 0000000000000000000000000000000000000000..586301d5b63ac0703e1438ac1a8a9e1ca8e95324
+index 0000000000000000000000000000000000000000..f776a2fa3857f18fa0a0e521c1f6a1ae7507dd37
 --- /dev/null
 +++ b/libgcc/gthr-amigaos.h
 @@ -0,0 +1,339 @@
@@ -515,7 +799,7 @@ index 0000000000000000000000000000000000000000..586301d5b63ac0703e1438ac1a8a9e1c
 +
 +typedef struct { char done; char started; } __gthread_once_t;
 +
-+typedef int __gthread_key_t;
++typedef struct { int id; void (*destroy) (void *);} __gthread_key_t;
 +
 +/* Should cover at least as much data as the maximum of sizeof(struct SignalSemaphore)
 + * and sizeof(pthread_mutex_t)
@@ -720,17 +1004,17 @@ index 0000000000000000000000000000000000000000..586301d5b63ac0703e1438ac1a8a9e1c
 +int
 +__gthread_once (__gthread_once_t *__once, void (*__func) (void));
 +
-+int UNUSED
-+__gthread_key_create (__gthread_key_t *__key UNUSED, void (*__func) (void *) UNUSED);
-+
-+int UNUSED
-+__gthread_key_delete (__gthread_key_t __key UNUSED);
-+
-+void *
-+__gthread_getspecific (__gthread_key_t __key UNUSED);
++int
++__gthread_key_create (__gthread_key_t *__key, void (*destroy) (void *));
 +
 +int
-+__gthread_setspecific (__gthread_key_t __key UNUSED, const void *__v UNUSED);
++__gthread_key_delete (__gthread_key_t __key);
++
++void *
++__gthread_getspecific (__gthread_key_t __key);
++
++int
++__gthread_setspecific (__gthread_key_t __key, const void *__v);
 +
 +int
 +__gthread_mutex_init (__gthread_mutex_t *__mutex);
