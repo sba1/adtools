@@ -1,4 +1,4 @@
-From 04ff90c428d845b54276e5327d6cbde9a3b2d05e Mon Sep 17 00:00:00 2001
+From 9df1a9f357b7e5ffb2aee03cec82adbe436be56f Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 4 May 2018 18:22:24 +0200
 Subject: [PATCH 23/23] Add amigaos thread model.
@@ -10,11 +10,11 @@ It is work in progress.
  gcc/configure.ac               |   2 +-
  libgcc/config/rs6000/t-amigaos |   5 +
  libgcc/configure               |   1 +
- libgcc/gthr-amigaos-native.c   | 504 +++++++++++++++++++++++++++++++++++++++++
- libgcc/gthr-amigaos-single.c   | 135 +++++++++++
- libgcc/gthr-amigaos.h          | 339 +++++++++++++++++++++++++++
+ libgcc/gthr-amigaos-native.c   | 677 +++++++++++++++++++++++++++++++++++++++++
+ libgcc/gthr-amigaos-single.c   | 135 ++++++++
+ libgcc/gthr-amigaos.h          | 342 +++++++++++++++++++++
  libstdc++-v3/configure         |  15 +-
- 9 files changed, 995 insertions(+), 9 deletions(-)
+ 9 files changed, 1171 insertions(+), 9 deletions(-)
  create mode 100644 libgcc/gthr-amigaos-native.c
  create mode 100644 libgcc/gthr-amigaos-single.c
  create mode 100644 libgcc/gthr-amigaos.h
@@ -111,13 +111,15 @@ index b2f3f8708441e473b8e2941c4748748b6c7c40b8..5e486be60eef6666e1d8c548163bce5d
      single)	thread_header=gthr-single.h ;;
 diff --git a/libgcc/gthr-amigaos-native.c b/libgcc/gthr-amigaos-native.c
 new file mode 100644
-index 0000000000000000000000000000000000000000..f80874130ca74be99933d146d57148d41f314a66
+index 0000000000000000000000000000000000000000..bf784ce83e62f90acca1bcd4bdad0f807bc57660
 --- /dev/null
 +++ b/libgcc/gthr-amigaos-native.c
-@@ -0,0 +1,504 @@
+@@ -0,0 +1,677 @@
 +/**
 + * This is the native implementation of gcc threads abstraction. The advantage
 + * over the pthreads one is that no pthreads.library is needed.
++ *
++ * (c) 2018 by Sebastian Bauer
 + */
 +
 +#include "gthr-amigaos.h"
@@ -141,6 +143,8 @@ index 0000000000000000000000000000000000000000..f80874130ca74be99933d146d57148d4
 +{
 +#endif
 +
++/******************************************************************************/
++
 +typedef struct
 +{
 +  union
@@ -159,6 +163,18 @@ index 0000000000000000000000000000000000000000..f80874130ca74be99933d146d57148d4
 +  } u;
 +} __internal_gthread_recursive_mutex_t;
 +
++typedef struct
++{
++  union
++  {
++    __gthread_cond_t gcond;
++    struct
++    {
++      struct threadentry *first_in_cond_wait_list;
++    } i;
++  } u;
++} __internal_gthread_cond_t;
++
 +/******************************************************************************/
 +
 +#ifndef __cplusplus
@@ -166,6 +182,7 @@ index 0000000000000000000000000000000000000000..f80874130ca74be99933d146d57148d4
 +_Static_assert(__atomic_always_lock_free(sizeof(char), 0), "Access to char is not lock free");
 +_Static_assert(sizeof(__gthread_mutex_t) >= sizeof(__internal_gthread_mutex_t), "__gthread_mutex_t not large enough!");
 +_Static_assert(sizeof(__gthread_recursive_mutex_t) >= sizeof(__internal_gthread_recursive_mutex_t), "__gthread_recursive_mutex_t not large enough!");
++_Static_assert(sizeof(__gthread_cond_t) >= sizeof(__internal_gthread_cond_t), "__gthread_recursive_mutex_t not large enough!");
 +#endif
 +
 +/******************************************************************************/
@@ -313,7 +330,7 @@ index 0000000000000000000000000000000000000000..f80874130ca74be99933d146d57148d4
 + *
 + * @return the key entry or NULL.
 + */
-+static keyentry_t *find_keyentry(int id, struct Task *task)
++static keyentry_t *find_keyentry (int id, struct Task *task)
 +{
 +  keyentry_t *entry;
 +  entry = keystore->keyentries[id];
@@ -459,6 +476,11 @@ index 0000000000000000000000000000000000000000..f80874130ca74be99933d146d57148d4
 +
 +  void *(*entry) (void*);
 +  void *args;
++
++  /* The next thread in the condition wait list. A thread can only be in one
++   * cond wait list so we can embed the linking in this structure.
++   */
++  struct threadentry *next_in_cond_wait_list;
 +};
 +
 +typedef struct threadentry threadentry_t;
@@ -477,27 +499,56 @@ index 0000000000000000000000000000000000000000..f80874130ca74be99933d146d57148d4
 +static __gthread_once_t threadstore_once = __GTHREAD_ONCE_INIT;
 +
 +/**
++ * Allocate data structure for a new thread and prepare it with
++ * a new id.
++ */
++static threadentry_t *__gthread_new_threadentry (void)
++{
++  threadentry_t *thr;
++  int thr_id;
++
++  if (!(thr = IExec->AllocVec (sizeof (*thr), MEMF_CLEAR)))
++    return NULL;
++
++  IExec->ObtainSemaphore (&threadstore->sem);
++  thr_id = threadstore->next_thread_id++;
++  IExec->ReleaseSemaphore (&threadstore->sem);
++
++  thr->id = thr_id;
++
++  return thr;
++}
++
++/**
 + * Initialize our threadstore.
 + */
-+static void init_threadstore(void)
++static void init_threadstore (void)
 +{
++  threadentry_t *thr;
++
 +  if (!(threadstore = (threadstore_t *)IExec->AllocVec (sizeof(*threadstore), MEMF_CLEAR)))
 +    return;
-+  IExec->InitSemaphore(&threadstore->sem);
++  IExec->InitSemaphore (&threadstore->sem);
 +
++  /* Create thread structure for this thread (aka root thread) */
++  if (!(thr = __gthread_new_threadentry ()))
++    goto bailout;
++  thr->process = (struct Process*)IExec->FindTask(NULL);
++
++  threadstore->threads = thr;
 +  return;
 +bailout:
 +  if (threadstore)
-+    IExec->FreeVec(threadstore);
++    IExec->FreeVec (threadstore);
 +  threadstore = NULL;
 +}
 +
 +static int __gthread_entry(STRPTR args UNUSED, int32 length UNUSED, APTR execbase UNUSED)
 +{
-+  threadentry_t *thr = ((struct Process*)IExec->FindTask(NULL))->pr_Task.tc_UserData;
++  threadentry_t *thr = ((struct Process*)IExec->FindTask (NULL))->pr_Task.tc_UserData;
 +
 +  /* Wait for the parent task to enqueue the process in the global list */
-+  while (!(IExec->Wait(SIGBREAKF_CTRL_F) & SIGBREAKF_CTRL_F));
++  while (!(IExec->Wait (SIGBREAKF_CTRL_F) & SIGBREAKF_CTRL_F));
 +
 +  thr->result = thr->entry(thr->args);
 +  thr->finished = 1;
@@ -507,7 +558,6 @@ index 0000000000000000000000000000000000000000..f80874130ca74be99933d146d57148d4
 +int
 +__gthread_create (__gthread_t *thread, void *(*func) (void*), void *args)
 +{
-+  int thread_id;
 +  threadentry_t *threadentry;
 +
 +  /* Initialize our private threadstore, but only once */
@@ -516,18 +566,13 @@ index 0000000000000000000000000000000000000000..f80874130ca74be99933d146d57148d4
 +  if (!threadstore)
 +    return ENOMEM;
 +
-+  if (!(threadentry = IExec->AllocVec (sizeof (*thread), MEMF_CLEAR)))
++  if (!(threadentry = __gthread_new_threadentry ()))
 +    return ENOMEM;
 +
-+  IExec->ObtainSemaphore (&threadstore->sem);
-+  thread_id = threadstore->next_thread_id++;
-+  IExec->ReleaseSemaphore (&threadstore->sem);
-+
-+  threadentry->id = thread_id;
 +  threadentry->entry = func;
 +  threadentry->args = args;
 +
-+  threadentry->process = IDOS->CreateNewProcTags(
++  threadentry->process = IDOS->CreateNewProcTags (
 +                NP_Entry, __gthread_entry,
 +                NP_Child, TRUE,
 +                NP_UserData, (int32)threadentry,
@@ -539,9 +584,9 @@ index 0000000000000000000000000000000000000000..f80874130ca74be99933d146d57148d4
 +  IExec->ReleaseSemaphore (&threadstore->sem);
 +
 +  /* Signal that we have enqueued the task */
-+  IExec->Signal(&threadentry->process->pr_Task, SIGBREAKF_CTRL_F);
++  IExec->Signal (&threadentry->process->pr_Task, SIGBREAKF_CTRL_F);
 +
-+  *thread = thread_id;
++  *thread = threadentry->id;
 +  return 0;
 +}
 +
@@ -557,7 +602,6 @@ index 0000000000000000000000000000000000000000..f80874130ca74be99933d146d57148d4
 +    }
 +  return thr;
 +}
-+
 +
 +static threadentry_t *find_threadentry_by_id (__gthread_t id)
 +{
@@ -613,8 +657,137 @@ index 0000000000000000000000000000000000000000..f80874130ca74be99933d146d57148d4
 +    }
 +
 +  /* FIXME: Record this thread */
++  return -1;
++}
++
++/******************************************************************************/
++
++/**
++ * Remove the given thread from the condition wait list.
++ */
++static void UNUSED
++__gthread_remove_thread_from_cond_wait_list (__internal_gthread_cond_t *cond, threadentry_t *thr)
++{
++  threadentry_t *cur_thr, *prev_thr;
++
++  prev_thr = NULL;
++  cur_thr = cond->u.i.first_in_cond_wait_list;
++  while (cur_thr)
++    {
++      if (cur_thr == thr)
++        {
++          if (!prev_thr)
++            cond->u.i.first_in_cond_wait_list = cur_thr->next_in_cond_wait_list;
++          else
++            {
++              prev_thr->next_in_cond_wait_list = cur_thr->next_in_cond_wait_list;
++            }
++          break;
++        }
++
++      prev_thr = cur_thr;
++      cur_thr = cur_thr->next_in_cond_wait_list;
++    }
++}
++
++int
++__gthread_cond_init (__gthread_cond_t *cond)
++{
++  memset(cond, 0, sizeof(*cond));
 +  return 0;
 +}
++
++int
++__gthread_cond_signal (__gthread_cond_t *__cond)
++{
++  __internal_gthread_cond_t *cond = (__internal_gthread_cond_t *)__cond;
++  threadentry_t *thr;
++
++  /* Most of the time, we are called with the same mutex being locked that is
++   * supplied to __gthread_cond_wait(). However,  most of the time is not always,
++   * so we have to make the lists manipulation atomic on our own.
++   */
++  IExec->ObtainSemaphore (&threadstore->sem);
++
++  if ((thr = cond->u.i.first_in_cond_wait_list))
++    {
++      /* Remove us from the list, then signal */
++      cond->u.i.first_in_cond_wait_list = thr->next_in_cond_wait_list;
++      thr->next_in_cond_wait_list = NULL;
++
++      IExec->Signal (&thr->process->pr_Task, SIGF_SINGLE);
++    }
++
++  IExec->ReleaseSemaphore (&threadstore->sem);
++
++  return 0;
++}
++
++int
++__gthread_cond_broadcast (__gthread_cond_t *__cond)
++{
++  __internal_gthread_cond_t *cond = (__internal_gthread_cond_t *)__cond;
++  threadentry_t *thr;
++
++  /* See __gthread_cond_signal() */
++  IExec->ObtainSemaphore (&threadstore->sem);
++
++  thr = cond->u.i.first_in_cond_wait_list;
++  cond->u.i.first_in_cond_wait_list = NULL;
++
++  while (thr)
++    {
++      threadentry_t *next_thr = thr->next_in_cond_wait_list;
++
++      thr->next_in_cond_wait_list = NULL;
++
++      IExec->Signal (&thr->process->pr_Task, SIGF_SINGLE);
++
++      thr = next_thr;
++    }
++
++  IExec->ReleaseSemaphore (&threadstore->sem);
++
++  return 0;
++}
++
++int
++__gthread_cond_wait (__gthread_cond_t *__cond, __gthread_mutex_t *mutex)
++{
++  __internal_gthread_cond_t *cond = (__internal_gthread_cond_t *)__cond;
++  __gthread_t self = __gthread_self ();
++  threadentry_t *self_thr;
++
++  if (!(self_thr = find_threadentry_by_id (self)))
++    return EINVAL;
++
++  /* Enqueue us into this thread's dedicated cond wait list */
++  IExec->ObtainSemaphore (&threadstore->sem);
++  self_thr->next_in_cond_wait_list = cond->u.i.first_in_cond_wait_list;
++  cond->u.i.first_in_cond_wait_list = self_thr;
++
++  /* Along the way, clear SIGF_SINGLE bit to avoid spurious signals */
++  IExec->SetSignal (0L, SIGF_SINGLE);
++
++  IExec->ReleaseSemaphore (&threadstore->sem);
++
++  /* TODO: Set a condition variable, which the notifier is supposed to change
++   * to avoid more suspsious signals. However, the caller is supposed to check
++   * the condition anyway, so suspsious wakes are perhaps acceptable.
++   */
++  __gthread_mutex_unlock (mutex);
++
++  /* Wait for anyone notifiying us */
++  while (!(IExec->Wait (SIGF_SINGLE) & SIGF_SINGLE));
++
++  __gthread_mutex_lock (mutex);
++
++  /* Receiving the proper SIGF_SINGLE also means that we have been removed from
++   * the cond's waiting list
++   */
++  return 0;
++}
++
 +
 +#ifdef __cplusplus
 +}
@@ -762,10 +935,10 @@ index 0000000000000000000000000000000000000000..ecf04721f0a57d14f4d111ccbfde124b
 +#endif
 diff --git a/libgcc/gthr-amigaos.h b/libgcc/gthr-amigaos.h
 new file mode 100644
-index 0000000000000000000000000000000000000000..f776a2fa3857f18fa0a0e521c1f6a1ae7507dd37
+index 0000000000000000000000000000000000000000..05c94a8a2a7c62e56482c37053e34a9228f463f6
 --- /dev/null
 +++ b/libgcc/gthr-amigaos.h
-@@ -0,0 +1,339 @@
+@@ -0,0 +1,342 @@
 +/* Threads compatibility routines for libgcc2 and libobjc.  */
 +/* Compile this one with gcc.  */
 +/* Copyright (C) 1997-2018 Free Software Foundation, Inc.
@@ -807,7 +980,7 @@ index 0000000000000000000000000000000000000000..f776a2fa3857f18fa0a0e521c1f6a1ae
 +typedef struct { char data[48]; } __gthread_mutex_t;
 +typedef struct { char data[48]; } __gthread_recursive_mutex_t;
 +
-+typedef int __gthread_cond_t;
++typedef struct { char data[8]; } __gthread_cond_t;
 +
 +typedef int __gthread_t;
 +typedef int __gthread_time_t;
@@ -821,8 +994,8 @@ index 0000000000000000000000000000000000000000..f776a2fa3857f18fa0a0e521c1f6a1ae
 +//#define __GTHREAD_RECURSIVE_MUTEX_INIT 0
 +#define __GTHREAD_RECURSIVE_MUTEX_INIT_FUNCTION(mx) __gthread_recursive_mutex_init(mx)
 +
-+#define __GTHREAD_COND_INIT 0
-+#define __GTHREAD_COND_INIT_FUNCTION(cond) do {} while (0)
++//#define __GTHREAD_COND_INIT 0
++#define __GTHREAD_COND_INIT_FUNCTION(cond) __gthread_cond_init(cond)
 +
 +#define UNUSED __attribute__((__unused__))
 +
@@ -1049,6 +1222,12 @@ index 0000000000000000000000000000000000000000..f776a2fa3857f18fa0a0e521c1f6a1ae
 +/******************************************************************************/
 +
 +int
++__gthread_cond_init (__gthread_cond_t *cond);
++
++int
++__gthread_cond_signal (__gthread_cond_t *__cond);
++
++int
 +__gthread_cond_broadcast (__gthread_cond_t *cond);
 +
 +int
@@ -1057,6 +1236,11 @@ index 0000000000000000000000000000000000000000..f776a2fa3857f18fa0a0e521c1f6a1ae
 +int
 +__gthread_cond_wait_recursive (__gthread_cond_t *cond,
 +                               __gthread_recursive_mutex_t *mutex);
++
++int
++__gthread_cond_timedwait (__gthread_cond_t *cond,
++                            __gthread_mutex_t *mutex,
++                            const __gthread_time_t *abs_timeout);
 +
 +int
 +__gthread_cond_destroy (__gthread_cond_t *__cond);
@@ -1087,14 +1271,6 @@ index 0000000000000000000000000000000000000000..f776a2fa3857f18fa0a0e521c1f6a1ae
 +int
 +__gthread_recursive_mutex_timedlock (__gthread_recursive_mutex_t *m,
 +                                    const __gthread_time_t *abs_time);
-+
-+int
-+__gthread_cond_signal (__gthread_cond_t *cond);
-+
-+int
-+__gthread_cond_timedwait (__gthread_cond_t *cond,
-+                             __gthread_mutex_t *mutex,
-+                             const __gthread_time_t *abs_timeout);
 +
 +#endif /* _LIBOBJC */
 +
