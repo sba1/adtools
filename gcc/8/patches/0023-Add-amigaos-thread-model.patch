@@ -1,4 +1,4 @@
-From 9df1a9f357b7e5ffb2aee03cec82adbe436be56f Mon Sep 17 00:00:00 2001
+From 186c38c7d2b6d89e50212c46e9c34d259015f23c Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 4 May 2018 18:22:24 +0200
 Subject: [PATCH 23/23] Add amigaos thread model.
@@ -111,7 +111,7 @@ index b2f3f8708441e473b8e2941c4748748b6c7c40b8..5e486be60eef6666e1d8c548163bce5d
      single)	thread_header=gthr-single.h ;;
 diff --git a/libgcc/gthr-amigaos-native.c b/libgcc/gthr-amigaos-native.c
 new file mode 100644
-index 0000000000000000000000000000000000000000..bf784ce83e62f90acca1bcd4bdad0f807bc57660
+index 0000000000000000000000000000000000000000..ff4b181cbfc5fca8db8f53d883a451b5ea745a28
 --- /dev/null
 +++ b/libgcc/gthr-amigaos-native.c
 @@ -0,0 +1,677 @@
@@ -278,7 +278,7 @@ index 0000000000000000000000000000000000000000..bf784ce83e62f90acca1bcd4bdad0f80
 +  keystore = NULL;
 +}
 +
-+int _gthread_key_create (__gthread_key_t *__key, void (*destroy) (void *))
++int __gthread_key_create (__gthread_key_t *__key, void (*destroy) (void *))
 +{
 +  /* Initialize our private keystore, but only once */
 +  __gthread_once (&keystore_once, init_keystore);
