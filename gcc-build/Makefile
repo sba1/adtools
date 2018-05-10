@@ -5,10 +5,11 @@
 # Use VERSION to specify the version (alters the name of the created drawer)
 #
 # when compiling 4.4.x or newer.
+#
 # 
 
 SRC_DIR=../gcc/repo
-VERSION=4.9.x
+VERSION:=$(shell cat $(SRC_DIR)/gcc/BASE-VER)
 CROSS_BUILD_DIR=cross-$(VERSION)
 NATIVE_BUILD_DIR=native-$(VERSION)
 PREFIX=/usr/local/amiga
