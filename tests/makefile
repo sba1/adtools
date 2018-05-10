@@ -28,7 +28,11 @@ test-dynld: test-dynld.c
 
 test-thread: test-thread.cpp
 	$(CPP) -ggdb -ffunction-sections -fdata-sections -MD $< -o $@.o -std=c++11 -c
-	$(CPP) -ggdb $@.o -o $@ -std=c++11 -lpthread -Wl,-Map=$@.map,--cref -Wl,--gc-sections -Wl,--verbose -Wl,-T,test-thread-ldscript
+	$(CPP) -ggdb $@.o -o $@ -std=c++11 -athread=native -Wl,-Map=$@.map,--cref -Wl,--gc-sections -Wl,--verbose
+#	$(CPP) -ggdb $@.o -o $@ -std=c++11 -lpthread -Wl,-Map=$@.map,--cref -Wl,--gc-sections -Wl,--verbose -Wl,-T,test-thread-ldscript
+
+test-thread-direct: test-thread.cpp ../gcc/repo/libgcc/gthr-amigaos-native.c
+	$(CPP) test-thread.cpp ../gcc/repo/libgcc/gthr-amigaos-native.c -ggdb -ffunction-sections -fdata-sections -Wl,--gc-sections -std=c++11 -o $@
 
 test-wchar: test-wchar.cpp
 	$(CPP) test-wchar.cpp -std=c++11 -mcrt=clib2 -o $@ -H
