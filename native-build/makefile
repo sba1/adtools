@@ -15,8 +15,9 @@
 ROOT_DIR=$(realpath .)
 
 # Compiler setup, utilize ccache if available
-HOST_GCC=$(shell (which ccache >/dev/zero && echo ccache gcc) || echo gcc)
-HOST_GXX=$(shell (which ccache >/dev/zero && echo ccache g++) || echo g++)
+CCACHE:=$(shell which ccache)
+HOST_GCC:=$(strip $(CCACHE) gcc)
+HOST_GXX:=$(strip $(CCACHE) g++)
 
 GMP_ARCHIVE=gmp-5.0.5.tar.bz2
 MPFR_ARCHIVE=mpfr-3.1.2/mpfr-3.1.2.tar.bz2
