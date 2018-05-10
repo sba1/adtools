@@ -1,4 +1,4 @@
-From 186c38c7d2b6d89e50212c46e9c34d259015f23c Mon Sep 17 00:00:00 2001
+From ff8580f723398a7d38c5058a8220843caa66d9b5 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 4 May 2018 18:22:24 +0200
 Subject: [PATCH 23/23] Add amigaos thread model.
@@ -6,15 +6,18 @@ Subject: [PATCH 23/23] Add amigaos thread model.
 It is work in progress.
 ---
  config/gthr.m4                 |   1 +
+ gcc/config/rs6000/amigaos.h    |   8 +-
+ gcc/config/rs6000/amigaos.opt  |  18 ++
  gcc/configure                  |   2 +-
  gcc/configure.ac               |   2 +-
+ gcc/doc/invoke.texi            |   9 +-
  libgcc/config/rs6000/t-amigaos |   5 +
  libgcc/configure               |   1 +
  libgcc/gthr-amigaos-native.c   | 677 +++++++++++++++++++++++++++++++++++++++++
  libgcc/gthr-amigaos-single.c   | 135 ++++++++
  libgcc/gthr-amigaos.h          | 342 +++++++++++++++++++++
  libstdc++-v3/configure         |  15 +-
- 9 files changed, 1171 insertions(+), 9 deletions(-)
+ 12 files changed, 1203 insertions(+), 12 deletions(-)
  create mode 100644 libgcc/gthr-amigaos-native.c
  create mode 100644 libgcc/gthr-amigaos-single.c
  create mode 100644 libgcc/gthr-amigaos.h
@@ -37,6 +40,86 @@ index 7b29f1f3327c9fdde23f15a507757e6a234cd196..6f61465461d6f70a717eb9205062d5ae
      posix)	thread_header=gthr-posix.h ;;
      rtems)	thread_header=config/gthr-rtems.h ;;
      single)	thread_header=gthr-single.h ;;
+diff --git a/gcc/config/rs6000/amigaos.h b/gcc/config/rs6000/amigaos.h
+index d4812d8f618c2758bf95ec998f6aa53ee9bcb6fc..ec0146c4b8c05eb300f8928e475641123c3f5632 100644
+--- a/gcc/config/rs6000/amigaos.h
++++ b/gcc/config/rs6000/amigaos.h
+@@ -272,13 +272,13 @@ mcrt=default|!mcrt=*: %{mcrt=default|!nostdinc: %(cpp_amiga_default)}; \
+ #define LINK_SPEC "\
+ --defsym __amigaos4__=1 \
+ %{!shared: %{!use-dynld: -Bstatic}} \
+ -q -d %{h*} %{v:-V} %{G*} \
+ %{Wl,*:%*} %{YP,*} %{R*} \
+ %{Qy:} %{!Qn:-Qy} \
+-%(link_shlib) %(link_text) \
++%(link_thread) %(link_shlib) %(link_text) \
+ %{mbaserel: %{msdata|msdata=default|msdata=sysv: %e-mbaserel and -msdata options are incompatible}} \
+ %{mcrt=clib2|mcrt=clib2-ts: %(link_clib2); \
+ mcrt=ixemul: %(link_ixemul); \
+ mcrt=libnix: %(link_libnix); \
+ mcrt=newlib: %(link_newlib); \
+ mcrt=default|!mcrt=*: %(link_amiga_default); \
+@@ -294,12 +294,15 @@ mcrt=default|!mcrt=*: %(link_amiga_default); \
+ #define LINK_TEXT ""
+ #endif
+ 
+ #define LINK_SHLIB "\
+ %{shared:-shared -dy --defsym __dynld_version__=1} %{!shared: %{static:-static}} %{use-dynld: -dy}"
+ 
++#define LINK_THREAD "\
++%s%{athread=native:gthr-amigaos-native.o;athread=single:gthr-amigaos-single.o;athread=pthread:gthr-amigaos-pthread.o}"
++
+ #undef STARTFILE_SPEC
+ #define STARTFILE_SPEC "\
+ %{mcrt=clib2|mcrt=clib2-ts: %(startfile_clib2); \
+ mcrt=ixemul: %(startfile_ixemul); \
+ mcrt=libnix: %(startfile_libnix); \
+ mcrt=newlib: %(startfile_newlib); \
+@@ -356,13 +359,14 @@ mcrt=default|!mcrt=*: %(endfile_amiga_default); \
+   {"lib_subdir_newlib", LIB_SUBDIR_NEWLIB_SPEC}, \
+   {"link_newlib", LINK_NEWLIB_SPEC}, \
+   {"startfile_newlib", STARTFILE_NEWLIB_SPEC}, \
+   {"endfile_newlib", ENDFILE_NEWLIB_SPEC}, \
+   /* used in link spec  */ \
+   {"link_text", LINK_TEXT}, \
+-  {"link_shlib", LINK_SHLIB},
++  {"link_shlib", LINK_SHLIB}, \
++  {"link_thread", LINK_THREAD},
+ 
+ #undef DEFAULT_VTABLE_THUNKS
+ #ifndef USE_GNULIBC_1
+ #define DEFAULT_VTABLE_THUNKS 1
+ #endif
+ 
+diff --git a/gcc/config/rs6000/amigaos.opt b/gcc/config/rs6000/amigaos.opt
+index 93d74f10bea8c1b23c82a9650bb0c3c153464ba7..1980ef231d7f849309ce24062d41992e01d77288 100644
+--- a/gcc/config/rs6000/amigaos.opt
++++ b/gcc/config/rs6000/amigaos.opt
+@@ -32,6 +32,24 @@ mcheck68kfuncptr
+ Target Report Var(CHECK68KFUNCPTR)
+ Generate target checking for function pointers
+ 
+ use-dynld
+ Target Driver
+ Generated binary employs the dynamic linker for shared objects.
++
++Enum
++Name(athread) Type(int) UnknownError(argument %qs to %<-athread%> not recognized)
++
++EnumValue
++Enum(athread) String(single) Value(0)
++
++EnumValue
++Enum(athread) String(native) Value(1)
++
++EnumValue
++Enum(athread) String(pthread) Value(2)
++
++athread=
++Driver RejectNegative Joined Enum(athread)
++Specifies the thread implementation that is linked to the final binary.
++
++; This comment is to ensure we retain the blank line above.
 diff --git a/gcc/configure b/gcc/configure
 index 6121e163259dd6c09188b48218b3fec63d41b2f8..04f420fe61c2a65c7c4adfc36ca07ec7ab6c074b 100755
 --- a/gcc/configure
@@ -75,6 +158,45 @@ index b066cc609e1c2615e66307d5439f765a4f3b286b..1a10e06f5a6254864f5a7dcad0a36007
    *)
      echo "${enable_threads} is an unknown thread package" 1>&2
      exit 1
+diff --git a/gcc/doc/invoke.texi b/gcc/doc/invoke.texi
+index 3a7fe4352fc063a5326e042ad1cf0cdda18299c2..02381135b1f42e8148da9cbcd3072d0324c3dc8f 100644
+--- a/gcc/doc/invoke.texi
++++ b/gcc/doc/invoke.texi
+@@ -1304,13 +1304,13 @@ See RS/6000 and PowerPC Options.
+ 
+ @emph{zSeries Options}
+ See S/390 and zSeries Options.
+ 
+ @emph{AmigaOS PPC options}
+ @gccoptlist{-mcrt=@var{crt}  -mbaserel  -mno-baserel @gol
+--mcheck68kfuncptr}
++-mcheck68kfuncptr -athread=@var{ti}}
+ 
+ @item Code Generation Options
+ @xref{Code Gen Options,,Options for Code Generation Conventions}.
+ @gccoptlist{-fcall-saved-@var{reg}  -fcall-used-@var{reg} @gol
+ -ffixed-@var{reg}  -fexceptions @gol
+ -fnon-call-exceptions  -fdelete-dead-exceptions  -funwind-tables @gol
+@@ -15201,12 +15201,19 @@ Generate absolute data access. This is the default.
+ @opindex mcheck68kfuncptr
+ 
+ Causes each function call through a function pointer to be performed as
+ if the function pointer was declared with the @samp{check68kfuncptr}
+ function attribute. @xref{Function Attributes}.
+ 
++@item -athread
++@opindex athread
++
++This option specified which thread implementation should be linked to
++the final executable. You can choose among @samp{single}, @samp{native},
++and @samp{pthread}.
++
+ @end table
+ 
+ @node ARC Options
+ @subsection ARC Options
+ @cindex ARC options
+ 
 diff --git a/libgcc/config/rs6000/t-amigaos b/libgcc/config/rs6000/t-amigaos
 index da1e303eed7e60df883971a610e8904db0df3e23..b7e5d3234458f2fe93778c9eb8813b712174059a 100644
 --- a/libgcc/config/rs6000/t-amigaos
