@@ -1,4 +1,4 @@
-From ff8580f723398a7d38c5058a8220843caa66d9b5 Mon Sep 17 00:00:00 2001
+From 008fba58d9700dd7f0b190b744364ff9310150a4 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 4 May 2018 18:22:24 +0200
 Subject: [PATCH 23/23] Add amigaos thread model.
@@ -233,7 +233,7 @@ index b2f3f8708441e473b8e2941c4748748b6c7c40b8..5e486be60eef6666e1d8c548163bce5d
      single)	thread_header=gthr-single.h ;;
 diff --git a/libgcc/gthr-amigaos-native.c b/libgcc/gthr-amigaos-native.c
 new file mode 100644
-index 0000000000000000000000000000000000000000..ff4b181cbfc5fca8db8f53d883a451b5ea745a28
+index 0000000000000000000000000000000000000000..d0d667ad25595299351b643856c7dfa0135ce7a5
 --- /dev/null
 +++ b/libgcc/gthr-amigaos-native.c
 @@ -0,0 +1,677 @@
@@ -486,7 +486,7 @@ index 0000000000000000000000000000000000000000..ff4b181cbfc5fca8db8f53d883a451b5
 +  IExec->ObtainSemaphore (&keystore->sem);
 +  if (!(entry = find_keyentry(__key.id, this_task)))
 +    {
-+      if (!(entry = IExec->ItemPoolAlloc(keystore->keyentry_pool)))
++      if (!(entry = (keyentry_t *)IExec->ItemPoolAlloc(keystore->keyentry_pool)))
 +        {
 +          IExec->ReleaseSemaphore (&keystore->sem);
 +          return ENOMEM;
@@ -629,7 +629,7 @@ index 0000000000000000000000000000000000000000..ff4b181cbfc5fca8db8f53d883a451b5
 +  threadentry_t *thr;
 +  int thr_id;
 +
-+  if (!(thr = IExec->AllocVec (sizeof (*thr), MEMF_CLEAR)))
++  if (!(thr = (threadentry_t *)IExec->AllocVec (sizeof (*thr), MEMF_CLEAR)))
 +    return NULL;
 +
 +  IExec->ObtainSemaphore (&threadstore->sem);
@@ -667,7 +667,7 @@ index 0000000000000000000000000000000000000000..ff4b181cbfc5fca8db8f53d883a451b5
 +
 +static int __gthread_entry(STRPTR args UNUSED, int32 length UNUSED, APTR execbase UNUSED)
 +{
-+  threadentry_t *thr = ((struct Process*)IExec->FindTask (NULL))->pr_Task.tc_UserData;
++  threadentry_t *thr = (threadentry_t *)((struct Process*)IExec->FindTask (NULL))->pr_Task.tc_UserData;
 +
 +  /* Wait for the parent task to enqueue the process in the global list */
 +  while (!(IExec->Wait (SIGBREAKF_CTRL_F) & SIGBREAKF_CTRL_F));
@@ -749,7 +749,7 @@ index 0000000000000000000000000000000000000000..ff4b181cbfc5fca8db8f53d883a451b5
 +  while (!thr->finished)
 +    IDOS->Delay(1);
 +
-+  if (thr->finished)
++  if (value_ptr)
 +    *value_ptr = thr->result;
 +  return 0;
 +}
