@@ -20,7 +20,7 @@ HOST_GCC:=$(strip $(CCACHE) gcc)
 HOST_GXX:=$(strip $(CCACHE) g++)
 
 GMP_ARCHIVE=gmp-5.1.3.tar.bz2
-MPFR_ARCHIVE=mpfr-3.1.2/mpfr-3.1.2.tar.bz2
+MPFR_ARCHIVE=mpfr-3.1.6.tar.bz2
 MPC_ARCHIVE=mpc-0.9.tar.gz
 
 BINUTILS_VERSION=2.23.2
@@ -81,7 +81,7 @@ downloads-done-clib2:
 downloads-done: downloads-done-clib2
 	wget "$(SDK_URL)" -O downloads/SDK_$(SDK_VERSION).lha
 	cd downloads && wget -N http://ftp.gnu.org/gnu/gmp/$(GMP_ARCHIVE)
-	cd downloads && wget -N http://www.mpfr.org/$(MPFR_ARCHIVE)
+	cd downloads && wget -N http://ftp.gnu.org/gnu/mpfr/$(MPFR_ARCHIVE)
 	cd downloads && wget -N http://www.multiprecision.org/downloads/$(MPC_ARCHIVE)
 	touch $@
 
