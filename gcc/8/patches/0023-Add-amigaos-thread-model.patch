@@ -1,4 +1,4 @@
-From 008fba58d9700dd7f0b190b744364ff9310150a4 Mon Sep 17 00:00:00 2001
+From 7ebd290951683570c229c60d145ba28fdb9525cc Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 4 May 2018 18:22:24 +0200
 Subject: [PATCH 23/23] Add amigaos thread model.
@@ -6,18 +6,21 @@ Subject: [PATCH 23/23] Add amigaos thread model.
 It is work in progress.
 ---
  config/gthr.m4                 |   1 +
+ gcc/config.host                |   1 +
  gcc/config/rs6000/amigaos.h    |   8 +-
  gcc/config/rs6000/amigaos.opt  |  18 ++
+ gcc/config/rs6000/x-amigaos    |  16 +
  gcc/configure                  |   2 +-
  gcc/configure.ac               |   2 +-
  gcc/doc/invoke.texi            |   9 +-
  libgcc/config/rs6000/t-amigaos |   5 +
  libgcc/configure               |   1 +
- libgcc/gthr-amigaos-native.c   | 677 +++++++++++++++++++++++++++++++++++++++++
+ libgcc/gthr-amigaos-native.c   | 683 +++++++++++++++++++++++++++++++++++++++++
  libgcc/gthr-amigaos-single.c   | 135 ++++++++
- libgcc/gthr-amigaos.h          | 342 +++++++++++++++++++++
+ libgcc/gthr-amigaos.h          | 347 +++++++++++++++++++++
  libstdc++-v3/configure         |  15 +-
- 12 files changed, 1203 insertions(+), 12 deletions(-)
+ 14 files changed, 1231 insertions(+), 12 deletions(-)
+ create mode 100644 gcc/config/rs6000/x-amigaos
  create mode 100644 libgcc/gthr-amigaos-native.c
  create mode 100644 libgcc/gthr-amigaos-single.c
  create mode 100644 libgcc/gthr-amigaos.h
@@ -40,6 +43,24 @@ index 7b29f1f3327c9fdde23f15a507757e6a234cd196..6f61465461d6f70a717eb9205062d5ae
      posix)	thread_header=gthr-posix.h ;;
      rtems)	thread_header=config/gthr-rtems.h ;;
      single)	thread_header=gthr-single.h ;;
+diff --git a/gcc/config.host b/gcc/config.host
+index ec4eb466506dfc20be35569c7c51f5a47624a474..1c3eb01907d57ef848fdb056ec3cdf0e0d836153 100644
+--- a/gcc/config.host
++++ b/gcc/config.host
+@@ -261,12 +261,13 @@ case ${host} in
+     ;;
+   powerpc-*-amigaos*) # AmigaOS 4
+     prefix=/gcc
+     local_prefix=/gcc
+     host_can_use_collect2=no
+     host_xm_defines=HOST_LACKS_INODE_NUMBERS
++    host_xmake_file="${host_xmake_file} rs6000/x-amigaos"
+     ;;
+   powerpc-*-darwin*)
+     out_host_hook_obj="${out_host_hook_obj} host-ppc-darwin.o"
+     host_xmake_file="${host_xmake_file} rs6000/x-darwin"
+     ;;
+   powerpc64-*-darwin*)
 diff --git a/gcc/config/rs6000/amigaos.h b/gcc/config/rs6000/amigaos.h
 index d4812d8f618c2758bf95ec998f6aa53ee9bcb6fc..ec0146c4b8c05eb300f8928e475641123c3f5632 100644
 --- a/gcc/config/rs6000/amigaos.h
@@ -120,6 +141,29 @@ index 93d74f10bea8c1b23c82a9650bb0c3c153464ba7..1980ef231d7f849309ce24062d41992e
 +Specifies the thread implementation that is linked to the final binary.
 +
 +; This comment is to ensure we retain the blank line above.
+diff --git a/gcc/config/rs6000/x-amigaos b/gcc/config/rs6000/x-amigaos
+new file mode 100644
+index 0000000000000000000000000000000000000000..a3dd2195809c2ce1fbab8be854f3c987dccc039b
+--- /dev/null
++++ b/gcc/config/rs6000/x-amigaos
+@@ -0,0 +1,16 @@
++# AmigaOS-specific makefile fragment that is included when building a compiler
++# that runs on AmigaOS
++
++ALL_EXECUTABLES=\
++	$(COMPILERS) \
++	gcov$(exeext) \
++	gcov-dump$(exeext) \
++	gcov-tool$(exeext) \
++	lto-wrapper$(exeext) \
++	cpp$(exeext) \
++	xgcc$(exeext) \
++	xg++$(exeext)
++
++# We use the native amiga thread implementation and additionally remove all
++# unneeded sections
++$(ALL_EXECUTABLES) : override LDFLAGS += -athread=native -Wl,--gc-sections
+\ No newline at end of file
 diff --git a/gcc/configure b/gcc/configure
 index 6121e163259dd6c09188b48218b3fec63d41b2f8..04f420fe61c2a65c7c4adfc36ca07ec7ab6c074b 100755
 --- a/gcc/configure
@@ -233,10 +277,10 @@ index b2f3f8708441e473b8e2941c4748748b6c7c40b8..5e486be60eef6666e1d8c548163bce5d
      single)	thread_header=gthr-single.h ;;
 diff --git a/libgcc/gthr-amigaos-native.c b/libgcc/gthr-amigaos-native.c
 new file mode 100644
-index 0000000000000000000000000000000000000000..d0d667ad25595299351b643856c7dfa0135ce7a5
+index 0000000000000000000000000000000000000000..fc8d46aa4071fe468de70735616d0a0af48f1e1c
 --- /dev/null
 +++ b/libgcc/gthr-amigaos-native.c
-@@ -0,0 +1,677 @@
+@@ -0,0 +1,683 @@
 +/**
 + * This is the native implementation of gcc threads abstraction. The advantage
 + * over the pthreads one is that no pthreads.library is needed.
@@ -549,6 +593,12 @@ index 0000000000000000000000000000000000000000..d0d667ad25595299351b643856c7dfa0
 +}
 +
 +/******************************************************************************/
++
++int
++__gthread_recursive_mutex_init (__gthread_recursive_mutex_t *__mutex)
++{
++  return __gthread_mutex_init ((__gthread_mutex_t*)__mutex);
++}
 +
 +int
 +__gthread_recursive_mutex_lock (__gthread_recursive_mutex_t *__mutex)
@@ -1057,10 +1107,10 @@ index 0000000000000000000000000000000000000000..ecf04721f0a57d14f4d111ccbfde124b
 +#endif
 diff --git a/libgcc/gthr-amigaos.h b/libgcc/gthr-amigaos.h
 new file mode 100644
-index 0000000000000000000000000000000000000000..05c94a8a2a7c62e56482c37053e34a9228f463f6
+index 0000000000000000000000000000000000000000..878f8acdc0b263508e091e6def225410753ed5bc
 --- /dev/null
 +++ b/libgcc/gthr-amigaos.h
-@@ -0,0 +1,342 @@
+@@ -0,0 +1,347 @@
 +/* Threads compatibility routines for libgcc2 and libobjc.  */
 +/* Compile this one with gcc.  */
 +/* Copyright (C) 1997-2018 Free Software Foundation, Inc.
@@ -1119,14 +1169,17 @@ index 0000000000000000000000000000000000000000..05c94a8a2a7c62e56482c37053e34a92
 +//#define __GTHREAD_COND_INIT 0
 +#define __GTHREAD_COND_INIT_FUNCTION(cond) __gthread_cond_init(cond)
 +
-+#define UNUSED __attribute__((__unused__))
-+
 +#ifdef __cplusplus
 +extern "C"
 +{
 +#endif
 +
 +#ifdef _LIBOBJC
++
++#ifndef UNUSED
++#define UNUSED __attribute__((__unused__))
++#define UNUSED_DEFINED
++#endif
 +
 +/* Thread local storage for a single thread */
 +static void *thread_local_storage = NULL;
@@ -1291,6 +1344,10 @@ index 0000000000000000000000000000000000000000..05c94a8a2a7c62e56482c37053e34a92
 +  return 0;
 +}
 +
++#ifndef UNUSED_DEFINED
++#undef UNUSED
++#endif
++
 +#else /* _LIBOBJC */
 +
 +int
@@ -1315,16 +1372,16 @@ index 0000000000000000000000000000000000000000..05c94a8a2a7c62e56482c37053e34a92
 +__gthread_mutex_init (__gthread_mutex_t *__mutex);
 +
 +int
-+__gthread_mutex_destroy (__gthread_mutex_t *__mutex UNUSED);
++__gthread_mutex_destroy (__gthread_mutex_t *__mutex);
 +
 +int
-+__gthread_mutex_lock (__gthread_mutex_t *__mutex UNUSED);
++__gthread_mutex_lock (__gthread_mutex_t *__mutex);
 +
 +int
-+__gthread_mutex_trylock (__gthread_mutex_t *__mutex UNUSED);
++__gthread_mutex_trylock (__gthread_mutex_t *__mutex);
 +
 +int
-+__gthread_mutex_unlock (__gthread_mutex_t *__mutex UNUSED);
++__gthread_mutex_unlock (__gthread_mutex_t *__mutex);
 +
 +int
 +__gthread_recursive_mutex_init (__gthread_recursive_mutex_t *__mutex);
@@ -1395,8 +1452,6 @@ index 0000000000000000000000000000000000000000..05c94a8a2a7c62e56482c37053e34a92
 +                                    const __gthread_time_t *abs_time);
 +
 +#endif /* _LIBOBJC */
-+
-+#undef UNUSED
 +
 +#ifdef __cplusplus
 +}
