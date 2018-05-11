@@ -34,7 +34,7 @@ cross-configure:
 
 .PHONY: cross
 cross: cross-configure
-	make -C $(CROSS_BUILD_DIR)
+	$(MAKE) -C $(CROSS_BUILD_DIR)
 
 .PHONY: native
 native:
@@ -50,4 +50,4 @@ native:
 		--with-mpfr=$(LIB_PATH) \
 		--with-mpc=$(LIB_PATH) \
 		$(FEATURES)
-	make -C $(NATIVE_BUILD_DIR)
+	$(MAKE) -C $(NATIVE_BUILD_DIR)
