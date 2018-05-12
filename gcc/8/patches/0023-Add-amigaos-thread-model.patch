@@ -1,4 +1,4 @@
-From 34fb556113af74156debab8c7603d52e21dad186 Mon Sep 17 00:00:00 2001
+From a269b67ac6bfd45504656566283aa416be5209a0 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 4 May 2018 18:22:24 +0200
 Subject: [PATCH 23/23] Add amigaos thread model.
@@ -15,11 +15,11 @@ It is work in progress.
  gcc/doc/invoke.texi            |   9 +-
  libgcc/config/rs6000/t-amigaos |   5 +
  libgcc/configure               |   1 +
- libgcc/gthr-amigaos-native.c   | 698 +++++++++++++++++++++++++++++++++++++++++
+ libgcc/gthr-amigaos-native.c   | 697 +++++++++++++++++++++++++++++++++++++++++
  libgcc/gthr-amigaos-single.c   | 135 ++++++++
  libgcc/gthr-amigaos.h          | 347 ++++++++++++++++++++
  libstdc++-v3/configure         |  15 +-
- 14 files changed, 1246 insertions(+), 12 deletions(-)
+ 14 files changed, 1245 insertions(+), 12 deletions(-)
  create mode 100644 gcc/config/rs6000/x-amigaos
  create mode 100644 libgcc/gthr-amigaos-native.c
  create mode 100644 libgcc/gthr-amigaos-single.c
@@ -277,10 +277,10 @@ index b2f3f8708441e473b8e2941c4748748b6c7c40b8..5e486be60eef6666e1d8c548163bce5d
      single)	thread_header=gthr-single.h ;;
 diff --git a/libgcc/gthr-amigaos-native.c b/libgcc/gthr-amigaos-native.c
 new file mode 100644
-index 0000000000000000000000000000000000000000..f42e8a1b1061dca265272a828393ef3a0de043c2
+index 0000000000000000000000000000000000000000..86c83ec756c8e827d6c1e75ce598ca6daa760d15
 --- /dev/null
 +++ b/libgcc/gthr-amigaos-native.c
-@@ -0,0 +1,698 @@
+@@ -0,0 +1,697 @@
 +/**
 + * This is the native implementation of gcc threads abstraction. The advantage
 + * over the pthreads one is that no pthreads.library is needed.
@@ -343,7 +343,6 @@ index 0000000000000000000000000000000000000000..f42e8a1b1061dca265272a828393ef3a
 +_Static_assert(__atomic_always_lock_free(sizeof(uint32_t), 0), "Access to uint32_t is not lock free");
 +_Static_assert(__atomic_always_lock_free(sizeof(char), 0), "Access to char is not lock free");
 +_Static_assert(sizeof(__gthread_mutex_t) >= sizeof(__internal_gthread_mutex_t), "__gthread_mutex_t not large enough!");
-+_Static_assert(sizeof(__gthread_recursive_mutex_t) >= sizeof(__internal_gthread_recursive_mutex_t), "__gthread_recursive_mutex_t not large enough!");
 +_Static_assert(sizeof(__gthread_cond_t) >= sizeof(__internal_gthread_cond_t), "__gthread_recursive_mutex_t not large enough!");
 +#endif
 +
