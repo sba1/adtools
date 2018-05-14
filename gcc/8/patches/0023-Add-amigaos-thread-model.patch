@@ -1,4 +1,4 @@
-From a269b67ac6bfd45504656566283aa416be5209a0 Mon Sep 17 00:00:00 2001
+From 9082bc0d62f7d5e63d9d4b241ca318d4b736eb8f Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 4 May 2018 18:22:24 +0200
 Subject: [PATCH 23/23] Add amigaos thread model.
@@ -15,13 +15,17 @@ It is work in progress.
  gcc/doc/invoke.texi            |   9 +-
  libgcc/config/rs6000/t-amigaos |   5 +
  libgcc/configure               |   1 +
- libgcc/gthr-amigaos-native.c   | 697 +++++++++++++++++++++++++++++++++++++++++
- libgcc/gthr-amigaos-single.c   | 135 ++++++++
+ libgcc/gthr-amigaos-asserts.h  |   7 +
+ libgcc/gthr-amigaos-native.c   | 707 +++++++++++++++++++++++++++++++++++++++++
+ libgcc/gthr-amigaos-posix.c    | 182 +++++++++++
+ libgcc/gthr-amigaos-single.c   | 141 ++++++++
  libgcc/gthr-amigaos.h          | 347 ++++++++++++++++++++
  libstdc++-v3/configure         |  15 +-
- 14 files changed, 1245 insertions(+), 12 deletions(-)
+ 16 files changed, 1450 insertions(+), 12 deletions(-)
  create mode 100644 gcc/config/rs6000/x-amigaos
+ create mode 100644 libgcc/gthr-amigaos-asserts.h
  create mode 100644 libgcc/gthr-amigaos-native.c
+ create mode 100644 libgcc/gthr-amigaos-posix.c
  create mode 100644 libgcc/gthr-amigaos-single.c
  create mode 100644 libgcc/gthr-amigaos.h
 
@@ -242,7 +246,7 @@ index 3a7fe4352fc063a5326e042ad1cf0cdda18299c2..02381135b1f42e8148da9cbcd3072d03
  @cindex ARC options
  
 diff --git a/libgcc/config/rs6000/t-amigaos b/libgcc/config/rs6000/t-amigaos
-index da1e303eed7e60df883971a610e8904db0df3e23..b7e5d3234458f2fe93778c9eb8813b712174059a 100644
+index da1e303eed7e60df883971a610e8904db0df3e23..fa9d22e72161436c81f6a9f687ddaa752f01a966 100644
 --- a/libgcc/config/rs6000/t-amigaos
 +++ b/libgcc/config/rs6000/t-amigaos
 @@ -40,6 +40,11 @@ SHLIB_LINK = $(GCC_FOR_TARGET) -shared $(SHLIB_OBJS) -nodefaultlibs $(LIBGCC2_CF
@@ -253,7 +257,7 @@ index da1e303eed7e60df883971a610e8904db0df3e23..b7e5d3234458f2fe93778c9eb8813b71
  	$(INSTALL_DATA) $(SHLIB_DIR)/$(SHLIB_SONAME) \
  	  $(DESTDIR)$(inst_libdir)/libgcc$(SHLIB_EXT);
 +
-+EXTRA_PARTS += gthr-amigaos-single.o gthr-amigaos-native.o
++EXTRA_PARTS += gthr-amigaos-native.o gthr-amigaos-single.o gthr-amigaos-pthread.o
 +
 +gthr-amigaos-%.o: $(srcdir)/gthr-amigaos-%.c $(srcdir)/gthr-amigaos.h
 +	$(gcc_compile) -c $<
@@ -275,12 +279,25 @@ index b2f3f8708441e473b8e2941c4748748b6c7c40b8..5e486be60eef6666e1d8c548163bce5d
      posix)	thread_header=gthr-posix.h ;;
      rtems)	thread_header=config/gthr-rtems.h ;;
      single)	thread_header=gthr-single.h ;;
+diff --git a/libgcc/gthr-amigaos-asserts.h b/libgcc/gthr-amigaos-asserts.h
+new file mode 100644
+index 0000000000000000000000000000000000000000..26950789d4ad3609590f12515c6f84cb9fd12192
+--- /dev/null
++++ b/libgcc/gthr-amigaos-asserts.h
+@@ -0,0 +1,7 @@
++#ifndef __cplusplus
++_Static_assert(__atomic_always_lock_free(sizeof(uint32_t), 0), "Access to uint32_t is not lock free");
++_Static_assert(__atomic_always_lock_free(sizeof(char), 0), "Access to char is not lock free");
++_Static_assert(sizeof(__gthread_once_t) >= sizeof(__internal_gthread_once_t), "__gthread_once_t not large enough!");
++_Static_assert(sizeof(__gthread_mutex_t) >= sizeof(__internal_gthread_mutex_t), "__gthread_mutex_t not large enough!");
++_Static_assert(sizeof(__gthread_cond_t) >= sizeof(__internal_gthread_cond_t), "__gthread_recursive_mutex_t not large enough!");
++#endif
 diff --git a/libgcc/gthr-amigaos-native.c b/libgcc/gthr-amigaos-native.c
 new file mode 100644
-index 0000000000000000000000000000000000000000..86c83ec756c8e827d6c1e75ce598ca6daa760d15
+index 0000000000000000000000000000000000000000..b8d595f8445b404fc2f94319732a64f031b7459f
 --- /dev/null
 +++ b/libgcc/gthr-amigaos-native.c
-@@ -0,0 +1,697 @@
+@@ -0,0 +1,707 @@
 +/**
 + * This is the native implementation of gcc threads abstraction. The advantage
 + * over the pthreads one is that no pthreads.library is needed.
@@ -315,6 +332,19 @@ index 0000000000000000000000000000000000000000..86c83ec756c8e827d6c1e75ce598ca6d
 +{
 +  union
 +  {
++    __gthread_once_t gonce;
++    struct
++    {
++      char done;
++      char started;
++    } i;
++  } u;
++} __internal_gthread_once_t;
++
++typedef struct
++{
++  union
++  {
 +    __gthread_mutex_t gmutex;
 +    struct
 +    {
@@ -339,12 +369,7 @@ index 0000000000000000000000000000000000000000..86c83ec756c8e827d6c1e75ce598ca6d
 +
 +/******************************************************************************/
 +
-+#ifndef __cplusplus
-+_Static_assert(__atomic_always_lock_free(sizeof(uint32_t), 0), "Access to uint32_t is not lock free");
-+_Static_assert(__atomic_always_lock_free(sizeof(char), 0), "Access to char is not lock free");
-+_Static_assert(sizeof(__gthread_mutex_t) >= sizeof(__internal_gthread_mutex_t), "__gthread_mutex_t not large enough!");
-+_Static_assert(sizeof(__gthread_cond_t) >= sizeof(__internal_gthread_cond_t), "__gthread_recursive_mutex_t not large enough!");
-+#endif
++#include "gthr-amigaos-asserts.h"
 +
 +/******************************************************************************/
 +
@@ -359,13 +384,15 @@ index 0000000000000000000000000000000000000000..86c83ec756c8e827d6c1e75ce598ca6d
 +int
 +__gthread_once (__gthread_once_t *__once, void (*__func) (void))
 +{
++  __internal_gthread_once_t *once = (__internal_gthread_once_t *)__once;
++
 +  if (__once == NULL || __func == NULL)
 +    return EINVAL;
 +
-+  if (__atomic_load_1(&__once->done, __ATOMIC_SEQ_CST))
++  if (__atomic_load_1(&once->u.i.done, __ATOMIC_SEQ_CST))
 +    return 0;
 +
-+  if (!__atomic_test_and_set(&__once->started, __ATOMIC_SEQ_CST))
++  if (!__atomic_test_and_set(&once->u.i.started, __ATOMIC_SEQ_CST))
 +    {
 +      /* Started flag was not set so call func now */
 +      __func();
@@ -374,11 +401,11 @@ index 0000000000000000000000000000000000000000..86c83ec756c8e827d6c1e75ce598ca6d
 +       * store visible to all the other clients that will read that we are
 +       * actually done.
 +       */
-+      __atomic_store_1(&__once->done, 1, __ATOMIC_SEQ_CST);
++      __atomic_store_1(&once->u.i.done, 1, __ATOMIC_SEQ_CST);
 +    }
 +  else
 +    {
-+      while (!__atomic_load_1(&__once->done, __ATOMIC_SEQ_CST))
++      while (!__atomic_load_1(&once->u.i.done, __ATOMIC_SEQ_CST))
 +        {
 +          /* Allow the other thread to progress quickly */
 +          IExec->Reschedule();
@@ -978,12 +1005,200 @@ index 0000000000000000000000000000000000000000..86c83ec756c8e827d6c1e75ce598ca6d
 +#ifdef __cplusplus
 +}
 +#endif
+diff --git a/libgcc/gthr-amigaos-posix.c b/libgcc/gthr-amigaos-posix.c
+new file mode 100644
+index 0000000000000000000000000000000000000000..05269eafba81e02950ab2b25ea9f3ba19c8bf9e3
+--- /dev/null
++++ b/libgcc/gthr-amigaos-posix.c
+@@ -0,0 +1,182 @@
++/**
++ * This is the posix.libraray-based implementation of gcc threads abstraction.
++ */
++
++#include "gthr-amigaos.h"
++
++#include <pthread.h>
++
++#define UNUSED __attribute__((__unused__))
++
++#ifdef __cplusplus
++extern "C"
++{
++#endif
++
++/******************************************************************************/
++
++typedef struct
++{
++  union
++  {
++    __gthread_once_t gonce;
++    pthread_once_t ionce;
++  } u;
++} __internal_gthread_once_t;
++
++typedef struct
++{
++  union
++  {
++    __gthread_mutex_t gmutex;
++  } u;
++} __internal_gthread_mutex_t;
++
++typedef struct
++{
++  union
++  {
++    __gthread_cond_t gcond;
++  } u;
++} __internal_gthread_cond_t;
++
++
++/******************************************************************************/
++
++#include "gthr-amigaos-asserts.h"
++
++/******************************************************************************/
++
++int
++__gthread_active_p (void)
++{
++  return 0;
++}
++
++int
++__gthread_once (__gthread_once_t *__once, void (*__func) (void))
++{
++  __internal_gthread_once_t *once = (__internal_gthread_once_t *)__once;
++
++  if (__gthread_active_p ())
++    return pthread_once (&once->u.ionce, __func);
++  else
++    return -1;
++}
++
++int UNUSED
++__gthread_key_create (__gthread_key_t *__key UNUSED, void (*__func) (void *) UNUSED)
++{
++  return 0;
++}
++
++int UNUSED
++__gthread_key_delete (__gthread_key_t __key UNUSED)
++{
++  return 0;
++}
++
++void *
++__gthread_getspecific (__gthread_key_t __key UNUSED)
++{
++  return 0;
++}
++
++int
++__gthread_setspecific (__gthread_key_t __key UNUSED, const void *__v UNUSED)
++{
++  return 0;
++}
++
++int
++__gthread_mutex_init (__gthread_mutex_t *__mutex UNUSED)
++{
++  return 0;
++}
++
++int
++__gthread_mutex_destroy (__gthread_mutex_t *__mutex UNUSED)
++{
++  return 0;
++}
++
++int
++__gthread_mutex_lock (__gthread_mutex_t *__mutex UNUSED)
++{
++  return 0;
++}
++
++int
++__gthread_mutex_trylock (__gthread_mutex_t *__mutex UNUSED)
++{
++  return 0;
++}
++
++int
++__gthread_mutex_unlock (__gthread_mutex_t *__mutex UNUSED)
++{
++  return 0;
++}
++
++int
++__gthread_recursive_mutex_init (__gthread_recursive_mutex_t *__mutex UNUSED)
++{
++  return 0;
++}
++
++int
++__gthread_recursive_mutex_lock (__gthread_recursive_mutex_t *__mutex)
++{
++  return 0;
++}
++
++int
++__gthread_recursive_mutex_trylock (__gthread_recursive_mutex_t *__mutex)
++{
++  return 0;
++}
++
++int
++__gthread_recursive_mutex_unlock (__gthread_recursive_mutex_t *__mutex)
++{
++  return 0;
++}
++
++int
++__gthread_recursive_mutex_destroy (__gthread_recursive_mutex_t *__mutex)
++{
++  return 0;
++}
++
++int
++__gthread_create (__gthread_t *thread, void *(*func) (void*), void *args)
++{
++  return 0;
++}
++
++int
++__gthread_join (__gthread_t thread, void **value_ptr)
++{
++  return 0;
++}
++
++int
++__gthread_detach (__gthread_t thread)
++{
++  return 0;
++}
++
++int
++__gthread_equal (__gthread_t t1, __gthread_t t2)
++{
++  return 0;
++}
++
++__gthread_t __gthread_self (void)
++{
++  return 0;
++}
++
++#ifdef __cplusplus
++}
++#endif
 diff --git a/libgcc/gthr-amigaos-single.c b/libgcc/gthr-amigaos-single.c
 new file mode 100644
-index 0000000000000000000000000000000000000000..ecf04721f0a57d14f4d111ccbfde124b3a1356df
+index 0000000000000000000000000000000000000000..d68a3e019fbac94a93a420fcf59476d2563fccbf
 --- /dev/null
 +++ b/libgcc/gthr-amigaos-single.c
-@@ -0,0 +1,135 @@
+@@ -0,0 +1,141 @@
 +/**
 + * This is the single-thread implementation of gcc threads abstraction.
 + */
@@ -1064,31 +1279,37 @@ index 0000000000000000000000000000000000000000..ecf04721f0a57d14f4d111ccbfde124b
 +}
 +
 +int
-+__gthread_recursive_mutex_lock (__gthread_recursive_mutex_t *__mutex)
++__gthread_recursive_mutex_init (__gthread_recursive_mutex_t *__mutex UNUSED)
 +{
 +  return 0;
 +}
 +
 +int
-+__gthread_recursive_mutex_trylock (__gthread_recursive_mutex_t *__mutex)
++__gthread_recursive_mutex_lock (__gthread_recursive_mutex_t *__mutex UNUSED)
 +{
 +  return 0;
 +}
 +
 +int
-+__gthread_recursive_mutex_unlock (__gthread_recursive_mutex_t *__mutex)
++__gthread_recursive_mutex_trylock (__gthread_recursive_mutex_t *__mutex UNUSED)
 +{
 +  return 0;
 +}
 +
 +int
-+__gthread_recursive_mutex_destroy (__gthread_recursive_mutex_t *__mutex)
++__gthread_recursive_mutex_unlock (__gthread_recursive_mutex_t *__mutex UNUSED)
 +{
 +  return 0;
 +}
 +
 +int
-+__gthread_create (__gthread_t *thread, void *(*func) (void*), void *args)
++__gthread_recursive_mutex_destroy (__gthread_recursive_mutex_t *__mutex UNUSED)
++{
++  return 0;
++}
++
++int
++__gthread_create (__gthread_t *thread, void *(*func) (void*), void *args UNUSED)
 +{
 +  return 0;
 +}
@@ -1121,7 +1342,7 @@ index 0000000000000000000000000000000000000000..ecf04721f0a57d14f4d111ccbfde124b
 +#endif
 diff --git a/libgcc/gthr-amigaos.h b/libgcc/gthr-amigaos.h
 new file mode 100644
-index 0000000000000000000000000000000000000000..878f8acdc0b263508e091e6def225410753ed5bc
+index 0000000000000000000000000000000000000000..8448f07ecddd5395bbf99feec0dfdbd02b3aa28a
 --- /dev/null
 +++ b/libgcc/gthr-amigaos.h
 @@ -0,0 +1,347 @@
@@ -1156,7 +1377,7 @@ index 0000000000000000000000000000000000000000..878f8acdc0b263508e091e6def225410
 +#include <stdlib.h>
 +#include <stdint.h>
 +
-+typedef struct { char done; char started; } __gthread_once_t;
++typedef struct { int data1, data2;} __gthread_once_t;
 +
 +typedef struct { int id; void (*destroy) (void *);} __gthread_key_t;
 +
