@@ -324,12 +324,12 @@ ReadMe: ReadMe.mak
 # but which is the same as the given one.
 #
 # We use cp here until we know that softlinks would work properly.
-define MAKE_TARGET_ALIAS =
+define MAKE_TARGET_ALIAS
 	cp /gcc/bin/$(1) /gcc/bin/ppc-amigaos-$(1)
 endef
 
 # A simple macro for inserting a newline
-define NL =
+define NL
 
 
 endef
