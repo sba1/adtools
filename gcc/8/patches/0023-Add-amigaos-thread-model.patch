@@ -1,4 +1,4 @@
-From 9082bc0d62f7d5e63d9d4b241ca318d4b736eb8f Mon Sep 17 00:00:00 2001
+From 3ffd9135a1337a1d0eacd48e4bb725615ee65890 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 4 May 2018 18:22:24 +0200
 Subject: [PATCH 23/23] Add amigaos thread model.
@@ -16,12 +16,12 @@ It is work in progress.
  libgcc/config/rs6000/t-amigaos |   5 +
  libgcc/configure               |   1 +
  libgcc/gthr-amigaos-asserts.h  |   7 +
- libgcc/gthr-amigaos-native.c   | 707 +++++++++++++++++++++++++++++++++++++++++
- libgcc/gthr-amigaos-posix.c    | 182 +++++++++++
+ libgcc/gthr-amigaos-native.c   | 718 +++++++++++++++++++++++++++++++++++++++++
+ libgcc/gthr-amigaos-posix.c    | 215 ++++++++++++
  libgcc/gthr-amigaos-single.c   | 141 ++++++++
  libgcc/gthr-amigaos.h          | 347 ++++++++++++++++++++
  libstdc++-v3/configure         |  15 +-
- 16 files changed, 1450 insertions(+), 12 deletions(-)
+ 16 files changed, 1494 insertions(+), 12 deletions(-)
  create mode 100644 gcc/config/rs6000/x-amigaos
  create mode 100644 libgcc/gthr-amigaos-asserts.h
  create mode 100644 libgcc/gthr-amigaos-native.c
@@ -294,10 +294,10 @@ index 0000000000000000000000000000000000000000..26950789d4ad3609590f12515c6f84cb
 +#endif
 diff --git a/libgcc/gthr-amigaos-native.c b/libgcc/gthr-amigaos-native.c
 new file mode 100644
-index 0000000000000000000000000000000000000000..b8d595f8445b404fc2f94319732a64f031b7459f
+index 0000000000000000000000000000000000000000..7666bbd11f090aa1ef14ecd90a38753be5811b8f
 --- /dev/null
 +++ b/libgcc/gthr-amigaos-native.c
-@@ -0,0 +1,707 @@
+@@ -0,0 +1,718 @@
 +/**
 + * This is the native implementation of gcc threads abstraction. The advantage
 + * over the pthreads one is that no pthreads.library is needed.
@@ -376,7 +376,10 @@ index 0000000000000000000000000000000000000000..b8d595f8445b404fc2f94319732a64f0
 +int
 +__gthread_active_p (void)
 +{
-+  return 0;
++  /* Thread-system is always active as we have to be explicitly linked to the
++   * final binary.
++   */
++  return 1;
 +}
 +
 +/******************************************************************************/
@@ -859,7 +862,8 @@ index 0000000000000000000000000000000000000000..b8d595f8445b404fc2f94319732a64f0
 +  return t1 == t2;
 +}
 +
-+__gthread_t __gthread_self (void)
++__gthread_t
++__gthread_self (void)
 +{
 +  struct Task *task = IExec->FindTask(NULL);
 +  static threadentry_t *thr;
@@ -871,6 +875,13 @@ index 0000000000000000000000000000000000000000..b8d595f8445b404fc2f94319732a64f0
 +
 +  /* FIXME: Record this thread */
 +  return -1;
++}
++
++int
++__gthread_yield (void)
++{
++  IExec->Reschedule();
++  return 0;
 +}
 +
 +/******************************************************************************/
@@ -1007,10 +1018,10 @@ index 0000000000000000000000000000000000000000..b8d595f8445b404fc2f94319732a64f0
 +#endif
 diff --git a/libgcc/gthr-amigaos-posix.c b/libgcc/gthr-amigaos-posix.c
 new file mode 100644
-index 0000000000000000000000000000000000000000..05269eafba81e02950ab2b25ea9f3ba19c8bf9e3
+index 0000000000000000000000000000000000000000..003d80e5ec6732eb222c29401a5af158b18ca54e
 --- /dev/null
 +++ b/libgcc/gthr-amigaos-posix.c
-@@ -0,0 +1,182 @@
+@@ -0,0 +1,215 @@
 +/**
 + * This is the posix.libraray-based implementation of gcc threads abstraction.
 + */
@@ -1018,8 +1029,7 @@ index 0000000000000000000000000000000000000000..05269eafba81e02950ab2b25ea9f3ba1
 +#include "gthr-amigaos.h"
 +
 +#include <pthread.h>
-+
-+#define UNUSED __attribute__((__unused__))
++#include <proto/exec.h>
 +
 +#ifdef __cplusplus
 +extern "C"
@@ -1033,7 +1043,7 @@ index 0000000000000000000000000000000000000000..05269eafba81e02950ab2b25ea9f3ba1
 +  union
 +  {
 +    __gthread_once_t gonce;
-+    pthread_once_t ionce;
++    pthread_once_t ponce;
 +  } u;
 +} __internal_gthread_once_t;
 +
@@ -1042,6 +1052,7 @@ index 0000000000000000000000000000000000000000..05269eafba81e02950ab2b25ea9f3ba1
 +  union
 +  {
 +    __gthread_mutex_t gmutex;
++    pthread_mutex_t pmutex;
 +  } u;
 +} __internal_gthread_mutex_t;
 +
@@ -1050,6 +1061,7 @@ index 0000000000000000000000000000000000000000..05269eafba81e02950ab2b25ea9f3ba1
 +  union
 +  {
 +    __gthread_cond_t gcond;
++    pthread_cond_t pcond;
 +  } u;
 +} __internal_gthread_cond_t;
 +
@@ -1063,7 +1075,10 @@ index 0000000000000000000000000000000000000000..05269eafba81e02950ab2b25ea9f3ba1
 +int
 +__gthread_active_p (void)
 +{
-+  return 0;
++  /* Thread-system is always active as we have to be explicitly linked to the
++   * final binary.
++   */
++  return 1;
 +}
 +
 +int
@@ -1072,63 +1087,79 @@ index 0000000000000000000000000000000000000000..05269eafba81e02950ab2b25ea9f3ba1
 +  __internal_gthread_once_t *once = (__internal_gthread_once_t *)__once;
 +
 +  if (__gthread_active_p ())
-+    return pthread_once (&once->u.ionce, __func);
++    return pthread_once (&once->u.ponce, __func);
 +  else
 +    return -1;
 +}
 +
-+int UNUSED
-+__gthread_key_create (__gthread_key_t *__key UNUSED, void (*__func) (void *) UNUSED)
++int
++__gthread_key_create (__gthread_key_t *__key, void (*__func) (void *))
 +{
++  int err;
++  pthread_key_t key;
++
++  if ((err = pthread_key_create (&key, __func)))
++    return err;
++  __key->id = key;
 +  return 0;
 +}
 +
-+int UNUSED
-+__gthread_key_delete (__gthread_key_t __key UNUSED)
++int
++__gthread_key_delete (__gthread_key_t __key)
 +{
-+  return 0;
++  return pthread_key_delete (__key.id);
 +}
 +
 +void *
-+__gthread_getspecific (__gthread_key_t __key UNUSED)
++__gthread_getspecific (__gthread_key_t __key)
 +{
-+  return 0;
++  return pthread_getspecific (__key.id);
 +}
 +
 +int
-+__gthread_setspecific (__gthread_key_t __key UNUSED, const void *__v UNUSED)
++__gthread_setspecific (__gthread_key_t __key, const void *__v)
 +{
-+  return 0;
++  return pthread_setspecific (__key.id, __v);
 +}
 +
 +int
-+__gthread_mutex_init (__gthread_mutex_t *__mutex UNUSED)
++__gthread_mutex_init (__gthread_mutex_t *__mutex)
 +{
-+  return 0;
++  __internal_gthread_mutex_t *mx = (__internal_gthread_mutex_t *)__mutex;
++
++  return pthread_mutex_init (&mx->u.pmutex, 0);
 +}
 +
 +int
-+__gthread_mutex_destroy (__gthread_mutex_t *__mutex UNUSED)
++__gthread_mutex_destroy (__gthread_mutex_t *__mutex)
 +{
-+  return 0;
++  __internal_gthread_mutex_t *mx = (__internal_gthread_mutex_t *)__mutex;
++
++  return pthread_mutex_destroy (&mx->u.pmutex);
 +}
 +
 +int
 +__gthread_mutex_lock (__gthread_mutex_t *__mutex UNUSED)
 +{
-+  return 0;
++  __internal_gthread_mutex_t *mx = (__internal_gthread_mutex_t *)__mutex;
++
++  return pthread_mutex_lock (&mx->u.pmutex);
 +}
 +
 +int
 +__gthread_mutex_trylock (__gthread_mutex_t *__mutex UNUSED)
 +{
-+  return 0;
++  __internal_gthread_mutex_t *mx = (__internal_gthread_mutex_t *)__mutex;
++
++  return pthread_mutex_trylock (&mx->u.pmutex);
 +}
 +
 +int
 +__gthread_mutex_unlock (__gthread_mutex_t *__mutex UNUSED)
 +{
-+  return 0;
++  __internal_gthread_mutex_t *mx = (__internal_gthread_mutex_t *)__mutex;
++
++  return pthread_mutex_unlock (&mx->u.pmutex);
 +}
 +
 +int
@@ -1164,29 +1195,42 @@ index 0000000000000000000000000000000000000000..05269eafba81e02950ab2b25ea9f3ba1
 +int
 +__gthread_create (__gthread_t *thread, void *(*func) (void*), void *args)
 +{
++  int err;
++  pthread_t pthread;
++
++  if ((err =  pthread_create (&pthread, NULL, func, args)))
++    return err;
++  *thread = pthread;
 +  return 0;
 +}
 +
 +int
 +__gthread_join (__gthread_t thread, void **value_ptr)
 +{
-+  return 0;
++  return pthread_join (thread, value_ptr);
 +}
 +
 +int
 +__gthread_detach (__gthread_t thread)
 +{
-+  return 0;
++  return pthread_detach (thread);
 +}
 +
 +int
 +__gthread_equal (__gthread_t t1, __gthread_t t2)
 +{
-+  return 0;
++  return pthread_equal (t1, t2);
 +}
 +
 +__gthread_t __gthread_self (void)
 +{
++  return pthread_self ();
++}
++
++int
++__gthread_yield (void)
++{
++  IExec->Reschedule();
 +  return 0;
 +}
 +
@@ -1342,7 +1386,7 @@ index 0000000000000000000000000000000000000000..d68a3e019fbac94a93a420fcf59476d2
 +#endif
 diff --git a/libgcc/gthr-amigaos.h b/libgcc/gthr-amigaos.h
 new file mode 100644
-index 0000000000000000000000000000000000000000..8448f07ecddd5395bbf99feec0dfdbd02b3aa28a
+index 0000000000000000000000000000000000000000..945bdd1dc65b9bf8de065c08a02c8208c25b113a
 --- /dev/null
 +++ b/libgcc/gthr-amigaos.h
 @@ -0,0 +1,347 @@
@@ -1379,7 +1423,7 @@ index 0000000000000000000000000000000000000000..8448f07ecddd5395bbf99feec0dfdbd0
 +
 +typedef struct { int data1, data2;} __gthread_once_t;
 +
-+typedef struct { int id; void (*destroy) (void *);} __gthread_key_t;
++typedef struct { long unsigned int id; void (*destroy) (void *);} __gthread_key_t;
 +
 +/* Should cover at least as much data as the maximum of sizeof(struct SignalSemaphore)
 + * and sizeof(pthread_mutex_t)
