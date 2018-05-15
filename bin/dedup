@@ -1,0 +1,47 @@
+#!/usr/bin/python
+#
+# A simple script to make links from duplicates of the given folder.
+#
+
+from __future__ import print_function
+
+import os
+import sys
+
+from subprocess import check_output
+
+if False:
+	from typing import Dict, List
+
+if len(sys.argv) <= 1:
+	sys.exit("Missing folder on which to operate")
+
+md5_dict = dict(); # type: Dict[str, List[str]]
+
+# Check if the file is an (AmigaOS) elf
+def is_elf(filename): # type: (str) -> bool
+	with open(filename, "rb") as f:
+		buf = f.read(4)
+		if buf == '\x7f\x45\x4c\x46':
+			return True;
+	return False
+
+folder = sys.argv[1] # type: str
+for (dirpath, dirnames, filenames) in os.walk(folder):
+	for filename in filenames:
+		full_name = os.path.join(dirpath, filename)
+		if not is_elf(full_name):
+			continue
+		md5 = check_output(["md5sum", full_name]).split()[0]
+		if not md5 in md5_dict:
+			md5_dict[md5] = []
+		md5_dict[md5].append(full_name)
+
+for md5 in md5_dict:
+	files = sorted(md5_dict[md5],key=lambda x: len(x))
+	if len(files) > 1:
+		target = files[-1]
+		for f in files[:-1]:
+			# Create a relative path to the target starting at the dir of the duplicate
+			relative_target = os.path.relpath(target,start=os.path.dirname(f))
+			print("ln -sf {0} {1}".format(relative_target, f))
