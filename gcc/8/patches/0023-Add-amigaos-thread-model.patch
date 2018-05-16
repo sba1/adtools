@@ -1,4 +1,4 @@
-From 3ffd9135a1337a1d0eacd48e4bb725615ee65890 Mon Sep 17 00:00:00 2001
+From 7badfedc42a814a4dc13b5e5ecb48200541c01c3 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 4 May 2018 18:22:24 +0200
 Subject: [PATCH 23/23] Add amigaos thread model.
@@ -15,13 +15,13 @@ It is work in progress.
  gcc/doc/invoke.texi            |   9 +-
  libgcc/config/rs6000/t-amigaos |   5 +
  libgcc/configure               |   1 +
- libgcc/gthr-amigaos-asserts.h  |   7 +
+ libgcc/gthr-amigaos-asserts.h  |   8 +
  libgcc/gthr-amigaos-native.c   | 718 +++++++++++++++++++++++++++++++++++++++++
- libgcc/gthr-amigaos-posix.c    | 215 ++++++++++++
+ libgcc/gthr-amigaos-posix.c    | 233 +++++++++++++
  libgcc/gthr-amigaos-single.c   | 141 ++++++++
  libgcc/gthr-amigaos.h          | 347 ++++++++++++++++++++
  libstdc++-v3/configure         |  15 +-
- 16 files changed, 1494 insertions(+), 12 deletions(-)
+ 16 files changed, 1513 insertions(+), 12 deletions(-)
  create mode 100644 gcc/config/rs6000/x-amigaos
  create mode 100644 libgcc/gthr-amigaos-asserts.h
  create mode 100644 libgcc/gthr-amigaos-native.c
@@ -281,15 +281,16 @@ index b2f3f8708441e473b8e2941c4748748b6c7c40b8..5e486be60eef6666e1d8c548163bce5d
      single)	thread_header=gthr-single.h ;;
 diff --git a/libgcc/gthr-amigaos-asserts.h b/libgcc/gthr-amigaos-asserts.h
 new file mode 100644
-index 0000000000000000000000000000000000000000..26950789d4ad3609590f12515c6f84cb9fd12192
+index 0000000000000000000000000000000000000000..bb6005cd52ef75cc7bfbc276d5d56ec54ed633cd
 --- /dev/null
 +++ b/libgcc/gthr-amigaos-asserts.h
-@@ -0,0 +1,7 @@
+@@ -0,0 +1,8 @@
 +#ifndef __cplusplus
 +_Static_assert(__atomic_always_lock_free(sizeof(uint32_t), 0), "Access to uint32_t is not lock free");
 +_Static_assert(__atomic_always_lock_free(sizeof(char), 0), "Access to char is not lock free");
 +_Static_assert(sizeof(__gthread_once_t) >= sizeof(__internal_gthread_once_t), "__gthread_once_t not large enough!");
 +_Static_assert(sizeof(__gthread_mutex_t) >= sizeof(__internal_gthread_mutex_t), "__gthread_mutex_t not large enough!");
++_Static_assert(sizeof(__gthread_recursive_mutex_t) >= sizeof(__internal_gthread_mutex_t), "__gthread_recursive_mutex_t not large enough!");
 +_Static_assert(sizeof(__gthread_cond_t) >= sizeof(__internal_gthread_cond_t), "__gthread_recursive_mutex_t not large enough!");
 +#endif
 diff --git a/libgcc/gthr-amigaos-native.c b/libgcc/gthr-amigaos-native.c
@@ -1018,10 +1019,10 @@ index 0000000000000000000000000000000000000000..7666bbd11f090aa1ef14ecd90a38753b
 +#endif
 diff --git a/libgcc/gthr-amigaos-posix.c b/libgcc/gthr-amigaos-posix.c
 new file mode 100644
-index 0000000000000000000000000000000000000000..003d80e5ec6732eb222c29401a5af158b18ca54e
+index 0000000000000000000000000000000000000000..53caa3c686d42a39324ce79c0555611263f0b141
 --- /dev/null
 +++ b/libgcc/gthr-amigaos-posix.c
-@@ -0,0 +1,215 @@
+@@ -0,0 +1,233 @@
 +/**
 + * This is the posix.libraray-based implementation of gcc threads abstraction.
 + */
@@ -1139,7 +1140,7 @@ index 0000000000000000000000000000000000000000..003d80e5ec6732eb222c29401a5af158
 +}
 +
 +int
-+__gthread_mutex_lock (__gthread_mutex_t *__mutex UNUSED)
++__gthread_mutex_lock (__gthread_mutex_t *__mutex)
 +{
 +  __internal_gthread_mutex_t *mx = (__internal_gthread_mutex_t *)__mutex;
 +
@@ -1147,7 +1148,7 @@ index 0000000000000000000000000000000000000000..003d80e5ec6732eb222c29401a5af158
 +}
 +
 +int
-+__gthread_mutex_trylock (__gthread_mutex_t *__mutex UNUSED)
++__gthread_mutex_trylock (__gthread_mutex_t *__mutex)
 +{
 +  __internal_gthread_mutex_t *mx = (__internal_gthread_mutex_t *)__mutex;
 +
@@ -1155,7 +1156,7 @@ index 0000000000000000000000000000000000000000..003d80e5ec6732eb222c29401a5af158
 +}
 +
 +int
-+__gthread_mutex_unlock (__gthread_mutex_t *__mutex UNUSED)
++__gthread_mutex_unlock (__gthread_mutex_t *__mutex)
 +{
 +  __internal_gthread_mutex_t *mx = (__internal_gthread_mutex_t *)__mutex;
 +
@@ -1163,33 +1164,51 @@ index 0000000000000000000000000000000000000000..003d80e5ec6732eb222c29401a5af158
 +}
 +
 +int
-+__gthread_recursive_mutex_init (__gthread_recursive_mutex_t *__mutex UNUSED)
++__gthread_recursive_mutex_init (__gthread_recursive_mutex_t *__mutex)
 +{
-+  return 0;
++  __internal_gthread_mutex_t *mx = (__internal_gthread_mutex_t *)__mutex;
++
++  pthread_mutexattr_t attr;
++  int err;
++
++  if ((err = pthread_mutexattr_init (&attr)))
++    return err;
++  if ((err = pthread_mutexattr_settype (&attr, PTHREAD_MUTEX_RECURSIVE)))
++    goto bailout;
++  if ((err = pthread_mutex_init (&mx->u.pmutex, &attr)))
++    goto bailout;
++  return pthread_mutexattr_destroy (&attr);
++bailout:
++  pthread_mutexattr_destroy (&attr);
++  return err;
 +}
 +
 +int
 +__gthread_recursive_mutex_lock (__gthread_recursive_mutex_t *__mutex)
 +{
-+  return 0;
++  __internal_gthread_mutex_t *mx = (__internal_gthread_mutex_t *)__mutex;
++  return pthread_mutex_lock (&mx->u.pmutex);
 +}
 +
 +int
 +__gthread_recursive_mutex_trylock (__gthread_recursive_mutex_t *__mutex)
 +{
-+  return 0;
++  __internal_gthread_mutex_t *mx = (__internal_gthread_mutex_t *)__mutex;
++  return pthread_mutex_trylock (&mx->u.pmutex);
 +}
 +
 +int
 +__gthread_recursive_mutex_unlock (__gthread_recursive_mutex_t *__mutex)
 +{
-+  return 0;
++  __internal_gthread_mutex_t *mx = (__internal_gthread_mutex_t *)__mutex;
++  return pthread_mutex_unlock (&mx->u.pmutex);
 +}
 +
 +int
 +__gthread_recursive_mutex_destroy (__gthread_recursive_mutex_t *__mutex)
 +{
-+  return 0;
++  __internal_gthread_mutex_t *mx = (__internal_gthread_mutex_t *)__mutex;
++  return pthread_mutex_destroy (&mx->u.pmutex);
 +}
 +
 +int
