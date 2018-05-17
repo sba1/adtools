@@ -17,10 +17,10 @@ if False:
 parser = argparse.ArgumentParser(description="""
         Create scripts for deduplicating files of a given folder
         """)
-parser.add_argument('folder', description="The root folder where to start the deduplication")
+parser.add_argument('folder', help="The root folder where to start the deduplication")
 args = parser.parse_args()
 
-md5_dict = dict(); # type: Dict[str, List[str]]
+md5_dict = dict() # type: Dict[str, List[str]]
 
 # Check if the file is an (AmigaOS) elf
 def is_elf(filename): # type: (str) -> bool
