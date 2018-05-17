@@ -5,6 +5,7 @@
 
 from __future__ import print_function
 
+import argparse
 import os
 import sys
 
@@ -13,8 +14,11 @@ from subprocess import check_output
 if False:
 	from typing import Dict, List
 
-if len(sys.argv) <= 1:
-	sys.exit("Missing folder on which to operate")
+parser = argparse.ArgumentParser(description="""
+        Create scripts for deduplicating files of a given folder
+        """)
+parser.add_argument('folder', description="The root folder where to start the deduplication")
+args = parser.parse_args()
 
 md5_dict = dict(); # type: Dict[str, List[str]]
 
@@ -26,7 +30,7 @@ def is_elf(filename): # type: (str) -> bool
 			return True;
 	return False
 
-folder = sys.argv[1] # type: str
+folder = args.folder # type: str
 for (dirpath, dirnames, filenames) in os.walk(folder):
 	for filename in filenames:
 		full_name = os.path.join(dirpath, filename)
