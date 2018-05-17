@@ -18,6 +18,8 @@ parser = argparse.ArgumentParser(description="""
         Create scripts for deduplicating files of a given folder
         """)
 parser.add_argument('folder', help="The root folder where to start the deduplication")
+parser.add_argument('--amigaos', help="Output a script that runs on AmigaOS", action='store_true')
+parser.add_argument('--folder-is-pwd', help="Output a script that assumes that the given folder is the current working directory", action='store_true')
 args = parser.parse_args()
 
 md5_dict = dict() # type: Dict[str, List[str]]
@@ -48,4 +50,9 @@ for md5 in md5_dict:
 		for f in files[:-1]:
 			# Create a relative path to the target starting at the dir of the duplicate
 			relative_target = os.path.relpath(target,start=os.path.dirname(f))
-			print("ln -sf {0} {1}".format(relative_target, f))
+			if not args.amigaos:
+				print("ln -sf {0} {1}".format(relative_target, f))
+			else:
+				f = f[len(folder):]
+				relative_target = relative_target.replace('../','/')
+				print("makelink {0} {1}".format(f, relative_target))
