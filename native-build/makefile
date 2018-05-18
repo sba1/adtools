@@ -427,6 +427,14 @@ native-dist: native-strip-really
 	rm -Rf /tmp/$(DIST_FOLDER)
 	mkdir /tmp/$(DIST_FOLDER)
 	cp -pR /gcc/* /tmp/$(DIST_FOLDER)
+
+	# Deduplicate
+	../bin/dedup /tmp/$(DIST_FOLDER) >.dedup
+	echo "; Create alternative filenames" >/tmp/$(DIST_FOLDER)/RestoreLinks
+	../bin/dedup /tmp/$(DIST_FOLDER) --amigaos --folder-is-pwd >>/tmp/$(DIST_FOLDER)/RestoreLinks
+	sh -x .dedup
+	rm .dedup
+
 	cd /tmp && lha ao5 $(realpath .)/$(DIST_FOLDER).lha $(DIST_FOLDER)/*
 
 #
