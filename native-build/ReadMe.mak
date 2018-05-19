@@ -55,5 +55,11 @@ Changes of the AmigaOS version
 ==============================
 
 In the doc folder, there is some usual gcc documentation provided. This is actually
-a diff of the original documentation, so AmigaOS-relevant changes are easily
+a diff to the original documentation, so AmigaOS-relevant changes are easily
 recognizable.
+
+Most notable changes are:
+ * --athread, -mbaserel, --mcrt, -mno-baserel, and --use-dyn-lib driver options
+ * baserel_restore, checktags, libcall, libcall2, linearvarargs function attributes
+ * force_no_baserel variable attribute
+ * tagtype enum attribute
