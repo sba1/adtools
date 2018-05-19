@@ -33,6 +33,10 @@ def is_elf(filename): # type: (str) -> bool
 	return False
 
 folder = args.folder # type: str
+folder = folder.rstrip('/')
+if len(folder) == 0:
+	sys.exit("Please specifiy a non-root folder.")
+
 for (dirpath, dirnames, filenames) in os.walk(folder):
 	for filename in filenames:
 		full_name = os.path.join(dirpath, filename)
