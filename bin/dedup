@@ -54,9 +54,13 @@ for md5 in md5_dict:
 		for f in files[:-1]:
 			# Create a relative path to the target starting at the dir of the duplicate
 			relative_target = os.path.relpath(target,start=os.path.dirname(f))
+
+			# Adapt the target location if requested
+			if args.folder_is_pwd:
+				f = f[len(folder)+1:]
+
 			if not args.amigaos:
 				print("ln -sf {0} {1}".format(relative_target, f))
 			else:
-				f = f[len(folder):]
 				relative_target = relative_target.replace('../','/')
 				print("makelink {0} {1}".format(f, relative_target))
