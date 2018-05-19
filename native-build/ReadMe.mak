@@ -29,8 +29,7 @@ Furthermore, you need to have an SDK: assign as in the original SDK.
 
 Note that if you use the APPDIR: feature you should flush its contents. Otherwise, you
 may observe unexpected behaviour. Most easily this can be achieved by entering
-
- 1> delete APPDIR:#?
+  1> delete APPDIR:#?
 
 This is a preliminary version and as such it will contain still many bugs. Please use
 the issue tracker at https://github.com/sba1/adtools/issues for reporting bugs.
