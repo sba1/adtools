@@ -1,4 +1,4 @@
-From 28fd1d68603db51851e349c0894c090293056e30 Mon Sep 17 00:00:00 2001
+From cd8b5783db9e73c95154d7bb62aafa43db900671 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 4 May 2018 18:22:24 +0200
 Subject: [PATCH 23/23] Add amigaos thread model.
@@ -16,12 +16,12 @@ It is work in progress.
  libgcc/config/rs6000/t-amigaos |   5 +
  libgcc/configure               |   1 +
  libgcc/gthr-amigaos-asserts.h  |   8 +
- libgcc/gthr-amigaos-native.c   | 725 +++++++++++++++++++++++++++++++++++++++++
+ libgcc/gthr-amigaos-native.c   | 755 +++++++++++++++++++++++++++++++++++++++++
  libgcc/gthr-amigaos-posix.c    | 233 +++++++++++++
  libgcc/gthr-amigaos-single.c   | 141 ++++++++
- libgcc/gthr-amigaos.h          | 347 ++++++++++++++++++++
+ libgcc/gthr-amigaos.h          | 347 +++++++++++++++++++
  libstdc++-v3/configure         |  15 +-
- 16 files changed, 1520 insertions(+), 12 deletions(-)
+ 16 files changed, 1550 insertions(+), 12 deletions(-)
  create mode 100644 gcc/config/rs6000/x-amigaos
  create mode 100644 libgcc/gthr-amigaos-asserts.h
  create mode 100644 libgcc/gthr-amigaos-native.c
@@ -295,10 +295,10 @@ index 0000000000000000000000000000000000000000..bb6005cd52ef75cc7bfbc276d5d56ec5
 +#endif
 diff --git a/libgcc/gthr-amigaos-native.c b/libgcc/gthr-amigaos-native.c
 new file mode 100644
-index 0000000000000000000000000000000000000000..38a7a1ca694b1272a0934acc8c2dad3d799d85cf
+index 0000000000000000000000000000000000000000..9cdf9b9480b1034c86cac6129b6112252ec53152
 --- /dev/null
 +++ b/libgcc/gthr-amigaos-native.c
-@@ -0,0 +1,725 @@
+@@ -0,0 +1,755 @@
 +/**
 + * This is the native implementation of gcc threads abstraction. The advantage
 + * over the pthreads one is that no pthreads.library is needed.
@@ -430,12 +430,18 @@ index 0000000000000000000000000000000000000000..38a7a1ca694b1272a0934acc8c2dad3d
 +
 +typedef struct keyentry keyentry_t;
 +
++struct key
++{
++  keyentry_t *first;
++  void (*destroy) (void *);
++};
++
 +typedef struct
 +{
 +  struct SignalSemaphore sem;
 +
 +  /* Each key is a single slot */
-+  keyentry_t **keyentries;
++  struct key *keys;
 +
 +  /* How many new keys */
 +  int num_key_entries;
@@ -481,25 +487,26 @@ index 0000000000000000000000000000000000000000..38a7a1ca694b1272a0934acc8c2dad3d
 +  IExec->ObtainSemaphore (&keystore->sem);
 +  if (keystore->num_key_entries >= keystore->num_key_entries_allocated)
 +    {
-+      keyentry_t **new_keyentries;
++      struct key *new_keys;
 +      int new_num_key_entries_allocated = keystore->num_key_entries_allocated * 2 + 4;
 +
-+      if (!(new_keyentries = (keyentry_t**)IExec->AllocVec (sizeof(**new_keyentries) * new_num_key_entries_allocated, 0)))
++      if (!(new_keys = (struct key *)IExec->AllocVec (sizeof(*new_keys) * new_num_key_entries_allocated, 0)))
 +        {
 +          IExec->ReleaseSemaphore (&keystore->sem);
 +          return ENOMEM;
 +        }
-+      if (keystore->keyentries)
++      if (keystore->keys)
 +        {
-+          memcpy (new_keyentries, keystore->keyentries, keystore->num_key_entries * sizeof(*new_keyentries));
-+          IExec->FreeVec (keystore->keyentries);
++          memcpy (new_keys, keystore->keys, keystore->num_key_entries * sizeof(*new_keys));
++          IExec->FreeVec (keystore->keys);
 +        }
-+      keystore->keyentries = new_keyentries;
++      keystore->keys = new_keys;
 +      keystore->num_key_entries_allocated = new_num_key_entries_allocated;
 +    }
-+  keystore->keyentries[keystore->num_key_entries] = NULL;
++  keystore->keys[keystore->num_key_entries].first = NULL;
++  keystore->keys[keystore->num_key_entries].destroy = destroy;
++
 +  __key->id = keystore->num_key_entries++;
-+  __key->destroy = destroy;
 +
 +  IExec->ReleaseSemaphore (&keystore->sem);
 +  return 0;
@@ -511,7 +518,7 @@ index 0000000000000000000000000000000000000000..38a7a1ca694b1272a0934acc8c2dad3d
 +  IExec->ObtainSemaphore (&keystore->sem);
 +
 +  /* TODO: Free the occupied storage for each entry */
-+  keystore->keyentries[__key.id] = NULL;
++  keystore->keys[__key.id].first = NULL;
 +
 +  IExec->ReleaseSemaphore (&keystore->sem);
 +  return 0;
@@ -525,7 +532,7 @@ index 0000000000000000000000000000000000000000..38a7a1ca694b1272a0934acc8c2dad3d
 +static keyentry_t *find_keyentry (int id, struct Task *task)
 +{
 +  keyentry_t *entry;
-+  entry = keystore->keyentries[id];
++  entry = keystore->keys[id].first;
 +  while (entry)
 +    {
 +      if (entry->task == task)
@@ -564,8 +571,8 @@ index 0000000000000000000000000000000000000000..38a7a1ca694b1272a0934acc8c2dad3d
 +        }
 +      entry->task = this_task;
 +      /* entry->data will be set in the following */
-+      entry->next = keystore->keyentries[__key.id];
-+      keystore->keyentries[__key.id] = entry;
++      entry->next = keystore->keys[__key.id].first;
++      keystore->keys[__key.id].first = entry;
 +    }
 +  entry->data = __v;
 +  IExec->ReleaseSemaphore (&keystore->sem);
@@ -763,12 +770,35 @@ index 0000000000000000000000000000000000000000..38a7a1ca694b1272a0934acc8c2dad3d
 +
 +static int __gthread_entry(STRPTR args UNUSED, int32 length UNUSED, APTR execbase UNUSED)
 +{
-+  threadentry_t *thr = (threadentry_t *)((struct Process*)IExec->FindTask (NULL))->pr_Task.tc_UserData;
++  struct Task *task = IExec->FindTask (NULL);
++  threadentry_t *thr;
++  int i;
++
++  thr = (threadentry_t *)((struct Process*)task)->pr_Task.tc_UserData;
 +
 +  /* Wait for the parent task to enqueue the process in the global list */
 +  while (!(IExec->Wait (SIGBREAKF_CTRL_F) & SIGBREAKF_CTRL_F));
 +
 +  thr->result = thr->entry(thr->args);
++
++  /* Invoke destructors of all non-NULL thread specifics */
++  IExec->ObtainSemaphore (&keystore->sem);
++  for (i = 0; i < keystore->num_key_entries; i++)
++    {
++      void (*destroy)(void *);
++      keyentry_t *key;
++
++      if (!(destroy = keystore->keys[i].destroy))
++        continue;
++
++      if (!(key = find_keyentry (i, task)))
++        continue;
++
++      if (key->data)
++        destroy ((void *)key->data);
++    }
++  IExec->ReleaseSemaphore (&keystore->sem);
++
 +  thr->finished = 1;
 +  return 0;
 +}
@@ -1412,7 +1442,7 @@ index 0000000000000000000000000000000000000000..d68a3e019fbac94a93a420fcf59476d2
 +#endif
 diff --git a/libgcc/gthr-amigaos.h b/libgcc/gthr-amigaos.h
 new file mode 100644
-index 0000000000000000000000000000000000000000..945bdd1dc65b9bf8de065c08a02c8208c25b113a
+index 0000000000000000000000000000000000000000..3a55b6b662545231aa3becff45dad6e1c72a040e
 --- /dev/null
 +++ b/libgcc/gthr-amigaos.h
 @@ -0,0 +1,347 @@
@@ -1447,9 +1477,9 @@ index 0000000000000000000000000000000000000000..945bdd1dc65b9bf8de065c08a02c8208
 +#include <stdlib.h>
 +#include <stdint.h>
 +
-+typedef struct { int data1, data2;} __gthread_once_t;
++typedef struct { int data1, data2; } __gthread_once_t;
 +
-+typedef struct { long unsigned int id; void (*destroy) (void *);} __gthread_key_t;
++typedef struct { long unsigned int id; } __gthread_key_t;
 +
 +/* Should cover at least as much data as the maximum of sizeof(struct SignalSemaphore)
 + * and sizeof(pthread_mutex_t)
