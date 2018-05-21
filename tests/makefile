@@ -37,6 +37,9 @@ test-thread-direct: test-thread.cpp ../gcc/repo/libgcc/gthr-amigaos-native.c
 test-wchar: test-wchar.cpp
 	$(CPP) test-wchar.cpp -std=c++11 -mcrt=clib2 -o $@ -H
 
+test-tls: test-tls.cpp
+	$(CPP) -g $< -o $@ ../gcc/repo/libgcc/gthr-amigaos-native.c -Wl,--cref -Wl,-M=$@.map
+
 test-checktags.o: test-checktags.c
 	$(XGCC) $< -c
 
