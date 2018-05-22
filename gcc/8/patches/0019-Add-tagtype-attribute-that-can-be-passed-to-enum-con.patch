@@ -1,7 +1,7 @@
 From 1c719d0354831fd627c7b562e29cdc73a22e215c Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Tue, 24 Apr 2018 06:29:13 +0200
-Subject: [PATCH 19/23] Add tagtype attribute that can be passed to enum
+Subject: [PATCH 19/24] Add tagtype attribute that can be passed to enum
  constants.
 
 The tagtype attribute can be applied to enum constants in order to annotate

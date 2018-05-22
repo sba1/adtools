@@ -1,7 +1,7 @@
 From 78be438839785b8776258e093897b1870ad5f21b Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Wed, 4 Apr 2018 22:48:33 +0200
-Subject: [PATCH 12/23] Rerun make maint-deps in libiberty.
+Subject: [PATCH 12/24] Rerun make maint-deps in libiberty.
 
 ---
  libiberty/Makefile.in | 36 ++++++++++++++++++++++--------------
