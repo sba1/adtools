@@ -1,4 +1,4 @@
-From cd8b5783db9e73c95154d7bb62aafa43db900671 Mon Sep 17 00:00:00 2001
+From 07ffe5c83ac24a47c59e37babd2ff786242ed195 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 4 May 2018 18:22:24 +0200
 Subject: [PATCH 23/23] Add amigaos thread model.
@@ -16,12 +16,12 @@ It is work in progress.
  libgcc/config/rs6000/t-amigaos |   5 +
  libgcc/configure               |   1 +
  libgcc/gthr-amigaos-asserts.h  |   8 +
- libgcc/gthr-amigaos-native.c   | 755 +++++++++++++++++++++++++++++++++++++++++
+ libgcc/gthr-amigaos-native.c   | 760 +++++++++++++++++++++++++++++++++++++++++
  libgcc/gthr-amigaos-posix.c    | 233 +++++++++++++
  libgcc/gthr-amigaos-single.c   | 141 ++++++++
  libgcc/gthr-amigaos.h          | 347 +++++++++++++++++++
  libstdc++-v3/configure         |  15 +-
- 16 files changed, 1550 insertions(+), 12 deletions(-)
+ 16 files changed, 1555 insertions(+), 12 deletions(-)
  create mode 100644 gcc/config/rs6000/x-amigaos
  create mode 100644 libgcc/gthr-amigaos-asserts.h
  create mode 100644 libgcc/gthr-amigaos-native.c
@@ -295,10 +295,10 @@ index 0000000000000000000000000000000000000000..bb6005cd52ef75cc7bfbc276d5d56ec5
 +#endif
 diff --git a/libgcc/gthr-amigaos-native.c b/libgcc/gthr-amigaos-native.c
 new file mode 100644
-index 0000000000000000000000000000000000000000..9cdf9b9480b1034c86cac6129b6112252ec53152
+index 0000000000000000000000000000000000000000..6075fe35ffb5f7af3fc24f5290d64f9e922689e8
 --- /dev/null
 +++ b/libgcc/gthr-amigaos-native.c
-@@ -0,0 +1,755 @@
+@@ -0,0 +1,760 @@
 +/**
 + * This is the native implementation of gcc threads abstraction. The advantage
 + * over the pthreads one is that no pthreads.library is needed.
@@ -1050,6 +1050,11 @@ index 0000000000000000000000000000000000000000..9cdf9b9480b1034c86cac6129b611225
 +  return 0;
 +}
 +
++int
++__gthread_cond_destroy (__gthread_cond_t *__cond)
++{
++  return 0;
++}
 +
 +#ifdef __cplusplus
 +}
