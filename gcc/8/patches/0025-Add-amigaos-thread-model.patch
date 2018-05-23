@@ -1,4 +1,4 @@
-From e94972acb4d91beed75add2d42744b0400093924 Mon Sep 17 00:00:00 2001
+From 6e94affc3d68c50a2bbc4d8f98aa95afe44130d1 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 4 May 2018 18:22:24 +0200
 Subject: [PATCH 25/25] Add amigaos thread model.
@@ -16,12 +16,12 @@ It is work in progress.
  libgcc/config/rs6000/t-amigaos |   5 +
  libgcc/configure               |   1 +
  libgcc/gthr-amigaos-asserts.h  |   8 +
- libgcc/gthr-amigaos-native.c   | 760 +++++++++++++++++++++++++++++++++++++++++
- libgcc/gthr-amigaos-posix.c    | 233 +++++++++++++
- libgcc/gthr-amigaos-single.c   | 141 ++++++++
- libgcc/gthr-amigaos.h          | 347 +++++++++++++++++++
+ libgcc/gthr-amigaos-native.c   | 899 +++++++++++++++++++++++++++++++++++++++++
+ libgcc/gthr-amigaos-posix.c    | 233 +++++++++++
+ libgcc/gthr-amigaos-single.c   | 141 +++++++
+ libgcc/gthr-amigaos.h          | 347 ++++++++++++++++
  libstdc++-v3/configure         |  15 +-
- 16 files changed, 1555 insertions(+), 12 deletions(-)
+ 16 files changed, 1694 insertions(+), 12 deletions(-)
  create mode 100644 gcc/config/rs6000/x-amigaos
  create mode 100644 libgcc/gthr-amigaos-asserts.h
  create mode 100644 libgcc/gthr-amigaos-native.c
@@ -295,10 +295,10 @@ index 0000000000000000000000000000000000000000..bb6005cd52ef75cc7bfbc276d5d56ec5
 +#endif
 diff --git a/libgcc/gthr-amigaos-native.c b/libgcc/gthr-amigaos-native.c
 new file mode 100644
-index 0000000000000000000000000000000000000000..6075fe35ffb5f7af3fc24f5290d64f9e922689e8
+index 0000000000000000000000000000000000000000..5a5b4b32f356aa0c83963010ddd325c9cbad8c70
 --- /dev/null
 +++ b/libgcc/gthr-amigaos-native.c
-@@ -0,0 +1,760 @@
+@@ -0,0 +1,899 @@
 +/**
 + * This is the native implementation of gcc threads abstraction. The advantage
 + * over the pthreads one is that no pthreads.library is needed.
@@ -315,6 +315,7 @@ index 0000000000000000000000000000000000000000..6075fe35ffb5f7af3fc24f5290d64f9e
 +
 +#include <proto/dos.h>
 +#include <proto/exec.h>
++#include <proto/timer.h>
 +
 +/******************************************************************************/
 +
@@ -687,6 +688,10 @@ index 0000000000000000000000000000000000000000..6075fe35ffb5f7af3fc24f5290d64f9e
 +  struct Process *process;
 +  int id;
 +
++  struct MsgPort *timer_port;
++  struct TimeRequest *timer_io;
++  struct ITimer *itimer;
++
 +  /* The task that is going to join us */
 +  struct Task *joiner_task;
 +
@@ -879,7 +884,7 @@ index 0000000000000000000000000000000000000000..6075fe35ffb5f7af3fc24f5290d64f9e
 +
 +  /* FIXME: This is very ugly, use SIGF_SINGLE */
 +  while (!thr->finished)
-+    IDOS->Delay(1);
++    IDOS->Delay (1);
 +
 +  if (value_ptr)
 +    *value_ptr = thr->result;
@@ -904,15 +909,20 @@ index 0000000000000000000000000000000000000000..6075fe35ffb5f7af3fc24f5290d64f9e
 +__gthread_self (void)
 +{
 +  struct Task *task = IExec->FindTask(NULL);
-+  static threadentry_t *thr;
++  threadentry_t *thr;
++  __gthread_t id;
 +
++  IExec->ObtainSemaphoreShared (&threadstore->sem);
 +  if ((thr = find_threadentry_by_process ((struct Process *)task)))
 +    {
-+      return thr->id;
++      id = thr->id;
 +    }
++  else
++    /* FIXME: Record this thread */
++    id = -1;
 +
-+  /* FIXME: Record this thread */
-+  return -1;
++  IExec->ReleaseSemaphore (&threadstore->sem);
++  return id;
 +}
 +
 +int
@@ -922,12 +932,67 @@ index 0000000000000000000000000000000000000000..6075fe35ffb5f7af3fc24f5290d64f9e
 +  return 0;
 +}
 +
++static int
++__gthread_open_timer(threadentry_t **thr_p)
++{
++  int needs_to_open_timer;
++  threadentry_t *thr;
++  struct Task *task;
++
++  task = IExec->FindTask(NULL);
++
++  IExec->ObtainSemaphoreShared (&threadstore->sem);
++  if (!(thr = find_threadentry_by_process((struct Process*)task)))
++    {
++      /* This is not our thread */
++      IExec->ReleaseSemaphore (&threadstore->sem);
++      return -1;
++    }
++  IExec->ReleaseSemaphore (&threadstore->sem);
++
++  /* Only we can open the timer device */
++  if (!thr->timer_port)
++    {
++      if (!(thr->timer_port = IExec->CreateMsgPort ()))
++        goto bailout;
++
++      if (!(thr->timer_io = (struct TimeRequest *)IExec->AllocSysObjectTags (ASOT_IOREQUEST,
++          ASOIOR_Size, sizeof(struct TimeRequest),
++          ASOIOR_ReplyPort, thr->timer_port,
++          TAG_END)))
++        goto bailout;
++
++      if (IExec->OpenDevice(TIMERNAME, UNIT_MICROHZ, &thr->timer_io->Request, 0))
++        goto bailout;
++    }
++
++  *thr_p = thr;
++  return 0;
++bailout:
++  if (thr->timer_io)
++    {
++      if (thr->timer_io->Request.io_Device)
++        {
++          IExec->CloseDevice (&thr->timer_io->Request);
++        }
++      IExec->FreeSysObject (ASOT_IOREQUEST, thr->timer_io);
++      thr->timer_io = NULL;
++    }
++
++  if (thr->timer_port)
++    {
++      IExec->DeleteMsgPort (thr->timer_port);
++      thr->timer_port = NULL;
++    }
++  return -1;
++}
++
 +/******************************************************************************/
 +
 +/**
 + * Remove the given thread from the condition wait list.
 + */
-+static void UNUSED
++static void
 +__gthread_remove_thread_from_cond_wait_list (__internal_gthread_cond_t *cond, threadentry_t *thr)
 +{
 +  threadentry_t *cur_thr, *prev_thr;
@@ -941,9 +1006,7 @@ index 0000000000000000000000000000000000000000..6075fe35ffb5f7af3fc24f5290d64f9e
 +          if (!prev_thr)
 +            cond->u.i.first_in_cond_wait_list = cur_thr->next_in_cond_wait_list;
 +          else
-+            {
-+              prev_thr->next_in_cond_wait_list = cur_thr->next_in_cond_wait_list;
-+            }
++            prev_thr->next_in_cond_wait_list = cur_thr->next_in_cond_wait_list;
 +          break;
 +        }
 +
@@ -1013,16 +1076,12 @@ index 0000000000000000000000000000000000000000..6075fe35ffb5f7af3fc24f5290d64f9e
 +  return 0;
 +}
 +
-+int
-+__gthread_cond_wait (__gthread_cond_t *__cond, __gthread_mutex_t *mutex)
++/**
++ * Prepare cond_wait.
++ */
++static void
++__gthread_cond_wait_prepare (threadentry_t *self_thr, __internal_gthread_cond_t *cond, __gthread_mutex_t *mutex)
 +{
-+  __internal_gthread_cond_t *cond = (__internal_gthread_cond_t *)__cond;
-+  __gthread_t self = __gthread_self ();
-+  threadentry_t *self_thr;
-+
-+  if (!(self_thr = find_threadentry_by_id (self)))
-+    return EINVAL;
-+
 +  /* Enqueue us into this thread's dedicated cond wait list */
 +  IExec->ObtainSemaphore (&threadstore->sem);
 +  self_thr->next_in_cond_wait_list = cond->u.i.first_in_cond_wait_list;
@@ -1038,6 +1097,19 @@ index 0000000000000000000000000000000000000000..6075fe35ffb5f7af3fc24f5290d64f9e
 +   * the condition anyway, so suspsious wakes are perhaps acceptable.
 +   */
 +  __gthread_mutex_unlock (mutex);
++}
++
++int
++__gthread_cond_wait (__gthread_cond_t *__cond, __gthread_mutex_t *mutex)
++{
++  __internal_gthread_cond_t *cond = (__internal_gthread_cond_t *)__cond;
++  __gthread_t self = __gthread_self ();
++  threadentry_t *self_thr;
++
++  if (!(self_thr = find_threadentry_by_id (self)))
++    return EINVAL;
++
++  __gthread_cond_wait_prepare (self_thr, cond, mutex);
 +
 +  /* Wait for anyone notifiying us */
 +  while (!(IExec->Wait (SIGF_SINGLE) & SIGF_SINGLE));
@@ -1048,6 +1120,73 @@ index 0000000000000000000000000000000000000000..6075fe35ffb5f7af3fc24f5290d64f9e
 +   * the cond's waiting list
 +   */
 +  return 0;
++}
++
++int
++__gthread_cond_timedwait (__gthread_cond_t *__cond,
++                          __gthread_mutex_t *mutex,
++                          const __gthread_time_t *abs_timeout)
++{
++  __internal_gthread_cond_t *cond = (__internal_gthread_cond_t *)__cond;
++  threadentry_t *self_thr;
++  uint32_t timer_mask;
++  struct timeval tv_now, tv_timeout;
++  uint32_t sigs;
++  int borrow = 0;
++  int err;
++
++  gettimeofday(&tv_now, 0);
++
++  /* Some timer arithmetics. TODO: Verify this! */
++  if (tv_now.tv_usec <= abs_timeout->nanoseconds / 1000)
++    tv_now.tv_usec = abs_timeout->nanoseconds / 1000 - tv_now.tv_usec;
++  else
++    {
++      tv_now.tv_usec = 1000000 + abs_timeout->nanoseconds / 1000 - tv_now.tv_usec;
++      borrow = 1;
++    }
++
++  if (tv_now.tv_sec + borrow <= abs_timeout->seconds)
++    tv_now.tv_sec = abs_timeout->seconds - tv_now.tv_sec + borrow;
++  else
++    {
++      tv_now.tv_sec = 0;
++      tv_now.tv_usec = 1;
++    }
++
++  if ((err = __gthread_open_timer (&self_thr)))
++    return err;
++
++  self_thr->timer_io->Request.io_Command = TR_ADDREQUEST;
++  self_thr->timer_io->Time.Seconds = tv_now.tv_sec;
++  self_thr->timer_io->Time.Microseconds = tv_now.tv_usec;
++  IExec->SendIO (&self_thr->timer_io->Request);
++
++  __gthread_cond_wait_prepare (self_thr, cond, mutex);
++
++  /* Wait for anyone notifiying us or a timeout, note that according to
++   * some docs we should not wait on other signals when using SIGF_SINGLE,
++   * but we do it nonetheless.  */
++  timer_mask = 1UL << self_thr->timer_port->mp_SigBit;
++  sigs = IExec->Wait (SIGF_SINGLE | timer_mask);
++
++  if (!(IExec->CheckIO (&self_thr->timer_io->Request)))
++    IExec->AbortIO (&self_thr->timer_io->Request);
++  IExec->WaitIO (&self_thr->timer_io->Request);
++
++  __gthread_mutex_lock (mutex);
++
++  /* Receiving the proper SIGF_SINGLE also means that we have been removed from
++   * the cond's waiting list, but if this was a timeout, we have not yet been
++   * removed. So we remove ourselves. This is safe, even if we have been removed.
++   */
++  if (!(sigs & SIGF_SINGLE))
++    {
++      IExec->ObtainSemaphore (&threadstore->sem);
++      __gthread_remove_thread_from_cond_wait_list (cond, self_thr);
++      IExec->ReleaseSemaphore (&threadstore->sem);
++    }
++  return err;
 +}
 +
 +int
@@ -1447,7 +1586,7 @@ index 0000000000000000000000000000000000000000..d68a3e019fbac94a93a420fcf59476d2
 +#endif
 diff --git a/libgcc/gthr-amigaos.h b/libgcc/gthr-amigaos.h
 new file mode 100644
-index 0000000000000000000000000000000000000000..3a55b6b662545231aa3becff45dad6e1c72a040e
+index 0000000000000000000000000000000000000000..123d3512abed0a43a8c019bbce0d83f0128a89ec
 --- /dev/null
 +++ b/libgcc/gthr-amigaos.h
 @@ -0,0 +1,347 @@
@@ -1495,7 +1634,7 @@ index 0000000000000000000000000000000000000000..3a55b6b662545231aa3becff45dad6e1
 +typedef struct { char data[8]; } __gthread_cond_t;
 +
 +typedef int __gthread_t;
-+typedef int __gthread_time_t;
++typedef struct { int seconds; long nanoseconds;} __gthread_time_t;
 +
 +#define __GTHREADS 1
 +#define __GTHREADS_CXX0X 1
