@@ -1,4 +1,4 @@
-From 6e94affc3d68c50a2bbc4d8f98aa95afe44130d1 Mon Sep 17 00:00:00 2001
+From 0d8b64afc36b77dff8b5f1c688b7071a4bd3da32 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 4 May 2018 18:22:24 +0200
 Subject: [PATCH 25/25] Add amigaos thread model.
@@ -16,12 +16,12 @@ It is work in progress.
  libgcc/config/rs6000/t-amigaos |   5 +
  libgcc/configure               |   1 +
  libgcc/gthr-amigaos-asserts.h  |   8 +
- libgcc/gthr-amigaos-native.c   | 899 +++++++++++++++++++++++++++++++++++++++++
+ libgcc/gthr-amigaos-native.c   | 912 +++++++++++++++++++++++++++++++++++++++++
  libgcc/gthr-amigaos-posix.c    | 233 +++++++++++
  libgcc/gthr-amigaos-single.c   | 141 +++++++
  libgcc/gthr-amigaos.h          | 347 ++++++++++++++++
  libstdc++-v3/configure         |  15 +-
- 16 files changed, 1694 insertions(+), 12 deletions(-)
+ 16 files changed, 1707 insertions(+), 12 deletions(-)
  create mode 100644 gcc/config/rs6000/x-amigaos
  create mode 100644 libgcc/gthr-amigaos-asserts.h
  create mode 100644 libgcc/gthr-amigaos-native.c
@@ -295,10 +295,10 @@ index 0000000000000000000000000000000000000000..bb6005cd52ef75cc7bfbc276d5d56ec5
 +#endif
 diff --git a/libgcc/gthr-amigaos-native.c b/libgcc/gthr-amigaos-native.c
 new file mode 100644
-index 0000000000000000000000000000000000000000..5a5b4b32f356aa0c83963010ddd325c9cbad8c70
+index 0000000000000000000000000000000000000000..3d0ce53439e61cb20d781a5058fa6d6c816ac439
 --- /dev/null
 +++ b/libgcc/gthr-amigaos-native.c
-@@ -0,0 +1,899 @@
+@@ -0,0 +1,912 @@
 +/**
 + * This is the native implementation of gcc threads abstraction. The advantage
 + * over the pthreads one is that no pthreads.library is needed.
@@ -372,6 +372,11 @@ index 0000000000000000000000000000000000000000..5a5b4b32f356aa0c83963010ddd325c9
 +/******************************************************************************/
 +
 +#include "gthr-amigaos-asserts.h"
++
++/******************************************************************************/
++
++static void
++__gthread_close_timer(threadentry *thr);
 +
 +/******************************************************************************/
 +
@@ -804,6 +809,8 @@ index 0000000000000000000000000000000000000000..5a5b4b32f356aa0c83963010ddd325c9
 +    }
 +  IExec->ReleaseSemaphore (&keystore->sem);
 +
++  __gthread_close_timer (thr);
++
 +  thr->finished = 1;
 +  return 0;
 +}
@@ -932,6 +939,26 @@ index 0000000000000000000000000000000000000000..5a5b4b32f356aa0c83963010ddd325c9
 +  return 0;
 +}
 +
++static void
++__gthread_close_timer(threadentry *thr)
++{
++  if (thr->timer_io)
++    {
++      if (thr->timer_io->Request.io_Device)
++        {
++          IExec->CloseDevice (&thr->timer_io->Request);
++        }
++      IExec->FreeSysObject (ASOT_IOREQUEST, thr->timer_io);
++      thr->timer_io = NULL;
++    }
++
++  if (thr->timer_port)
++    {
++      IExec->DeleteMsgPort (thr->timer_port);
++      thr->timer_port = NULL;
++    }
++}
++
 +static int
 +__gthread_open_timer(threadentry_t **thr_p)
 +{
@@ -969,21 +996,7 @@ index 0000000000000000000000000000000000000000..5a5b4b32f356aa0c83963010ddd325c9
 +  *thr_p = thr;
 +  return 0;
 +bailout:
-+  if (thr->timer_io)
-+    {
-+      if (thr->timer_io->Request.io_Device)
-+        {
-+          IExec->CloseDevice (&thr->timer_io->Request);
-+        }
-+      IExec->FreeSysObject (ASOT_IOREQUEST, thr->timer_io);
-+      thr->timer_io = NULL;
-+    }
-+
-+  if (thr->timer_port)
-+    {
-+      IExec->DeleteMsgPort (thr->timer_port);
-+      thr->timer_port = NULL;
-+    }
++  __gthread_close_timer(thr);
 +  return -1;
 +}
 +
