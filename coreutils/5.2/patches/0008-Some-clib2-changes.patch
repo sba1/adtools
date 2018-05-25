@@ -1,47 +1,12 @@
-From fa54ea5589b3f2d77c4db75ca125e0e45b4af8a1 Mon Sep 17 00:00:00 2001
+From 778e8b4dfca1cf6a22d652ed0ea8e999f861b800 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Sat, 2 Jan 2016 19:42:24 +0100
 Subject: [PATCH 8/8] Some clib2 changes.
 
 ---
- config.hin | 4 ++++
  src/sort.c | 4 ++++
- 2 files changed, 8 insertions(+)
+ 1 file changed, 4 insertions(+)
 
-diff --git a/config.hin b/config.hin
-index 40261c45dedd420ec55b9f5cc66445e8778eecc9..326d473deeb2908f4c815b8d2cdaed0a4f3b74b9 100644
---- a/config.hin
-+++ b/config.hin
-@@ -1090,12 +1090,14 @@
- /* Define to 1 if you have the `vasnprintf' function. */
- #undef HAVE_VASNPRINTF
- 
- /* Define to 1 if you have the `vasprintf' function. */
- #undef HAVE_VASPRINTF
- 
-+#if !defined(__amigaos4__) || !defined(__CLIB2__)
-+
- /* Define to 1 if you have the <wchar.h> header file. */
- #undef HAVE_WCHAR_H
- 
- /* Define if you have the 'wchar_t' type. */
- #undef HAVE_WCHAR_T
- 
-@@ -1105,12 +1107,14 @@
- /* Define to 1 if you have the `wcslen' function. */
- #undef HAVE_WCSLEN
- 
- /* Define to 1 if you have the <wctype.h> header file. */
- #undef HAVE_WCTYPE_H
- 
-+#endif
-+
- /* Define to 1 if you have the `wcwidth' function. */
- #undef HAVE_WCWIDTH
- 
- /* Define if you have the 'wint_t' type. */
- #undef HAVE_WINT_T
- 
 diff --git a/src/sort.c b/src/sort.c
 index 3db3ea30ff930cca703c13455e0fd521159ee61f..ffb52bb4fd17d71d1eb5de288e5404be25e7368c 100644
 --- a/src/sort.c
