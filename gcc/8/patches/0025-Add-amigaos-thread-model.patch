@@ -1,4 +1,4 @@
-From 1500b97be262b4c1cab586deec577e7714cb9021 Mon Sep 17 00:00:00 2001
+From 4f1a4c15fc6f80069f2b060de74a96b4bdcf0889 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 4 May 2018 18:22:24 +0200
 Subject: [PATCH 25/25] Add amigaos thread model.
@@ -16,12 +16,12 @@ It is work in progress.
  libgcc/config/rs6000/t-amigaos |   5 +
  libgcc/configure               |   1 +
  libgcc/gthr-amigaos-asserts.h  |   8 +
- libgcc/gthr-amigaos-native.c   | 913 +++++++++++++++++++++++++++++++++++++++++
+ libgcc/gthr-amigaos-native.c   | 914 +++++++++++++++++++++++++++++++++++++++++
  libgcc/gthr-amigaos-posix.c    | 233 +++++++++++
  libgcc/gthr-amigaos-single.c   | 141 +++++++
  libgcc/gthr-amigaos.h          | 347 ++++++++++++++++
  libstdc++-v3/configure         |  15 +-
- 16 files changed, 1708 insertions(+), 12 deletions(-)
+ 16 files changed, 1709 insertions(+), 12 deletions(-)
  create mode 100644 gcc/config/rs6000/x-amigaos
  create mode 100644 libgcc/gthr-amigaos-asserts.h
  create mode 100644 libgcc/gthr-amigaos-native.c
@@ -295,10 +295,10 @@ index 0000000000000000000000000000000000000000..bb6005cd52ef75cc7bfbc276d5d56ec5
 +#endif
 diff --git a/libgcc/gthr-amigaos-native.c b/libgcc/gthr-amigaos-native.c
 new file mode 100644
-index 0000000000000000000000000000000000000000..6398dfb4015ad1704318bfb618836b1d89bd4f6b
+index 0000000000000000000000000000000000000000..f6297ab16ce850117998c4bf9eb2b9c5849fdea5
 --- /dev/null
 +++ b/libgcc/gthr-amigaos-native.c
-@@ -0,0 +1,913 @@
+@@ -0,0 +1,914 @@
 +/**
 + * This is the native implementation of gcc threads abstraction. The advantage
 + * over the pthreads one is that no pthreads.library is needed.
@@ -312,6 +312,7 @@ index 0000000000000000000000000000000000000000..6398dfb4015ad1704318bfb618836b1d
 +#include <errno.h>
 +#include <stdint.h>
 +#include <string.h>
++#include <sys/time.h>
 +
 +#include <proto/dos.h>
 +#include <proto/exec.h>
@@ -604,7 +605,7 @@ index 0000000000000000000000000000000000000000..6398dfb4015ad1704318bfb618836b1d
 +  IExec->ObtainSemaphoreShared (&keystore->sem);
 +  entry = find_keyentry(__key.id, this_task);
 +  IExec->ReleaseSemaphore (&keystore->sem);
-+  return entry?(void*)entry->data:NULL;
++  return entry?((void*)entry->data):NULL;
 +}
 +
 +int
@@ -1152,7 +1153,7 @@ index 0000000000000000000000000000000000000000..6398dfb4015ad1704318bfb618836b1d
 +  gettimeofday(&tv_now, 0);
 +
 +  /* Some timer arithmetics. TODO: Verify this! */
-+  if (tv_now.tv_usec <= abs_timeout->nanoseconds / 1000)
++  if (tv_now.tv_usec <= (uint32_t)(abs_timeout->nanoseconds / 1000))
 +    tv_now.tv_usec = abs_timeout->nanoseconds / 1000 - tv_now.tv_usec;
 +  else
 +    {
@@ -1160,7 +1161,7 @@ index 0000000000000000000000000000000000000000..6398dfb4015ad1704318bfb618836b1d
 +      borrow = 1;
 +    }
 +
-+  if (tv_now.tv_sec + borrow <= abs_timeout->seconds)
++  if (tv_now.tv_sec + borrow <= (uint32_t)(abs_timeout->seconds))
 +    tv_now.tv_sec = abs_timeout->seconds - tv_now.tv_sec + borrow;
 +  else
 +    {
@@ -1204,7 +1205,7 @@ index 0000000000000000000000000000000000000000..6398dfb4015ad1704318bfb618836b1d
 +}
 +
 +int
-+__gthread_cond_destroy (__gthread_cond_t *__cond)
++__gthread_cond_destroy (__gthread_cond_t *__cond UNUSED)
 +{
 +  return 0;
 +}
