@@ -7,7 +7,11 @@
 /*.o
 /*.out
 /test-aos4-extensions-simple
+/test-atomic
+/test-exceptions
 /test-thread
+/test-thread-direct
 /test-thread.d
 /test-thread.o
+/test-tls
 /test-wchar
