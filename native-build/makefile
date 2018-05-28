@@ -259,8 +259,8 @@ coreutils-native-done: gcc-cross-done-$(GCC_VERSION)
 endif
 	mkdir -p coreutils-native-build
 	@if [ ! -f $(COREUTILS_SRC_DIR)/configure ]; then echo "Please checkout coreutils first!"; false; fi
-# Pretend uptodate configure script
-	touch $(realpath $(COREUTILS_SRC_DIR))/configure
+# Pretend few files to be uptodate
+	touch $(realpath $(COREUTILS_SRC_DIR))/configure $(realpath $(COREUTILS_SRC_DIR))/config.hin
 #	cd coreutils-native-build ; PATH="$(CROSS_PREFIX)/bin:$(PATH)" LIBS="-lunix" $(realpath $(COREUTILS_SRC_DIR))/configure --prefix=/gcc --host=ppc-amigaos
 	cd coreutils-native-build ; PATH="$(CROSS_PREFIX)/bin:$(PATH)" CPPFLAGS="-mcrt=clib2" LDFLAGS="-mcrt=clib2" LIBS="-lunix -lnet" $(realpath $(COREUTILS_SRC_DIR))/configure --prefix=/gcc --host=ppc-amigaos
 	PATH="$(CROSS_PREFIX)/bin:$(PATH)" $(MAKE) -C coreutils-native-build
