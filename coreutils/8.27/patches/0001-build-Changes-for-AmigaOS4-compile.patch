@@ -1,7 +1,7 @@
-From 166720c81d3d28b64ed57868402dd805f19fd874 Mon Sep 17 00:00:00 2001
+From 13edc6e35fef9828ee8853660f99900569c615af Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Wed, 30 May 2018 11:32:48 +0200
-Subject: [PATCH] Changes for AmigaOS4 compile.
+Subject: [PATCH] build: Changes for AmigaOS4 compile
 
 This is based on https://github.com/adtools/coreutils commit
 f94b6dd850452b3260397caee6f983ef59f25df1.
@@ -177,7 +177,7 @@ index 68f537cef85f0eecc8f5dadf14263a17464aca8d..e2d473f6a50d54b5304407bdf14dda8f
 -include $(top_srcdir)/tests/local.mk
 diff --git a/README.os4 b/README.os4
 new file mode 100644
-index 0000000000000000000000000000000000000000..b57b29282b292d5032a2f3fad401f89496841012
+index 0000000000000000000000000000000000000000..d2f009447c207696f11732335a55b8940591efe1
 --- /dev/null
 +++ b/README.os4
 @@ -0,0 +1,54 @@
@@ -231,7 +231,7 @@ index 0000000000000000000000000000000000000000..b57b29282b292d5032a2f3fad401f894
 +Handle paths correctly.
 +Cleanup Configure.ac and Makefile.am, to disable the creation of documents (generated from the help files).
 +
-+06-08-2017 - Version 54.1 
++06-08-2017 - Version 54.1
 +Coreutils 8.29 source used for the port
 +The sourcecode for Sort and Split have been replaced with the old 5.2.1-9 code.
 +To compile you need libwide found on http://os4depot.net and the current clib2 code from http://github.com/adtools/clib2
@@ -2497,7 +2497,7 @@ index c0c9733a2b17398c55b7c6ead1d88b00740bb9b0..19856b743122f42251e269eb83380334
    char *word_start;		/* start of word */
    char *word_end;		/* end of word */
 diff --git a/src/sort.c b/src/sort.c
-index 94315d2a1bf28e3459486fe49164a5190a92701d..8de6f817edf7d5b7c65500fd861d58b9bf6d8cfd 100644
+index 94315d2a1bf28e3459486fe49164a5190a92701d..a5a82bcca07e0675c7d6a46f37be61776131bc18 100644
 --- a/src/sort.c
 +++ b/src/sort.c
 @@ -1,180 +1,123 @@
@@ -2924,7 +2924,7 @@ index 94315d2a1bf28e3459486fe49164a5190a92701d..8de6f817edf7d5b7c65500fd861d58b9
 -  die (SORT_FAILURE, errno, "%s: %s", message,
 -       quotef (file ? file : _("standard output")));
 +  if (stdout_is_closed == 0)
-+  	close_stdout();
++	close_stdout();
  }
 +#endif
  
@@ -3559,7 +3559,7 @@ index 94315d2a1bf28e3459486fe49164a5190a92701d..8de6f817edf7d5b7c65500fd861d58b9
 -  switch (fileno (fp))
 +#ifdef __amigaos__ /* AmigaOS */
 +  if (fp == stdout)
-+  	stdout_is_closed = 1;
++	stdout_is_closed = 1;
 +#endif
 +  if (fp == stdin)
      {
