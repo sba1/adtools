@@ -287,7 +287,7 @@ doc:
 
 	# Checkout base branch as worktree
 	cd $(GCC_SRC_DIR) && git worktree add -f $(ROOT_DIR)/$(GCC_BASE_BRANCH_NAME) $(GCC_BASE_BRANCH_NAME) || true
-	cd $(ROOT_DIR)/$(GCC_BASE_BRANCH_NAME) && git checkout $(GCC_BASE_BRANCH_NAME)
+	cd $(ROOT_DIR)/$(GCC_BASE_BRANCH_NAME) && git checkout --detach $(GCC_BASE_BRANCH_NAME)
 
 	makeinfo --plaintext -I $(GCC_BASE_BRANCH_NAME)/gcc/doc -I $(GCC_BASE_BRANCH_NAME)/gcc/doc/include -I $@/tmp/orig -o $@/tmp/orig/gcc.txt $(GCC_BASE_BRANCH_NAME)/gcc/doc/gcc.texi
 	makeinfo --plaintext -I $(GCC_BASE_BRANCH_NAME)/gcc/doc -I $(GCC_BASE_BRANCH_NAME)/gcc/doc/include -I $@/tmp/orig -o $@/tmp/orig/cpp.txt $(GCC_BASE_BRANCH_NAME)/gcc/doc/cpp.texi
