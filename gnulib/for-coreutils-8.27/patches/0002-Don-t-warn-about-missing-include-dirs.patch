@@ -1,0 +1,30 @@
+From c8aa8f6403e335c61d79902c4d39cebc9bb2ec4f Mon Sep 17 00:00:00 2001
+From: Sebastian Bauer <mail@sebastianbauer.info>
+Date: Fri, 1 Jun 2018 20:19:32 +0200
+Subject: [PATCH 2/2] Don't warn about missing include dirs.
+
+---
+ m4/manywarnings.m4 | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/m4/manywarnings.m4 b/m4/manywarnings.m4
+index 0f06adecfbb511b049d70c3097e0c8e07839d952..8efa9e84b100c24f61db56c906a697f690b0bf68 100644
+--- a/m4/manywarnings.m4
++++ b/m4/manywarnings.m4
+@@ -165,13 +165,12 @@ AC_DEFUN([gl_MANYWARN_ALL_GCC],
+     -Wmaybe-uninitialized \
+     -Wmemset-transposed-args \
+     -Wmisleading-indentation \
+     -Wmissing-braces \
+     -Wmissing-declarations \
+     -Wmissing-field-initializers \
+-    -Wmissing-include-dirs \
+     -Wmissing-parameter-type \
+     -Wmissing-prototypes \
+     -Wmultichar \
+     -Wnarrowing \
+     -Wnested-externs \
+     -Wnonnull \
+-- 
+2.17.1
+
