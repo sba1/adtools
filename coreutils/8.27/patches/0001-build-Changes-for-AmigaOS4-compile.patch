@@ -1,7 +1,7 @@
-From 13edc6e35fef9828ee8853660f99900569c615af Mon Sep 17 00:00:00 2001
+From 03f00e295dc36ceb7640d6265f06b6b4b044386f Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Wed, 30 May 2018 11:32:48 +0200
-Subject: [PATCH] build: Changes for AmigaOS4 compile
+Subject: [PATCH 1/2] build: Changes for AmigaOS4 compile
 
 This is based on https://github.com/adtools/coreutils commit
 f94b6dd850452b3260397caee6f983ef59f25df1.
@@ -10,12 +10,13 @@ f94b6dd850452b3260397caee6f983ef59f25df1.
  AutoInstall/SubScript   |    6 +
  Makefile.am             |    3 -
  README.os4              |   54 +
+ bootstrap               |    6 +-
  bootstrap.conf          |    2 -
  configure.ac            |   38 -
  src/copy.c              |    1 +
  src/cp.c                |   31 +
  src/csplit.c            |   10 +
- src/cut.c               |  875 +++++---
+ src/cut.c               |  875 ++++---
  src/dd.c                |    6 +
  src/fmt.c               |   44 +-
  src/force-link.c        |    7 +
@@ -26,12 +27,12 @@ f94b6dd850452b3260397caee6f983ef59f25df1.
  src/od.c                |   16 +-
  src/operand2sig.c       |    8 +-
  src/ptx.c               |   30 +-
- src/sort.c              | 5035 ++++++++++++++---------------------------------
- src/split.c             | 1730 ++++------------
+ src/sort.c              | 5035 +++++++++++----------------------------
+ src/split.c             | 1730 +++-----------
  src/stat.c              |    4 +
  src/stdbuf.c            |   20 +
  src/tee.c               |    2 +
- 25 files changed, 2662 insertions(+), 5416 deletions(-)
+ 26 files changed, 2667 insertions(+), 5417 deletions(-)
  create mode 100644 AutoInstall/AutoInstall
  create mode 100644 AutoInstall/SubScript
  create mode 100644 README.os4
@@ -235,6 +236,29 @@ index 0000000000000000000000000000000000000000..d2f009447c207696f11732335a55b894
 +Coreutils 8.29 source used for the port
 +The sourcecode for Sort and Split have been replaced with the old 5.2.1-9 code.
 +To compile you need libwide found on http://os4depot.net and the current clib2 code from http://github.com/adtools/clib2
+diff --git a/bootstrap b/bootstrap
+index 6a21392d44e99d6fd409d39c8c84050ef0c4a6ab..aa4869c1150a57aba25f75cc20404a45f9ce23fb 100755
+--- a/bootstrap
++++ b/bootstrap
+@@ -207,13 +207,17 @@ vc_ignore=auto
+ 
+ # Set this to true in bootstrap.conf to enable --bootstrap-sync by
+ # default.
+ bootstrap_sync=false
+ 
+ # Use git to update gnulib sources
+-use_git=true
++#use_git=true
++
++# Don't use git and point to custom dir
++use_git=false
++GNULIB_SRCDIR=../../gnulib/repo
+ 
+ check_exists() {
+   if test "$1" = "--verbose"; then
+     ($2 --version </dev/null) >/dev/null 2>&1
+     if test $? -ge 126; then
+       # If not found, run with diagnostics as one may be
 diff --git a/bootstrap.conf b/bootstrap.conf
 index 7def1f99a631de7a53c247ef128eeee4aa7dd642..96db8c3334c41af8312b1ab775bc480174fe4c20 100644
 --- a/bootstrap.conf
@@ -10725,5 +10749,5 @@ index 4a6885ce5ed45fc98a0a23f29172aa858fa63655..390468a4ba9cf56ecd30192832ce5869
    ok = tee_files (argc - optind, &argv[optind]);
    if (close (STDIN_FILENO) != 0)
 -- 
-2.14.2
+2.17.1
 

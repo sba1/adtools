@@ -1,0 +1,29 @@
+From 0266d7053dca2bb97bca08deb83eca08813f2526 Mon Sep 17 00:00:00 2001
+From: Sebastian Bauer <mail@sebastianbauer.info>
+Date: Fri, 1 Jun 2018 20:51:44 +0200
+Subject: [PATCH 2/2] build: Remove submodule info
+
+---
+ .gitmodules | 3 ---
+ gnulib      | 1 -
+ 2 files changed, 4 deletions(-)
+ delete mode 160000 gnulib
+
+diff --git a/.gitmodules b/.gitmodules
+index bb9e1baf5180abe9d8467d45bd79707f2444f332..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391 100644
+--- a/.gitmodules
++++ b/.gitmodules
+@@ -1,3 +0,0 @@
+-[submodule "gnulib"]
+-        path = gnulib
+-        url = git://git.sv.gnu.org/gnulib.git
+diff --git a/gnulib b/gnulib
+deleted file mode 160000
+index 405cd675384221b541b460c43de26d159914fe0a..0000000000000000000000000000000000000000
+--- a/gnulib
++++ /dev/null
+@@ -1 +0,0 @@
+-Subproject commit 405cd675384221b541b460c43de26d159914fe0a
+-- 
+2.17.1
+
