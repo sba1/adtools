@@ -29,6 +29,7 @@ prepare-binutils:
 			rm -Rf .git
 
 GCC_ARCHIVE_NAME = $(shell basename $(shell $(ROOT)/bin/gild get gcc $(GCC_BRANCH_NAME) --print-url-only))
+GCC_ARCHIVE_TAR_FILTER = $(subst .gz,z,$(subst .xz,J,$(suffix $(GCC_ARCHIVE_NAME))))
 GCC_DIR = $(basename $(basename $(GCC_ARCHIVE_NAME)))
 
 .PHONY: prepare-gcc
@@ -39,7 +40,7 @@ prepare-gcc:
 	rm -Rf adtools-gcc/$(GCC_DIR)
 	rm -Rf adtools-gcc/patched
 	cd adtools-gcc && \
-		tar xzf ../$(GCC_ARCHIVE_NAME) && \
+		tar x$(GCC_ARCHIVE_TAR_FILTER)f ../$(GCC_ARCHIVE_NAME) && \
 		mv $(GCC_DIR) patched && \
 		cd patched && \
 			git init && \
