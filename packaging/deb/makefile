@@ -42,6 +42,7 @@ prepare-gcc:
 	cd adtools-gcc && \
 		tar x$(GCC_ARCHIVE_TAR_FILTER)f ../$(GCC_ARCHIVE_NAME) && \
 		mv $(GCC_DIR) patched && \
+		cp $(ROOT)/gcc-build/features.mk debian && \
 		cd patched && \
 			git init && \
 			git apply ../patches/*.patch && \
