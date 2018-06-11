@@ -3,6 +3,8 @@
 
 ROOT = $(realpath ../../)
 
+GCC_BRANCH_NAME=5
+
 all: source-packages
 
 #
@@ -26,14 +28,14 @@ prepare-binutils:
 			git apply ../patches/*.patch && \
 			rm -Rf .git
 
-GCC_ARCHIVE_NAME = $(shell basename $(shell $(ROOT)/bin/gild get gcc 5 --print-url-only))
+GCC_ARCHIVE_NAME = $(shell basename $(shell $(ROOT)/bin/gild get gcc $(GCC_BRANCH_NAME) --print-url-only))
 GCC_DIR = $(basename $(basename $(GCC_ARCHIVE_NAME)))
 
 .PHONY: prepare-gcc
 prepare-gcc:
 	rm -Rf adtools-gcc/patches
-	cp -R $(ROOT)/gcc/5/patches adtools-gcc
-	$(ROOT)/bin/gild get gcc 5
+	cp -R $(ROOT)/gcc/$(GCC_BRANCH_NAME)/patches adtools-gcc
+	$(ROOT)/bin/gild get gcc $(GCC_BRANCH_NAME)
 	rm -Rf adtools-gcc/$(GCC_DIR)
 	rm -Rf adtools-gcc/patched
 	cd adtools-gcc && \
