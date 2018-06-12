@@ -18,7 +18,7 @@ override_dh_auto_build:
 		--target=ppc-amigaos \
 		--prefix=/usr \
 		--libexec=/usr/lib \
-		--with-bugurl=''https://github.com/sba1/adtools/issues' \
+		--with-bugurl='https://github.com/sba1/adtools/issues' \
 		--with-pkgversion='adtools build $(VERSION)' \
 		--enable-languages=c,c++  \
 		--enable-haifa            \
