@@ -47,6 +47,9 @@ prepare-gcc:
 			git init && \
 			git apply ../patches/*.patch && \
 			rm -Rf .git
+	$(MAKE) -C $(ROOT)/native-build downloads-done-clib2
+	cp -R $(ROOT)/native-build/downloads/clib2 adtools-gcc/patched
+	rm -Rf adtools-gcc/patched/clib2/.git
 
 .PHONY: source-packages
 source-packages: prepare-packages
