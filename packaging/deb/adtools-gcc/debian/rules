@@ -12,6 +12,10 @@ export GCC_VERSION:=$(shell cat $(GCC_SRC_DIR)/gcc/BASE-VER)
 
 PWD=$(shell pwd)
 
+# Include common features, these are shared for all builds
+VERSION := $(GCC_VERSION)
+include debian/features.mk
+
 override_dh_auto_build:
 	CFLAGS="-Wno-switch -Wno-unused" $(GCC_SRC_DIR)/configure \
 		--config-cache \
@@ -20,11 +24,7 @@ override_dh_auto_build:
 		--libexec=/usr/lib \
 		--with-bugurl='https://github.com/sba1/adtools/issues' \
 		--with-pkgversion='adtools build $(VERSION)' \
-		--enable-languages=c,c++  \
-		--enable-haifa            \
-		--enable-sjlj-exceptions  \
-		--disable-libstdcxx-pch \
-		--disable-tls \
+		$(FEATURES)
 		--disable-nls
 	$(MAKE)
 
