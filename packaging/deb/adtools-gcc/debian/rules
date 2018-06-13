@@ -16,6 +16,10 @@ PWD=$(shell pwd)
 VERSION := $(GCC_VERSION)
 include debian/features.mk
 
+XGCC_DIR=$(abspath .)/gcc
+XGCC=$(XGCC_DIR)/xgcc
+XGCC_CC=$(XGCC) -B $(XGCC_DIR)
+
 override_dh_auto_build:
 	CFLAGS="-Wno-switch -Wno-unused" $(GCC_SRC_DIR)/configure \
 		--config-cache \
@@ -26,6 +30,8 @@ override_dh_auto_build:
 		--with-pkgversion='adtools build $(VERSION)' \
 		$(FEATURES)
 		--disable-nls
+	$(MAKE) all-gcc
+	$(MAKE) -C patched/clib2/library -f GNUmakefile.os4 CC="$(XGCC_CC)"
 	$(MAKE)
 
 override_dh_auto_install:
