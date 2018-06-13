@@ -60,3 +60,9 @@ source-packages: prepare-packages
 .PHONY: docker
 docker:
 	docker build -t adtools-debs .
+
+DOCKER_IMAGE=adtools-debs
+
+.PHONY: login
+login:
+	docker run -ti $(DOCKER_IMAGE) /bin/bash -c "useradd -u $(shell id -u) $(USER) && su $(USER)"
