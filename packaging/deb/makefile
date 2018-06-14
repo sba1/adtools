@@ -56,6 +56,7 @@ prepare-clib2: prepare-gcc
 	$(MAKE) -C $(ROOT)/native-build downloads-done-clib2
 	cp -R $(ROOT)/native-build/downloads/clib2 adtools-clib2/patched
 	rm -Rf adtools-clib2/patched/clib2/.git
+	$(MAKE) -C adtools-clib2/patched/clib2/library -f GNUmakefile.os4 clean
 
 .PHONY: source-packages
 source-packages: prepare-packages
