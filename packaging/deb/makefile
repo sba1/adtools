@@ -47,14 +47,20 @@ prepare-gcc:
 			git init && \
 			git apply ../patches/*.patch && \
 			rm -Rf .git
+
+.PHONY: prepare-clib2
+prepare-clib2: prepare-gcc
+	rm -Rf adtools-clib2/patched
+	cp -R adtools-gcc/patched adtools-clib2
 	$(MAKE) -C $(ROOT)/native-build downloads-done-clib2
-	cp -R $(ROOT)/native-build/downloads/clib2 adtools-gcc/patched
-	rm -Rf adtools-gcc/patched/clib2/.git
+	cp -R $(ROOT)/native-build/downloads/clib2 adtools-clib2/patched
+	rm -Rf adtools-clib2/patched/clib2/.git
 
 .PHONY: source-packages
 source-packages: prepare-packages
 	dpkg-source -b adtools-sdk
 	dpkg-source -b adtools-binutils
+	dpkg-source -b adtools-clib2
 	dpkg-source -b adtools-gcc
 
 .PHONY: docker

@@ -1,0 +1,64 @@
+#!/usr/bin/make -f
+
+top_dir := $(shell pwd)
+
+export DH_VERBOSE=1
+
+# Disable all security flags. The build will not go through otherwise.
+export DEB_BUILD_MAINT_OPTIONS=hardening=-all
+
+export GCC_SRC_DIR=patched
+export GCC_VERSION:=$(shell cat $(GCC_SRC_DIR)/gcc/BASE-VER)
+
+PWD=$(shell pwd)
+
+# Include common features, these are shared for all builds
+VERSION := $(GCC_VERSION)
+include debian/features.mk
+
+XGCC_DIR=$(abspath .)/gcc
+XGCC=$(XGCC_DIR)/xgcc
+XGCC_CC=$(XGCC) -B $(XGCC_DIR)
+
+override_dh_auto_build:
+	CFLAGS="-Wno-switch -Wno-unused" $(GCC_SRC_DIR)/configure \
+		--config-cache \
+		--target=ppc-amigaos \
+		--prefix=/usr \
+		--libexec=/usr/lib \
+		--with-bugurl='https://github.com/sba1/adtools/issues' \
+		--with-pkgversion='adtools build $(VERSION)' \
+		$(FEATURES)
+		--disable-nls
+	$(MAKE) all-gcc
+	$(MAKE) -C patched/clib2/library -f GNUmakefile.os4 CC="$(XGCC_CC)"
+
+override_dh_auto_install:
+#	$(MAKE) install DESTDIR=$(top_dir)/debian/adtools-gcc
+#	rm -f $(top_dir)/debian/adtools-gcc/usr/share/info/dir
+#	rm -f $(top_dir)/debian/adtools-gcc/usr/lib/libiberty.a
+#	rm -f $(top_dir)/debian/adtools-gcc/usr/ppc-amigaos/lib/*.a
+#	rm -f $(top_dir)/debian/adtools-gcc/usr/ppc-amigaos/lib/*.la
+#	rm -f $(top_dir)/debian/adtools-gcc/usr/ppc-amigaos/lib/*.so
+#	rm -f $(top_dir)/debian/adtools-gcc/usr/ppc-amigaos/lib/*.py
+#	rm -Rf $(top_dir)/debian/adtools-gcc/usr/share/info
+#	rm -Rf $(top_dir)/debian/adtools-gcc/usr/share/man/man7
+#	rm -Rf $(top_dir)/debian/adtools-gcc/usr/share/$(GCC_VERSION)
+
+# We don't have any useful tests
+override_dh_auto_test:
+
+# Don't strip ppc files
+override_dh_strip:
+
+# As per default, but ignore ppc files
+override_dh_makeshlibs:
+
+# As per default, but ignore ppc files
+override_dh_shlibdeps:
+
+%:
+	echo $@
+	dh $@
+
+

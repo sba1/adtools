@@ -1,3 +1,4 @@
 *.dsc
 */patches
 /adtools-gcc/debian/features.mk
+/adtools-clib2/debian/features.mk
