@@ -34,16 +34,10 @@ override_dh_auto_build:
 	$(MAKE) -C patched/clib2/library -f GNUmakefile.os4 CC="$(XGCC_CC)"
 
 override_dh_auto_install:
-#	$(MAKE) install DESTDIR=$(top_dir)/debian/adtools-gcc
-#	rm -f $(top_dir)/debian/adtools-gcc/usr/share/info/dir
-#	rm -f $(top_dir)/debian/adtools-gcc/usr/lib/libiberty.a
-#	rm -f $(top_dir)/debian/adtools-gcc/usr/ppc-amigaos/lib/*.a
-#	rm -f $(top_dir)/debian/adtools-gcc/usr/ppc-amigaos/lib/*.la
-#	rm -f $(top_dir)/debian/adtools-gcc/usr/ppc-amigaos/lib/*.so
-#	rm -f $(top_dir)/debian/adtools-gcc/usr/ppc-amigaos/lib/*.py
-#	rm -Rf $(top_dir)/debian/adtools-gcc/usr/share/info
-#	rm -Rf $(top_dir)/debian/adtools-gcc/usr/share/man/man7
-#	rm -Rf $(top_dir)/debian/adtools-gcc/usr/share/$(GCC_VERSION)
+	mkdir -p $(top_dir)/debian/adtools-clib2/ppc-amigaos/SDK/clib2/lib
+	mkdir -p $(top_dir)/debian/adtools-clib2/ppc-amigaos/SDK/clib2/include
+	cp -Rp patched/clib2/library/include/* $(top_dir)/debian/adtools-clib2/ppc-amigaos/SDK/clib2/include
+	cp -Rp patched/clib2/library/lib/* $(top_dir)/debian/adtools-clib2/ppc-amigaos/SDK/clib2/lib
 
 # We don't have any useful tests
 override_dh_auto_test:
@@ -60,5 +54,3 @@ override_dh_shlibdeps:
 %:
 	echo $@
 	dh $@
-
-
