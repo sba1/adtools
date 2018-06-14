@@ -4,6 +4,7 @@ repo
 *.deb
 *.tar.gz
 *.tar.bz2
+*.tar.xz
 *.log
 68k-build/sources
 native-build/binutils-cross-build-*
