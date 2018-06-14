@@ -52,6 +52,7 @@ prepare-gcc:
 prepare-clib2: prepare-gcc
 	rm -Rf adtools-clib2/patched
 	cp -R adtools-gcc/patched adtools-clib2
+	cp $(ROOT)/gcc-build/features.mk adtools-clib2/debian
 	$(MAKE) -C $(ROOT)/native-build downloads-done-clib2
 	cp -R $(ROOT)/native-build/downloads/clib2 adtools-clib2/patched
 	rm -Rf adtools-clib2/patched/clib2/.git
