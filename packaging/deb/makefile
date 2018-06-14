@@ -71,4 +71,4 @@ DOCKER_IMAGE=adtools-debs
 
 .PHONY: login
 login:
-	docker run -ti -v $(realpath adtools-gcc):/build/adtools-gcc-0.0.13 $(DOCKER_IMAGE) /bin/bash -c "useradd -u $(shell id -u) $(USER) && su $(USER)"
+	docker run -ti -v $(realpath .):/build/original $(DOCKER_IMAGE) /bin/bash -c "useradd -u $(shell id -u) $(USER) && su $(USER)"
