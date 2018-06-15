@@ -35,6 +35,9 @@ RUN cd adtools-binutils* && debuild -i -us -uc -b
 RUN dpkg --install adtools-sdk_*.deb
 RUN dpkg --install adtools-binutils*.deb
 
+RUN cd adtools-clib2* && debuild -i -us -uc -b
+RUN dkpg --install adtools-clib*.deb
+
 RUN cd adtools-gcc* && debuild -i -us -uc -b
 
 # Now copy all artifacts to a known directory
