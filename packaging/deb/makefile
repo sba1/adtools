@@ -11,7 +11,7 @@ all: source-packages
 # Prepare all packages in the appropriate patched folder
 #
 .PHONY: prepare-packages
-prepare-packages: prepare-binutils prepare-gcc
+prepare-packages: prepare-binutils prepare-gcc prepare-clib2
 
 .PHONY: prepare-binutils
 prepare-binutils:
