@@ -25,7 +25,7 @@ COPY . /build/
 WORKDIR  /build
 
 # Extract
-RUN find | grep dsc | xargs -n 1 dpkg-source -x
+RUN find -maxdepth 1 -name '*.dsc' | xargs -n 1 dpkg-source -x
 
 # Create the packages
 RUN cd adtools-sdk* && debuild -i -us -uc -b
