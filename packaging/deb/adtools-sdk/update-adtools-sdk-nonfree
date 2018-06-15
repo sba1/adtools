@@ -62,6 +62,8 @@ case "$1" in
 		id=$(echo "$CODES" | find_id $target_ver $target_rev)
 		FULLURL=$BASEURL$DOWNLOADURL$id
 		wget "$FULLURL" -O ${EXTRACTDIR}/$OUTNAME
+		mkdir -p /var/cache/adtools-sdk/
+		cp ${EXTRACTDIR}/$OUTNAME /var/cache/adtools-sdk
 		lha xw=${EXTRACTDIR} ${EXTRACTDIR}/$OUTNAME
 		lha xw=${EXTRACTDIR} ${EXTRACTDIR}/SDK_Install/base.lha
 		lha xw=${EXTRACTDIR} ${EXTRACTDIR}/SDK_Install/clib*.lha

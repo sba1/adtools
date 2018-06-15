@@ -7,6 +7,10 @@ case "$1" in
 		update-adtools-sdk-nonfree --uninstall || true
 	;;
 
+	purge)
+		rm -Rf /var/cache/adtools-sdk
+	;;
+
 	failed-upgrade)
 	;;
 
