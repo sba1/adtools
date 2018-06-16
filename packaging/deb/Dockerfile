@@ -36,7 +36,7 @@ RUN dpkg --install adtools-sdk_*.deb
 RUN dpkg --install adtools-binutils*.deb
 
 RUN cd adtools-clib2* && debuild -i -us -uc -b
-RUN dkpg --install adtools-clib*.deb
+RUN dpkg --install adtools-clib*.deb
 
 RUN cd adtools-gcc* && debuild -i -us -uc -b
 
