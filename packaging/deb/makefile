@@ -55,6 +55,7 @@ prepare-clib2: prepare-gcc
 	cp $(ROOT)/gcc-build/features.mk adtools-clib2/debian
 	$(MAKE) -C $(ROOT)/native-build downloads-done-clib2
 	cp -R $(ROOT)/native-build/downloads/clib2 adtools-clib2/patched
+	cd adtools-clib2/patched/clib2 && git clean -dxf
 	rm -Rf adtools-clib2/patched/clib2/.git
 	$(MAKE) -C adtools-clib2/patched/clib2/library -f GNUmakefile.os4 clean
 
