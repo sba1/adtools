@@ -34,10 +34,10 @@ override_dh_auto_build:
 	$(MAKE) -C patched/clib2/library -f GNUmakefile.os4 CC="$(XGCC_CC)"
 
 override_dh_auto_install:
-	mkdir -p $(top_dir)/debian/adtools-clib2/ppc-amigaos/SDK/clib2/lib
-	mkdir -p $(top_dir)/debian/adtools-clib2/ppc-amigaos/SDK/clib2/include
-	cp -Rp patched/clib2/library/include/* $(top_dir)/debian/adtools-clib2/ppc-amigaos/SDK/clib2/include
-	cp -Rp patched/clib2/library/lib/* $(top_dir)/debian/adtools-clib2/ppc-amigaos/SDK/clib2/lib
+	mkdir -p $(top_dir)/debian/adtools-clib2/usr/ppc-amigaos/SDK/clib2/lib
+	mkdir -p $(top_dir)/debian/adtools-clib2/usr/ppc-amigaos/SDK/clib2/include
+	cp -Rp patched/clib2/library/include/* $(top_dir)/debian/adtools-clib2/usr/ppc-amigaos/SDK/clib2/include
+	cp -Rp patched/clib2/library/lib/* $(top_dir)/debian/adtools-clib2/usr/ppc-amigaos/SDK/clib2/lib
 
 # We don't have any useful tests
 override_dh_auto_test:
