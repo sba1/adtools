@@ -3,7 +3,7 @@
 
 ROOT = $(realpath ../../)
 
-GCC_BRANCH_NAME=5
+GCC_BRANCH_NAME=8
 
 all: source-packages
 
