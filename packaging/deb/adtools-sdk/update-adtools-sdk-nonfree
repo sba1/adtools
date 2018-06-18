@@ -29,7 +29,7 @@ CROSS_ROOT=/usr/
 # Usage
 display_usage() {
 	echo "Usage:"
-	echo "  update-adtools-sdk-nonfree --install"
+	echo "  update-adtools-sdk-nonfree --install [--version <version>]"
 	echo "  update-adtools-sdk-nonfree --uninstall"
 	exit 1
 }
