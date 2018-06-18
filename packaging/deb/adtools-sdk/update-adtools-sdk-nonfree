@@ -51,6 +51,10 @@ case "$1" in
 			target_rev=${arrIN[1]}
 		fi
 
+		declare -A KNOWN_SDKS
+		KNOWN_SDKS[a26df1b6d942d3a92c9963686feead5c]=53.24
+		KNOWN_SDKS[bb6b5cd52a5e28f72a28bca9e52d113f]=53.30
+
 		# Temporary directory that will contain extracted stuff
 		DOWNLOADURL='/index.php/downloads?view=download&format=raw&file='
 		EXTRACTDIR=`mktemp -d /tmp/adtools-sdk.XXXXXXXXXXX`
@@ -61,7 +65,20 @@ case "$1" in
 
 		id=$(echo "$CODES" | find_id $target_ver $target_rev)
 		FULLURL=$BASEURL$DOWNLOADURL$id
-		wget "$FULLURL" -O ${EXTRACTDIR}/$OUTNAME
+
+		# Try if we can use the cached file
+		if [ -f /var/cache/adtools-sdk/$OUTNAME ]; then
+			if [ "${target_ver}" != "" ]; then
+				MD5SUM=$(md5sum /var/cache/adtools-sdk/$OUTNAME | cut -d ' ' -f 1)
+				cached_ver=${KNOWN_SDKS[$MD5SUM]}
+				echo $cached_ver "  " $target_ver.$target_rev
+				if [ "$cached_ver" == "$target_ver.$target_rev" ]; then
+					mkdir -p ${EXTRACTDIR}
+					cp /var/cache/adtools-sdk/$OUTNAME ${EXTRACTDIR}/$OUTNAME
+				fi
+			fi
+		fi
+		wget -c "$FULLURL" -O ${EXTRACTDIR}/$OUTNAME
 		mkdir -p /var/cache/adtools-sdk/
 		cp ${EXTRACTDIR}/$OUTNAME /var/cache/adtools-sdk
 		lha xw=${EXTRACTDIR} ${EXTRACTDIR}/$OUTNAME
