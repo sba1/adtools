@@ -1,8 +1,8 @@
-adtools-sdk (0.0.7) UNRELEASED; urgency=medium
+adtools-sdk (0.0.7) unstable; urgency=medium
 
   * Cache downloaded files in /var/cache/adtools-sdk that get away when purged.
 
- -- Sebastian Bauer <mail@sebastianbauer.info>  Fri, 15 Jun 2018 18:33:39 +0200
+ -- Sebastian Bauer <mail@sebastianbauer.info>  Tue, 19 Jun 2018 23:00:43 +0200
 
 adtools-sdk (0.0.6) unstable; urgency=medium
 

@@ -1,5 +1,5 @@
-adtools-clib2 (0.0.1) UNRELEASED; urgency=medium
+adtools-clib2 (0.0.1) unstable; urgency=medium
 
   * Initial release.
 
- -- Sebastian Bauer <mail@sebastianbauer.info>  Sun, 14 Jun 2018 20:35:03 +0200
+ -- Sebastian Bauer <mail@sebastianbauer.info>  Tue, 19 Jun 2018 22:59:54 +0200

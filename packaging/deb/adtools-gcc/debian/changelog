@@ -1,9 +1,9 @@
-adtools-gcc (0.0.13) UNRELEASED; urgency=medium
+adtools-gcc (0.0.13) unstable; urgency=medium
 
   * Split configuring and compiling phase.
   * Now bundles GCC 8.1
 
- -- Sebastian Bauer <mail@sebastianbauer.info>  Sun, 25 Mar 2018 23:35:03 +0200
+ -- Sebastian Bauer <mail@sebastianbauer.info>  Tue, 19 Jun 2018 23:00:12 +0200
 
 adtools-gcc (0.0.12) unstable; urgency=medium
 
