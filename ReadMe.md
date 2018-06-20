@@ -116,9 +116,9 @@ line path, you have access to the following commands:
  content of the patches e.g., using ```git rebase``` etc. For example,
  invoke
  ```
- $ gild checkout gcc 6
+ $ gild checkout gcc 8
  ```
- to checkout the version 6 branch of gcc and apply all adtools patches
+ to checkout the version 8 branch of gcc and apply all adtools patches
  for this branch. The gild tool will attempt a shallow clone of the
  remote repository if it doesn't exist locally.
 
@@ -149,7 +149,7 @@ This can be done by:
 $ bin/gild clone
 $ bin/gild checkout binutils 2.23.2
 $ bin/gild checkout coreutils 5.2
-$ bin/gild checkout gcc 5
+$ bin/gild checkout gcc 8
 ```
 You can also try ```bin/gild checkout gcc 6``` but this produces the more
 experimental version of gcc 6. Building is then a matter of entering
