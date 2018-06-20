@@ -16,10 +16,10 @@ script:
 # So Python finds Mako
 - export PYTHONPATH=/usr/local/lib/python2.7/dist-packages:$PYTHONPATH
 - make prepare-packages
-- cd adtools-sdk && debuild -i -us -uc -b && cd ..
-- cd adtools-binutils && debuild -i -us -uc -b && cd ..
+- cd adtools-sdk && debuild -j2 -i -us -uc -b && cd ..
+- cd adtools-binutils && debuild -j2 -i -us -uc -b && cd ..
 - sudo dpkg -i adtools-binutils_*.deb adtools-sdk_*.deb &> /tmp/dpkg.out
-- cd adtools-clib2 && debuild -i -us -uc -b && cd ..
+- cd adtools-clib2 && debuild -j2 -i -us -uc -b && cd ..
 - sudo dpkg -i adtools-clib2_*.deb &>> /tmp/dpkg.out
 - cd ../..
 - travis_wait 30 ./travis-gcc-deb.sh
