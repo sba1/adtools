@@ -30,8 +30,8 @@ override_dh_auto_build:
 		--with-pkgversion='adtools build $(VERSION)' \
 		$(FEATURES)
 		--disable-nls
-	$(MAKE) all-gcc
-	$(MAKE) -C patched/clib2/library -f GNUmakefile.os4 CC="$(XGCC_CC)"
+	$(MAKE) -j2 all-gcc
+	$(MAKE) -j2 -C patched/clib2/library -f GNUmakefile.os4 CC="$(XGCC_CC)"
 
 override_dh_auto_install:
 	mkdir -p $(top_dir)/debian/adtools-clib2/usr/ppc-amigaos/SDK/clib2/lib
