@@ -30,7 +30,7 @@ override_dh_auto_build:
 		--with-pkgversion='adtools build $(VERSION)' \
 		$(FEATURES)
 		--disable-nls
-	$(MAKE)
+	$(MAKE) -j2
 
 override_dh_auto_install:
 	$(MAKE) install DESTDIR=$(top_dir)/debian/adtools-gcc
