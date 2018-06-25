@@ -20,7 +20,7 @@ key = os.environ.get('BINTRAY_API_KEY')
 
 for deb in all_debs:
 	# Check whether this deb should be released after all
-	changelog_head = check_output("dpkg-deb --fsys-tarfile '{0}' | tar x --wildcards '*/changelogs*.gz' -O | gzip -dc | head -2".format(deb), shell=True)
+	changelog_head = check_output("dpkg-deb --fsys-tarfile '{0}' | tar x --wildcards '*/changelog*.gz' -O | gzip -dc | head -2".format(deb), shell=True)
 	if 'UNRELEASED' in changelog_head:
 		print('Skip uploading of {0} because it is marked as UNRELEASED.'.format(deb))
 		continue
