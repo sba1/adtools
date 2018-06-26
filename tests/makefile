@@ -4,6 +4,8 @@ CPP = ppc-amigaos-g++ -v
 XGCC_DIR := $(shell make -s -C ../native-build print-xg-dir)
 XGCC := $(XGCC_DIR)/xgcc -B $(XGCC_DIR)
 
+QEMU_PPC := qemu-system-ppc
+
 TESTS = \
 	test-dynld \
 	test-exceptions \
@@ -77,7 +79,7 @@ run-$(1): $(1)
 # Extract expected stdout
 	<$$<.c ./extract-stdout.py >$$<.expected
 # Run the executable via qemu for maximal one second, catch the serial output
-	{ sleep 1; echo q; } | qemu-system-ppc -M ppce500 -kernel $$< -serial file:$$<.actual -nographic -monitor stdio >/dev/null || true
+	{ sleep 1; echo q; } | $(QEMU_PPC) -M ppce500 -kernel $$< -serial file:$$<.actual -nographic -monitor stdio >/dev/null || true
 # Compare expected vs. actual, and if it differs highlight difference.
 # We first calculate the md5sums of the actual and expected output. If they match
 # everything is fine, otherwise we employ wdiff to highlight the difference
