@@ -434,8 +434,9 @@ native-dist: native-strip-really
 	../bin/dedup /tmp/$(DIST_FOLDER) >.dedup
 	echo "; Create alternative filenames" >/tmp/$(DIST_FOLDER)/RestoreLinks
 	../bin/dedup /tmp/$(DIST_FOLDER) --amigaos --folder-is-pwd >>/tmp/$(DIST_FOLDER)/RestoreLinks
-	sh -x .dedup
-	rm .dedup
+# Disbaled until we find a way to keep softlinks via lha
+#	sh -x .dedup
+#	rm .dedup
 
 	cd /tmp && lha ao5 $(realpath .)/$(DIST_FOLDER).lha $(DIST_FOLDER)/*
 
