@@ -20,8 +20,8 @@ bin folder to the command search path
   1> ASSIGN GCC: <extracted folder>
   1> PATH GCC:bin add
 
-If soft links that serve as short cuts were not created during extraction, you may want
-to try the RestoreLinks scripts:
+If you want that various short cuts for the binaries are represented by soft links on
+you local harddisk, try the RestoreLinks script:
   1> cd <extracted folder>
   1> EXECUTE RestoreLinks
 
