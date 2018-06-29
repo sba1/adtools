@@ -130,10 +130,10 @@ line path, you have access to the following commands:
  ```patches``` directory of the respective component. For instance,
  invoke
  ```
- $ gild genpatch gcc 6
+ $ gild genpatch gcc 8
  ```
- to generate the tracked changes for 6 branch of gcc. The patches will
- be located in ```gcc/6/patches```.
+ to generate the tracked changes for 8 branch of gcc. The patches will
+ be located in ```gcc/8/patches```.
 
 Building
 --------
