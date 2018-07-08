@@ -1,4 +1,4 @@
-From 33fb8dd600f69a8296531fcbabd0c99acec9e93f Mon Sep 17 00:00:00 2001
+From 38b76a8e1b3ed43ef0153ba9041b0de45260ba1b Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Sun, 8 Jul 2018 15:37:39 +0200
 Subject: [PATCH 12/12] Fix pointer comparision bug.

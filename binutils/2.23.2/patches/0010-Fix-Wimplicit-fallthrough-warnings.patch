@@ -1,4 +1,4 @@
-From dff8d0f0f5c1124f11b145e315b68ed6cb3ca680 Mon Sep 17 00:00:00 2001
+From ab54fa9287d410470a25966d8ed97bdd0d84b39a Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Sun, 8 Jul 2018 15:37:58 +0200
 Subject: [PATCH 10/12] Fix -Wimplicit-fallthrough warnings.
@@ -6,6 +6,7 @@ Subject: [PATCH 10/12] Fix -Wimplicit-fallthrough warnings.
 These appear with recent versions of gcc.
 ---
  bfd/coffgen.c        | 4 ++--
+ bfd/compress.c       | 2 +-
  bfd/elf.c            | 2 +-
  bfd/elf32-amigaos.c  | 1 +
  bfd/elf32-ppc.c      | 1 +
@@ -31,7 +32,7 @@ These appear with recent versions of gcc.
  gprof/gprof.c        | 2 ++
  ld/lexsup.c          | 2 ++
  ld/plugin.c          | 1 +
- 26 files changed, 47 insertions(+), 18 deletions(-)
+ 27 files changed, 48 insertions(+), 19 deletions(-)
 
 diff --git a/bfd/coffgen.c b/bfd/coffgen.c
 index 509119b075d9d2ec2d3a6ce4310e7e8f72c96e2b..72a72213b65626727386b8a7746487026446b691 100644
@@ -67,6 +68,26 @@ index 509119b075d9d2ec2d3a6ce4310e7e8f72c96e2b..72a72213b65626727386b8a774648702
  			   auxp->u.auxent.x_sym.x_misc.x_lnsz.x_size,
  			   tagndx);
  		  if (auxp->fix_end)
+diff --git a/bfd/compress.c b/bfd/compress.c
+index 52c884cd83d95745e512b4ce04caec23a94b496d..c845164f6c6ad245174c0013b7a13da410834e20 100644
+--- a/bfd/compress.c
++++ b/bfd/compress.c
+@@ -234,14 +234,14 @@ bfd_get_full_section_contents (bfd *abfd, sec_ptr sec, bfd_byte **ptr)
+ 	  return FALSE;
+ 	}
+ 
+       free (compressed_buffer);
+       sec->contents = uncompressed_buffer;
+       sec->compress_status = COMPRESS_SECTION_DONE;
+-      /* Fall thru */
+ #endif
++      /* Fall thru */
+ 
+     case COMPRESS_SECTION_DONE:
+       if (p == NULL)
+ 	{
+ 	  p = (bfd_byte *) bfd_malloc (sz);
+ 	  if (p == NULL)
 diff --git a/bfd/elf.c b/bfd/elf.c
 index 062967e151a2ae870237dab8475699ec0f736110..73f959c17e7a2ace28a2c784dc8749b962469219 100644
 --- a/bfd/elf.c
