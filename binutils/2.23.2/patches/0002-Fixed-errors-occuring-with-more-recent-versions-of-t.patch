@@ -1,4 +1,4 @@
-From d9aa45e67589ba6303ae74e8c3ac07a3719f1480 Mon Sep 17 00:00:00 2001
+From ffbc740ec41b7670d9a463e7d52aca3b3f362296 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Sat, 29 Nov 2014 11:32:22 +0100
 Subject: [PATCH 02/12] Fixed errors occuring with more recent versions of
@@ -6,13 +6,13 @@ Subject: [PATCH 02/12] Fixed errors occuring with more recent versions of
 
 ---
  bfd/doc/bfd.texinfo        |  4 ++--
- binutils/doc/binutils.texi | 12 ++++++------
+ binutils/doc/binutils.texi | 12 +++++-----
  gas/doc/c-arc.texi         |  4 ++--
- gas/doc/c-arm.texi         | 18 +++++++++---------
- gas/doc/c-cr16.texi        | 47 ++++++++++++++++++++++++++--------------------
+ gas/doc/c-arm.texi         | 18 +++++++--------
+ gas/doc/c-cr16.texi        | 47 ++++++++++++++++++++++----------------
  gas/doc/c-mips.texi        |  2 +-
- gas/doc/c-score.texi       |  8 ++++----
- gas/doc/c-tic54x.texi      | 10 +++++-----
+ gas/doc/c-score.texi       |  8 +++----
+ gas/doc/c-tic54x.texi      | 10 ++++----
  ld/ld.texinfo              |  4 ++--
  9 files changed, 58 insertions(+), 51 deletions(-)
 
@@ -432,5 +432,5 @@ index 71e909e4b61606d4ca8d1f855d9cd10a3ae1947b..81d538bad91eee08ae24dc88f589b6d0
  
  @bye
 -- 
-2.16.2
+2.18.0
 

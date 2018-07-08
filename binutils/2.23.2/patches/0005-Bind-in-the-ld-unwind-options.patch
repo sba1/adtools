@@ -1,4 +1,4 @@
-From c21cd01a43d66eb4161b6614dc0cf932e9072650 Mon Sep 17 00:00:00 2001
+From 55835c573fe5f9e9dabfecea82e4e1300c78327c Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Thu, 22 Oct 2015 09:48:26 +0200
 Subject: [PATCH 05/12] Bind in the ld unwind options.
@@ -23,5 +23,5 @@ index 605b81e76bcbbd2322561d7d9502190dc7c00674..2661d4ddcd1c5ecab9adea84af7f7d0b
  COMMONPAGESIZE="CONSTANT (COMMONPAGESIZE)"
  ALIGNMENT=16
 -- 
-2.16.2
+2.18.0
 

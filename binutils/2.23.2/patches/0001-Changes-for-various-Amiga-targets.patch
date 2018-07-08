@@ -1,118 +1,118 @@
-From ebed185e98704dd95fbf04d9852feaf4841061e8 Mon Sep 17 00:00:00 2001
+From 878a6bfce26d1f580fa538b349a20d77b9afa1b8 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Sat, 14 Feb 2015 14:54:44 +0100
 Subject: [PATCH 01/12] Changes for various Amiga targets.
 
 ---
- bfd/ChangeLog-9697                                |   64 +
- bfd/ChangeLog-9899                                |    5 +
- bfd/Makefile.am                                   |   18 +-
- bfd/Makefile.in                                   |   24 +-
- bfd/amigaos.c                                     | 3189 +++++++++
- bfd/amigaoslink.c                                 | 1032 +++
- bfd/aout-amiga.c                                  |  152 +
- bfd/aoutx.h                                       |   26 +-
- bfd/bfd-in2.h                                     |   12 +
- bfd/bfd.c                                         |    1 +
- bfd/bfdio.c                                       |   25 +
- bfd/config.bfd                                    |   28 +-
- bfd/configure                                     |    5 +
- bfd/configure.host                                |    1 +
- bfd/configure.in                                  |    5 +
- bfd/doc/Makefile.am                               |   15 +-
- bfd/doc/Makefile.in                               |   15 +-
- bfd/doc/bfd.texinfo                               |    9 +-
- bfd/elf32-amiga.c                                 | 3844 +++++++++++
- bfd/{elf32-ppc.c => elf32-amigaos.c}              |  341 +-
- bfd/elf32-i386-amithlon.c                         |  198 +
- bfd/elf32-i386.c                                  |   17 +-
- bfd/elf32-morphos.c                               | 7137 +++++++++++++++++++++
- bfd/elf32-ppc.c                                   |    4 +
- bfd/hosts/amigaos.h                               |    5 +
- bfd/hosts/morphos.h                               |    5 +
- bfd/libamiga.h                                    |  187 +
- bfd/libbfd.h                                      |    8 +
- bfd/linker.c                                      |   26 +-
- bfd/reloc.c                                       |   19 +
- bfd/targets.c                                     |   11 +
- binutils/objcopy.c                                |   50 +-
- binutils/readelf.c                                |    5 +
- binutils/rename.c                                 |    4 +-
- config.sub                                        |   11 +-
- config/mh-amigaos                                 |   13 +
- config/mh-morphos                                 |   13 +
- configure                                         |    6 +
- configure.ac                                      |    6 +
- gas/ChangeLog-9697                                |   12 +
- gas/ChangeLog-9899                                |    4 +
- gas/Makefile.am                                   |    5 +-
- gas/Makefile.in                                   |   20 +-
- gas/as.c                                          |   14 +
- gas/config/m68k-parse.h                           |    3 +
- gas/config/m68k-parse.y                           |   10 +-
- gas/config/obj-amigahunk.c                        |  212 +
- gas/config/obj-amigahunk.h                        |   54 +
- gas/config/obj-elf.c                              |    4 +-
- gas/config/tc-i386.h                              |   15 +-
- gas/config/tc-m68k.c                              |  312 +-
- gas/config/tc-m68k.h                              |   15 +
- gas/config/tc-ppc.c                               |   36 +-
- gas/config/tc-sh.c                                |   28 +-
- gas/config/te-amiga.h                             |   24 +
- gas/config/te-amigaos.h                           |   14 +
- gas/config/{te-nbsd.h => te-amithlon.h}           |   16 +-
- gas/config/te-morphos.h                           |   14 +
- gas/configure                                     |   20 +
- gas/configure.in                                  |   18 +
- gas/configure.tgt                                 |    8 +-
- gas/read.c                                        |   21 +-
- gas/read.h                                        |    4 +
- gas/write.c                                       |   31 +-
- gas/write.h                                       |    4 +-
- gprof/Makefile.am                                 |    2 +-
- gprof/Makefile.in                                 |    2 +-
- gprof/configure                                   |   13 +
- gprof/configure.in                                |   11 +
- gprof/gconfig.in                                  |    4 -
- include/elf/amigaos.h                             |   27 +
- include/elf/ppc.h                                 |   12 +
- include/libiberty.h                               |    2 +-
- ld/ChangeLog-9197                                 |   15 +
- ld/ChangeLog-9899                                 |    5 +
- ld/Makefile.am                                    |   38 +
- ld/Makefile.in                                    |   46 +
- ld/configure.host                                 |    4 +
- ld/configure.tgt                                  |    9 +
- ld/emulparams/amiga.sh                            |    6 +
- ld/emulparams/amiga_bss.sh                        |    6 +
- ld/emulparams/amigaos.sh                          |   26 +
- ld/emulparams/amithlon.sh                         |   11 +
- ld/emulparams/morphos.sh                          |    6 +
- ld/emulparams/morphos_baserel.sh                  |    6 +
- ld/emulparams/ppcamiga.sh                         |    8 +
- ld/emulparams/ppcamiga_bss.sh                     |    8 +
- ld/emultempl/amiga.em                             |  288 +
- ld/emultempl/{elf32.em => amigaos.em}             |    0
- ld/emultempl/amithlon.em                          | 1698 +++++
- ld/emultempl/morphos.em                           | 1104 ++++
- ld/emultempl/ppc32elf.em                          |   12 +
- ld/ldctor.c                                       |   18 +-
- ld/ldfile.c                                       |   54 +-
- ld/ldfile.h                                       |    5 +
- ld/ldlang.c                                       |    7 +
- ld/ldlang.h                                       |    2 +
- ld/ldlex.c                                        |  127 +-
- ld/ldmain.c                                       |    7 +
- ld/scripttempl/amiga.sc                           |   49 +
- ld/scripttempl/amiga_bss.sc                       |   41 +
- ld/scripttempl/{elf64hppa.sc => amigaos.sc}       |  132 +-
- ld/scripttempl/{mep.sc => amithlon.sc}            |  145 +-
- ld/scripttempl/{elfi370.sc => morphos.sc}         |   57 +-
- ld/scripttempl/{elfi370.sc => morphos_baserel.sc} |  108 +-
- libiberty/config/mh-amigaos                       |   12 +
- libiberty/config/mh-morphos                       |   12 +
- libiberty/lrealpath.c                             |    6 +
- opcodes/m68k-dis.c                                |    2 +-
+ bfd/ChangeLog-9697                            |   64 +
+ bfd/ChangeLog-9899                            |    5 +
+ bfd/Makefile.am                               |   18 +-
+ bfd/Makefile.in                               |   24 +-
+ bfd/amigaos.c                                 | 3189 ++++++++
+ bfd/amigaoslink.c                             | 1032 +++
+ bfd/aout-amiga.c                              |  152 +
+ bfd/aoutx.h                                   |   26 +-
+ bfd/bfd-in2.h                                 |   12 +
+ bfd/bfd.c                                     |    1 +
+ bfd/bfdio.c                                   |   25 +
+ bfd/config.bfd                                |   28 +-
+ bfd/configure                                 |    5 +
+ bfd/configure.host                            |    1 +
+ bfd/configure.in                              |    5 +
+ bfd/doc/Makefile.am                           |   15 +-
+ bfd/doc/Makefile.in                           |   15 +-
+ bfd/doc/bfd.texinfo                           |    9 +-
+ bfd/elf32-amiga.c                             | 3844 +++++++++
+ bfd/{elf32-ppc.c => elf32-amigaos.c}          |  341 +-
+ bfd/elf32-i386-amithlon.c                     |  198 +
+ bfd/elf32-i386.c                              |   17 +-
+ bfd/elf32-morphos.c                           | 7137 +++++++++++++++++
+ bfd/elf32-ppc.c                               |    4 +
+ bfd/hosts/amigaos.h                           |    5 +
+ bfd/hosts/morphos.h                           |    5 +
+ bfd/libamiga.h                                |  187 +
+ bfd/libbfd.h                                  |    8 +
+ bfd/linker.c                                  |   26 +-
+ bfd/reloc.c                                   |   19 +
+ bfd/targets.c                                 |   11 +
+ binutils/objcopy.c                            |   50 +-
+ binutils/readelf.c                            |    5 +
+ binutils/rename.c                             |    4 +-
+ config.sub                                    |   11 +-
+ config/mh-amigaos                             |   13 +
+ config/mh-morphos                             |   13 +
+ configure                                     |    6 +
+ configure.ac                                  |    6 +
+ gas/ChangeLog-9697                            |   12 +
+ gas/ChangeLog-9899                            |    4 +
+ gas/Makefile.am                               |    5 +-
+ gas/Makefile.in                               |   20 +-
+ gas/as.c                                      |   14 +
+ gas/config/m68k-parse.h                       |    3 +
+ gas/config/m68k-parse.y                       |   10 +-
+ gas/config/obj-amigahunk.c                    |  212 +
+ gas/config/obj-amigahunk.h                    |   54 +
+ gas/config/obj-elf.c                          |    4 +-
+ gas/config/tc-i386.h                          |   15 +-
+ gas/config/tc-m68k.c                          |  312 +-
+ gas/config/tc-m68k.h                          |   15 +
+ gas/config/tc-ppc.c                           |   36 +-
+ gas/config/tc-sh.c                            |   28 +-
+ gas/config/te-amiga.h                         |   24 +
+ gas/config/te-amigaos.h                       |   14 +
+ gas/config/{te-nbsd.h => te-amithlon.h}       |   16 +-
+ gas/config/te-morphos.h                       |   14 +
+ gas/configure                                 |   20 +
+ gas/configure.in                              |   18 +
+ gas/configure.tgt                             |    8 +-
+ gas/read.c                                    |   21 +-
+ gas/read.h                                    |    4 +
+ gas/write.c                                   |   31 +-
+ gas/write.h                                   |    4 +-
+ gprof/Makefile.am                             |    2 +-
+ gprof/Makefile.in                             |    2 +-
+ gprof/configure                               |   13 +
+ gprof/configure.in                            |   11 +
+ gprof/gconfig.in                              |    4 -
+ include/elf/amigaos.h                         |   27 +
+ include/elf/ppc.h                             |   12 +
+ include/libiberty.h                           |    2 +-
+ ld/ChangeLog-9197                             |   15 +
+ ld/ChangeLog-9899                             |    5 +
+ ld/Makefile.am                                |   38 +
+ ld/Makefile.in                                |   46 +
+ ld/configure.host                             |    4 +
+ ld/configure.tgt                              |    9 +
+ ld/emulparams/amiga.sh                        |    6 +
+ ld/emulparams/amiga_bss.sh                    |    6 +
+ ld/emulparams/amigaos.sh                      |   26 +
+ ld/emulparams/amithlon.sh                     |   11 +
+ ld/emulparams/morphos.sh                      |    6 +
+ ld/emulparams/morphos_baserel.sh              |    6 +
+ ld/emulparams/ppcamiga.sh                     |    8 +
+ ld/emulparams/ppcamiga_bss.sh                 |    8 +
+ ld/emultempl/amiga.em                         |  288 +
+ ld/emultempl/{elf32.em => amigaos.em}         |    0
+ ld/emultempl/amithlon.em                      | 1698 ++++
+ ld/emultempl/morphos.em                       | 1104 +++
+ ld/emultempl/ppc32elf.em                      |   12 +
+ ld/ldctor.c                                   |   18 +-
+ ld/ldfile.c                                   |   54 +-
+ ld/ldfile.h                                   |    5 +
+ ld/ldlang.c                                   |    7 +
+ ld/ldlang.h                                   |    2 +
+ ld/ldlex.c                                    |  127 +-
+ ld/ldmain.c                                   |    7 +
+ ld/scripttempl/amiga.sc                       |   49 +
+ ld/scripttempl/amiga_bss.sc                   |   41 +
+ ld/scripttempl/{elf64hppa.sc => amigaos.sc}   |  132 +-
+ ld/scripttempl/{mep.sc => amithlon.sc}        |  145 +-
+ ld/scripttempl/{elfi370.sc => morphos.sc}     |   57 +-
+ .../{elfi370.sc => morphos_baserel.sc}        |  108 +-
+ libiberty/config/mh-amigaos                   |   12 +
+ libiberty/config/mh-morphos                   |   12 +
+ libiberty/lrealpath.c                         |    6 +
+ opcodes/m68k-dis.c                            |    2 +-
  109 files changed, 20966 insertions(+), 641 deletions(-)
  create mode 100644 bfd/amigaos.c
  create mode 100644 bfd/amigaoslink.c
@@ -27429,5 +27429,5 @@ index bc2dd491592e56fb664cdf96fc32491c08e1e075..bc40541b7c5aecc30a7a74fd61f29225
     Seperate from reg_names since 'spu', 'fpl' look weird.  */
  static char *const reg_half_names[] =
 -- 
-2.16.2
+2.18.0
 

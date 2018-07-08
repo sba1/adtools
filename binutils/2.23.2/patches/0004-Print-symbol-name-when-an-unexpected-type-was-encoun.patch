@@ -1,4 +1,4 @@
-From 47bacb7cb3a85c97c656c7d610ef0e86dc43a177 Mon Sep 17 00:00:00 2001
+From 52c3f1f019de5c4c3f6113b5bc30c3125f55d204 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Sat, 12 Sep 2015 11:29:01 +0200
 Subject: [PATCH 04/12] Print symbol name when an unexpected type was
@@ -27,5 +27,5 @@ index bcd3add478ab13addffee21b54919afd5cdcd7d6..f10801b99e366ad956faf039401cfcbf
      case bfd_link_hash_undefweak:
        input_sec = bfd_und_section_ptr;
 -- 
-2.16.2
+2.18.0
 

@@ -1,6 +1,6 @@
-From 1685e6f9cba88e00ffc97144b6643315de77b2ae Mon Sep 17 00:00:00 2001
-From: Sebastian Bauer <bauer@jpk.com>
-Date: Mon, 30 Apr 2018 20:23:31 +0200
+From 4882804d78344ad10c26bd4cb1d88137a9eeb531 Mon Sep 17 00:00:00 2001
+From: Sebastian Bauer <mail@sebastianbauer.info>
+Date: Sun, 8 Jul 2018 15:38:17 +0200
 Subject: [PATCH 11/12] Fix bad function cast warnings.
 
 These happen with newer gcc version.
@@ -26,19 +26,19 @@ These happen with newer gcc version.
  bfd/elf64-mmix.c      |   2 +-
  bfd/elf64-sh64.c      |   2 +-
  bfd/elfnn-ia64.c      |   2 +-
- bfd/elfxx-target.h    |  12 ++--
+ bfd/elfxx-target.h    |  12 +--
  bfd/i386msdos.c       |   2 +-
- bfd/ieee.c            |   9 +--
+ bfd/ieee.c            |   9 ++-
  bfd/ihex.c            |   4 +-
  bfd/libaout.h         |   2 +-
- bfd/libbfd-in.h       | 183 ++++++++++++++++++++++++++------------------------
+ bfd/libbfd-in.h       | 183 ++++++++++++++++++++++--------------------
  bfd/libbfd.c          |   2 +-
- bfd/libbfd.h          | 183 ++++++++++++++++++++++++++------------------------
+ bfd/libbfd.h          | 183 ++++++++++++++++++++++--------------------
  bfd/libecoff.h        |   6 +-
  bfd/mach-o-target.c   |   2 +-
  bfd/mmo.c             |   2 +-
  bfd/nlm-target.h      |   2 +-
- bfd/oasys.c           |  12 ++--
+ bfd/oasys.c           |  12 ++-
  bfd/pef.c             |   3 +-
  bfd/plugin.c          |   2 +-
  bfd/ppcboot.c         |   2 +-
@@ -47,7 +47,7 @@ These happen with newer gcc version.
  bfd/tekhex.c          |   2 +-
  bfd/verilog.c         |   2 +-
  bfd/versados.c        |   3 +-
- bfd/vms-alpha.c       |  12 +---
+ bfd/vms-alpha.c       |  12 +--
  bfd/xsym.c            |   2 +-
  gas/config/obj-elf.c  |   6 +-
  45 files changed, 280 insertions(+), 255 deletions(-)
@@ -1881,5 +1881,5 @@ index 7e1e773bcc42aac8b01a0466c1d6af1c05e29bd9..a5bd04003017c5f8ed77545a67330fcf
    {"data", obj_elf_data, 0},
    {"offset", obj_elf_struct, 0},
 -- 
-2.16.2
+2.18.0
 

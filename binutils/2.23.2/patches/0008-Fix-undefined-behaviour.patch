@@ -1,4 +1,4 @@
-From 3ed3c0c0cdaf1d6fc7dcf4a6b059a566a2ab3d27 Mon Sep 17 00:00:00 2001
+From d16072e60a830e2f8d60c04ccf2a64995f5fa204 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Wed, 15 Feb 2017 22:12:54 +0100
 Subject: [PATCH 08/12] Fix undefined behaviour.
@@ -109,5 +109,5 @@ index e57b118b02e5a2faba62f5dbd524f03827f719c0..40a1262ecd17944de229f6b192f8c6e0
  #define PPC_OPERAND_SIGNED (0x1)
  
 -- 
-2.16.2
+2.18.0
 

@@ -1,6 +1,6 @@
-From 30a8825b0e8a4f2074859bccea4430b99987b2ea Mon Sep 17 00:00:00 2001
-From: Sebastian Bauer <bauer@jpk.com>
-Date: Mon, 30 Apr 2018 19:34:12 +0200
+From dff8d0f0f5c1124f11b145e315b68ed6cb3ca680 Mon Sep 17 00:00:00 2001
+From: Sebastian Bauer <mail@sebastianbauer.info>
+Date: Sun, 8 Jul 2018 15:37:58 +0200
 Subject: [PATCH 10/12] Fix -Wimplicit-fallthrough warnings.
 
 These appear with recent versions of gcc.
@@ -30,7 +30,8 @@ These appear with recent versions of gcc.
  gas/expr.c           | 2 ++
  gprof/gprof.c        | 2 ++
  ld/lexsup.c          | 2 ++
- 25 files changed, 46 insertions(+), 18 deletions(-)
+ ld/plugin.c          | 1 +
+ 26 files changed, 47 insertions(+), 18 deletions(-)
 
 diff --git a/bfd/coffgen.c b/bfd/coffgen.c
 index 509119b075d9d2ec2d3a6ce4310e7e8f72c96e2b..72a72213b65626727386b8a7746487026446b691 100644
@@ -719,6 +720,24 @@ index 4dc10131beda701728cb7671da86ffb8bee39a3e..327b7e39008941320e10c8a17dd6b4fb
      }
  
    if (! link_info.shared)
+diff --git a/ld/plugin.c b/ld/plugin.c
+index da99e7743c8d9705a79eb55892c2206cbaeadb35..3a3ac607230730c9775423a20e791767b98cfdbc 100644
+--- a/ld/plugin.c
++++ b/ld/plugin.c
+@@ -350,12 +350,13 @@ asymbol_from_plugin_symbol (bfd *abfd, asymbol *asym,
+ 	einfo (_("%P%F: %s: non-ELF symbol in ELF BFD!\n"), asym->name);
+       switch (ldsym->visibility)
+ 	{
+ 	default:
+ 	  einfo (_("%P%F: unknown ELF symbol visibility: %d!\n"),
+ 		 ldsym->visibility);
++	  /* Fall through. */
+ 	case LDPV_DEFAULT:
+ 	  visibility = STV_DEFAULT;
+ 	  break;
+ 	case LDPV_PROTECTED:
+ 	  visibility = STV_PROTECTED;
+ 	  break;
 -- 
-2.16.2
+2.18.0
 

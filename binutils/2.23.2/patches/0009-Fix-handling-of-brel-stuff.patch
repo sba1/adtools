@@ -1,4 +1,4 @@
-From 339eaadb7f5b29a4bdd83eaa429de3ba43e656da Mon Sep 17 00:00:00 2001
+From 4473438b4280e83b8f8b53155d4bd414e0330606 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Wed, 18 Apr 2018 09:12:12 +0200
 Subject: [PATCH 09/12] Fix handling of brel stuff.
@@ -68,5 +68,5 @@ index 9bf9535888f2345d60a8f802680ae03f41f67a5f..fa9333b7f1d953b5ebcf338bd465c75f
  	  continue;
  
 -- 
-2.16.2
+2.18.0
 
