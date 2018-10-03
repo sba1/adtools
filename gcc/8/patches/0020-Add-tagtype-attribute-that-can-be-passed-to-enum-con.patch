@@ -1,7 +1,7 @@
-From 304486476939018cd65210599361fa1ab4ee6f7a Mon Sep 17 00:00:00 2001
+From 7b4020dfb02189d018773e878a70e525ea55ca6f Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Tue, 24 Apr 2018 06:29:13 +0200
-Subject: [PATCH 20/25] Add tagtype attribute that can be passed to enum
+Subject: [PATCH 20/26] Add tagtype attribute that can be passed to enum
  constants.
 
 The tagtype attribute can be applied to enum constants in order to annotate
@@ -13,9 +13,9 @@ implemented for the same purpose but that has problems with optimizations.
 Also, the preprocessor can now be used to hide the attribute for compilers
 that don't support it.
 ---
- gcc/c/c-parser.c                   | 32 ++++++++++++++++++++++++++++++++
+ gcc/c/c-parser.c                   | 32 ++++++++++++++++++++++++++++++
  gcc/config/rs6000/amigaos-protos.h |  1 +
- gcc/config/rs6000/amigaos.c        | 26 ++++++++++++++++++++++++++
+ gcc/config/rs6000/amigaos.c        | 26 ++++++++++++++++++++++++
  gcc/config/rs6000/amigaos.h        |  1 +
  4 files changed, 60 insertions(+)
 
@@ -163,5 +163,5 @@ index f88bfe5f879cb4ca09f067d907ec36ef0b4c2da3..0ed2a2b9ca1abe33f6534008f0c9592a
  /* Overrides */
  
 -- 
-2.14.2
+2.19.0
 

@@ -1,7 +1,7 @@
-From 1a135f60f0eb726f4ea0a7ad652d68020495e6cf Mon Sep 17 00:00:00 2001
+From d523c55b1db232e179c222a28b59fb25456563df Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Tue, 3 Apr 2018 19:52:01 +0200
-Subject: [PATCH 12/25] Add amigaos-stdint.h for libatomic.
+Subject: [PATCH 12/26] Add amigaos-stdint.h for libatomic.
 
 ---
  gcc/config.gcc                                      | 2 +-
@@ -10,10 +10,10 @@ Subject: [PATCH 12/25] Add amigaos-stdint.h for libatomic.
  copy gcc/config/{dragonfly-stdint.h => amigaos-stdint.h} (90%)
 
 diff --git a/gcc/config.gcc b/gcc/config.gcc
-index 2eb83eb597c8b379d247db7779454ae1b3148e19..e45ce2032c791e9229c203b9c60ceb188a840df9 100644
+index 7946acd394cf166b39d1bc4fa9859d85ab3d1af2..cdc38e8cb879f36f0eb7b92bded8bb094724736b 100644
 --- a/gcc/config.gcc
 +++ b/gcc/config.gcc
-@@ -2373,13 +2373,13 @@ nvptx-*)
+@@ -2375,13 +2375,13 @@ nvptx-*)
  	;;
  pdp11-*-*)
  	tm_file="${tm_file} newlib-stdint.h"
@@ -50,5 +50,5 @@ index d29dd8c54530f003c20786c9261159de83276d8e..854009ca098f9dff59be936425a565dd
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation; either version 3, or (at your option)
 -- 
-2.14.2
+2.19.0
 

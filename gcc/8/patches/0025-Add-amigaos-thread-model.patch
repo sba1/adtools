@@ -1,7 +1,7 @@
-From 4f1a4c15fc6f80069f2b060de74a96b4bdcf0889 Mon Sep 17 00:00:00 2001
+From 9f1718a49bcd0c9ffef88e5d3305fb75db9192da Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 4 May 2018 18:22:24 +0200
-Subject: [PATCH 25/25] Add amigaos thread model.
+Subject: [PATCH 25/26] Add amigaos thread model.
 
 It is work in progress.
 ---
@@ -16,10 +16,10 @@ It is work in progress.
  libgcc/config/rs6000/t-amigaos |   5 +
  libgcc/configure               |   1 +
  libgcc/gthr-amigaos-asserts.h  |   8 +
- libgcc/gthr-amigaos-native.c   | 914 +++++++++++++++++++++++++++++++++++++++++
- libgcc/gthr-amigaos-posix.c    | 233 +++++++++++
- libgcc/gthr-amigaos-single.c   | 141 +++++++
- libgcc/gthr-amigaos.h          | 347 ++++++++++++++++
+ libgcc/gthr-amigaos-native.c   | 914 +++++++++++++++++++++++++++++++++
+ libgcc/gthr-amigaos-posix.c    | 233 +++++++++
+ libgcc/gthr-amigaos-single.c   | 141 +++++
+ libgcc/gthr-amigaos.h          | 347 +++++++++++++
  libstdc++-v3/configure         |  15 +-
  16 files changed, 1709 insertions(+), 12 deletions(-)
  create mode 100644 gcc/config/rs6000/x-amigaos
@@ -207,7 +207,7 @@ index b066cc609e1c2615e66307d5439f765a4f3b286b..1a10e06f5a6254864f5a7dcad0a36007
      echo "${enable_threads} is an unknown thread package" 1>&2
      exit 1
 diff --git a/gcc/doc/invoke.texi b/gcc/doc/invoke.texi
-index 3a7fe4352fc063a5326e042ad1cf0cdda18299c2..02381135b1f42e8148da9cbcd3072d0324c3dc8f 100644
+index 3b2f036509f2af427c8ec7235d93fe8464347161..add268936da18c99cb0602f22f4e41c04c4922eb 100644
 --- a/gcc/doc/invoke.texi
 +++ b/gcc/doc/invoke.texi
 @@ -1304,13 +1304,13 @@ See RS/6000 and PowerPC Options.
@@ -225,7 +225,7 @@ index 3a7fe4352fc063a5326e042ad1cf0cdda18299c2..02381135b1f42e8148da9cbcd3072d03
  @gccoptlist{-fcall-saved-@var{reg}  -fcall-used-@var{reg} @gol
  -ffixed-@var{reg}  -fexceptions @gol
  -fnon-call-exceptions  -fdelete-dead-exceptions  -funwind-tables @gol
-@@ -15201,12 +15201,19 @@ Generate absolute data access. This is the default.
+@@ -15209,12 +15209,19 @@ Generate absolute data access. This is the default.
  @opindex mcheck68kfuncptr
  
  Causes each function call through a function pointer to be performed as
@@ -1953,7 +1953,7 @@ index 0000000000000000000000000000000000000000..123d3512abed0a43a8c019bbce0d83f0
 +
 +#endif /* ! GCC_GTHR_AMIGAOS_H */
 diff --git a/libstdc++-v3/configure b/libstdc++-v3/configure
-index 0789c9f050c0e282cf99f0e1ee807b50832e00e5..22fb42c3142901a281b718ac09b04c0ad9e74627 100755
+index dcb8b7a0aceee5bfbb40f9e77e2b24245cd627f7..637929f067cd798d084775dab41eee0f1f1a56db 100755
 --- a/libstdc++-v3/configure
 +++ b/libstdc++-v3/configure
 @@ -15175,12 +15175,13 @@ $as_echo_n "checking for thread model used by GCC... " >&6; }
@@ -2076,5 +2076,5 @@ index 0789c9f050c0e282cf99f0e1ee807b50832e00e5..22fb42c3142901a281b718ac09b04c0a
  template<typename T>
    struct same<T, T>;
 -- 
-2.14.2
+2.19.0
 

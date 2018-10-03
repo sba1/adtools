@@ -1,7 +1,7 @@
-From 7c5567a4f120c774a7d90d1983882d1a94491db2 Mon Sep 17 00:00:00 2001
+From 0d3a8abd4ede37475e1a41bd9cd6aee726e3da01 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Tue, 22 May 2018 23:14:01 +0200
-Subject: [PATCH 24/25] Adapt libssp for AmigaOS.
+Subject: [PATCH 24/26] Adapt libssp for AmigaOS.
 
 ---
  libssp/ssp.c | 8 +++++---
@@ -64,5 +64,5 @@ index 741377ddd4050a1583952c32bdcffe372a3b4aa8..aa14566dea777c6629f4efd18e0c75d7
       is dead.  */
    {
 -- 
-2.14.2
+2.19.0
 

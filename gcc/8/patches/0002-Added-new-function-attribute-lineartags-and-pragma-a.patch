@@ -1,7 +1,7 @@
-From 1989b314efbdd6585398d5a9d012811f7bbe681f Mon Sep 17 00:00:00 2001
+From 0d43d6007cffb4bcab062ee2df141321f54f064f Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 14 Nov 2014 20:03:56 +0100
-Subject: [PATCH 02/25] Added new function attribute "lineartags" and pragma
+Subject: [PATCH 02/26] Added new function attribute "lineartags" and pragma
  "amigaos tagtype".
 
 Functions that have the lineartags attribute are assumed to be functions
@@ -28,10 +28,10 @@ For instance, no check is done that the attribute is applied to varargs
 functions.
 ---
  gcc/c-family/c-pragma.c            |  10 +++
- gcc/c/c-parser.c                   | 129 +++++++++++++++++++++++++++++++++++++
- gcc/c/c-typeck.c                   |  26 ++++++++
+ gcc/c/c-parser.c                   | 129 +++++++++++++++++++++++++++++
+ gcc/c/c-typeck.c                   |  26 ++++++
  gcc/config/rs6000/amigaos-protos.h |   1 +
- gcc/config/rs6000/amigaos.c        |  33 ++++++++++
+ gcc/config/rs6000/amigaos.c        |  33 ++++++++
  5 files changed, 199 insertions(+)
 
 diff --git a/gcc/c-family/c-pragma.c b/gcc/c-family/c-pragma.c
@@ -260,7 +260,7 @@ index 47720861d3f22ea1ec414c0f134004b355798df3..2402da0ce1d38d16739ca90860022268
    c_parser_skip_to_pragma_eol (parser);
  
 diff --git a/gcc/c/c-typeck.c b/gcc/c/c-typeck.c
-index 7bf360ddc98fa57be91b046f43e09568643b0618..ee96f8c75a6be19169d22327ef8c384dad59406d 100644
+index 68ff57c4ab3f5ae11db61d1c22ed5ad6d94a0edc..30ca51cb1ee2de443098fe4052da1e1fd8d0a3d6 100644
 --- a/gcc/c/c-typeck.c
 +++ b/gcc/c/c-typeck.c
 @@ -3235,12 +3235,14 @@ convert_arguments (location_t loc, vec<location_t> arg_loc, tree typelist,
@@ -397,5 +397,5 @@ index ad8c0e64c056129afcd8bfa2a656749a2febfaaa..85c03f28e37d64865360692a14fcc8a1
  amigaos_legitimize_baserel_address (rtx addr)
  {
 -- 
-2.14.2
+2.19.0
 

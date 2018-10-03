@@ -1,7 +1,7 @@
-From c809c9ec9c4c82a554054f2e3add1608ab045dad Mon Sep 17 00:00:00 2001
+From 62ecf1e28e5a758dfc5c401f5c98d68a7b63d299 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Tue, 24 Apr 2018 22:46:21 +0200
-Subject: [PATCH 19/25] Add _Static_warning().
+Subject: [PATCH 19/26] Add _Static_warning().
 
 This acts very similar to _Static_assert() but produces a warning
 rather than an compiler error.
@@ -13,7 +13,7 @@ rather than an compiler error.
  4 files changed, 20 insertions(+), 4 deletions(-)
 
 diff --git a/gcc/c-family/c-common.c b/gcc/c-family/c-common.c
-index 7e6905e791e27a4035c389476862a76eb270fd0c..463305cc004e2798c1de7564ce6102f0a0925b84 100644
+index dbbaa81956b6fa294183fb34ec57bd0edcae1749..7dba737363b8a23d77d54c511359ebe7b7d88350 100644
 --- a/gcc/c-family/c-common.c
 +++ b/gcc/c-family/c-common.c
 @@ -351,12 +351,13 @@ const struct c_common_resword c_common_reswords[] =
@@ -31,7 +31,7 @@ index 7e6905e791e27a4035c389476862a76eb270fd0c..463305cc004e2798c1de7564ce6102f0
    { "__PRETTY_FUNCTION__", RID_PRETTY_FUNCTION_NAME, 0 },
    { "__alignof",	RID_ALIGNOF,	0 },
 diff --git a/gcc/c-family/c-common.h b/gcc/c-family/c-common.h
-index 6cf7614f68207c9ea26e293aa2e9600c3af53df8..a66586ef5048d92b5d84a13798f92ff34cfd70ca 100644
+index f2c66628e53316ca12885cbd32cdec84e5ca162e..9105afe24499b9eb42a4927701181034192bfad2 100644
 --- a/gcc/c-family/c-common.h
 +++ b/gcc/c-family/c-common.h
 @@ -101,12 +101,13 @@ enum rid
@@ -124,7 +124,7 @@ index 2402da0ce1d38d16739ca90860022268117de326..cc1cfa97e6a783497b4c9b7db714ba8d
     Storage class specifiers are accepted iff SCSPEC_OK; type
     specifiers are accepted iff TYPESPEC_OK; alignment specifiers are
 diff --git a/gcc/cp/parser.c b/gcc/cp/parser.c
-index d8ce28a6d61a11b0a9a711218587ffd302ce7cca..30cda732380c9115b923ad6ba2fd771aec9d27bd 100644
+index 715faea2b2a81ba1466782492e915646872a4302..47102ad6c5cd5946bea3f223eaca6bd3b2e7f831 100644
 --- a/gcc/cp/parser.c
 +++ b/gcc/cp/parser.c
 @@ -155,12 +155,13 @@ enum required_token {
@@ -141,7 +141,7 @@ index d8ce28a6d61a11b0a9a711218587ffd302ce7cca..30cda732380c9115b923ad6ba2fd771a
    RT_TEMPLATE, /* template */
    RT_NAMESPACE, /* namespace */
    RT_USING, /* using */
-@@ -12864,13 +12865,13 @@ cp_parser_block_declaration (cp_parser *parser,
+@@ -12861,13 +12862,13 @@ cp_parser_block_declaration (cp_parser *parser,
        cp_parser_skip_to_end_of_statement (parser);
        /* If the next token is now a `;', consume it.  */
        if (cp_lexer_next_token_is (parser->lexer, CPP_SEMICOLON))
@@ -157,5 +157,5 @@ index d8ce28a6d61a11b0a9a711218587ffd302ce7cca..30cda732380c9115b923ad6ba2fd771a
  				  /*maybe_range_for_decl*/NULL);
  }
 -- 
-2.14.2
+2.19.0
 
