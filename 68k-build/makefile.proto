@@ -14,7 +14,7 @@ proto/%.h: $(FDDIR)/%_lib.fd
 	$(FD2PRAGMA) -i $< -s 38 --clib output/root-cross/m68k-unknown-elf/include/clib/$(<:$(FDDIR)/%_lib.fd=%_protos.h)  -t $(INCLUDEDIR)/proto
 
 inline/stubs.h:
-	touch $(INCLUDEDIR)/$@
+	echo '#define __inline static inline __attribute__((optimize("omit-frame-pointer")))' >$(INCLUDEDIR)/$@
 
 inline/%.h: $(FDDIR)/%_lib.fd
 	mkdir -p $(INCLUDEDIR)/inline
