@@ -1,7 +1,7 @@
 From 919371658c4659c235b7d34e83590b323efd960a Mon Sep 17 00:00:00 2001
 From: rguenth <rguenth@138bc75d-0d04-0410-961f-82ee72b054a4>
 Date: Wed, 1 Aug 2018 08:06:20 +0000
-Subject: [PATCH 26/26] 2018-08-01  Richard Biener  <rguenther@suse.de>
+Subject: [PATCH 26/27] 2018-08-01  Richard Biener  <rguenther@suse.de>
 
 	PR bootstrap/86724
 	* graphite.h: Include isl/id.h and isl/space.h to allow build
@@ -50,5 +50,5 @@ index 4e0e58c60ab83f1b8acf576e83330466775fac17..be0a22b38942850d88feb159603bb846
  
  typedef struct scop *scop_p;
 -- 
-2.19.0
+2.19.1
 

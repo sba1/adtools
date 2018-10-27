@@ -1,7 +1,7 @@
 From d63925f0797f6adfd011527a72004fd1edad2753 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Sun, 29 Apr 2018 00:08:22 +0200
-Subject: [PATCH 23/26] Provide a documentation for checktags and tagtype
+Subject: [PATCH 23/27] Provide a documentation for checktags and tagtype
  attributes.
 
 ---
@@ -67,5 +67,5 @@ index 214c979c44c2da232d688cda3c381c8e5ea5ab70..03886116121acb9f34479b68513cc795
  @cindex Statement Attributes
  
 -- 
-2.19.0
+2.19.1
 

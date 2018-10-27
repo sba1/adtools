@@ -1,7 +1,7 @@
 From 9f1718a49bcd0c9ffef88e5d3305fb75db9192da Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 4 May 2018 18:22:24 +0200
-Subject: [PATCH 25/26] Add amigaos thread model.
+Subject: [PATCH 25/27] Add amigaos thread model.
 
 It is work in progress.
 ---
@@ -2076,5 +2076,5 @@ index dcb8b7a0aceee5bfbb40f9e77e2b24245cd627f7..637929f067cd798d084775dab41eee0f
  template<typename T>
    struct same<T, T>;
 -- 
-2.19.0
+2.19.1
 
