@@ -1,4 +1,4 @@
-FD2PRAGMA = ./sources/sditools/fd2pragma/fd2pragma
+FD2PRAGMA = ./fd2pragma/fd2pragma
 FDDIR = sources/NDK_3.9/Include/fd
 FDS = $(sort $(filter-out $(FDDIR)/dtclass_lib.fd, $(wildcard $(FDDIR)/*.fd)))
 
