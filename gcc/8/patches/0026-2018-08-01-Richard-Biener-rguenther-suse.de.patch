@@ -1,4 +1,4 @@
-From 919371658c4659c235b7d34e83590b323efd960a Mon Sep 17 00:00:00 2001
+From b7d8f9b52986d7f0e67dfa1e245c0c224d73ad48 Mon Sep 17 00:00:00 2001
 From: rguenth <rguenth@138bc75d-0d04-0410-961f-82ee72b054a4>
 Date: Wed, 1 Aug 2018 08:06:20 +0000
 Subject: [PATCH 26/27] 2018-08-01  Richard Biener  <rguenther@suse.de>

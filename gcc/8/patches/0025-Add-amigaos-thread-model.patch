@@ -1,27 +1,27 @@
-From 9f1718a49bcd0c9ffef88e5d3305fb75db9192da Mon Sep 17 00:00:00 2001
+From 9413d0038c41a9933832eeb10ab8080541a44ffd Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 4 May 2018 18:22:24 +0200
 Subject: [PATCH 25/27] Add amigaos thread model.
 
 It is work in progress.
 ---
- config/gthr.m4                 |   1 +
- gcc/config.host                |   1 +
- gcc/config/rs6000/amigaos.h    |   8 +-
- gcc/config/rs6000/amigaos.opt  |  18 +
- gcc/config/rs6000/x-amigaos    |  16 +
- gcc/configure                  |   2 +-
- gcc/configure.ac               |   2 +-
- gcc/doc/invoke.texi            |   9 +-
- libgcc/config/rs6000/t-amigaos |   5 +
- libgcc/configure               |   1 +
- libgcc/gthr-amigaos-asserts.h  |   8 +
- libgcc/gthr-amigaos-native.c   | 914 +++++++++++++++++++++++++++++++++
- libgcc/gthr-amigaos-posix.c    | 233 +++++++++
- libgcc/gthr-amigaos-single.c   | 141 +++++
- libgcc/gthr-amigaos.h          | 347 +++++++++++++
- libstdc++-v3/configure         |  15 +-
- 16 files changed, 1709 insertions(+), 12 deletions(-)
+ config/gthr.m4                 |    1 +
+ gcc/config.host                |    1 +
+ gcc/config/rs6000/amigaos.h    |    8 +-
+ gcc/config/rs6000/amigaos.opt  |   18 +
+ gcc/config/rs6000/x-amigaos    |   16 +
+ gcc/configure                  |    2 +-
+ gcc/configure.ac               |    2 +-
+ gcc/doc/invoke.texi            |    9 +-
+ libgcc/config/rs6000/t-amigaos |    5 +
+ libgcc/configure               |    1 +
+ libgcc/gthr-amigaos-asserts.h  |    8 +
+ libgcc/gthr-amigaos-native.c   | 1013 ++++++++++++++++++++++++++++++++
+ libgcc/gthr-amigaos-posix.c    |  233 ++++++++
+ libgcc/gthr-amigaos-single.c   |  141 +++++
+ libgcc/gthr-amigaos.h          |  347 +++++++++++
+ libstdc++-v3/configure         |   15 +-
+ 16 files changed, 1808 insertions(+), 12 deletions(-)
  create mode 100644 gcc/config/rs6000/x-amigaos
  create mode 100644 libgcc/gthr-amigaos-asserts.h
  create mode 100644 libgcc/gthr-amigaos-native.c
@@ -295,16 +295,18 @@ index 0000000000000000000000000000000000000000..bb6005cd52ef75cc7bfbc276d5d56ec5
 +#endif
 diff --git a/libgcc/gthr-amigaos-native.c b/libgcc/gthr-amigaos-native.c
 new file mode 100644
-index 0000000000000000000000000000000000000000..f6297ab16ce850117998c4bf9eb2b9c5849fdea5
+index 0000000000000000000000000000000000000000..7b03647a4a2e2acab21f73eb55733c62aee4431a
 --- /dev/null
 +++ b/libgcc/gthr-amigaos-native.c
-@@ -0,0 +1,914 @@
+@@ -0,0 +1,1013 @@
 +/**
 + * This is the native implementation of gcc threads abstraction. The advantage
 + * over the pthreads one is that no pthreads.library is needed.
 + *
 + * (c) 2018 by Sebastian Bauer
 + */
++#define __NOLIBBASE__
++#define __NOGLOBALIFACE__
 +
 +#include "gthr-amigaos.h"
 +
@@ -373,6 +375,25 @@ index 0000000000000000000000000000000000000000..f6297ab16ce850117998c4bf9eb2b9c5
 +/******************************************************************************/
 +
 +#include "gthr-amigaos-asserts.h"
++
++/******************************************************************************/
++
++static struct ExecIFace *iexec = 0;
++static struct DOSIFace *idos = 0;
++static struct Library *DOSBase;
++
++static __gthread_once_t libs_once = __GTHREAD_ONCE_INIT;
++
++/**
++ * The init function to open all necessary libs.
++ */
++static void init_libs(void)
++{
++  struct ExecBase *SysBase = *(struct ExecBase **)4;
++  iexec = (struct ExecIFace *)SysBase->MainInterface;
++  DOSBase = iexec->OpenLibrary("dos.library", 0);
++  idos = (struct DOSIFace *)iexec->GetInterface(DOSBase, "main", 1, NULL);
++}
 +
 +/******************************************************************************/
 +
@@ -465,8 +486,10 @@ index 0000000000000000000000000000000000000000..f6297ab16ce850117998c4bf9eb2b9c5
 +    {
 +      while (!__atomic_load_1(&once->u.i.done, __ATOMIC_SEQ_CST))
 +        {
-+          /* Allow the other thread to progress quickly */
-+          IExec->Reschedule();
++          /* Allow the other thread to progress quickly but iexec may be not available */
++          struct ExecBase *SysBase = *(struct ExecBase **)4;
++          struct ExecIFace *ie = (struct ExecIFace *)SysBase->MainInterface;
++          ie->Reschedule();
 +        }
 +    }
 +  return 0;
@@ -517,42 +540,45 @@ index 0000000000000000000000000000000000000000..f6297ab16ce850117998c4bf9eb2b9c5
 + */
 +static void init_keystore(void)
 +{
-+  if (!(keystore = (keystore_t *)IExec->AllocVec (sizeof(*keystore), MEMF_CLEAR)))
++  if (!(keystore = (keystore_t *)iexec->AllocVec (sizeof(*keystore), MEMF_CLEAR)))
 +    return;
-+  IExec->InitSemaphore(&keystore->sem);
++  iexec->InitSemaphore(&keystore->sem);
 +
-+  if (!(keystore->keyentry_pool = IExec->AllocSysObjectTags (ASOT_ITEMPOOL, ASOITEM_ItemSize, sizeof(keyentry_t), TAG_DONE)))
++  if (!(keystore->keyentry_pool = iexec->AllocSysObjectTags (ASOT_ITEMPOOL, ASOITEM_ItemSize, sizeof(keyentry_t), TAG_DONE)))
 +    goto bailout;
 +  return;
 +bailout:
 +  if (keystore)
-+    IExec->FreeVec (keystore);
++    iexec->FreeVec (keystore);
 +  keystore = NULL;
 +}
 +
 +int __gthread_key_create (__gthread_key_t *__key, void (*destroy) (void *))
 +{
++  /* Initialize libs */
++  __gthread_once (&libs_once, init_libs);
++
 +  /* Initialize our private keystore, but only once */
 +  __gthread_once (&keystore_once, init_keystore);
 +
 +  if (!keystore)
 +    return ENOMEM;
 +
-+  IExec->ObtainSemaphore (&keystore->sem);
++  iexec->ObtainSemaphore (&keystore->sem);
 +  if (keystore->num_key_entries >= keystore->num_key_entries_allocated)
 +    {
 +      struct key *new_keys;
 +      int new_num_key_entries_allocated = keystore->num_key_entries_allocated * 2 + 4;
 +
-+      if (!(new_keys = (struct key *)IExec->AllocVec (sizeof(*new_keys) * new_num_key_entries_allocated, 0)))
++      if (!(new_keys = (struct key *)iexec->AllocVec (sizeof(*new_keys) * new_num_key_entries_allocated, 0)))
 +        {
-+          IExec->ReleaseSemaphore (&keystore->sem);
++          iexec->ReleaseSemaphore (&keystore->sem);
 +          return ENOMEM;
 +        }
 +      if (keystore->keys)
 +        {
 +          memcpy (new_keys, keystore->keys, keystore->num_key_entries * sizeof(*new_keys));
-+          IExec->FreeVec (keystore->keys);
++          iexec->FreeVec (keystore->keys);
 +        }
 +      keystore->keys = new_keys;
 +      keystore->num_key_entries_allocated = new_num_key_entries_allocated;
@@ -562,19 +588,22 @@ index 0000000000000000000000000000000000000000..f6297ab16ce850117998c4bf9eb2b9c5
 +
 +  __key->id = keystore->num_key_entries++;
 +
-+  IExec->ReleaseSemaphore (&keystore->sem);
++  iexec->ReleaseSemaphore (&keystore->sem);
 +  return 0;
 +}
 +
 +int
 +__gthread_key_delete (__gthread_key_t __key)
 +{
-+  IExec->ObtainSemaphore (&keystore->sem);
++  /* Initialize libs */
++  __gthread_once (&libs_once, init_libs);
++
++  iexec->ObtainSemaphore (&keystore->sem);
 +
 +  /* TODO: Free the occupied storage for each entry */
 +  keystore->keys[__key.id].first = NULL;
 +
-+  IExec->ReleaseSemaphore (&keystore->sem);
++  iexec->ReleaseSemaphore (&keystore->sem);
 +  return 0;
 +}
 +
@@ -599,28 +628,38 @@ index 0000000000000000000000000000000000000000..f6297ab16ce850117998c4bf9eb2b9c5
 +void *
 +__gthread_getspecific (__gthread_key_t __key)
 +{
-+  struct Task *this_task = IExec->FindTask(NULL);
++  struct Task *this_task;
 +  keyentry_t *entry;
 +
-+  IExec->ObtainSemaphoreShared (&keystore->sem);
++  /* Initialize libs */
++  __gthread_once (&libs_once, init_libs);
++
++  this_task = iexec->FindTask(NULL);
++
++  iexec->ObtainSemaphoreShared (&keystore->sem);
 +  entry = find_keyentry(__key.id, this_task);
-+  IExec->ReleaseSemaphore (&keystore->sem);
++  iexec->ReleaseSemaphore (&keystore->sem);
 +  return entry?((void*)entry->data):NULL;
 +}
 +
 +int
 +__gthread_setspecific (__gthread_key_t __key, const void *__v)
 +{
-+  struct Task *this_task = IExec->FindTask(NULL);
++  struct Task *this_task;
 +  keyentry_t *entry;
 +
-+  IExec->ObtainSemaphore (&keystore->sem);
++  /* Initialize libs */
++  __gthread_once (&libs_once, init_libs);
++
++  this_task = iexec->FindTask(NULL);
++
++  iexec->ObtainSemaphore (&keystore->sem);
 +  if (!(entry = find_keyentry(__key.id, this_task)))
 +    {
 +      /* Specific not found for this task, allocate a new entry */
-+      if (!(entry = (keyentry_t *)IExec->ItemPoolAlloc(keystore->keyentry_pool)))
++      if (!(entry = (keyentry_t *)iexec->ItemPoolAlloc(keystore->keyentry_pool)))
 +        {
-+          IExec->ReleaseSemaphore (&keystore->sem);
++          iexec->ReleaseSemaphore (&keystore->sem);
 +          return ENOMEM;
 +        }
 +      entry->task = this_task;
@@ -629,7 +668,7 @@ index 0000000000000000000000000000000000000000..f6297ab16ce850117998c4bf9eb2b9c5
 +      keystore->keys[__key.id].first = entry;
 +    }
 +  entry->data = __v;
-+  IExec->ReleaseSemaphore (&keystore->sem);
++  iexec->ReleaseSemaphore (&keystore->sem);
 +  return 0;
 +}
 +
@@ -645,7 +684,11 @@ index 0000000000000000000000000000000000000000..f6297ab16ce850117998c4bf9eb2b9c5
 +__gthread_mutex_init (__gthread_mutex_t *__mutex)
 +{
 +  __internal_gthread_mutex_t *mx = (__internal_gthread_mutex_t *)__mutex;
-+  IExec->InitSemaphore (&mx->u.i.sem);
++
++  /* Initialize libs */
++  __gthread_once (&libs_once, init_libs);
++
++  iexec->InitSemaphore (&mx->u.i.sem);
 +  mx->u.i.recursive = 0;
 +  mx->u.i.acquired = 0;
 +  return 0;
@@ -655,12 +698,16 @@ index 0000000000000000000000000000000000000000..f6297ab16ce850117998c4bf9eb2b9c5
 +__gthread_mutex_lock (__gthread_mutex_t *__mutex)
 +{
 +  __internal_gthread_mutex_t *mx = (__internal_gthread_mutex_t *)__mutex;
-+  IExec->ObtainSemaphore (&mx->u.i.sem);
++
++  /* Initialize libs */
++  __gthread_once (&libs_once, init_libs);
++
++  iexec->ObtainSemaphore (&mx->u.i.sem);
 +  if (!mx->u.i.recursive && mx->u.i.acquired)
 +    {
 +      /* Deadlock */
-+      IExec->DebugPrintF("threadimpl: non-recursive mutex_lock() called twice on the same thread.\n");
-+      IExec->ReleaseSemaphore (&mx->u.i.sem);
++      iexec->DebugPrintF("threadimpl: non-recursive mutex_lock() called twice on the same thread.\n");
++      iexec->ReleaseSemaphore (&mx->u.i.sem);
 +      return EBUSY;
 +    }
 +  mx->u.i.acquired++;
@@ -672,11 +719,14 @@ index 0000000000000000000000000000000000000000..f6297ab16ce850117998c4bf9eb2b9c5
 +{
 +  __internal_gthread_mutex_t *mx = (__internal_gthread_mutex_t *)__mutex;
 +
-+  if (IExec->AttemptSemaphore (&mx->u.i.sem))
++  /* Initialize libs */
++  __gthread_once (&libs_once, init_libs);
++
++  if (iexec->AttemptSemaphore (&mx->u.i.sem))
 +    {
 +      if (!mx->u.i.recursive && mx->u.i.acquired)
 +        {
-+          IExec->ReleaseSemaphore (&mx->u.i.sem);
++          iexec->ReleaseSemaphore (&mx->u.i.sem);
 +          return EBUSY;
 +        }
 +      return 0;
@@ -688,8 +738,12 @@ index 0000000000000000000000000000000000000000..f6297ab16ce850117998c4bf9eb2b9c5
 +__gthread_mutex_unlock (__gthread_mutex_t *__mutex)
 +{
 +  __internal_gthread_mutex_t *mx = (__internal_gthread_mutex_t *)__mutex;
++
++  /* Initialize libs */
++  __gthread_once (&libs_once, init_libs);
++
 +  mx->u.i.acquired--;
-+  IExec->ReleaseSemaphore (&mx->u.i.sem);
++  iexec->ReleaseSemaphore (&mx->u.i.sem);
 +  return 0;
 +}
 +
@@ -745,12 +799,15 @@ index 0000000000000000000000000000000000000000..f6297ab16ce850117998c4bf9eb2b9c5
 +  threadentry_t *thr;
 +  int thr_id;
 +
-+  if (!(thr = (threadentry_t *)IExec->AllocVec (sizeof (*thr), MEMF_CLEAR)))
++  /* Initialize libs */
++  __gthread_once (&libs_once, init_libs);
++
++  if (!(thr = (threadentry_t *)iexec->AllocVec (sizeof (*thr), MEMF_CLEAR)))
 +    return NULL;
 +
-+  IExec->ObtainSemaphore (&threadstore->sem);
++  iexec->ObtainSemaphore (&threadstore->sem);
 +  thr_id = threadstore->next_thread_id++;
-+  IExec->ReleaseSemaphore (&threadstore->sem);
++  iexec->ReleaseSemaphore (&threadstore->sem);
 +
 +  thr->id = thr_id;
 +
@@ -764,38 +821,45 @@ index 0000000000000000000000000000000000000000..f6297ab16ce850117998c4bf9eb2b9c5
 +{
 +  threadentry_t *thr;
 +
-+  if (!(threadstore = (threadstore_t *)IExec->AllocVec (sizeof(*threadstore), MEMF_CLEAR)))
++  /* Initialize libs */
++  __gthread_once (&libs_once, init_libs);
++
++  if (!(threadstore = (threadstore_t *)iexec->AllocVec (sizeof(*threadstore), MEMF_CLEAR)))
 +    return;
-+  IExec->InitSemaphore (&threadstore->sem);
++  iexec->InitSemaphore (&threadstore->sem);
 +
 +  /* Create thread structure for this thread (aka root thread) */
 +  if (!(thr = __gthread_new_threadentry ()))
 +    goto bailout;
-+  thr->process = (struct Process*)IExec->FindTask(NULL);
++  thr->process = (struct Process*)iexec->FindTask(NULL);
 +
 +  threadstore->threads = thr;
 +  return;
 +bailout:
 +  if (threadstore)
-+    IExec->FreeVec (threadstore);
++    iexec->FreeVec (threadstore);
 +  threadstore = NULL;
 +}
 +
 +static int __gthread_entry(STRPTR args UNUSED, int32 length UNUSED, APTR execbase UNUSED)
 +{
-+  struct Task *task = IExec->FindTask (NULL);
++  struct Task *task;
 +  threadentry_t *thr;
 +  int i;
 +
++  /* Initialize libs */
++  __gthread_once (&libs_once, init_libs);
++
++  task = iexec->FindTask (NULL);
 +  thr = (threadentry_t *)((struct Process*)task)->pr_Task.tc_UserData;
 +
 +  /* Wait for the parent task to enqueue the process in the global list */
-+  while (!(IExec->Wait (SIGBREAKF_CTRL_F) & SIGBREAKF_CTRL_F));
++  while (!(iexec->Wait (SIGBREAKF_CTRL_F) & SIGBREAKF_CTRL_F));
 +
 +  thr->result = thr->entry(thr->args);
 +
 +  /* Invoke destructors of all non-NULL thread specifics */
-+  IExec->ObtainSemaphore (&keystore->sem);
++  iexec->ObtainSemaphore (&keystore->sem);
 +  for (i = 0; i < keystore->num_key_entries; i++)
 +    {
 +      void (*destroy)(void *);
@@ -810,7 +874,7 @@ index 0000000000000000000000000000000000000000..f6297ab16ce850117998c4bf9eb2b9c5
 +      if (key->data)
 +        destroy ((void *)key->data);
 +    }
-+  IExec->ReleaseSemaphore (&keystore->sem);
++  iexec->ReleaseSemaphore (&keystore->sem);
 +
 +  __gthread_close_timer (thr);
 +
@@ -822,6 +886,9 @@ index 0000000000000000000000000000000000000000..f6297ab16ce850117998c4bf9eb2b9c5
 +__gthread_create (__gthread_t *thread, void *(*func) (void*), void *args)
 +{
 +  threadentry_t *threadentry;
++
++  /* Initialize libs */
++  __gthread_once (&libs_once, init_libs);
 +
 +  /* Initialize our private threadstore, but only once */
 +  __gthread_once (&threadstore_once, init_threadstore);
@@ -835,25 +902,25 @@ index 0000000000000000000000000000000000000000..f6297ab16ce850117998c4bf9eb2b9c5
 +  threadentry->entry = func;
 +  threadentry->args = args;
 +
-+  threadentry->process = IDOS->CreateNewProcTags (
++  threadentry->process = idos->CreateNewProcTags (
 +                NP_Entry, __gthread_entry,
 +                NP_Child, TRUE,
 +                NP_UserData, (int32)threadentry,
-+                NP_Input, IDOS->Input(),
-+                NP_Output, IDOS->Output(),
-+                NP_Error, IDOS->ErrorOutput(),
++                NP_Input, idos->Input(),
++                NP_Output, idos->Output(),
++                NP_Error, idos->ErrorOutput(),
 +                NP_CloseInput,  FALSE,
 +                NP_CloseOutput, FALSE,
 +                NP_CloseError, FALSE,
 +                TAG_DONE);
 +
-+  IExec->ObtainSemaphore (&threadstore->sem);
++  iexec->ObtainSemaphore (&threadstore->sem);
 +  threadentry->next = threadstore->threads;
 +  threadstore->threads = threadentry;
-+  IExec->ReleaseSemaphore (&threadstore->sem);
++  iexec->ReleaseSemaphore (&threadstore->sem);
 +
 +  /* Signal that we have enqueued the task */
-+  IExec->Signal (&threadentry->process->pr_Task, SIGBREAKF_CTRL_F);
++  iexec->Signal (&threadentry->process->pr_Task, SIGBREAKF_CTRL_F);
 +
 +  *thread = threadentry->id;
 +  return 0;
@@ -888,13 +955,17 @@ index 0000000000000000000000000000000000000000..f6297ab16ce850117998c4bf9eb2b9c5
 +int
 +__gthread_join (__gthread_t thread, void **value_ptr)
 +{
-+  threadentry_t *thr = find_threadentry_by_id (thread);
-+  if (!thr)
++  threadentry_t *thr;
++
++  /* Initialize libs */
++  __gthread_once (&libs_once, init_libs);
++
++  if (!(thr = find_threadentry_by_id (thread)))
 +    return ESRCH;
 +
 +  /* FIXME: This is very ugly, use SIGF_SINGLE */
 +  while (!thr->finished)
-+    IDOS->Delay (1);
++    idos->Delay (1);
 +
 +  if (value_ptr)
 +    *value_ptr = thr->result;
@@ -918,11 +989,15 @@ index 0000000000000000000000000000000000000000..f6297ab16ce850117998c4bf9eb2b9c5
 +__gthread_t
 +__gthread_self (void)
 +{
-+  struct Task *task = IExec->FindTask(NULL);
++  struct Task *task;
 +  threadentry_t *thr;
 +  __gthread_t id;
 +
-+  IExec->ObtainSemaphoreShared (&threadstore->sem);
++  /* Initialize libs */
++  __gthread_once (&libs_once, init_libs);
++
++  task = iexec->FindTask(NULL);
++  iexec->ObtainSemaphoreShared (&threadstore->sem);
 +  if ((thr = find_threadentry_by_process ((struct Process *)task)))
 +    {
 +      id = thr->id;
@@ -931,33 +1006,39 @@ index 0000000000000000000000000000000000000000..f6297ab16ce850117998c4bf9eb2b9c5
 +    /* FIXME: Record this thread */
 +    id = -1;
 +
-+  IExec->ReleaseSemaphore (&threadstore->sem);
++  iexec->ReleaseSemaphore (&threadstore->sem);
 +  return id;
 +}
 +
 +int
 +__gthread_yield (void)
 +{
-+  IExec->Reschedule();
++  /* Initialize libs */
++  __gthread_once (&libs_once, init_libs);
++
++  iexec->Reschedule();
 +  return 0;
 +}
 +
 +void
 +__gthread_close_timer(threadentry_t *thr)
 +{
++  /* Initialize libs */
++  __gthread_once (&libs_once, init_libs);
++
 +  if (thr->timer_io)
 +    {
 +      if (thr->timer_io->Request.io_Device)
 +        {
-+          IExec->CloseDevice (&thr->timer_io->Request);
++          iexec->CloseDevice (&thr->timer_io->Request);
 +        }
-+      IExec->FreeSysObject (ASOT_IOREQUEST, thr->timer_io);
++      iexec->FreeSysObject (ASOT_IOREQUEST, thr->timer_io);
 +      thr->timer_io = NULL;
 +    }
 +
 +  if (thr->timer_port)
 +    {
-+      IExec->DeleteMsgPort (thr->timer_port);
++      iexec->DeleteMsgPort (thr->timer_port);
 +      thr->timer_port = NULL;
 +    }
 +}
@@ -968,30 +1049,33 @@ index 0000000000000000000000000000000000000000..f6297ab16ce850117998c4bf9eb2b9c5
 +  threadentry_t *thr;
 +  struct Task *task;
 +
-+  task = IExec->FindTask(NULL);
++  /* Initialize libs */
++  __gthread_once (&libs_once, init_libs);
 +
-+  IExec->ObtainSemaphoreShared (&threadstore->sem);
++  task = iexec->FindTask(NULL);
++
++  iexec->ObtainSemaphoreShared (&threadstore->sem);
 +  if (!(thr = find_threadentry_by_process((struct Process*)task)))
 +    {
 +      /* This is not our thread */
-+      IExec->ReleaseSemaphore (&threadstore->sem);
++      iexec->ReleaseSemaphore (&threadstore->sem);
 +      return -1;
 +    }
-+  IExec->ReleaseSemaphore (&threadstore->sem);
++  iexec->ReleaseSemaphore (&threadstore->sem);
 +
 +  /* Only we can open the timer device */
 +  if (!thr->timer_port)
 +    {
-+      if (!(thr->timer_port = IExec->CreateMsgPort ()))
++      if (!(thr->timer_port = iexec->CreateMsgPort ()))
 +        goto bailout;
 +
-+      if (!(thr->timer_io = (struct TimeRequest *)IExec->AllocSysObjectTags (ASOT_IOREQUEST,
++      if (!(thr->timer_io = (struct TimeRequest *)iexec->AllocSysObjectTags (ASOT_IOREQUEST,
 +          ASOIOR_Size, sizeof(struct TimeRequest),
 +          ASOIOR_ReplyPort, thr->timer_port,
 +          TAG_END)))
 +        goto bailout;
 +
-+      if (IExec->OpenDevice(TIMERNAME, UNIT_MICROHZ, &thr->timer_io->Request, 0))
++      if (iexec->OpenDevice(TIMERNAME, UNIT_MICROHZ, &thr->timer_io->Request, 0))
 +        goto bailout;
 +    }
 +
@@ -1043,11 +1127,14 @@ index 0000000000000000000000000000000000000000..f6297ab16ce850117998c4bf9eb2b9c5
 +  __internal_gthread_cond_t *cond = (__internal_gthread_cond_t *)__cond;
 +  threadentry_t *thr;
 +
++  /* Initialize libs */
++  __gthread_once (&libs_once, init_libs);
++
 +  /* Most of the time, we are called with the same mutex being locked that is
 +   * supplied to __gthread_cond_wait(). However,  most of the time is not always,
 +   * so we have to make the lists manipulation atomic on our own.
 +   */
-+  IExec->ObtainSemaphore (&threadstore->sem);
++  iexec->ObtainSemaphore (&threadstore->sem);
 +
 +  if ((thr = cond->u.i.first_in_cond_wait_list))
 +    {
@@ -1055,10 +1142,10 @@ index 0000000000000000000000000000000000000000..f6297ab16ce850117998c4bf9eb2b9c5
 +      cond->u.i.first_in_cond_wait_list = thr->next_in_cond_wait_list;
 +      thr->next_in_cond_wait_list = NULL;
 +
-+      IExec->Signal (&thr->process->pr_Task, SIGF_SINGLE);
++      iexec->Signal (&thr->process->pr_Task, SIGF_SINGLE);
 +    }
 +
-+  IExec->ReleaseSemaphore (&threadstore->sem);
++  iexec->ReleaseSemaphore (&threadstore->sem);
 +
 +  return 0;
 +}
@@ -1066,11 +1153,17 @@ index 0000000000000000000000000000000000000000..f6297ab16ce850117998c4bf9eb2b9c5
 +int
 +__gthread_cond_broadcast (__gthread_cond_t *__cond)
 +{
++  /* Initialize libs */
++  __gthread_once (&libs_once, init_libs);
++
++  /* Initialize our private threadstore, but only once */
++  __gthread_once (&threadstore_once, init_threadstore);
++
 +  __internal_gthread_cond_t *cond = (__internal_gthread_cond_t *)__cond;
 +  threadentry_t *thr;
 +
 +  /* See __gthread_cond_signal() */
-+  IExec->ObtainSemaphore (&threadstore->sem);
++  iexec->ObtainSemaphore (&threadstore->sem);
 +
 +  thr = cond->u.i.first_in_cond_wait_list;
 +  cond->u.i.first_in_cond_wait_list = NULL;
@@ -1081,12 +1174,12 @@ index 0000000000000000000000000000000000000000..f6297ab16ce850117998c4bf9eb2b9c5
 +
 +      thr->next_in_cond_wait_list = NULL;
 +
-+      IExec->Signal (&thr->process->pr_Task, SIGF_SINGLE);
++      iexec->Signal (&thr->process->pr_Task, SIGF_SINGLE);
 +
 +      thr = next_thr;
 +    }
 +
-+  IExec->ReleaseSemaphore (&threadstore->sem);
++  iexec->ReleaseSemaphore (&threadstore->sem);
 +
 +  return 0;
 +}
@@ -1097,15 +1190,18 @@ index 0000000000000000000000000000000000000000..f6297ab16ce850117998c4bf9eb2b9c5
 +static void
 +__gthread_cond_wait_prepare (threadentry_t *self_thr, __internal_gthread_cond_t *cond, __gthread_mutex_t *mutex)
 +{
++  /* Initialize libs */
++  __gthread_once (&libs_once, init_libs);
++
 +  /* Enqueue us into this thread's dedicated cond wait list */
-+  IExec->ObtainSemaphore (&threadstore->sem);
++  iexec->ObtainSemaphore (&threadstore->sem);
 +  self_thr->next_in_cond_wait_list = cond->u.i.first_in_cond_wait_list;
 +  cond->u.i.first_in_cond_wait_list = self_thr;
 +
 +  /* Along the way, clear SIGF_SINGLE bit to avoid spurious signals */
-+  IExec->SetSignal (0L, SIGF_SINGLE);
++  iexec->SetSignal (0L, SIGF_SINGLE);
 +
-+  IExec->ReleaseSemaphore (&threadstore->sem);
++  iexec->ReleaseSemaphore (&threadstore->sem);
 +
 +  /* TODO: Set a condition variable, which the notifier is supposed to change
 +   * to avoid more suspsious signals. However, the caller is supposed to check
@@ -1127,7 +1223,7 @@ index 0000000000000000000000000000000000000000..f6297ab16ce850117998c4bf9eb2b9c5
 +  __gthread_cond_wait_prepare (self_thr, cond, mutex);
 +
 +  /* Wait for anyone notifiying us */
-+  while (!(IExec->Wait (SIGF_SINGLE) & SIGF_SINGLE));
++  while (!(iexec->Wait (SIGF_SINGLE) & SIGF_SINGLE));
 +
 +  __gthread_mutex_lock (mutex);
 +
@@ -1149,6 +1245,9 @@ index 0000000000000000000000000000000000000000..f6297ab16ce850117998c4bf9eb2b9c5
 +  uint32_t sigs;
 +  int borrow = 0;
 +  int err;
++
++  /* Initialize libs */
++  __gthread_once (&libs_once, init_libs);
 +
 +  gettimeofday(&tv_now, 0);
 +
@@ -1175,7 +1274,7 @@ index 0000000000000000000000000000000000000000..f6297ab16ce850117998c4bf9eb2b9c5
 +  self_thr->timer_io->Request.io_Command = TR_ADDREQUEST;
 +  self_thr->timer_io->Time.Seconds = tv_now.tv_sec;
 +  self_thr->timer_io->Time.Microseconds = tv_now.tv_usec;
-+  IExec->SendIO (&self_thr->timer_io->Request);
++  iexec->SendIO (&self_thr->timer_io->Request);
 +
 +  __gthread_cond_wait_prepare (self_thr, cond, mutex);
 +
@@ -1183,11 +1282,11 @@ index 0000000000000000000000000000000000000000..f6297ab16ce850117998c4bf9eb2b9c5
 +   * some docs we should not wait on other signals when using SIGF_SINGLE,
 +   * but we do it nonetheless.  */
 +  timer_mask = 1UL << self_thr->timer_port->mp_SigBit;
-+  sigs = IExec->Wait (SIGF_SINGLE | timer_mask);
++  sigs = iexec->Wait (SIGF_SINGLE | timer_mask);
 +
-+  if (!(IExec->CheckIO (&self_thr->timer_io->Request)))
-+    IExec->AbortIO (&self_thr->timer_io->Request);
-+  IExec->WaitIO (&self_thr->timer_io->Request);
++  if (!(iexec->CheckIO (&self_thr->timer_io->Request)))
++    iexec->AbortIO (&self_thr->timer_io->Request);
++  iexec->WaitIO (&self_thr->timer_io->Request);
 +
 +  __gthread_mutex_lock (mutex);
 +
@@ -1197,9 +1296,9 @@ index 0000000000000000000000000000000000000000..f6297ab16ce850117998c4bf9eb2b9c5
 +   */
 +  if (!(sigs & SIGF_SINGLE))
 +    {
-+      IExec->ObtainSemaphore (&threadstore->sem);
++      iexec->ObtainSemaphore (&threadstore->sem);
 +      __gthread_remove_thread_from_cond_wait_list (cond, self_thr);
-+      IExec->ReleaseSemaphore (&threadstore->sem);
++      iexec->ReleaseSemaphore (&threadstore->sem);
 +    }
 +  return err;
 +}
