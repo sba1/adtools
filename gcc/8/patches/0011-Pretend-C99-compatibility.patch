@@ -1,7 +1,7 @@
-From 86e58174662dcd37e2cc07ceb03aee605cf1a0e5 Mon Sep 17 00:00:00 2001
+From 30f622609ad963495f1dad521174ea0924806654 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Sat, 4 Mar 2017 07:39:21 +0100
-Subject: [PATCH 11/27] Pretend C99 compatibility.
+Subject: [PATCH 11/26] Pretend C99 compatibility.
 
 At least newlib is not fully C99 compatible because it doesn't expose
 various C99 function if __STRICT_ANSI__ is declared. Also it misses
@@ -30,10 +30,10 @@ index 346f063958cd7e80ebf97be4acee0bdf391cb811..6b67630b7be7102a9dfb7c104deac629
  
  #endif
 diff --git a/libstdc++-v3/include/bits/basic_string.h b/libstdc++-v3/include/bits/basic_string.h
-index 2e6e1c6e5da31dfef57ef8fc673779827cf468ad..bee61a782b367701f3a8a59d23496ba2622ade53 100644
+index 0f5d398fcf24c32bfc593e18b771a4f42eb85ae8..d01c86a175301024f8d1cb7e4384324b96e28b2e 100644
 --- a/libstdc++-v3/include/bits/basic_string.h
 +++ b/libstdc++-v3/include/bits/basic_string.h
-@@ -6428,15 +6428,18 @@ _GLIBCXX_BEGIN_NAMESPACE_CXX11
+@@ -6437,15 +6437,18 @@ _GLIBCXX_BEGIN_NAMESPACE_CXX11
    { return __gnu_cxx::__stoa(&std::strtof, "stof", __str.c_str(), __idx); }
  
    inline double
@@ -107,5 +107,5 @@ index 10335017f0c4261c02b0b4d87c15b9a8572e6a61..fb5ae1889b288097f793396f35a9b65c
  } // extern "C++"
  
 -- 
-2.19.1
+2.20.1
 

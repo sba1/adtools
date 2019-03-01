@@ -1,7 +1,7 @@
-From 62ecf1e28e5a758dfc5c401f5c98d68a7b63d299 Mon Sep 17 00:00:00 2001
+From ba037751982d710f152003dd919591c05e58368a Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Tue, 24 Apr 2018 22:46:21 +0200
-Subject: [PATCH 19/27] Add _Static_warning().
+Subject: [PATCH 19/26] Add _Static_warning().
 
 This acts very similar to _Static_assert() but produces a warning
 rather than an compiler error.
@@ -49,7 +49,7 @@ index f2c66628e53316ca12885cbd32cdec84e5ca162e..9105afe24499b9eb42a4927701181034
    RID_FLOAT32,
    RID_FLOAT64,
 diff --git a/gcc/c/c-parser.c b/gcc/c/c-parser.c
-index 2402da0ce1d38d16739ca90860022268117de326..cc1cfa97e6a783497b4c9b7db714ba8d2d776cac 100644
+index f54d47207a04f92cdcb72b1e05a460217df0b4a9..02f1c36e8ee6ba9688984e1ffd0412eaa8342bd6 100644
 --- a/gcc/c/c-parser.c
 +++ b/gcc/c/c-parser.c
 @@ -765,13 +765,13 @@ c_token_starts_declspecs (c_token *token)
@@ -86,7 +86,7 @@ index 2402da0ce1d38d16739ca90860022268117de326..cc1cfa97e6a783497b4c9b7db714ba8d
    if (c_parser_peek_token (parser)->type == CPP_NAME
        && c_parser_peek_token (parser)->id_kind == C_ID_ID
        && (c_parser_peek_2nd_token (parser)->type == CPP_NAME
-@@ -2471,13 +2477,15 @@ static void
+@@ -2473,13 +2479,15 @@ static void
  c_parser_static_assert_declaration_no_semi (c_parser *parser)
  {
    location_t assert_loc, value_loc;
@@ -103,7 +103,7 @@ index 2402da0ce1d38d16739ca90860022268117de326..cc1cfa97e6a783497b4c9b7db714ba8d
  		 "ISO C99 does not support %<_Static_assert%>");
    else
      pedwarn_c99 (assert_loc, OPT_Wpedantic,
-@@ -2531,13 +2539,18 @@ c_parser_static_assert_declaration_no_semi (c_parser *parser)
+@@ -2533,13 +2541,18 @@ c_parser_static_assert_declaration_no_semi (c_parser *parser)
      {
        error_at (value_loc, "expression in static assertion is not constant");
        return;
@@ -124,7 +124,7 @@ index 2402da0ce1d38d16739ca90860022268117de326..cc1cfa97e6a783497b4c9b7db714ba8d
     Storage class specifiers are accepted iff SCSPEC_OK; type
     specifiers are accepted iff TYPESPEC_OK; alignment specifiers are
 diff --git a/gcc/cp/parser.c b/gcc/cp/parser.c
-index 715faea2b2a81ba1466782492e915646872a4302..47102ad6c5cd5946bea3f223eaca6bd3b2e7f831 100644
+index 18b09affb59d5eab24369831a24500c0a5275764..afa71dcbe5ad0b601d8c17e338e0cf155bbec856 100644
 --- a/gcc/cp/parser.c
 +++ b/gcc/cp/parser.c
 @@ -155,12 +155,13 @@ enum required_token {
@@ -141,7 +141,7 @@ index 715faea2b2a81ba1466782492e915646872a4302..47102ad6c5cd5946bea3f223eaca6bd3
    RT_TEMPLATE, /* template */
    RT_NAMESPACE, /* namespace */
    RT_USING, /* using */
-@@ -12861,13 +12862,13 @@ cp_parser_block_declaration (cp_parser *parser,
+@@ -12867,13 +12868,13 @@ cp_parser_block_declaration (cp_parser *parser,
        cp_parser_skip_to_end_of_statement (parser);
        /* If the next token is now a `;', consume it.  */
        if (cp_lexer_next_token_is (parser->lexer, CPP_SEMICOLON))
@@ -157,5 +157,5 @@ index 715faea2b2a81ba1466782492e915646872a4302..47102ad6c5cd5946bea3f223eaca6bd3
  				  /*maybe_range_for_decl*/NULL);
  }
 -- 
-2.19.1
+2.20.1
 

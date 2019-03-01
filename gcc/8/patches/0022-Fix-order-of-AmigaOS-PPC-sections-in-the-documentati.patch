@@ -1,17 +1,17 @@
-From d90569325458b6fcdecf8474b54e01a65e252481 Mon Sep 17 00:00:00 2001
+From cd43a4ef859c06c0c30a6086f766a21a80639908 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Sat, 28 Apr 2018 08:09:58 +0200
-Subject: [PATCH 22/27] Fix order of AmigaOS PPC sections in the documentation.
+Subject: [PATCH 22/26] Fix order of AmigaOS PPC sections in the documentation.
 
 ---
  gcc/doc/invoke.texi | 264 ++++++++++++++++++++++----------------------
  1 file changed, 132 insertions(+), 132 deletions(-)
 
 diff --git a/gcc/doc/invoke.texi b/gcc/doc/invoke.texi
-index 90ef977b59b36b88fea238e2d649cfb8575a258d..3b2f036509f2af427c8ec7235d93fe8464347161 100644
+index ab353459f1f734ffdd130456671feb728ac4f568..24e8a53217164ebe0c7481df23089621c2c47f58 100644
 --- a/gcc/doc/invoke.texi
 +++ b/gcc/doc/invoke.texi
-@@ -14539,12 +14539,13 @@ platform.
+@@ -14544,12 +14544,13 @@ platform.
  @c It should be the same order and spelling as these options are listed
  @c in Machine Dependent Options
  
@@ -25,7 +25,7 @@ index 90ef977b59b36b88fea238e2d649cfb8575a258d..3b2f036509f2af427c8ec7235d93fe84
  * Blackfin Options::
  * C6X Options::
  * CRIS Options::
-@@ -14596,13 +14597,12 @@ platform.
+@@ -14601,13 +14602,12 @@ platform.
  * VMS Options::
  * VxWorks Options::
  * x86 Options::
@@ -39,7 +39,7 @@ index 90ef977b59b36b88fea238e2d649cfb8575a258d..3b2f036509f2af427c8ec7235d93fe84
  @node AArch64 Options
  @subsection AArch64 Options
  @cindex AArch64 Options
-@@ -15080,12 +15080,143 @@ Allowable values for @var{reg} are @samp{r43} and @samp{r63},
+@@ -15088,12 +15088,143 @@ Allowable values for @var{reg} are @samp{r43} and @samp{r63},
  which specify use of that register as a fixed register,
  and @samp{none}, which means that no register is used for this
  purpose.  The default is @option{-m1reg-none}.
@@ -183,7 +183,7 @@ index 90ef977b59b36b88fea238e2d649cfb8575a258d..3b2f036509f2af427c8ec7235d93fe84
  
  The following options control the architecture variant for which code
  is being compiled:
-@@ -28150,143 +28281,12 @@ These options are defined for Xstormy16:
+@@ -28210,143 +28341,12 @@ These options are defined for Xstormy16:
  @table @gcctabopt
  @item -msim
  @opindex msim
@@ -328,5 +328,5 @@ index 90ef977b59b36b88fea238e2d649cfb8575a258d..3b2f036509f2af427c8ec7235d93fe84
  These options are supported for Xtensa targets:
  
 -- 
-2.19.1
+2.20.1
 

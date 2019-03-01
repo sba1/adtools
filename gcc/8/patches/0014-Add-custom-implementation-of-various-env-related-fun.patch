@@ -1,7 +1,7 @@
-From 06b09f4cc055bca5cf9784395e2107f39ac270c6 Mon Sep 17 00:00:00 2001
+From ef1ee5242d7f7219038bbebea4073cb3db7fecf1 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Wed, 4 Apr 2018 23:50:48 +0200
-Subject: [PATCH 14/27] Add custom implementation of various env-related
+Subject: [PATCH 14/26] Add custom implementation of various env-related
  functions.
 
 No official clib does support unsetenv() but this is required by newer gcc.
@@ -204,5 +204,5 @@ index 0000000000000000000000000000000000000000..dc9a460737538d74558bb43c21c21e61
 +	return lvar->lv_Value;
 +}
 -- 
-2.19.1
+2.20.1
 

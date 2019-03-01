@@ -1,7 +1,7 @@
-From e81dbdf40d9a34ab1fb8cbd2c2e3cff547c98690 Mon Sep 17 00:00:00 2001
+From 595b85684be29b8b6b73459bf3a0c8a568dcecd4 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 22 Jan 2016 20:04:50 +0100
-Subject: [PATCH 08/27] Added libstc++ support for AmigaOS.
+Subject: [PATCH 08/26] Added libstc++ support for AmigaOS.
 
 ---
  libstdc++-v3/config/os/amigaos/ctype_base.h   |  59 ++++++
@@ -600,7 +600,7 @@ index 0000000000000000000000000000000000000000..346f063958cd7e80ebf97be4acee0bdf
 +
 +#endif
 diff --git a/libstdc++-v3/configure.host b/libstdc++-v3/configure.host
-index caea9de9c7655600f9d0a3f8ff7b1fb5b793fc58..30219344f82b4d1444788e28be945ef70c8f1a46 100644
+index 155a3cdea1bad297b3cd4c21ecd3c7307b5e6ac9..9daab7c3c71169b10f5ff48c70e4d6d13228cf7f 100644
 --- a/libstdc++-v3/configure.host
 +++ b/libstdc++-v3/configure.host
 @@ -219,12 +219,15 @@ case "${host_os}" in
@@ -620,5 +620,5 @@ index caea9de9c7655600f9d0a3f8ff7b1fb5b793fc58..30219344f82b4d1444788e28be945ef7
    cygwin*)
      os_include_dir="os/newlib"
 -- 
-2.19.1
+2.20.1
 

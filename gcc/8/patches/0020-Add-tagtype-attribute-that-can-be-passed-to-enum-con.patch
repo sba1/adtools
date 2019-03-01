@@ -1,7 +1,7 @@
-From 7b4020dfb02189d018773e878a70e525ea55ca6f Mon Sep 17 00:00:00 2001
+From c0c8c50b8b78701ddff66b0a223d16212b406b5a Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Tue, 24 Apr 2018 06:29:13 +0200
-Subject: [PATCH 20/27] Add tagtype attribute that can be passed to enum
+Subject: [PATCH 20/26] Add tagtype attribute that can be passed to enum
  constants.
 
 The tagtype attribute can be applied to enum constants in order to annotate
@@ -20,10 +20,10 @@ that don't support it.
  4 files changed, 60 insertions(+)
 
 diff --git a/gcc/c/c-parser.c b/gcc/c/c-parser.c
-index cc1cfa97e6a783497b4c9b7db714ba8d2d776cac..6bd8aa47b7f733125a356f6222e70b44a7a4b9c2 100644
+index 02f1c36e8ee6ba9688984e1ffd0412eaa8342bd6..3570f0e60e3ffe363722d16596a1e991939c0703 100644
 --- a/gcc/c/c-parser.c
 +++ b/gcc/c/c-parser.c
-@@ -3054,12 +3054,28 @@ c_parser_enum_specifier (c_parser *parser)
+@@ -3056,12 +3056,28 @@ c_parser_enum_specifier (c_parser *parser)
  	  else
  	    enum_value = NULL_TREE;
  	  enum_decl = build_enumerator (decl_loc, value_loc,
@@ -52,7 +52,7 @@ index cc1cfa97e6a783497b4c9b7db714ba8d2d776cac..6bd8aa47b7f733125a356f6222e70b44
  	  if (c_parser_next_token_is (parser, CPP_COMMA))
  	    {
  	      comma_loc = c_parser_peek_token (parser)->location;
-@@ -4456,14 +4472,30 @@ c_parser_attributes (c_parser *parser)
+@@ -4458,14 +4474,30 @@ c_parser_attributes (c_parser *parser)
  	  else
  	    {
  	      if (c_parser_next_token_is (parser, CPP_CLOSE_PAREN))
@@ -163,5 +163,5 @@ index f88bfe5f879cb4ca09f067d907ec36ef0b4c2da3..0ed2a2b9ca1abe33f6534008f0c9592a
  /* Overrides */
  
 -- 
-2.19.1
+2.20.1
 

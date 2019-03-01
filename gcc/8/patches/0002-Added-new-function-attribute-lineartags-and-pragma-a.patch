@@ -1,7 +1,7 @@
-From 0d43d6007cffb4bcab062ee2df141321f54f064f Mon Sep 17 00:00:00 2001
+From 88a37a4b641f4366a6a1395eb49f19d477e6a489 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 14 Nov 2014 20:03:56 +0100
-Subject: [PATCH 02/27] Added new function attribute "lineartags" and pragma
+Subject: [PATCH 02/26] Added new function attribute "lineartags" and pragma
  "amigaos tagtype".
 
 Functions that have the lineartags attribute are assumed to be functions
@@ -75,7 +75,7 @@ index 84e4341ee5f0594515ff564d39a9073ed9f42466..d22bf0ae4c2ae578274b52e71e1e5d94
    global_sso = default_sso;
    c_register_pragma (0, "scalar_storage_order", 
 diff --git a/gcc/c/c-parser.c b/gcc/c/c-parser.c
-index 47720861d3f22ea1ec414c0f134004b355798df3..2402da0ce1d38d16739ca90860022268117de326 100644
+index ece6b9202453827e7bbcecb4b618ebaae6b40a2a..f54d47207a04f92cdcb72b1e05a460217df0b4a9 100644
 --- a/gcc/c/c-parser.c
 +++ b/gcc/c/c-parser.c
 @@ -94,12 +94,74 @@ set_c_expr_source_range (c_expr *expr,
@@ -153,7 +153,7 @@ index 47720861d3f22ea1ec414c0f134004b355798df3..2402da0ce1d38d16739ca90860022268
  void
  c_parse_init (void)
  {
-@@ -2755,12 +2817,15 @@ c_parser_declspecs (c_parser *parser, struct c_declspecs *specs,
+@@ -2757,12 +2819,15 @@ c_parser_declspecs (c_parser *parser, struct c_declspecs *specs,
  	    goto out;
  	  attrs_ok = true;
  	  seen_type = true;
@@ -169,7 +169,7 @@ index 47720861d3f22ea1ec414c0f134004b355798df3..2402da0ce1d38d16739ca90860022268
  	  if (!typespec_ok)
  	    goto out;
  	  attrs_ok = true;
-@@ -10915,12 +10980,32 @@ c_parser_pragma_unroll (c_parser *parser)
+@@ -10961,12 +11026,32 @@ c_parser_pragma_unroll (c_parser *parser)
      }
  
    c_parser_skip_to_pragma_eol (parser);
@@ -202,7 +202,7 @@ index 47720861d3f22ea1ec414c0f134004b355798df3..2402da0ce1d38d16739ca90860022268
     true if we actually parsed such a pragma.  */
  
  static bool
-@@ -11136,12 +11221,56 @@ c_parser_pragma (c_parser *parser, enum pragma_context context, bool *if_p)
+@@ -11182,12 +11267,56 @@ c_parser_pragma (c_parser *parser, enum pragma_context context, bool *if_p)
        break;
      }
  
@@ -260,7 +260,7 @@ index 47720861d3f22ea1ec414c0f134004b355798df3..2402da0ce1d38d16739ca90860022268
    c_parser_skip_to_pragma_eol (parser);
  
 diff --git a/gcc/c/c-typeck.c b/gcc/c/c-typeck.c
-index 68ff57c4ab3f5ae11db61d1c22ed5ad6d94a0edc..30ca51cb1ee2de443098fe4052da1e1fd8d0a3d6 100644
+index d520cb0b62a75d71b752fb17bacabe512cf58ef1..b2328f5b6877990d79976418205729cd8bfc174a 100644
 --- a/gcc/c/c-typeck.c
 +++ b/gcc/c/c-typeck.c
 @@ -3235,12 +3235,14 @@ convert_arguments (location_t loc, vec<location_t> arg_loc, tree typelist,
@@ -397,5 +397,5 @@ index ad8c0e64c056129afcd8bfa2a656749a2febfaaa..85c03f28e37d64865360692a14fcc8a1
  amigaos_legitimize_baserel_address (rtx addr)
  {
 -- 
-2.19.1
+2.20.1
 
