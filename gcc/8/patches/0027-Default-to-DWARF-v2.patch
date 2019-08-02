@@ -1,0 +1,27 @@
+From 5859c8033fbe6a49418d5bd86eb9d93f5cbb6907 Mon Sep 17 00:00:00 2001
+From: Marcus Comstedt <marcus@mc.pp.se>
+Date: Wed, 31 Jul 2019 22:10:48 +0200
+Subject: [PATCH] Default to DWARF v2
+
+---
+ gcc/config/rs6000/amigaos.h | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/gcc/config/rs6000/amigaos.h b/gcc/config/rs6000/amigaos.h
+index ec0146c4b8c..a8724d3f3ef 100644
+--- a/gcc/config/rs6000/amigaos.h
++++ b/gcc/config/rs6000/amigaos.h
+@@ -384,6 +384,10 @@ do                                   \
+     rs6000_altivec_abi = 1;          \
+     TARGET_ALTIVEC_VRSAVE = 1;       \
+   }                                  \
++  if (!global_options_set.x_dwarf_strict)	\
++    dwarf_strict = 1;				\
++  if (!global_options_set.x_dwarf_version)	\
++    dwarf_version = 2;				\
+ } while(0)
+ 
+ #undef SUBTARGET_EXPAND_BUILTIN
+-- 
+2.21.0
+
