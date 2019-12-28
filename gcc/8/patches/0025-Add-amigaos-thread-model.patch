@@ -1261,7 +1261,7 @@ index 0000000000000000000000000000000000000000..7b03647a4a2e2acab21f73eb55733c62
 +    }
 +
 +  if (tv_now.tv_sec + borrow <= (uint32_t)(abs_timeout->seconds))
-+    tv_now.tv_sec = abs_timeout->seconds - tv_now.tv_sec + borrow;
++    tv_now.tv_sec = abs_timeout->seconds - (tv_now.tv_sec + borrow);
 +  else
 +    {
 +      tv_now.tv_sec = 0;
