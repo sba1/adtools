@@ -1,4 +1,4 @@
-From a8c9e1b47629e4d870552811be2dd090de405356 Mon Sep 17 00:00:00 2001
+From b9089f48195c41d3c683489e2e17fec4d1e666f2 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 4 May 2018 18:22:24 +0200
 Subject: [PATCH 25/26] Add amigaos thread model.
@@ -169,10 +169,10 @@ index 0000000000000000000000000000000000000000..a3dd2195809c2ce1fbab8be854f3c987
 +$(ALL_EXECUTABLES) : override LDFLAGS += -athread=native -Wl,--gc-sections
 \ No newline at end of file
 diff --git a/gcc/configure b/gcc/configure
-index 6121e163259dd6c09188b48218b3fec63d41b2f8..04f420fe61c2a65c7c4adfc36ca07ec7ab6c074b 100755
+index 97ba7d7d69c9c8a8c19ddcd265035f5ea9aabaf4..4ddface9c03f14dbe7c09314b32aaee2edde82a0 100755
 --- a/gcc/configure
 +++ b/gcc/configure
-@@ -11689,13 +11689,13 @@ case ${enable_threads} in
+@@ -11690,13 +11690,13 @@ case ${enable_threads} in
      target_thread_file='single'
      ;;
    yes)
@@ -188,7 +188,7 @@ index 6121e163259dd6c09188b48218b3fec63d41b2f8..04f420fe61c2a65c7c4adfc36ca07ec7
      echo "${enable_threads} is an unknown thread package" 1>&2
      exit 1
 diff --git a/gcc/configure.ac b/gcc/configure.ac
-index b066cc609e1c2615e66307d5439f765a4f3b286b..1a10e06f5a6254864f5a7dcad0a360077d7c9d10 100644
+index d6f2d5b2ed046a5fe7aa22e1439e868fbf75a835..e85f1dd44f53eddbcdeebbca0fced891e9a04609 100644
 --- a/gcc/configure.ac
 +++ b/gcc/configure.ac
 @@ -1608,13 +1608,13 @@ case ${enable_threads} in
@@ -207,10 +207,10 @@ index b066cc609e1c2615e66307d5439f765a4f3b286b..1a10e06f5a6254864f5a7dcad0a36007
      echo "${enable_threads} is an unknown thread package" 1>&2
      exit 1
 diff --git a/gcc/doc/invoke.texi b/gcc/doc/invoke.texi
-index 24e8a53217164ebe0c7481df23089621c2c47f58..7584226bea7929de93304a538846016ff1e35f9a 100644
+index b21dec174a50bbf7c38b206c93fc34d54cef2326..4ab1c9469158d5a10dc396a5bf281d37c2b83769 100644
 --- a/gcc/doc/invoke.texi
 +++ b/gcc/doc/invoke.texi
-@@ -1306,13 +1306,13 @@ See RS/6000 and PowerPC Options.
+@@ -1305,13 +1305,13 @@ See RS/6000 and PowerPC Options.
  
  @emph{zSeries Options}
  See S/390 and zSeries Options.
@@ -225,7 +225,7 @@ index 24e8a53217164ebe0c7481df23089621c2c47f58..7584226bea7929de93304a538846016f
  @gccoptlist{-fcall-saved-@var{reg}  -fcall-used-@var{reg} @gol
  -ffixed-@var{reg}  -fexceptions @gol
  -fnon-call-exceptions  -fdelete-dead-exceptions  -funwind-tables @gol
-@@ -15217,12 +15217,19 @@ Generate absolute data access. This is the default.
+@@ -15216,12 +15216,19 @@ Generate absolute data access. This is the default.
  @opindex mcheck68kfuncptr
  
  Causes each function call through a function pointer to be performed as
@@ -295,7 +295,7 @@ index 0000000000000000000000000000000000000000..bb6005cd52ef75cc7bfbc276d5d56ec5
 +#endif
 diff --git a/libgcc/gthr-amigaos-native.c b/libgcc/gthr-amigaos-native.c
 new file mode 100644
-index 0000000000000000000000000000000000000000..7b03647a4a2e2acab21f73eb55733c62aee4431a
+index 0000000000000000000000000000000000000000..41adbdc3324156bee31731da8f0da92e819ffdd8
 --- /dev/null
 +++ b/libgcc/gthr-amigaos-native.c
 @@ -0,0 +1,1013 @@
@@ -2052,10 +2052,10 @@ index 0000000000000000000000000000000000000000..123d3512abed0a43a8c019bbce0d83f0
 +
 +#endif /* ! GCC_GTHR_AMIGAOS_H */
 diff --git a/libstdc++-v3/configure b/libstdc++-v3/configure
-index 5b3997778d1753db2317b1fa4db59a3763b26fb9..5f06e7af0dc39cbfc676c745718a38409e6bb600 100755
+index f16bfea81cb0c480488d72c73b2edf5c7e6e7a87..45dcf6730020ffae5ae76ae84a88d64530f61c27 100755
 --- a/libstdc++-v3/configure
 +++ b/libstdc++-v3/configure
-@@ -15177,12 +15177,13 @@ $as_echo_n "checking for thread model used by GCC... " >&6; }
+@@ -15379,12 +15379,13 @@ $as_echo_n "checking for thread model used by GCC... " >&6; }
    target_thread_file=`$CXX -v 2>&1 | sed -n 's/^Thread model: //p'`
    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $target_thread_file" >&5
  $as_echo "$target_thread_file" >&6; }
@@ -2069,105 +2069,105 @@ index 5b3997778d1753db2317b1fa4db59a3763b26fb9..5f06e7af0dc39cbfc676c745718a3840
      posix)	thread_header=gthr-posix.h ;;
      rtems)	thread_header=config/gthr-rtems.h ;;
      single)	thread_header=gthr-single.h ;;
-@@ -15397,13 +15398,13 @@ $as_echo "$glibcxx_cv_atomic_long_long" >&6; }
+@@ -15599,13 +15600,13 @@ $as_echo "$glibcxx_cv_atomic_long_long" >&6; }
    # Compile unoptimized.
    CXXFLAGS='-O0 -S'
  
    # Fake what AC_TRY_COMPILE does.
  
      cat > conftest.$ac_ext << EOF
--#line 15403 "configure"
-+#line 15404 "configure"
+-#line 15605 "configure"
++#line 15606 "configure"
  int main()
  {
    typedef bool atomic_type;
    atomic_type c1;
    atomic_type c2;
    atomic_type c3(0);
-@@ -15432,13 +15433,13 @@ $as_echo_n "checking for atomic builtins for bool... " >&6; }
+@@ -15634,13 +15635,13 @@ $as_echo_n "checking for atomic builtins for bool... " >&6; }
      fi
      { $as_echo "$as_me:${as_lineno-$LINENO}: result: $glibcxx_cv_atomic_bool" >&5
  $as_echo "$glibcxx_cv_atomic_bool" >&6; }
      rm -f conftest*
  
      cat > conftest.$ac_ext << EOF
--#line 15438 "configure"
-+#line 15439 "configure"
+-#line 15640 "configure"
++#line 15641 "configure"
  int main()
  {
    typedef short atomic_type;
    atomic_type c1;
    atomic_type c2;
    atomic_type c3(0);
-@@ -15467,13 +15468,13 @@ $as_echo_n "checking for atomic builtins for short... " >&6; }
+@@ -15669,13 +15670,13 @@ $as_echo_n "checking for atomic builtins for short... " >&6; }
      fi
      { $as_echo "$as_me:${as_lineno-$LINENO}: result: $glibcxx_cv_atomic_short" >&5
  $as_echo "$glibcxx_cv_atomic_short" >&6; }
      rm -f conftest*
  
      cat > conftest.$ac_ext << EOF
--#line 15473 "configure"
-+#line 15474 "configure"
+-#line 15675 "configure"
++#line 15676 "configure"
  int main()
  {
    // NB: _Atomic_word not necessarily int.
    typedef int atomic_type;
    atomic_type c1;
    atomic_type c2;
-@@ -15503,13 +15504,13 @@ $as_echo_n "checking for atomic builtins for int... " >&6; }
+@@ -15705,13 +15706,13 @@ $as_echo_n "checking for atomic builtins for int... " >&6; }
      fi
      { $as_echo "$as_me:${as_lineno-$LINENO}: result: $glibcxx_cv_atomic_int" >&5
  $as_echo "$glibcxx_cv_atomic_int" >&6; }
      rm -f conftest*
  
      cat > conftest.$ac_ext << EOF
--#line 15509 "configure"
-+#line 15510 "configure"
+-#line 15711 "configure"
++#line 15712 "configure"
  int main()
  {
    typedef long long atomic_type;
    atomic_type c1;
    atomic_type c2;
    atomic_type c3(0);
-@@ -15584,13 +15585,13 @@ $as_echo "$as_me: WARNING: Performance of certain classes will degrade as a resu
+@@ -15786,13 +15787,13 @@ $as_echo "$as_me: WARNING: Performance of certain classes will degrade as a resu
  
  
    # Fake what AC_TRY_COMPILE does, without linking as this is
    # unnecessary for this test.
  
      cat > conftest.$ac_ext << EOF
--#line 15590 "configure"
-+#line 15591 "configure"
+-#line 15792 "configure"
++#line 15793 "configure"
  int main()
  {
    _Decimal32 d1;
    _Decimal64 d2;
    _Decimal128 d3;
    return 0;
-@@ -15626,13 +15627,13 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+@@ -15828,13 +15829,13 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
  
  
    # Fake what AC_TRY_COMPILE does, without linking as this is
    # unnecessary for this test.
  
      cat > conftest.$ac_ext << EOF
--#line 15632 "configure"
-+#line 15633 "configure"
+-#line 15834 "configure"
++#line 15835 "configure"
  template<typename T1, typename T2>
    struct same
    { typedef T2 type; };
  
  template<typename T>
    struct same<T, T>;
-@@ -15660,13 +15661,13 @@ $as_echo "#define _GLIBCXX_USE_INT128 1" >>confdefs.h
+@@ -15862,13 +15863,13 @@ $as_echo "#define _GLIBCXX_USE_INT128 1" >>confdefs.h
      fi
      { $as_echo "$as_me:${as_lineno-$LINENO}: result: $enable_int128" >&5
  $as_echo "$enable_int128" >&6; }
      rm -f conftest*
  
      cat > conftest.$ac_ext << EOF
--#line 15666 "configure"
-+#line 15667 "configure"
+-#line 15868 "configure"
++#line 15869 "configure"
  template<typename T1, typename T2>
    struct same
    { typedef T2 type; };
@@ -2175,5 +2175,5 @@ index 5b3997778d1753db2317b1fa4db59a3763b26fb9..5f06e7af0dc39cbfc676c745718a3840
  template<typename T>
    struct same<T, T>;
 -- 
-2.20.1
+2.25.1
 
