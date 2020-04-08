@@ -1,7 +1,7 @@
-From 6851f8f1194605aab698d60786a596ed68ccb181 Mon Sep 17 00:00:00 2001
+From 1a8ea2e85103a7ea1adcca88445991d83677a840 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Wed, 2 Dec 2015 21:39:42 +0100
-Subject: [PATCH 05/26] Disable the usage of /dev/urandom when compiling for
+Subject: [PATCH 05/24] Disable the usage of /dev/urandom when compiling for
  AmigaOS.
 
 ---
@@ -40,7 +40,7 @@ index 71cd1e5045311dc4f61d359d2786ee1847558dea..2fe3d2eb7dcb2cb71e24a2fe2e01f637
      struct timeval tv;
  
 diff --git a/gcc/toplev.c b/gcc/toplev.c
-index b066bcc72297fad53dcea3f5e605a0c87c6402a2..ffcaddd6544eb98df75b45369f74bfb3c8829b74 100644
+index bdf021e828a9e4c8737fe5e7fd243262f0a455a6..4eb1e1ee434e1388b08421090782e1531b64a209 100644
 --- a/gcc/toplev.c
 +++ b/gcc/toplev.c
 @@ -271,20 +271,22 @@ init_local_tick (void)
@@ -67,5 +67,5 @@ index b066bcc72297fad53dcea3f5e605a0c87c6402a2..ffcaddd6544eb98df75b45369f74bfb3
  }
  
 -- 
-2.20.1
+2.25.1
 
