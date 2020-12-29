@@ -1,0 +1,175 @@
+From 5c22aeb4ca116e2b41badac7f53190b448e3723d Mon Sep 17 00:00:00 2001
+From: "ola.soder@axis.com" <ola.soder@axis.com>
+Date: Tue, 29 Dec 2020 21:28:04 +0100
+Subject: [PATCH 29/31] gcc9: Correct documentation section order / naming.
+
+---
+ gcc/doc/extend.texi |  4 +--
+ gcc/doc/invoke.texi | 71 +++++++++++++++++++++++++++--------------------------
+ 2 files changed, 38 insertions(+), 37 deletions(-)
+
+diff --git a/gcc/doc/extend.texi b/gcc/doc/extend.texi
+index 8ac9b7a707a7ca4202bcf95e0d1c8977ad8d222e..170503cbdc89521fbcc2c1f8e4e6cbf05125a069 100644
+--- a/gcc/doc/extend.texi
++++ b/gcc/doc/extend.texi
+@@ -7734,15 +7734,15 @@ For full documentation of the struct attributes please see the
+ documentation in @ref{x86 Variable Attributes}.
+ 
+ @cindex @code{altivec} variable attribute, PowerPC
+ For documentation of @code{altivec} attribute please see the
+ documentation in @ref{PowerPC Type Attributes}.
+ 
+-@subsection AmigaOS PPC Variable Attributes
++@subsection AmigaOS PowerPC Variable Attributes
+ 
+-One attribute is currently defined for AmigaOS PPC.
++One attribute is currently defined for AmigaOS PowerPC.
+ 
+ @table @code
+ @item force_no_baserel
+ @cindex forcing a variable not to be addressed base relative
+ 
+ This attribute forces access to a variable in code compiled with
+diff --git a/gcc/doc/invoke.texi b/gcc/doc/invoke.texi
+index 4d3d8fa8603edbcfe7efb73025bab5a9995afc88..dbef59d182733a9ded4fc171ca658017462fd2e9 100644
+--- a/gcc/doc/invoke.texi
++++ b/gcc/doc/invoke.texi
+@@ -646,12 +646,41 @@ Objective-C and Objective-C++ Dialects}.
+ -mfp-mode=@var{mode}  -mvect-double  -max-vect-align=@var{num} @gol
+ -msplit-vecmove-early  -m1reg-@var{reg}}
+ 
+ @emph{AMD GCN Options}
+ @gccoptlist{-march=@var{gpu} -mtune=@var{gpu} -mstack-size=@var{bytes}}
+ 
++@emph{AmigaOS PowerPC options}
++@gccoptlist{-mcrt=@var{crt}  -mbaserel  -mno-baserel @gol
++-mcheck68kfuncptr -athread=@var{ti}}
++
++@item Code Generation Options
++@xref{Code Gen Options,,Options for Code Generation Conventions}.
++@gccoptlist{-fcall-saved-@var{reg}  -fcall-used-@var{reg} @gol
++-ffixed-@var{reg}  -fexceptions @gol
++-fnon-call-exceptions  -fdelete-dead-exceptions  -funwind-tables @gol
++-fasynchronous-unwind-tables @gol
++-fno-gnu-unique @gol
++-finhibit-size-directive  -finstrument-functions @gol
++-finstrument-functions-exclude-function-list=@var{sym},@var{sym},@dots{} @gol
++-finstrument-functions-exclude-file-list=@var{file},@var{file},@dots{} @gol
++-fno-common  -fno-ident @gol
++-fpcc-struct-return  -fpic  -fPIC -fpie -fPIE @gol
++-fno-jump-tables @gol
++-frecord-gcc-switches @gol
++-freg-struct-return  -fshort-enums @gol
++-fshort-double  -fshort-wchar @gol
++-fverbose-asm  -fpack-struct[=@var{n}]  -fstack-check @gol
++-fstack-limit-register=@var{reg}  -fstack-limit-symbol=@var{sym} @gol
++-fno-stack-limit -fsplit-stack @gol
++-fleading-underscore  -ftls-model=@var{model} @gol
++-fstack-reuse=@var{reuse_level} @gol
++-ftrapv  -fwrapv  -fbounds-check @gol
++-fvisibility=@r{[}default@r{|}internal@r{|}hidden@r{|}protected@r{]} @gol
++-fstrict-volatile-bitfields -fsync-libcalls}
++
+ @emph{ARC Options}
+ @gccoptlist{-mbarrel-shifter  -mjli-always @gol
+ -mcpu=@var{cpu}  -mA6  -mARC600  -mA7  -mARC700 @gol
+ -mdpfp  -mdpfp-compact  -mdpfp-fast  -mno-dpfp-lrsr @gol
+ -mea  -mno-mpy  -mmul32x16  -mmul64  -matomic @gol
+ -mnorm  -mspfp  -mspfp-compact  -mspfp-fast  -msimd  -msoft-float  -mswap @gol
+@@ -1317,41 +1346,12 @@ See RS/6000 and PowerPC Options.
+ -mauto-litpools  -mno-auto-litpools @gol
+ -mtarget-align  -mno-target-align @gol
+ -mlongcalls  -mno-longcalls}
+ 
+ @emph{zSeries Options}
+ See S/390 and zSeries Options.
+-
+-@emph{AmigaOS PPC options}
+-@gccoptlist{-mcrt=@var{crt}  -mbaserel  -mno-baserel @gol
+--mcheck68kfuncptr -athread=@var{ti}}
+-
+-@item Code Generation Options
+-@xref{Code Gen Options,,Options for Code Generation Conventions}.
+-@gccoptlist{-fcall-saved-@var{reg}  -fcall-used-@var{reg} @gol
+--ffixed-@var{reg}  -fexceptions @gol
+--fnon-call-exceptions  -fdelete-dead-exceptions  -funwind-tables @gol
+--fasynchronous-unwind-tables @gol
+--fno-gnu-unique @gol
+--finhibit-size-directive  -finstrument-functions @gol
+--finstrument-functions-exclude-function-list=@var{sym},@var{sym},@dots{} @gol
+--finstrument-functions-exclude-file-list=@var{file},@var{file},@dots{} @gol
+--fno-common  -fno-ident @gol
+--fpcc-struct-return  -fpic  -fPIC -fpie -fPIE @gol
+--fno-jump-tables @gol
+--frecord-gcc-switches @gol
+--freg-struct-return  -fshort-enums @gol
+--fshort-double  -fshort-wchar @gol
+--fverbose-asm  -fpack-struct[=@var{n}]  -fstack-check @gol
+--fstack-limit-register=@var{reg}  -fstack-limit-symbol=@var{sym} @gol
+--fno-stack-limit -fsplit-stack @gol
+--fleading-underscore  -ftls-model=@var{model} @gol
+--fstack-reuse=@var{reuse_level} @gol
+--ftrapv  -fwrapv  -fbounds-check @gol
+--fvisibility=@r{[}default@r{|}internal@r{|}hidden@r{|}protected@r{]} @gol
+--fstrict-volatile-bitfields -fsync-libcalls}
+ @end table
+ 
+ 
+ @node Overall Options
+ @section Options Controlling the Kind of Output
+ 
+@@ -15554,13 +15554,13 @@ platform.
+ @c in Machine Dependent Options
+ 
+ @menu
+ * AArch64 Options::
+ * Adapteva Epiphany Options::
+ * AMD GCN Options::
+-* AmigaOS PPC options::
++* AmigaOS PowerPC options::
+ * ARC Options::
+ * ARM Options::
+ * AVR Options::
+ * Blackfin Options::
+ * C6X Options::
+ * CRIS Options::
+@@ -16229,16 +16229,18 @@ Compile for GCN5 Vega 10 devices (gfx900).
+ @opindex mstack-size
+ Specify how many @var{bytes} of stack space will be requested for each GPU
+ thread (wave-front).  Beware that there may be many threads and limited memory
+ available.  The size of the stack allocation may also have an impact on
+ run-time performance.  The default is 32KB when using OpenACC or OpenMP, and
+ 1MB otherwise.
+-=======
+-@node AmigaOS PPC options
+-@subsection AmigaOS PPC options
+-@cindex AmigaOS PPC options
++
++@end table
++
++@node AmigaOS PowerPC options
++@subsection AmigaOS PowerPC options
++@cindex AmigaOS PowerPC options
+ 
+ @table @gcctabopt
+ 
+ @item -mcrt=@var{crt}
+ @opindex mcrt
+ 
+@@ -16358,13 +16360,12 @@ Generate absolute data access. This is the default.
+ @item -mcheck68kfuncptr
+ @opindex mcheck68kfuncptr
+ 
+ Causes each function call through a function pointer to be performed as
+ if the function pointer was declared with the @samp{check68kfuncptr}
+ function attribute. @xref{Function Attributes}.
+->>>>>>> Fix order of AmigaOS PPC sections in the documentation.
+ 
+ @item -athread
+ @opindex athread
+ 
+ This option specified which thread implementation should be linked to
+ the final executable. You can choose among @samp{single}, @samp{native},
+-- 
+2.11.0
+
