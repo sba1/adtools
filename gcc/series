@@ -2,3 +2,4 @@
 5	releases/gcc-5.5.0	http://ftp.gnu.org/gnu/gcc/gcc-5.5.0/gcc-5.5.0.tar.gz
 6	releases/gcc-6.4.0	http://ftp.gnu.org/gnu/gcc/gcc-6.4.0/gcc-6.4.0.tar.xz
 8	releases/gcc-8.4.0	http://ftp.gnu.org/gnu/gcc/gcc-8.4.0/gcc-8.4.0.tar.xz
+9	releases/gcc-9.1.0	http://ftp.gnu.org/gnu/gcc/gcc-9.1.0/gcc-9.1.0.tar.xz
