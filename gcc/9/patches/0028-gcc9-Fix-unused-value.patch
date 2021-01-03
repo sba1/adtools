@@ -1,0 +1,31 @@
+From e904a6ed5ffaf63151307171bad9b94530e065dd Mon Sep 17 00:00:00 2001
+From: "ola.soder@axis.com" <ola.soder@axis.com>
+Date: Tue, 29 Dec 2020 21:24:26 +0100
+Subject: [PATCH 28/31] gcc9: Fix unused value.
+
+---
+ gcc/c/c-parser.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/gcc/c/c-parser.c b/gcc/c/c-parser.c
+index 658dbebd930dbd9c3e5be1a3f581dcdeb8f590d6..2b463c6f7dc000189660f76774e22ac1f427ce37 100644
+--- a/gcc/c/c-parser.c
++++ b/gcc/c/c-parser.c
+@@ -11688,13 +11688,13 @@ c_parser_pragma (c_parser *parser, enum pragma_context context, bool *if_p)
+    * file.
+    */
+   extern int was_tagtypepragma;
+   if (was_tagtypepragma)
+   {
+     c_token *tok = c_parser_peek_token (the_parser);
+-    enum cpp_ttype ret = tok->type;
++    enum cpp_ttype ret;
+     c_parser_consume_token(parser);
+ 
+     c_type_name *ctype = c_parser_type_name(parser);
+     tree ctypetree = groktypename (ctype, NULL, NULL);
+ 
+     /* Make the parsed type available to all functions called from here on */
+-- 
+2.11.0
+

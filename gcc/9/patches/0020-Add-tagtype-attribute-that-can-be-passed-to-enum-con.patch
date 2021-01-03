@@ -1,0 +1,136 @@
+From 6d8c18fa473b71fed3819df0c600c4c191d234eb Mon Sep 17 00:00:00 2001
+From: Sebastian Bauer <mail@sebastianbauer.info>
+Date: Tue, 24 Apr 2018 06:29:13 +0200
+Subject: [PATCH 20/31] Add tagtype attribute that can be passed to enum
+ constants.
+
+The tagtype attribute can be applied to enum constants in order to annotate
+them with type information. The type information is verified for function
+calls to functions that have the lineartags attribute associated,
+
+This deprecates the previously added pragma-based tagtype variant that was
+implemented for the same purpose but that has problems with optimizations.
+Also, the preprocessor can now be used to hide the attribute for compilers
+that don't support it.
+---
+ gcc/c/c-parser.c                   | 16 ++++++++++++++++
+ gcc/config/rs6000/amigaos-protos.h |  1 +
+ gcc/config/rs6000/amigaos.c        | 26 ++++++++++++++++++++++++++
+ gcc/config/rs6000/amigaos.h        |  1 +
+ 4 files changed, 44 insertions(+)
+
+diff --git a/gcc/c/c-parser.c b/gcc/c/c-parser.c
+index 69b9a10b397c87969f93f6dffe12d522b64cd292..658dbebd930dbd9c3e5be1a3f581dcdeb8f590d6 100644
+--- a/gcc/c/c-parser.c
++++ b/gcc/c/c-parser.c
+@@ -3077,12 +3077,28 @@ c_parser_enum_specifier (c_parser *parser)
+ 	  else
+ 	    enum_value = NULL_TREE;
+ 	  enum_decl = build_enumerator (decl_loc, value_loc,
+ 					&the_enum, enum_id, enum_value);
+ 	  if (enum_attrs)
+ 	    decl_attributes (&TREE_PURPOSE (enum_decl), enum_attrs, 0);
++
++	  if (enum_attrs)
++	    {
++	      /* Do additional stuff if the tagtype attribute has been
++	       * specified, extract the type information and associate
++	       * the enum value with it in our hash table.
++	       */
++	      tree attr = lookup_attribute ("tagtype", enum_attrs);
++	      if (attr != NULL_TREE)
++		{
++		  /* Extract the type of the cast */
++		  tree type = TREE_TYPE(TREE_VALUE(TREE_VALUE(attr)));
++		  amigaos_put_type_associated_tagtype(enum_value, type);
++		}
++	    }
++
+ 	  TREE_CHAIN (enum_decl) = values;
+ 	  values = enum_decl;
+ 	  seen_comma = false;
+ 	  if (c_parser_next_token_is (parser, CPP_COMMA))
+ 	    {
+ 	      comma_loc = c_parser_peek_token (parser)->location;
+diff --git a/gcc/config/rs6000/amigaos-protos.h b/gcc/config/rs6000/amigaos-protos.h
+index 5a0b8006e2f6b6b8877e092994567233077594f1..df81cfa81701262bebfbad60b580ab75517aa276 100644
+--- a/gcc/config/rs6000/amigaos-protos.h
++++ b/gcc/config/rs6000/amigaos-protos.h
+@@ -31,12 +31,13 @@ extern void amigaos_init_builtins (void);
+ extern rtx amigaos_expand_builtin (tree, rtx, rtx, enum machine_mode, int, bool*);
+ extern tree amigaos_handle_linearvarargs_attribute (tree *, tree, tree, int, bool*);
+ extern tree amigaos_handle_lineartags_attribute (tree *, tree, tree, int, bool*);
+ extern tree amigaos_handle_baserel_restore_attribute (tree *, tree, tree, int, bool*);
+ extern tree amigaos_handle_force_no_baserel_attribute (tree *, tree, tree, int, bool*);
+ extern tree amigaos_handle_check68kfuncptr_attribute (tree *, tree, tree, int, bool*);
++extern tree amigaos_handle_tagtype_attribute (tree *, tree, tree, int, bool*);
+ extern rtx amigaos_legitimize_baserel_address (rtx addr);
+ extern int amigaos_baserel_operand(rtx x);
+ extern int amigaos_not_baserel_tree_p(tree decl);
+ extern bool amigaos_use_anchors_for_symbol_p (const_rtx symbol);
+ 
+ //#endif /* TREE_CODE */
+diff --git a/gcc/config/rs6000/amigaos.c b/gcc/config/rs6000/amigaos.c
+index a7cfaaa2ca4ac913d78e3240aa994a65c2e4b03f..db803847e90047b90c8c88e3aa9b50c8ccf73489 100644
+--- a/gcc/config/rs6000/amigaos.c
++++ b/gcc/config/rs6000/amigaos.c
+@@ -496,12 +496,38 @@ amigaos_handle_check68kfuncptr_attribute (tree *node, tree name,
+       *no_add_attrs = true;
+     }
+ 
+   return NULL_TREE;
+ }
+ 
++/* Handle a tagtype attribute */
++tree
++amigaos_handle_tagtype_attribute(tree *node, tree name,
++	tree args, int flags ATTRIBUTE_UNUSED,
++	bool *no_add_attrs)
++{
++  if (TREE_CODE(*node) != CONST_DECL)
++    {
++      warning (0, "the %<tagtype%> attribute only applies to enum fields");
++      *no_add_attrs = true;
++      return NULL_TREE;
++    }
++
++  tree value = TREE_VALUE (args);
++  tree type = TREE_TYPE (value);
++
++  if (TREE_CODE (value) != INTEGER_CST && TREE_CODE(type) != POINTER_TYPE)
++    {
++      warning (OPT_Wattributes, "argument to the %<tagtype%> attribute must be a type or cast expression of an integer");
++      *no_add_attrs = true;
++      return NULL_TREE;
++    }
++
++  return NULL_TREE;
++}
++
+ /* Addititionally to the normal anchor (optimization) suppression, suppress
+  * it also in the baserel mode because we don't adjust the anchor access yet.
+  * It would make some sence to support anchros also in baserel mode, because
+  * baserel access is 32 bit.
+  */
+ bool
+diff --git a/gcc/config/rs6000/amigaos.h b/gcc/config/rs6000/amigaos.h
+index f88bfe5f879cb4ca09f067d907ec36ef0b4c2da3..0ed2a2b9ca1abe33f6534008f0c9592a02eacc09 100644
+--- a/gcc/config/rs6000/amigaos.h
++++ b/gcc/config/rs6000/amigaos.h
+@@ -393,12 +393,13 @@ do                                   \
+ /* AmigaOS specific attribute */
+ /* { name, min_len, max_len, decl_req, type_req, fn_type_req,
+        affects_type_identity, handler, exclude } */
+ #define SUBTARGET_ATTRIBUTE_TABLE \
+   { "linearvarargs", 0, 0, false, true,  true, false, amigaos_handle_linearvarargs_attribute, NULL}, \
+   { "lineartags", 0, 0, false, true, true, false, amigaos_handle_lineartags_attribute, NULL}, \
++  { "tagtype", 1, 1, false, false, false, false, amigaos_handle_tagtype_attribute, NULL}, \
+   { "baserel_restore", 0, 0, false, true, true, false, amigaos_handle_baserel_restore_attribute, NULL }, \
+   { "force_no_baserel", 0, 0, true, false, false, false, amigaos_handle_force_no_baserel_attribute, NULL }, \
+   { "check68kfuncptr", 0, 0, false, true, true, false, amigaos_handle_check68kfuncptr_attribute, NULL }
+ 
+ /* Overrides */
+ 
+-- 
+2.11.0
+
