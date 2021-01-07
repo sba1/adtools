@@ -298,7 +298,7 @@ new file mode 100644
 index 0000000000000000000000000000000000000000..41adbdc3324156bee31731da8f0da92e819ffdd8
 --- /dev/null
 +++ b/libgcc/gthr-amigaos-native.c
-@@ -0,0 +1,1016 @@
+@@ -0,0 +1,1017 @@
 +/**
 + * This is the native implementation of gcc threads abstraction. The advantage
 + * over the pthreads one is that no pthreads.library is needed.
@@ -729,6 +729,7 @@ index 0000000000000000000000000000000000000000..41adbdc3324156bee31731da8f0da92e
 +          iexec->ReleaseSemaphore (&mx->u.i.sem);
 +          return EBUSY;
 +        }
++      mx->u.i.acquired++;
 +      return 0;
 +    }
 +  return EBUSY;
