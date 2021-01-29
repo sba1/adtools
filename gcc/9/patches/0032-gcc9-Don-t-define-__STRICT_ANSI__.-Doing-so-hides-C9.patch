@@ -1,4 +1,4 @@
-From 3dfc96d88a8b2336e528864452490e163158d35f Mon Sep 17 00:00:00 2001
+From 057a2e651aa45eab01c9d8fb0882816b8ca64828 Mon Sep 17 00:00:00 2001
 From: "ola.soder@axis.com" <ola.soder@axis.com>
 Date: Wed, 27 Jan 2021 18:56:32 +0100
 Subject: [PATCH 32/32] gcc9: Don't define __STRICT_ANSI__. Doing so hides C99

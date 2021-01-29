@@ -1,4 +1,4 @@
-From 78501d5d0a714a1616e53e6f19ed6ea28a3b5a87 Mon Sep 17 00:00:00 2001
+From a0ef4c9834a069efe5ceb682e441d320b662262e Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Sat, 27 Oct 2018 08:06:21 +0200
 Subject: [PATCH 26/32] Add aregparam attribute for functions for the m68k
