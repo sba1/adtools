@@ -1,7 +1,7 @@
 From 060011cf50f1b802a100f2777bca14a9cada8b35 Mon Sep 17 00:00:00 2001
 From: "ola.soder@axis.com" <ola.soder@axis.com>
 Date: Wed, 6 Jan 2021 20:06:54 +0100
-Subject: [PATCH 31/31] gcc9: Expose max_align_t when using clib2.
+Subject: [PATCH 31/32] gcc9: Expose max_align_t when using clib2.
 
 ---
  libstdc++-v3/include/c_global/cstddef | 3 ---

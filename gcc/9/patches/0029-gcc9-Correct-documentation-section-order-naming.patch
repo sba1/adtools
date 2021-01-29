@@ -1,7 +1,7 @@
 From 5c22aeb4ca116e2b41badac7f53190b448e3723d Mon Sep 17 00:00:00 2001
 From: "ola.soder@axis.com" <ola.soder@axis.com>
 Date: Tue, 29 Dec 2020 21:28:04 +0100
-Subject: [PATCH 29/31] gcc9: Correct documentation section order / naming.
+Subject: [PATCH 29/32] gcc9: Correct documentation section order / naming.
 
 ---
  gcc/doc/extend.texi |  4 +--

@@ -1,7 +1,7 @@
 From 5b3765448ca16c222d070007932e8ae0512c277e Mon Sep 17 00:00:00 2001
 From: "ola.soder@axis.com" <ola.soder@axis.com>
 Date: Tue, 29 Dec 2020 21:19:57 +0100
-Subject: [PATCH 27/31] gcc9: Don't use poisoned define.
+Subject: [PATCH 27/32] gcc9: Don't use poisoned define.
 
 ---
  gcc/config/rs6000/amigaos.h | 3 ---
