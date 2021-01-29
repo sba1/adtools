@@ -46,8 +46,8 @@ COREUTILS_VERSION=5.2.1
 # Distribution version, used as middle part of a distribution archive
 DIST_VERSION=$(shell date +%Y%m%d)-$(shell git rev-list --count HEAD)
 
-CLIB2_URL=https://github.com/sba1/clib2-1
-CLIB2_SHA1=b874ff71deb55016a20f87483beb1ecbe226c55e
+CLIB2_URL=https://github.com/sodero/clib2
+CLIB2_SHA1=b98491c8787b48cb2ffe95cfc88cc4e66a2eec29
 CLIB2_RELEASE_ARCHIVE_NAME=adtools-os4-clib2-$(DIST_VERSION).lha
 
 CROSS_PREFIX?=$(ROOT_DIR)/root-cross
