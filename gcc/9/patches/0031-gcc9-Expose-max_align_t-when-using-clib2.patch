@@ -1,4 +1,4 @@
-From ea72190ec45e7b30b4e9e596fde46df00cdbe507 Mon Sep 17 00:00:00 2001
+From 24b9813cba87693593d7d78aa8194bff77d3a507 Mon Sep 17 00:00:00 2001
 From: "ola.soder@axis.com" <ola.soder@axis.com>
 Date: Wed, 6 Jan 2021 20:06:54 +0100
 Subject: [PATCH 31/32] gcc9: Expose max_align_t when using clib2.

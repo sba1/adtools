@@ -1,4 +1,4 @@
-From c07ebdfeb0f0e6ae5087e39b378d3d617057cb57 Mon Sep 17 00:00:00 2001
+From ae3522d074b5affa1de95c8bd82b871170612f90 Mon Sep 17 00:00:00 2001
 From: "ola.soder@axis.com" <ola.soder@axis.com>
 Date: Tue, 29 Dec 2020 21:24:26 +0100
 Subject: [PATCH 28/32] gcc9: Fix unused value.

@@ -1,4 +1,4 @@
-From 468b1096ebe3abe0fbe27fc65463c97c0fc4ec03 Mon Sep 17 00:00:00 2001
+From aeb602f9822c8b8330d7ba46c2409ffbe4d939ea Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 20 Apr 2018 20:04:30 +0200
 Subject: [PATCH 18/32] Respect -nostdinc also for SDK includes.

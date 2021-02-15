@@ -1,4 +1,4 @@
-From cee41d4495846ad3ff303a676fde606d708777cd Mon Sep 17 00:00:00 2001
+From 3ccc0437faebfc4888ec4d04362152db1747ab18 Mon Sep 17 00:00:00 2001
 From: "ola.soder@axis.com" <ola.soder@axis.com>
 Date: Tue, 29 Dec 2020 21:28:04 +0100
 Subject: [PATCH 29/32] gcc9: Correct documentation section order / naming.
