@@ -1,7 +1,7 @@
 From de30b79e0989a709b5b28828d7a7e029bff27fda Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Sat, 28 Apr 2018 08:09:58 +0200
-Subject: [PATCH 22/26] Fix order of AmigaOS PPC sections in the documentation.
+Subject: [PATCH 22/27] Fix order of AmigaOS PPC sections in the documentation.
 
 ---
  gcc/doc/invoke.texi | 264 ++++++++++++++++++++++----------------------
@@ -328,5 +328,5 @@ index ee8085fff435aa062c69f666f245ceb4fa68fe22..b21dec174a50bbf7c38b206c93fc34d5
  These options are supported for Xtensa targets:
  
 -- 
-2.25.1
+2.30.0
 

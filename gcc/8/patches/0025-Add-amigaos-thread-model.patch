@@ -1,7 +1,7 @@
-From b9089f48195c41d3c683489e2e17fec4d1e666f2 Mon Sep 17 00:00:00 2001
+From b054dbdd84d9aabc489e4a7a520c67a006a7c4f9 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 4 May 2018 18:22:24 +0200
-Subject: [PATCH 25/26] Add amigaos thread model.
+Subject: [PATCH 25/27] Add amigaos thread model.
 
 It is work in progress.
 ---
@@ -16,12 +16,12 @@ It is work in progress.
  libgcc/config/rs6000/t-amigaos |    5 +
  libgcc/configure               |    1 +
  libgcc/gthr-amigaos-asserts.h  |    8 +
- libgcc/gthr-amigaos-native.c   | 1013 ++++++++++++++++++++++++++++++++
+ libgcc/gthr-amigaos-native.c   | 1017 ++++++++++++++++++++++++++++++++
  libgcc/gthr-amigaos-posix.c    |  233 ++++++++
  libgcc/gthr-amigaos-single.c   |  141 +++++
  libgcc/gthr-amigaos.h          |  347 +++++++++++
  libstdc++-v3/configure         |   15 +-
- 16 files changed, 1808 insertions(+), 12 deletions(-)
+ 16 files changed, 1812 insertions(+), 12 deletions(-)
  create mode 100644 gcc/config/rs6000/x-amigaos
  create mode 100644 libgcc/gthr-amigaos-asserts.h
  create mode 100644 libgcc/gthr-amigaos-native.c
@@ -295,7 +295,7 @@ index 0000000000000000000000000000000000000000..bb6005cd52ef75cc7bfbc276d5d56ec5
 +#endif
 diff --git a/libgcc/gthr-amigaos-native.c b/libgcc/gthr-amigaos-native.c
 new file mode 100644
-index 0000000000000000000000000000000000000000..41adbdc3324156bee31731da8f0da92e819ffdd8
+index 0000000000000000000000000000000000000000..3806359eed9a80027a7b37e79d148cded12ce7b9
 --- /dev/null
 +++ b/libgcc/gthr-amigaos-native.c
 @@ -0,0 +1,1017 @@
@@ -2179,5 +2179,5 @@ index f16bfea81cb0c480488d72c73b2edf5c7e6e7a87..45dcf6730020ffae5ae76ae84a88d645
  template<typename T>
    struct same<T, T>;
 -- 
-2.25.1
+2.30.0
 
