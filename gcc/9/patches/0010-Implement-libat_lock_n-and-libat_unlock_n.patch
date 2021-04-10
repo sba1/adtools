@@ -1,7 +1,7 @@
 From fb4f1673a62e828fd3fa74decd2771942ea709ac Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Wed, 23 May 2018 10:54:19 +0200
-Subject: [PATCH 10/31] Implement libat_lock_n() and libat_unlock_n().
+Subject: [PATCH 10/32] Implement libat_lock_n() and libat_unlock_n().
 
 ---
  libatomic/config/amigaos/lock.c | 58 ++++++++++++++++++++++++++++++++---------

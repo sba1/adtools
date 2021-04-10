@@ -1,22 +1,20 @@
-From 7ddd0aa30703bee23ed45739d8e7bf464e2f8fca Mon Sep 17 00:00:00 2001
+From 4bcecd9e4df4f9cc0cc185e9170233dd7fa47e5f Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Sat, 4 Mar 2017 07:39:21 +0100
-Subject: [PATCH 11/31] Pretend C99 compatibility.
+Subject: [PATCH 11/32] Pretend C99 compatibility.
 
-At least newlib is not fully C99 compatible because it doesn't expose
-various C99 function if __STRICT_ANSI__ is declared. Also it misses
-strtold() (as clib2).
+Disable missing strtold() and pretend that newlib is C99 compatible.
 ---
- libstdc++-v3/config/os/amigaos/os_defines.h | 3 +++
+ libstdc++-v3/config/os/amigaos/os_defines.h | 1 +
  libstdc++-v3/include/bits/basic_string.h    | 3 +++
  libstdc++-v3/include/c_global/cstdlib       | 8 ++++++++
- 3 files changed, 14 insertions(+)
+ 3 files changed, 12 insertions(+)
 
 diff --git a/libstdc++-v3/config/os/amigaos/os_defines.h b/libstdc++-v3/config/os/amigaos/os_defines.h
-index 346f063958cd7e80ebf97be4acee0bdf391cb811..6b67630b7be7102a9dfb7c104deac6293a13c017 100644
+index 346f063958cd7e80ebf97be4acee0bdf391cb811..647c560e6ff196234fda2e14073ee0b7074ad5da 100644
 --- a/libstdc++-v3/config/os/amigaos/os_defines.h
 +++ b/libstdc++-v3/config/os/amigaos/os_defines.h
-@@ -35,9 +35,12 @@
+@@ -35,9 +35,10 @@
  
  // No ioctl() on AmigaOS
  #define _GLIBCXX_NO_IOCTL 1
@@ -24,8 +22,6 @@ index 346f063958cd7e80ebf97be4acee0bdf391cb811..6b67630b7be7102a9dfb7c104deac629
  #ifdef __NEWLIB__
  #define _GLIBCXX_USE_C99_STDINT_TR1 1
 +#define _GLIBCXX_USE_C99 1
-+/* Temporary until newlib behaves properly */
-+#undef __STRICT_ANSI__
  #endif
  
  #endif

@@ -1,0 +1,39 @@
+From 7824bd01bf24f618536fa4618d61e76ad7b71edc Mon Sep 17 00:00:00 2001
+From: "ola.soder@axis.com" <ola.soder@axis.com>
+Date: Wed, 27 Jan 2021 18:56:32 +0100
+Subject: [PATCH 32/32] gcc9: Don't define __STRICT_ANSI__.
+
+Doing so hides C99 features when configuring libstdc++.
+---
+ libstdc++-v3/config/os/amigaos/os_defines.h | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+
+diff --git a/libstdc++-v3/config/os/amigaos/os_defines.h b/libstdc++-v3/config/os/amigaos/os_defines.h
+index 647c560e6ff196234fda2e14073ee0b7074ad5da..10b56638f418baec6fea0c91888882c65a994d85 100644
+--- a/libstdc++-v3/config/os/amigaos/os_defines.h
++++ b/libstdc++-v3/config/os/amigaos/os_defines.h
+@@ -38,7 +38,21 @@
+ 
+ #ifdef __NEWLIB__
+ #define _GLIBCXX_USE_C99_STDINT_TR1 1
+ #define _GLIBCXX_USE_C99 1
+ #endif
+ 
++#undef __STRICT_ANSI__
++/* GCC defines this macro if, and only if, the -ansi switch, or a
++ * -std switch specifying strict conformance to some version of ISO C
++ * or ISO C++, was specified when GCC was invoked. This macro exists
++ * primarily to direct GNU libc's header files to restrict their
++ * definitions to the minimal set found in the 1989 C standard. If -std
++ * is set to C++ >98 when building with clib2 or newlib, configure will
++ * be tricked into believing that existing C99 features are missing.
++ *
++ * Please note that this is a temporary workaround. The real solution
++ * would be to figure out why this is set during configuration in the
++ * first place.
++ */
++
+ #endif
+-- 
+2.11.0
+
