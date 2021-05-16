@@ -1,17 +1,28 @@
-From 26efc51ab14b38740c75fa0b81bcfcda77401ab7 Mon Sep 17 00:00:00 2001
+From 3ddf19fd28795b4ab3d1f525cfbc2ee2b6588490 Mon Sep 17 00:00:00 2001
 From: Le Philousophe <lephilousophe@users.noreply.github.com>
 Date: Sat, 15 May 2021 14:51:23 +0200
 Subject: [PATCH 13/13] Don't emit dynamic relocations for data symbols
 
+In particular, sometimes an R_PPC_ADDR32 would be generated
+that the dynamic linker of AmigaOS apparently cannot handle well
+as of this writing. This effect of this change is to favor the
+R_PPC_COPY relocation.
+
+See https://github.com/sba1/adtools/issues/77 for details.
+
+Patch description by Sebastian Bauer <mail@sebastianbauer.info>
 ---
  bfd/elf32-amigaos.c | 5 +++--
  1 file changed, 3 insertions(+), 2 deletions(-)
 
 diff --git a/bfd/elf32-amigaos.c b/bfd/elf32-amigaos.c
-index 4f0c37c97ac..eb032e589d6 100644
+index 4f0c37c97accbb9a00762fc2e04c56ea0942d483..eb032e589d6e3e316cb0ab88a94905c38a6d68ea 100644
 --- a/bfd/elf32-amigaos.c
 +++ b/bfd/elf32-amigaos.c
-@@ -5571,8 +5571,9 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
+@@ -5568,14 +5568,15 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
+   if (ELIMINATE_COPY_RELOCS
+       && !ppc_elf_hash_entry (h)->has_sda_refs
+       && !htab->is_vxworks
        && !h->def_regular
        && !readonly_dynrelocs (h))
      {
@@ -23,6 +34,9 @@ index 4f0c37c97ac..eb032e589d6 100644
      }
  
    /* We must allocate the symbol in our .dynbss section, which will
+      become part of the .bss section of the executable.  There will be
+      an entry for this symbol in the .dynsym section.  The dynamic
+      object will contain position independent code, so all references
 -- 
-2.25.1
+2.30.2
 
