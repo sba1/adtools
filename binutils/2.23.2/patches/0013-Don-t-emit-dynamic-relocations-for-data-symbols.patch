@@ -1,0 +1,28 @@
+From 26efc51ab14b38740c75fa0b81bcfcda77401ab7 Mon Sep 17 00:00:00 2001
+From: Le Philousophe <lephilousophe@users.noreply.github.com>
+Date: Sat, 15 May 2021 14:51:23 +0200
+Subject: [PATCH 13/13] Don't emit dynamic relocations for data symbols
+
+---
+ bfd/elf32-amigaos.c | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/bfd/elf32-amigaos.c b/bfd/elf32-amigaos.c
+index 4f0c37c97ac..eb032e589d6 100644
+--- a/bfd/elf32-amigaos.c
++++ b/bfd/elf32-amigaos.c
+@@ -5571,8 +5571,9 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
+       && !h->def_regular
+       && !readonly_dynrelocs (h))
+     {
+-      h->non_got_ref = 0;
+-      return TRUE;
++      //h->non_got_ref = 0;
++      //return TRUE;
++      // Emitting a dynamic relocation on data doesn't work on AmigaOS
+     }
+ 
+   /* We must allocate the symbol in our .dynbss section, which will
+-- 
+2.25.1
+
