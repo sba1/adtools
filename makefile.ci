@@ -11,6 +11,8 @@ build-setup:
 		libmpfr-dev \
 		patch \
 		texinfo
+	wget http://mirrors.kernel.org/ubuntu/pool/multiverse/l/lha/lha_1.14i-10.3_amd64.deb
+	sudo dpkg -i lha_1.14i-10.3_amd64.deb
 	./bin/gild clone coreutils
 	./bin/gild checkout coreutils 5.2
 	./bin/gild checkout binutils 2.23.2
