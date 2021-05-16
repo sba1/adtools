@@ -1,0 +1,15 @@
+.PHONY: all
+all:
+
+.PHONY: build-setup
+build-setup:
+	./bin/gild clone coreutils
+	./bin/gild checkout coreutils 5.2
+	./bin/gild checkout binutils 2.23.2
+	./bin/gild checkout gcc 8
+
+.PHONY: ci-native
+ci-native:
+	make -C native-build native-install -j2 -Orecurse
+	make -C native-build native-dist -Orecurse
+	make -C native-build clib2-dist -Orecurse

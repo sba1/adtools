@@ -30,4 +30,5 @@ jobs:
         run: |
           sudo mkdir /gcc
           sudo chown $USER:$USER /gcc
-          make -C native-build native-install
+          make -f makefile.ci build-setup
+          make -f makefile.ci ci-native
