@@ -311,6 +311,7 @@ ReadMe: ReadMe.mak
 		filename='$<',\
 		input_encoding='utf-8',\
 		output_encoding='utf-8',\
+		bytestring_passthrough=True,\
 		lookup=TemplateLookup(['./'],input_encoding='utf-8')).render(\
 			DIST_VERSION='$(DIST_VERSION)',\
 			ADTOOLS_COMMIT_SHA1='$(shell git rev-list HEAD -1)',\
