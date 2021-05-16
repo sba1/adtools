@@ -1,7 +1,7 @@
-From 878a6bfce26d1f580fa538b349a20d77b9afa1b8 Mon Sep 17 00:00:00 2001
+From 1678a95339b8893195b307a953a0053ceeca0133 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Sat, 14 Feb 2015 14:54:44 +0100
-Subject: [PATCH 01/12] Changes for various Amiga targets.
+Subject: [PATCH 01/13] Changes for various Amiga targets.
 
 ---
  bfd/ChangeLog-9697                            |   64 +
@@ -27429,5 +27429,5 @@ index bc2dd491592e56fb664cdf96fc32491c08e1e075..bc40541b7c5aecc30a7a74fd61f29225
     Seperate from reg_names since 'spu', 'fpl' look weird.  */
  static char *const reg_half_names[] =
 -- 
-2.18.0
+2.30.2
 

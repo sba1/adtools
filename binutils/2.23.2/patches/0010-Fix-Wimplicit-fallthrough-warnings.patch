@@ -1,7 +1,7 @@
-From ab54fa9287d410470a25966d8ed97bdd0d84b39a Mon Sep 17 00:00:00 2001
+From 7f226984c345f723f4ee54a445ec25f42f42b33b Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Sun, 8 Jul 2018 15:37:58 +0200
-Subject: [PATCH 10/12] Fix -Wimplicit-fallthrough warnings.
+Subject: [PATCH 10/13] Fix -Wimplicit-fallthrough warnings.
 
 These appear with recent versions of gcc.
 ---
@@ -760,5 +760,5 @@ index da99e7743c8d9705a79eb55892c2206cbaeadb35..3a3ac607230730c9775423a20e791767
  	  visibility = STV_PROTECTED;
  	  break;
 -- 
-2.18.0
+2.30.2
 

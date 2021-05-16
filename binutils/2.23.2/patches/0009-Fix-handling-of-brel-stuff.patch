@@ -1,7 +1,7 @@
-From 4473438b4280e83b8f8b53155d4bd414e0330606 Mon Sep 17 00:00:00 2001
+From 62abb37b1ca898eff4fa5550cf714fcce9ca3631 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Wed, 18 Apr 2018 09:12:12 +0200
-Subject: [PATCH 09/12] Fix handling of brel stuff.
+Subject: [PATCH 09/13] Fix handling of brel stuff.
 
 ---
  bfd/elf32-amigaos.c | 7 ++++---
@@ -68,5 +68,5 @@ index 9bf9535888f2345d60a8f802680ae03f41f67a5f..fa9333b7f1d953b5ebcf338bd465c75f
  	  continue;
  
 -- 
-2.18.0
+2.30.2
 

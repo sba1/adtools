@@ -1,7 +1,7 @@
-From d16072e60a830e2f8d60c04ccf2a64995f5fa204 Mon Sep 17 00:00:00 2001
+From cd00879650602635cdf11576f2ee0cebd1e105bd Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Wed, 15 Feb 2017 22:12:54 +0100
-Subject: [PATCH 08/12] Fix undefined behaviour.
+Subject: [PATCH 08/13] Fix undefined behaviour.
 
 This should ensure that the code compiles with more recent version of GCC.
 Changes have been backported from more recent version of binutils.
@@ -109,5 +109,5 @@ index e57b118b02e5a2faba62f5dbd524f03827f719c0..40a1262ecd17944de229f6b192f8c6e0
  #define PPC_OPERAND_SIGNED (0x1)
  
 -- 
-2.18.0
+2.30.2
 

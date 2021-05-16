@@ -1,7 +1,7 @@
-From 55835c573fe5f9e9dabfecea82e4e1300c78327c Mon Sep 17 00:00:00 2001
+From 058d28eec297c6006644d53da8f35bba898b2472 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Thu, 22 Oct 2015 09:48:26 +0200
-Subject: [PATCH 05/12] Bind in the ld unwind options.
+Subject: [PATCH 05/13] Bind in the ld unwind options.
 
 ---
  ld/emulparams/amigaos.sh | 4 +++-
@@ -23,5 +23,5 @@ index 605b81e76bcbbd2322561d7d9502190dc7c00674..2661d4ddcd1c5ecab9adea84af7f7d0b
  COMMONPAGESIZE="CONSTANT (COMMONPAGESIZE)"
  ALIGNMENT=16
 -- 
-2.18.0
+2.30.2
 

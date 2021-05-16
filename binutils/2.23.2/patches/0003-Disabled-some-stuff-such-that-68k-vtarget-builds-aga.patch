@@ -1,7 +1,7 @@
-From 21117c850814165a57f6afb26fe05b61a30fbdf1 Mon Sep 17 00:00:00 2001
+From 249b45d0f5a41e970c72e945b2063a7cd1206fe6 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Tue, 17 Mar 2015 19:30:24 +0100
-Subject: [PATCH 03/12] Disabled some stuff such that 68k vtarget builds again.
+Subject: [PATCH 03/13] Disabled some stuff such that 68k vtarget builds again.
 
 This doesn't imply that it is working.
 ---
@@ -106,5 +106,5 @@ index 8b5f6c60f2141ee91d6e9d1d639815abdf4e5042..9070a862b9c1266e84a8cea8da697f33
      }
    while (*input_line_pointer++ == ',');
 -- 
-2.18.0
+2.30.2
 

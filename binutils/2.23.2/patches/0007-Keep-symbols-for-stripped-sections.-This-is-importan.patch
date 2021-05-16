@@ -1,7 +1,7 @@
-From 7f0bd6eb0eb4c126dd568deecfe06f0d56745744 Mon Sep 17 00:00:00 2001
+From fbee1b3ea1902f18e5b430e52acba69dda6bcdd9 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Thu, 3 Dec 2015 23:48:21 +0100
-Subject: [PATCH 07/12] Keep symbols for stripped sections. This is important
+Subject: [PATCH 07/13] Keep symbols for stripped sections. This is important
  for _SDA_BASE_,
 
 ---
@@ -38,5 +38,5 @@ index 4beee77179b85479d5b43507d9eb2a6e0caf384e..8750db51279ec56080aba114cd61780d
  	      && (weaken || is_specified_symbol (name, weaken_specific_htab)))
  	    {
 -- 
-2.18.0
+2.30.2
 
