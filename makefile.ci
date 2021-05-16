@@ -18,6 +18,6 @@ build-setup:
 
 .PHONY: ci-native
 ci-native:
-	make -C native-build native-install -j2 -Orecurse
+	make -C native-build native-install -Orecurse
 	make -C native-build native-dist -Orecurse
 	make -C native-build clib2-dist -Orecurse
