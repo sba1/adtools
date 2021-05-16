@@ -3,6 +3,14 @@ all:
 
 .PHONY: build-setup
 build-setup:
+	sudo apt-get install \
+		binutils \
+		flex \
+		libgmp-dev \
+		libmpc-dev \
+		libmpfr-dev \
+		patch \
+		texinfo
 	./bin/gild clone coreutils
 	./bin/gild checkout coreutils 5.2
 	./bin/gild checkout binutils 2.23.2
