@@ -1,0 +1,38 @@
+From d917f0d6f55ab73b8c230777106075396257971d Mon Sep 17 00:00:00 2001
+From: "ola.soder@axis.com" <ola.soder@axis.com>
+Date: Sun, 7 Feb 2021 19:38:47 +0100
+Subject: [PATCH 32/33] gcc10: Don't define __STRICT_ANSI__.
+
+Doing so hides C99 features when configuring libstdc++.
+---
+ libstdc++-v3/config/os/amigaos/os_defines.h | 11 +++++++++--
+ 1 file changed, 9 insertions(+), 2 deletions(-)
+
+diff --git a/libstdc++-v3/config/os/amigaos/os_defines.h b/libstdc++-v3/config/os/amigaos/os_defines.h
+index 6b67630b7be7102a9dfb7c104deac6293a13c017..3f2d894b6c28e493e38c114da8d4f8528c4e3a12 100644
+--- a/libstdc++-v3/config/os/amigaos/os_defines.h
++++ b/libstdc++-v3/config/os/amigaos/os_defines.h
+@@ -36,11 +36,18 @@
+ // No ioctl() on AmigaOS
+ #define _GLIBCXX_NO_IOCTL 1
+ 
+ #ifdef __NEWLIB__
+ #define _GLIBCXX_USE_C99_STDINT_TR1 1
+ #define _GLIBCXX_USE_C99 1
+-/* Temporary until newlib behaves properly */
+-#undef __STRICT_ANSI__
+ #endif
+ 
++#undef __STRICT_ANSI__
++/* GCC defines this macro if, and only if, the -ansi switch, or a
++ * -std switch specifying strict conformance to some version of ISO C
++ * or ISO C++, was specified when GCC was invoked. This macro exists
++ * primarily to direct GNU libc's header files to restrict their
++ * definitions to the minimal set found in the 1989 C standard. If
++ * -std is set to > c++98 when building with clib2, configure will be
++ * tricked into believing that existing C99 features are missing. */
++
+ #endif
+-- 
+2.11.0
+

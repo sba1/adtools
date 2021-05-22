@@ -1,0 +1,33 @@
+From 11d4b4699a52475732529a1b9847f60f45855d12 Mon Sep 17 00:00:00 2001
+From: Sebastian Bauer <mail@sebastianbauer.info>
+Date: Fri, 20 Apr 2018 20:04:30 +0200
+Subject: [PATCH 18/33] Respect -nostdinc also for SDK includes.
+
+---
+ gcc/config/rs6000/amigaos.h | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
+
+diff --git a/gcc/config/rs6000/amigaos.h b/gcc/config/rs6000/amigaos.h
+index d339c4280b67d863ec9c60dd38230d7bb2549345..f88bfe5f879cb4ca09f067d907ec36ef0b4c2da3 100644
+--- a/gcc/config/rs6000/amigaos.h
++++ b/gcc/config/rs6000/amigaos.h
+@@ -261,15 +261,13 @@
+ %{mcrt=clib2|mcrt=clib2-ts: %(cpp_clib2); \
+ mcrt=ixemul: %(cpp_ixemul); \
+ mcrt=libnix: %(cpp_libnix); \
+ mcrt=newlib: %(cpp_newlib); \
+ mcrt=default|!mcrt=*: %{mcrt=default|!nostdinc: %(cpp_amiga_default)}; \
+ : %eInvalid C runtime library} \
+--idirafter %(base_sdk)include/include_h \
+--idirafter %(base_sdk)include/netinclude \
+--idirafter %(base_sdk)local/common/include \
++%{!nostdinc: -idirafter %(base_sdk)include/include_h -idirafter %(base_sdk)include/netinclude -idirafter %(base_sdk)local/common/include} \
+ %{mbaserel: %{msdata|msdata=default|msdata=sysv: %e-mbaserel and -msdata options are incompatible}} \
+ %{newlib: %e-newlib is obsolete, use -mcrt=newlib instead}"
+ 
+ #undef LINK_SPEC
+ #define LINK_SPEC "\
+ --defsym __amigaos4__=1 \
+-- 
+2.11.0
+

@@ -1,0 +1,68 @@
+From 2b445a6d08530c52ad4f411a30cb574dc2b94e4e Mon Sep 17 00:00:00 2001
+From: Sebastian Bauer <mail@sebastianbauer.info>
+Date: Tue, 22 May 2018 23:14:01 +0200
+Subject: [PATCH 23/33] Adapt libssp for AmigaOS.
+
+---
+ libssp/ssp.c | 8 +++++---
+ 1 file changed, 5 insertions(+), 3 deletions(-)
+
+diff --git a/libssp/ssp.c b/libssp/ssp.c
+index 28f3e9cc64a2c4faf573ee5878e5ac62e1e7f189..180bb3eb6ab5bb79745a64966286b76f20a7fc42 100644
+--- a/libssp/ssp.c
++++ b/libssp/ssp.c
+@@ -55,12 +55,14 @@ see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
+ /* Native win32 apps don't know about /dev/tty but can print directly
+    to the console using  "CONOUT$"   */
+ #if defined (_WIN32) && !defined (__CYGWIN__)
+ #include <windows.h>
+ #include <wincrypt.h>
+ # define _PATH_TTY "CONOUT$"
++#elif defined (__amigaos4__)
++# define _PATH_TTY "CONSOLE:"
+ #else
+ # define _PATH_TTY "/dev/tty"
+ #endif
+ #endif
+ #ifdef HAVE_SYSLOG_H
+ # include <syslog.h>
+@@ -86,13 +88,13 @@ __guard_setup (void)
+         {
+            CryptReleaseContext(hprovider, 0);
+            return;
+         }
+       CryptReleaseContext(hprovider, 0);
+     }
+-#else
++#elif !defined(__amigaos4__)
+   int fd = open ("/dev/urandom", O_RDONLY);
+   if (fd != -1)
+     {
+       ssize_t size = read (fd, &__stack_chk_guard,
+                            sizeof (__stack_chk_guard));
+       close (fd);
+@@ -145,19 +147,19 @@ fail (const char *msg1, size_t msg1len, const char *msg3)
+             break;
+           buf += wrote;
+           len -= wrote;
+         }
+       close (fd);
+     }
+-
++#ifndef __amigaos4__
+ #ifdef HAVE_SYSLOG_H
+   /* Only send the error to syslog if there was no tty available.  */
+   else
+     syslog (LOG_CRIT, "%s", msg3);
+ #endif /* HAVE_SYSLOG_H */
+-
++#endif
+   /* Try very hard to exit.  Note that signals may be blocked preventing
+      the first two options from working.  The use of volatile is here to
+      prevent optimizers from "knowing" that __builtin_trap is called first,
+      and that it doesn't return, and so "obviously" the rest of the code
+      is dead.  */
+   {
+-- 
+2.11.0
+

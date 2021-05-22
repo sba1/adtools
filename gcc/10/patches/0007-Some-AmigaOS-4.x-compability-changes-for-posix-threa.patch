@@ -1,0 +1,85 @@
+From eb8b8a2708023813b9a42be4c97393b04f4998c3 Mon Sep 17 00:00:00 2001
+From: Sebastian Bauer <mail@sebastianbauer.info>
+Date: Thu, 21 Jan 2016 20:46:59 +0100
+Subject: [PATCH 07/33] Some AmigaOS 4.x compability changes for posix thread
+ support.
+
+---
+ libgcc/gthr-posix.h | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+
+diff --git a/libgcc/gthr-posix.h b/libgcc/gthr-posix.h
+index 965247602acf11f81c5fa009c7ee48eb55cbacca..b345914381af9df06368bfc576f7a36bb8a50538 100644
+--- a/libgcc/gthr-posix.h
++++ b/libgcc/gthr-posix.h
+@@ -29,12 +29,16 @@ see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
+ /* POSIX threads specific definitions.
+    Easy, since the interface is just one-to-one mapping.  */
+ 
+ #define __GTHREADS 1
+ #define __GTHREADS_CXX0X 1
+ 
++#ifdef __amigaos4__
++#include <exec/types.h>
++#endif
++
+ #include <pthread.h>
+ 
+ #if ((defined(_LIBOBJC) || defined(_LIBOBJC_WEAK)) \
+      || !defined(_GTHREAD_USE_MUTEX_TIMEDLOCK))
+ # include <unistd.h>
+ # if defined(_POSIX_TIMEOUTS) && _POSIX_TIMEOUTS >= 0
+@@ -108,13 +112,15 @@ __gthrw(pthread_join)
+ __gthrw(pthread_equal)
+ __gthrw(pthread_self)
+ __gthrw(pthread_detach)
+ #ifndef __BIONIC__
+ __gthrw(pthread_cancel)
+ #endif
++#ifndef __amigaos4__
+ __gthrw(sched_yield)
++#endif
+ 
+ __gthrw(pthread_mutex_lock)
+ __gthrw(pthread_mutex_trylock)
+ #if _GTHREAD_USE_MUTEX_TIMEDLOCK
+ __gthrw(pthread_mutex_timedlock)
+ #endif
+@@ -445,14 +451,16 @@ __gthread_objc_thread_get_priority (void)
+ }
+ 
+ /* Yield our process time to another thread.  */
+ static inline void
+ __gthread_objc_thread_yield (void)
+ {
++#ifndef __amigaos4__
+   if (__gthread_active_p ())
+     __gthrw_(sched_yield) ();
++#endif
+ }
+ 
+ /* Terminate the current thread.  */
+ static inline int
+ __gthread_objc_thread_exit (void)
+ {
+@@ -687,13 +695,17 @@ __gthread_self (void)
+   return __gthrw_(pthread_self) ();
+ }
+ 
+ static inline int
+ __gthread_yield (void)
+ {
++#ifdef __amigaos4__
++  return 1;
++#else
+   return __gthrw_(sched_yield) ();
++#endif
+ }
+ 
+ static inline int
+ __gthread_once (__gthread_once_t *__once, void (*__func) (void))
+ {
+   if (__gthread_active_p ())
+-- 
+2.11.0
+

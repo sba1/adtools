@@ -1,0 +1,55 @@
+From fbeccff7905239df1110729f8f383df85adda8aa Mon Sep 17 00:00:00 2001
+From: "ola.soder@axis.com" <ola.soder@axis.com>
+Date: Fri, 8 Jan 2021 14:03:50 +0100
+Subject: [PATCH 31/33] gcc10: Expose max_align_t when using clib2.
+
+---
+ libstdc++-v3/include/c_global/cstddef | 3 ---
+ libstdc++-v3/include/c_std/cstddef    | 3 ---
+ 2 files changed, 6 deletions(-)
+
+diff --git a/libstdc++-v3/include/c_global/cstddef b/libstdc++-v3/include/c_global/cstddef
+index ce8b2f4bbfaefc29036dca9a6586ab07dc46d340..ce9cd3e9d3c9d70ac3873273c4651b32a060ae7c 100644
+--- a/libstdc++-v3/include/c_global/cstddef
++++ b/libstdc++-v3/include/c_global/cstddef
+@@ -51,17 +51,14 @@
+ 
+ extern "C++"
+ {
+ #if __cplusplus >= 201103L
+ namespace std
+ {
+-/* Needed as clib2 on AmigaOS has no C11 support yet */
+-#if __STDC_VERSION__ >= 201112L
+   // We handle size_t, ptrdiff_t, and nullptr_t in c++config.h.
+   using ::max_align_t;
+-#endif
+ }
+ #endif // C++11
+ 
+ #if __cplusplus >= 201703L
+ namespace std
+ {
+diff --git a/libstdc++-v3/include/c_std/cstddef b/libstdc++-v3/include/c_std/cstddef
+index 266b90b655f31e32873a432c617a589fb2bb3c71..a7f0094969cc26636da59503127b504730fbb9ee 100644
+--- a/libstdc++-v3/include/c_std/cstddef
++++ b/libstdc++-v3/include/c_std/cstddef
+@@ -44,15 +44,12 @@
+ #include <bits/c++config.h>
+ #include <stddef.h>
+ 
+ #if __cplusplus >= 201103L
+ namespace std
+ {
+-/* Needed as clib2 on AmigaOS has no C11 support yet */
+-#if __STDC_VERSION__ >= 201112L
+   // We handle size_t, ptrdiff_t, and nullptr_t in c++config.h.
+   using ::max_align_t;
+-#endif
+ }
+ #endif
+ 
+ #endif // _GLIBCXX_CSTDDEF
+-- 
+2.11.0
+

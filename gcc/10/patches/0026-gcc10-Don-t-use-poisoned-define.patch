@@ -1,0 +1,32 @@
+From 3c55e3e48b2b180fd10c1b4ad0483102ec5b7fca Mon Sep 17 00:00:00 2001
+From: "ola.soder@axis.com" <ola.soder@axis.com>
+Date: Sat, 2 Jan 2021 17:22:55 +0100
+Subject: [PATCH 26/33] gcc10: Don't use poisoned define.
+
+---
+ gcc/config/rs6000/amigaos.h | 3 ---
+ 1 file changed, 3 deletions(-)
+
+diff --git a/gcc/config/rs6000/amigaos.h b/gcc/config/rs6000/amigaos.h
+index ec0146c4b8c05eb300f8928e475641123c3f5632..19dacdc885e71ef81186b3f990173dade2bd517a 100644
+--- a/gcc/config/rs6000/amigaos.h
++++ b/gcc/config/rs6000/amigaos.h
+@@ -16,15 +16,12 @@
+    You should have received a copy of the GNU General Public License
+    along with GCC; see the file COPYING.  If not, write to the
+    Free Software Foundation, 59 Temple Place - Suite 330, Boston,
+    MA 02111-1307, USA.  */
+ 
+ 
+-/* Don't assume anything about the header files. */
+-#define NO_IMPLICIT_EXTERN_C
+-
+ #undef MD_EXEC_PREFIX
+ #undef MD_STARTFILE_PREFIX
+ 
+ /* Make CPU default to 604e. FIXME: Make this 750 later */
+ #undef PROCESSOR_DEFAULT
+ #define PROCESSOR_DEFAULT PROCESSOR_PPC604e
+-- 
+2.11.0
+

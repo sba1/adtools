@@ -1,0 +1,114 @@
+From 3f98998c2447c96907504ef5e295d71754dd550f Mon Sep 17 00:00:00 2001
+From: Sebastian Bauer <mail@sebastianbauer.info>
+Date: Fri, 27 Apr 2018 22:48:18 +0200
+Subject: [PATCH 20/33] Rename lineartags to checktags.
+
+The name lineartags would imply linearvarargs but this is not implemented
+or necessary.
+---
+ gcc/c/c-typeck.c                   | 6 +++---
+ gcc/config/rs6000/amigaos-protos.h | 2 +-
+ gcc/config/rs6000/amigaos.c        | 4 ++--
+ gcc/config/rs6000/amigaos.h        | 3 ++-
+ 4 files changed, 8 insertions(+), 7 deletions(-)
+
+diff --git a/gcc/c/c-typeck.c b/gcc/c/c-typeck.c
+index 5cf86f2c26902751c9f2d4e6e6c2b83ea97495f8..830221cedd8f76f6c540d0b0e48aaf6016a6557c 100644
+--- a/gcc/c/c-typeck.c
++++ b/gcc/c/c-typeck.c
+@@ -3489,14 +3489,14 @@ convert_arguments (location_t loc, vec<location_t> arg_loc, tree typelist,
+   bool error_args = false;
+   const bool type_generic = fundecl
+     && lookup_attribute ("type generic", TYPE_ATTRIBUTES (TREE_TYPE (fundecl)));
+   bool type_generic_remove_excess_precision = false;
+   bool type_generic_overflow_p = false;
+   tree selector;
+-  const bool lineartags = fundecl
+-    && lookup_attribute ("lineartags", TYPE_ATTRIBUTES (TREE_TYPE (fundecl)));
++  const bool checktags = fundecl
++    && lookup_attribute ("checktags", TYPE_ATTRIBUTES (TREE_TYPE (fundecl)));
+ 
+   /* Change pointer to function to the function itself for
+      diagnostics.  */
+   if (TREE_CODE (function) == ADDR_EXPR
+       && TREE_CODE (TREE_OPERAND (function, 0)) == FUNCTION_DECL)
+     function = TREE_OPERAND (function, 0);
+@@ -3658,13 +3658,13 @@ convert_arguments (location_t loc, vec<location_t> arg_loc, tree typelist,
+ 
+       /* If this is a function call with linear tags try to improve the expected
+        * type on base of recorded tag <-> type mapping, but only if we don't know
+        * the expected type (e.g. on a var) or if the expected type is an integer.
+        * The latter case usually happens on the first tag item.
+        */
+-      if (lineartags && (type == NULL_TREE || TREE_CODE(type) == INTEGER_TYPE))
++      if (checktags && (type == NULL_TREE || TREE_CODE(type) == INTEGER_TYPE))
+         {
+           extern tree amigaos_get_type_associated_tagtype(tree type);
+ 
+           if (prev_tagtype)
+             {
+               type = prev_tagtype;
+diff --git a/gcc/config/rs6000/amigaos-protos.h b/gcc/config/rs6000/amigaos-protos.h
+index 5a0b8006e2f6b6b8877e092994567233077594f1..70351c90a0189cf5032253cb413baf8dc9b9fe43 100644
+--- a/gcc/config/rs6000/amigaos-protos.h
++++ b/gcc/config/rs6000/amigaos-protos.h
+@@ -27,13 +27,13 @@ extern void amigaos_function_arg_advance (CUMULATIVE_ARGS *, enum machine_mode,
+ extern struct rtx_def *amigaos_function_arg (CUMULATIVE_ARGS *, enum machine_mode, tree, int);
+ extern void amigaos_expand_builtin_va_start (tree valist, rtx nextarg);
+ extern struct rtx_def *amigaos_expand_builtin_saveregs (void);
+ extern void amigaos_init_builtins (void);
+ extern rtx amigaos_expand_builtin (tree, rtx, rtx, enum machine_mode, int, bool*);
+ extern tree amigaos_handle_linearvarargs_attribute (tree *, tree, tree, int, bool*);
+-extern tree amigaos_handle_lineartags_attribute (tree *, tree, tree, int, bool*);
++extern tree amigaos_handle_checktags_attribute (tree *, tree, tree, int, bool*);
+ extern tree amigaos_handle_baserel_restore_attribute (tree *, tree, tree, int, bool*);
+ extern tree amigaos_handle_force_no_baserel_attribute (tree *, tree, tree, int, bool*);
+ extern tree amigaos_handle_check68kfuncptr_attribute (tree *, tree, tree, int, bool*);
+ extern rtx amigaos_legitimize_baserel_address (rtx addr);
+ extern int amigaos_baserel_operand(rtx x);
+ extern int amigaos_not_baserel_tree_p(tree decl);
+diff --git a/gcc/config/rs6000/amigaos.c b/gcc/config/rs6000/amigaos.c
+index a7cfaaa2ca4ac913d78e3240aa994a65c2e4b03f..ad9b4897dcb6df114c1a890bbbf6618a2fe72369 100644
+--- a/gcc/config/rs6000/amigaos.c
++++ b/gcc/config/rs6000/amigaos.c
+@@ -346,15 +346,15 @@ amigaos_handle_linearvarargs_attribute (tree *node, tree name,
+       *no_add_attrs = true;
+     }
+ 
+   return NULL_TREE;
+ }
+ 
+-/* Handle a lineartags attribute. This enables tag verifications */
++/* Handle a checktags attribute. This enables tag verifications */
+ tree
+-amigaos_handle_lineartags_attribute (tree *node, tree name, tree args, int flags ATTRIBUTE_UNUSED, bool *no_add_attrs)
++amigaos_handle_checktags_attribute (tree *node, tree name, tree args, int flags ATTRIBUTE_UNUSED, bool *no_add_attrs)
+ {
+   if (TREE_CODE (*node) != FUNCTION_TYPE)
+     {
+       warning (0, "%s attribute only applies to functions",
+ 	       IDENTIFIER_POINTER (name));
+       *no_add_attrs = true;
+diff --git a/gcc/config/rs6000/amigaos.h b/gcc/config/rs6000/amigaos.h
+index f88bfe5f879cb4ca09f067d907ec36ef0b4c2da3..d4812d8f618c2758bf95ec998f6aa53ee9bcb6fc 100644
+--- a/gcc/config/rs6000/amigaos.h
++++ b/gcc/config/rs6000/amigaos.h
+@@ -392,13 +392,14 @@ do                                   \
+ 
+ /* AmigaOS specific attribute */
+ /* { name, min_len, max_len, decl_req, type_req, fn_type_req,
+        affects_type_identity, handler, exclude } */
+ #define SUBTARGET_ATTRIBUTE_TABLE \
+   { "linearvarargs", 0, 0, false, true,  true, false, amigaos_handle_linearvarargs_attribute, NULL}, \
+-  { "lineartags", 0, 0, false, true, true, false, amigaos_handle_lineartags_attribute, NULL}, \
++  { "checktags", 0, 0, false, true, true, false, amigaos_handle_checktags_attribute, NULL}, \
++  { "tagtype", 1, 1, false, false, false, false, amigaos_handle_tagtype_attribute, NULL}, \
+   { "baserel_restore", 0, 0, false, true, true, false, amigaos_handle_baserel_restore_attribute, NULL }, \
+   { "force_no_baserel", 0, 0, true, false, false, false, amigaos_handle_force_no_baserel_attribute, NULL }, \
+   { "check68kfuncptr", 0, 0, false, true, true, false, amigaos_handle_check68kfuncptr_attribute, NULL }
+ 
+ /* Overrides */
+ 
+-- 
+2.11.0
+

@@ -1,0 +1,33 @@
+From 0d8d3dce74382cd5680c3c1c7375a82ba4a3645c Mon Sep 17 00:00:00 2001
+From: "ola.soder@axis.com" <ola.soder@axis.com>
+Date: Sat, 2 Jan 2021 22:05:59 +0100
+Subject: [PATCH 28/33] gcc10: Remove tagtype attribute.
+
+The 'Add tagtype attribute that can be passed to enum' patch needs
+to be adapted. Temporarily disable the patch since adaptation requires
+in-depth understanding of what the patch does.
+---
+ gcc/config/rs6000/amigaos.h | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/gcc/config/rs6000/amigaos.h b/gcc/config/rs6000/amigaos.h
+index 19dacdc885e71ef81186b3f990173dade2bd517a..1731d3263ced055f39eb150e375392d055acd125 100644
+--- a/gcc/config/rs6000/amigaos.h
++++ b/gcc/config/rs6000/amigaos.h
+@@ -394,13 +394,12 @@ do                                   \
+ /* AmigaOS specific attribute */
+ /* { name, min_len, max_len, decl_req, type_req, fn_type_req,
+        affects_type_identity, handler, exclude } */
+ #define SUBTARGET_ATTRIBUTE_TABLE \
+   { "linearvarargs", 0, 0, false, true,  true, false, amigaos_handle_linearvarargs_attribute, NULL}, \
+   { "checktags", 0, 0, false, true, true, false, amigaos_handle_checktags_attribute, NULL}, \
+-  { "tagtype", 1, 1, false, false, false, false, amigaos_handle_tagtype_attribute, NULL}, \
+   { "baserel_restore", 0, 0, false, true, true, false, amigaos_handle_baserel_restore_attribute, NULL }, \
+   { "force_no_baserel", 0, 0, true, false, false, false, amigaos_handle_force_no_baserel_attribute, NULL }, \
+   { "check68kfuncptr", 0, 0, false, true, true, false, amigaos_handle_check68kfuncptr_attribute, NULL }
+ 
+ /* Overrides */
+ 
+-- 
+2.11.0
+
