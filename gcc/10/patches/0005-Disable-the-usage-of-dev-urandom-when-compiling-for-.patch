@@ -1,0 +1,71 @@
+From 96a890a4b38d4ec4546c32969d6a796ffc40d3fc Mon Sep 17 00:00:00 2001
+From: Sebastian Bauer <mail@sebastianbauer.info>
+Date: Wed, 2 Dec 2015 21:39:42 +0100
+Subject: [PATCH 05/33] Disable the usage of /dev/urandom when compiling for
+ AmigaOS.
+
+---
+ gcc/gcc.c    | 3 +++
+ gcc/toplev.c | 2 ++
+ 2 files changed, 5 insertions(+)
+
+diff --git a/gcc/gcc.c b/gcc/gcc.c
+index 97fd5f63a650ff9d5772e4464bbe66a9962c561e..45c0ece73885bac9891c0aadc281ed1f245ea459 100644
+--- a/gcc/gcc.c
++++ b/gcc/gcc.c
+@@ -9714,22 +9714,25 @@ print_asm_header_spec_function (int arg ATTRIBUTE_UNUSED,
+ /* Get a random number for -frandom-seed */
+ 
+ static unsigned HOST_WIDE_INT
+ get_random_number (void)
+ {
+   unsigned HOST_WIDE_INT ret = 0;
++
++#ifndef __amigaos4__
+   int fd; 
+ 
+   fd = open ("/dev/urandom", O_RDONLY); 
+   if (fd >= 0)
+     {
+       read (fd, &ret, sizeof (HOST_WIDE_INT));
+       close (fd);
+       if (ret)
+         return ret;
+     }
++#endif
+ 
+   /* Get some more or less random data.  */
+ #ifdef HAVE_GETTIMEOFDAY
+   {
+     struct timeval tv;
+ 
+diff --git a/gcc/toplev.c b/gcc/toplev.c
+index eaed6f6c78005510af8811f2a5f17ffa159824a0..0b876664290dc9d7ab831996cdf71268cbf40aa5 100644
+--- a/gcc/toplev.c
++++ b/gcc/toplev.c
+@@ -274,20 +274,22 @@ init_local_tick (void)
+ 
+ HOST_WIDE_INT
+ get_random_seed (bool noinit)
+ {
+   if (!random_seed && !noinit)
+     {
++#ifndef __amigaos4__
+       int fd = open ("/dev/urandom", O_RDONLY);
+       if (fd >= 0)
+         {
+           if (read (fd, &random_seed, sizeof (random_seed))
+               != sizeof (random_seed))
+             random_seed = 0;
+           close (fd);
+         }
++#endif
+       if (!random_seed)
+ 	random_seed = local_tick ^ getpid ();
+     }
+   return random_seed;
+ }
+ 
+-- 
+2.11.0
+
