@@ -1,0 +1,3525 @@
+From b0267abe33b5f40d247c7fe210f9128a3ff7cdf0 Mon Sep 17 00:00:00 2001
+From: Sebastian Bauer <mail@sebastianbauer.info>
+Date: Tue, 17 Feb 2015 20:25:55 +0100
+Subject: [PATCH 01/35] Changes for AmigaOS version of gcc.
+
+---
+ fixincludes/configure                 |   1 +
+ fixincludes/configure.ac              |   1 +
+ gcc/Makefile.in                       |   1 +
+ gcc/c-family/c-attribs.c              |  26 ++
+ gcc/c/c-typeck.c                      |  25 ++
+ gcc/config.gcc                        |   8 +
+ gcc/config.host                       |   6 +
+ gcc/config/rs6000/amigaos-protos.h    |  41 +++
+ gcc/config/rs6000/amigaos.c           | 467 ++++++++++++++++++++++++++++++++++
+ gcc/config/rs6000/amigaos.h           | 437 +++++++++++++++++++++++++++++++
+ gcc/config/rs6000/amigaos.opt         |  37 +++
+ gcc/config/rs6000/rs6000-builtin.def  |   7 +
+ gcc/config/rs6000/rs6000-call.c       |  45 +++-
+ gcc/config/rs6000/rs6000-internal.h   |   6 +
+ gcc/config/rs6000/rs6000-logue.c      |  83 ++++++
+ gcc/config/rs6000/rs6000.c            |  43 ++++
+ gcc/config/rs6000/rs6000.h            |   3 +
+ gcc/config/rs6000/rs6000.md           |  27 +-
+ gcc/config/rs6000/t-amigaos           |  20 ++
+ gcc/cp/typeck.c                       |  16 ++
+ gcc/doc/extend.texi                   | 168 ++++++++++++
+ gcc/doc/invoke.texi                   | 161 ++++++++++++
+ gcc/expr.c                            |   1 -
+ gcc/gcc.c                             |  12 +-
+ gcc/prefix.c                          |   2 +-
+ intl/dcigettext.c                     |   2 +
+ libcpp/line-map.c                     |   3 +
+ libgcc/config.host                    |   3 +
+ libgcc/config/rs6000/t-amigaos        |  45 ++++
+ libiberty/Makefile.in                 |   9 +
+ libiberty/basename.c                  |  21 +-
+ libiberty/configure                   |   1 +
+ libiberty/configure.ac                |   1 +
+ libiberty/lrealpath.c                 |   3 +-
+ libiberty/make-relative-prefix.c      |  37 ++-
+ libiberty/make-temp-file.c            |  27 +-
+ libiberty/pex-amigaos.c               | 325 +++++++++++++++++++++++
+ libstdc++-v3/configure                | 160 ++++++++++++
+ libstdc++-v3/configure.ac             |   3 +
+ libstdc++-v3/crossconfig.m4           |   8 +
+ libstdc++-v3/include/c_global/cstddef |   3 +
+ libstdc++-v3/include/c_std/cstddef    |   3 +
+ 42 files changed, 2245 insertions(+), 53 deletions(-)
+ create mode 100644 gcc/config/rs6000/amigaos-protos.h
+ create mode 100644 gcc/config/rs6000/amigaos.c
+ create mode 100644 gcc/config/rs6000/amigaos.h
+ create mode 100644 gcc/config/rs6000/amigaos.opt
+ create mode 100644 gcc/config/rs6000/t-amigaos
+ create mode 100644 libgcc/config/rs6000/t-amigaos
+ create mode 100644 libiberty/pex-amigaos.c
+
+diff --git a/fixincludes/configure b/fixincludes/configure
+index 6e2d67b655b2f0c1914550e0b2e3b97f8391eef0..cde46a525a606d3b87fb75e50d839f53ce02b141 100755
+--- a/fixincludes/configure
++++ b/fixincludes/configure
+@@ -4813,12 +4813,13 @@ else
+ fi
+ else
+   case $host in
+ 	i?86-*-msdosdjgpp* | \
+ 	i?86-*-mingw32* | \
+ 	x86_64-*-mingw32* | \
++	*-*-amigaos* | \
+ 	*-*-beos* | \
+         *-*-*vms*)
+ 		TARGET=twoprocess
+ 		;;
+ 
+ 	* )
+diff --git a/fixincludes/configure.ac b/fixincludes/configure.ac
+index 14813b910f196a7adc7f185a55d02195c021351f..cdb37b0700d46dde6698dce552959aa404a7733a 100644
+--- a/fixincludes/configure.ac
++++ b/fixincludes/configure.ac
+@@ -49,12 +49,13 @@ else
+ 	TARGET=oneprocess
+ fi],
+ [case $host in
+ 	i?86-*-msdosdjgpp* | \
+ 	i?86-*-mingw32* | \
+ 	x86_64-*-mingw32* | \
++	*-*-amigaos* | \
+ 	*-*-beos* | \
+         *-*-*vms*)
+ 		TARGET=twoprocess
+ 		;;
+ 
+ 	* )
+diff --git a/gcc/Makefile.in b/gcc/Makefile.in
+index 8a5fb3fd99c1ab850631d2ccb9f3466170b81b40..06fa713bba7eaaded01034e93847756101a90b28 100644
+--- a/gcc/Makefile.in
++++ b/gcc/Makefile.in
+@@ -2273,12 +2273,13 @@ default-d.o: config/default-d.c
+ 	$(COMPILE) $<
+ 	$(POSTCOMPILE)
+ 
+ # Language-independent files.
+ 
+ DRIVER_DEFINES = \
++  -DEXEC_PREFIX=\"$(exec_prefix)/\" \
+   -DSTANDARD_STARTFILE_PREFIX=\"$(unlibsubdir)/\" \
+   -DSTANDARD_EXEC_PREFIX=\"$(libdir)/gcc/\" \
+   -DSTANDARD_LIBEXEC_PREFIX=\"$(libexecdir)/gcc/\" \
+   -DDEFAULT_TARGET_VERSION=\"$(version)\" \
+   -DDEFAULT_REAL_TARGET_MACHINE=\"$(real_target_noncanonical)\" \
+   -DDEFAULT_TARGET_MACHINE=\"$(target_noncanonical)\" \
+diff --git a/gcc/c-family/c-attribs.c b/gcc/c-family/c-attribs.c
+index c1f652d1dc978f15ae11673405f028048f8d5ef4..0a16b8f1546944726cb585364a82ce0eb926fea4 100644
+--- a/gcc/c-family/c-attribs.c
++++ b/gcc/c-family/c-attribs.c
+@@ -127,12 +127,13 @@ static tree handle_nonnull_attribute (tree *, tree, tree, int, bool *);
+ static tree handle_nonstring_attribute (tree *, tree, tree, int, bool *);
+ static tree handle_nothrow_attribute (tree *, tree, tree, int, bool *);
+ static tree handle_cleanup_attribute (tree *, tree, tree, int, bool *);
+ static tree handle_warn_unused_result_attribute (tree *, tree, tree, int,
+ 						 bool *);
+ static tree handle_access_attribute (tree *, tree, tree, int, bool *);
++static tree handle_libcall_attribute (tree *, tree, tree, int, bool *);
+ 
+ static tree handle_sentinel_attribute (tree *, tree, tree, int, bool *);
+ static tree handle_type_generic_attribute (tree *, tree, tree, int, bool *);
+ static tree handle_alloc_size_attribute (tree *, tree, tree, int, bool *);
+ static tree handle_alloc_align_attribute (tree *, tree, tree, int, bool *);
+ static tree handle_assume_aligned_attribute (tree *, tree, tree, int, bool *);
+@@ -419,12 +420,17 @@ const struct attribute_spec c_common_attribute_table[] =
+   { "may_alias",	      0, 0, false, true, false, false, NULL, NULL },
+   { "cleanup",		      1, 1, true, false, false, false,
+ 			      handle_cleanup_attribute, NULL },
+   { "warn_unused_result",     0, 0, false, true, true, false,
+ 			      handle_warn_unused_result_attribute,
+ 	                      attr_warn_unused_result_exclusions },
++  { "libcall",                0, 0, false, true, true, false,
++                              handle_libcall_attribute, NULL },
++  /* Similiar to libcall but doesn't imply linearvarargs. Can be handled as libcall here. */
++  { "libcall2",               0, 0, false, true, true, false,
++                              handle_libcall_attribute, NULL },
+   { "sentinel",               0, 1, false, true, true, false,
+ 			      handle_sentinel_attribute, NULL },
+   /* For internal use (marking of builtins) only.  The name contains space
+      to prevent its usage in source code.  */
+   { "type generic",           0, 0, false, true, true, false,
+ 			      handle_type_generic_attribute, NULL },
+@@ -5172,12 +5178,32 @@ handle_warn_unused_result_attribute (tree *node, tree name,
+       *no_add_attrs = true;
+     }
+ 
+   return NULL_TREE;
+ }
+ 
++/* Handle a "libcall" attribute.  No special handling.  */
++
++static tree
++handle_libcall_attribute (tree *node, tree name,
++       tree ARG_UNUSED (args), int ARG_UNUSED (flags),
++       bool *no_add_attrs)
++{
++  if (TREE_CODE (*node) != FUNCTION_TYPE
++      && TREE_CODE (*node) != METHOD_TYPE
++      && TREE_CODE (*node) != FIELD_DECL
++      && TREE_CODE (*node) != TYPE_DECL)
++    {
++      warning (OPT_Wattributes,"%qs attribute only applies to functions",
++              IDENTIFIER_POINTER (name));
++      *no_add_attrs = true;
++    }
++
++   return NULL_TREE;
++}
++
+ /* Handle a "sentinel" attribute.  */
+ 
+ static tree
+ handle_sentinel_attribute (tree *node, tree name, tree args,
+ 			   int ARG_UNUSED (flags), bool *no_add_attrs)
+ {
+diff --git a/gcc/c/c-typeck.c b/gcc/c/c-typeck.c
+index 51a62c800f79035c4c63c11751a4c7c12a9fa04b..b43f1551c8af496f80362bfeded9b28f49056b66 100644
+--- a/gcc/c/c-typeck.c
++++ b/gcc/c/c-typeck.c
+@@ -3094,12 +3094,14 @@ build_function_call_vec (location_t loc, vec<location_t> arg_loc,
+   tree fntype, fundecl = NULL_TREE;
+   tree name = NULL_TREE, result;
+   tree tem;
+   int nargs;
+   tree *argarray;
+ 
++  vec<tree, va_gc> *new_params = NULL;
++  vec<tree, va_gc> *new_origtypes = NULL;
+ 
+   /* Strip NON_LVALUE_EXPRs, etc., since we aren't using as an lvalue.  */
+   STRIP_TYPE_NOPS (function);
+ 
+   /* Convert anything with function type to a pointer-to-function.  */
+   if (TREE_CODE (function) == FUNCTION_DECL)
+@@ -3154,12 +3156,35 @@ build_function_call_vec (location_t loc, vec<location_t> arg_loc,
+   if (fundecl && TREE_THIS_VOLATILE (fundecl))
+     current_function_returns_abnormally = 1;
+ 
+   /* fntype now gets the type of function pointed to.  */
+   fntype = TREE_TYPE (fntype);
+ 
++  if (lookup_attribute ("libcall", TYPE_ATTRIBUTES (fntype)) ||
++      lookup_attribute ("libcall2", TYPE_ATTRIBUTES (fntype)))
++  {
++	if (TREE_CODE (function) == COMPONENT_REF && lvalue_p (function))
++	{
++		/* We copy the involved vectors here, as adding an element may
++		 * free the original pointer, but we are not the owner of those.
++		 *
++		 * FIXME: At the moment, we don't free the memory allocated here
++		 * If it is freed at the exit of the function via VEC_free() in
++		 * some cases a segfault occurs */
++		params = new_params = vec_safe_copy(params);
++		origtypes = new_origtypes = vec_safe_copy(origtypes);
++
++		/* Type of 0 operand of a component ref is always a dereferenced object but
++		 * we need to pass the address of this object */
++		vec_safe_insert(params,0,
++			build1(ADDR_EXPR, build_pointer_type (TREE_TYPE (TREE_OPERAND (function, 0))),
++				TREE_OPERAND (function, 0)));
++		vec_safe_insert(origtypes,0,(tree)NULL);
++	}
++  }
++
+   /* Convert the parameters to the types declared in the
+      function prototype, or apply default promotions.  */
+ 
+   nargs = convert_arguments (loc, arg_loc, TYPE_ARG_TYPES (fntype), params,
+ 			     origtypes, function, fundecl);
+   if (nargs < 0)
+diff --git a/gcc/config.gcc b/gcc/config.gcc
+index 357b0bed06739446344a29de408331abf80e671c..4f1b0e3a36109702704e5170337fbb0514c46267 100644
+--- a/gcc/config.gcc
++++ b/gcc/config.gcc
+@@ -2883,12 +2883,20 @@ or1k*-*-*)
+ 	esac
+ 	;;
+ pdp11-*-*)
+ 	tm_file="${tm_file} newlib-stdint.h"
+ 	use_gcc_stdint=wrap
+ 	;;
++powerpc-*-amigaos*)
++	tm_file="${tm_file} dbxelf.h elfos.h rs6000/sysv4.h rs6000/amigaos.h"
++	tm_p_file="${tm_p_file} rs6000/amigaos-protos.h"
++	extra_options="${extra_options} rs6000/sysv4.opt rs6000/amigaos.opt"
++	tmake_file="rs6000/t-amigaos"
++	extra_objs="$extra_objs amigaos.o"
++	use_collect2=no
++	;;
+ # port not yet contributed
+ #powerpc-*-openbsd*)
+ #	tmake_file="${tmake_file} rs6000/t-fprules"
+ #	extra_headers=
+ #	;;
+ powerpc-*-darwin*)
+diff --git a/gcc/config.host b/gcc/config.host
+index 0a02c33cc8044455bc2412a365c8d214b8c47f2b..a4354b5d3497e441d6e50b05aeefc232f4dfe40b 100644
+--- a/gcc/config.host
++++ b/gcc/config.host
+@@ -252,12 +252,18 @@ case ${host} in
+     host_lto_plugin_soname=liblto_plugin.dll
+     ;;
+   i[34567]86-*-darwin* | x86_64-*-darwin*)
+     out_host_hook_obj="${out_host_hook_obj} host-i386-darwin.o"
+     host_xmake_file="${host_xmake_file} i386/x-darwin"
+     ;;
++  powerpc-*-amigaos*) # AmigaOS 4
++    prefix=/gcc
++    local_prefix=/gcc
++    host_can_use_collect2=no
++    host_xm_defines=HOST_LACKS_INODE_NUMBERS
++    ;;
+   powerpc-*-darwin*)
+     out_host_hook_obj="${out_host_hook_obj} host-ppc-darwin.o"
+     host_xmake_file="${host_xmake_file} rs6000/x-darwin"
+     ;;
+   powerpc64-*-darwin*)
+     out_host_hook_obj="${out_host_hook_obj} host-ppc64-darwin.o"
+diff --git a/gcc/config/rs6000/amigaos-protos.h b/gcc/config/rs6000/amigaos-protos.h
+new file mode 100644
+index 0000000000000000000000000000000000000000..eb5f8fc5f3d546b8d8e1cdd8118a3085079df50e
+--- /dev/null
++++ b/gcc/config/rs6000/amigaos-protos.h
+@@ -0,0 +1,41 @@
++/* Prototypes.
++   Copyright (C) 2003 Free Software Foundation, Inc.
++
++   This file is part of GCC.
++
++   GCC is free software; you can redistribute it and/or modify it
++   under the terms of the GNU General Public License as published
++   by the Free Software Foundation; either version 2, or (at your
++   option) any later version.
++
++   GCC is distributed in the hope that it will be useful, but WITHOUT
++   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
++   or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
++   License for more details.
++
++   You should have received a copy of the GNU General Public License
++   along with GCC; see the file COPYING.  If not, write to the
++   Free Software Foundation, 59 Temple Place - Suite 330, Boston,
++   MA 02111-1307, USA.  */
++
++
++//#ifdef RTX_CODE
++//#ifdef TREE_CODE
++
++extern void amigaos_init_cumulative_args (CUMULATIVE_ARGS *, tree, rtx, int, int);
++extern void amigaos_function_arg_advance (CUMULATIVE_ARGS *, enum machine_mode, tree, int);
++extern struct rtx_def *amigaos_function_arg (CUMULATIVE_ARGS *, enum machine_mode, tree, int);
++extern void amigaos_expand_builtin_va_start (tree valist, rtx nextarg);
++extern struct rtx_def *amigaos_expand_builtin_saveregs (void);
++extern void amigaos_init_builtins (void);
++extern rtx amigaos_expand_builtin (tree, rtx, rtx, enum machine_mode, int, bool*);
++extern tree amigaos_handle_linearvarargs_attribute (tree *, tree, tree, int, bool*);
++extern tree amigaos_handle_baserel_restore_attribute (tree *, tree, tree, int, bool*);
++extern tree amigaos_handle_force_no_baserel_attribute (tree *, tree, tree, int, bool*);
++extern tree amigaos_handle_check68kfuncptr_attribute (tree *, tree, tree, int, bool*);
++extern rtx amigaos_legitimize_baserel_address (rtx addr);
++extern int amigaos_baserel_operand(rtx x);
++extern int amigaos_not_baserel_tree_p(tree decl);
++
++//#endif /* TREE_CODE */
++//#endif /* RTX_CODE */
+diff --git a/gcc/config/rs6000/amigaos.c b/gcc/config/rs6000/amigaos.c
+new file mode 100644
+index 0000000000000000000000000000000000000000..ad8c0e64c056129afcd8bfa2a656749a2febfaaa
+--- /dev/null
++++ b/gcc/config/rs6000/amigaos.c
+@@ -0,0 +1,467 @@
++/* Subroutines used for code generation on Amiga OS 4
++   Copyright (C) 2003 Free Software Foundation, Inc.
++   Contributed by Thomas Frieden (ThomasF@hyperion-entertainment.com)
++
++   This file is part of GCC.
++
++   GCC is free software; you can redistribute it and/or modify it
++   under the terms of the GNU General Public License as published
++   by the Free Software Foundation; either version 2, or (at your
++   option) any later version.
++
++   GCC is distributed in the hope that it will be useful, but WITHOUT
++   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
++   or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
++   License for more details.
++
++   You should have received a copy of the GNU General Public License
++   along with GCC; see the file COPYING.  If not, write to the
++   Free Software Foundation, 59 Temple Place - Suite 330, Boston,
++   MA 02111-1307, USA.  */
++
++
++#include "config.h"
++#include "system.h"
++#include "coretypes.h"
++#include "diagnostic-core.h"
++#include "tm.h"
++#include "hash-set.h"
++#include "inchash.h"
++#include "memmodel.h"
++#include "profile-count.h"
++#include "rtl.h"
++#include "regs.h"
++#include "hard-reg-set.h"
++#include "real.h"
++#include "insn-config.h"
++#include "conditions.h"
++#include "insn-flags.h"
++#include "insn-attr.h"
++#include "flags.h"
++#include "recog.h"
++#include "obstack.h"
++#include "symtab.h"
++#include "tree.h"
++#include "expr.h"
++#include "optabs.h"
++#include "except.h"
++#include "function.h"
++#include "output.h"
++#include "tm_p.h"
++#include "fold-const.h"
++#include "langhooks.h"
++#include "explow.h"
++#include "emit-rtl.h"
++#include "stringpool.h"
++#include "attribs.h"
++
++#undef DEBUG
++#ifdef DEBUG
++#define dprintf(...)      			\
++printf("%s: ", __PRETTY_FUNCTION__);		\
++printf(__VA_ARGS__)
++#else
++#define dprintf(...) /* __VA_ARGS__ */
++#endif
++
++#undef TARGET_EXPAND_BUILTIN_SAVEREGS
++#define TARGET_EXPAND_BUILTIN_SAVEREGS() \
++    amigaos_expand_builtin_saveregs ()
++
++#ifdef __amigaos4__
++static const char * __attribute__((used)) amigaos_stack_cookie = "$STACK:768000";
++#endif /* __amigaos4__ */
++
++/* Initialize a variable CUM of type CUMULATIVE_ARGS
++   for a call to a function whose data type is FNTYPE.
++   For a library call, FNTYPE is 0.
++
++   Most of the work is delegated to init_cumulative_args() in rs6000.c,
++   here we just check for special attributes and update call_cookie
++   accordingly.  */
++#if 0
++void
++amigaos_init_cumulative_args (CUMULATIVE_ARGS *cum, tree fntype,
++	rtx libname ATTRIBUTE_UNUSED, int incoming,
++	int n_named_args)
++{
++  dprintf ("enter(cum=%p,fntype=%p)\n",cum,fntype);
++  init_cumulative_args (cum, fntype, libname, incoming, FALSE, n_named_args);
++
++  /* Check if either libcall or linear varargs, set appropriate cookie */
++  if (fntype && (lookup_attribute ("libcall", TYPE_ATTRIBUTES (fntype))))
++    cum->call_cookie |= CALL_LINEARVARARGS;
++
++  if (fntype && (lookup_attribute ("linearvarargs", TYPE_ATTRIBUTES (fntype))))
++    cum->call_cookie |= CALL_LINEARVARARGS;
++
++  dprintf ("exit\n");
++}
++
++/* Update the data in CUM to advance over an argument
++   of mode MODE and data type TYPE.
++   (TYPE is null for libcalls where that information may not be available.)
++
++   If the function has the linearvarargs attribute and this argument
++   to advance over is the last non-vararg argument, then advance over
++   all registers, so that the overflow area is hit immediately.
++   Otherwise, just let function_arg_advance () from rs6000.c do its
++   thing.  */
++
++void
++amigaos_function_arg_advance (CUMULATIVE_ARGS *cum, enum machine_mode mode,
++	tree type, int named)
++{
++  dprintf ("enter\n");
++  function_arg_advance (cum, mode, type, named, 0);
++
++  if (cum->call_cookie & CALL_LINEARVARARGS && cum->nargs_prototype <= 0)
++    {
++      cum->sysv_gregno = GP_ARG_MAX_REG + 1;
++      cum->fregno = FP_ARG_V4_MAX_REG + 1;
++    }
++  dprintf ("exit\n");
++}
++
++
++/* Determine where to put an argument to a function.
++
++   Linearvarargs should always go to the stack, apart from that
++   any decision made by function_arg () in rs6000.c will be OK. */
++
++struct rtx_def *
++amigaos_function_arg (CUMULATIVE_ARGS *cum, enum machine_mode mode,
++	tree type, int named)
++{
++  struct rtx_def *res = 0;
++
++  dprintf ("enter\n");
++  if (mode == VOIDmode && cum->call_cookie & CALL_LINEARVARARGS)
++    res = GEN_INT (cum->call_cookie);
++  else
++    res = function_arg (cum, mode, type, named);
++
++  dprintf ("exit\n");
++
++  return res;
++}
++#endif
++
++/* Implement va_start.
++
++   For linearvarargs functions, immediately increase the fpr
++   and gpr count to the maximum value, so that va_arg will look
++   only at the stack. */
++#if 0
++void
++amigaos_expand_builtin_va_start (tree valist, rtx nextarg)
++{
++printf("amigaos_expand_builtin_va_start()\n");
++  rs6000_va_start (valist, nextarg);
++
++  if (crtl->args.info.call_cookie & CALL_LINEARVARARGS)
++    {
++      tree f_gpr, f_fpr;
++      tree gpr, fpr, t;
++
++      f_gpr = TYPE_FIELDS (TREE_TYPE (va_list_type_node));
++      f_fpr = TREE_CHAIN (f_gpr);
++
++      valist = build1 (INDIRECT_REF, TREE_TYPE (TREE_TYPE (valist)), valist);
++      gpr = build3 (COMPONENT_REF, TREE_TYPE (f_gpr), valist, f_gpr, NULL_TREE);
++      fpr = build3 (COMPONENT_REF, TREE_TYPE (f_fpr), valist, f_fpr, NULL_TREE);
++
++      /* Set gpr use count to 8, forcing the overflow area to be used */
++      t = build2 (MODIFY_EXPR, TREE_TYPE (gpr), gpr, build_int_cst (NULL_TREE, 8));
++      TREE_SIDE_EFFECTS (t) = 1;
++      expand_expr (t, const0_rtx, VOIDmode, EXPAND_NORMAL);
++
++      /* Likewise for floating point arguments */
++      t = build2 (MODIFY_EXPR, TREE_TYPE (fpr), fpr, build_int_cst (NULL_TREE, 8));
++      TREE_SIDE_EFFECTS (t) = 1;
++      expand_expr (t, const0_rtx, VOIDmode, EXPAND_NORMAL);
++    }
++}
++#endif
++
++/* Implement __builtin_saveregs for linearvarargs functions. */
++#if 0
++struct rtx_def *
++amigaos_expand_builtin_saveregs (void)
++{
++  rtx block, mem_gpr_fpr, mem_overflow, tmp;
++  tree fntype;
++  int stdarg_p;
++  HOST_WIDE_INT words, gpr;
++  struct rtx_def *res;
++
++  dprintf ("enter\n");
++
++  if (crtl->args.info.call_cookie & CALL_LINEARVARARGS)
++    {
++      HOST_WIDE_INT bits;
++
++      fntype = TREE_TYPE (current_function_decl);
++      stdarg_p = (TYPE_ARG_TYPES (fntype) != 0
++		  && (TREE_VALUE (tree_last (TYPE_ARG_TYPES (fntype)))
++		      != void_type_node));
++
++      /* Allocate the va_list constructor.  */
++      block = assign_stack_local (BLKmode, 3 * UNITS_PER_WORD, BITS_PER_WORD);
++      MEM_READONLY_P (block) = 1;
++      MEM_READONLY_P (XEXP (block, 0)) = 1;
++
++      mem_gpr_fpr = change_address (block, word_mode, XEXP (block, 0));
++      mem_overflow = change_address (block, ptr_mode,
++				     plus_constant (XEXP (block, 0),
++                                                UNITS_PER_WORD));
++      /*mem_reg_save_area = change_address (block, ptr_mode,
++	plus_constant (XEXP (block, 0),
++	2 * UNITS_PER_WORD));*/
++
++      /* Construct the two characters of `gpr' and `fpr' as a unit.  */
++      words = crtl->args.info.words;
++      gpr = crtl->args.info.sysv_gregno - GP_ARG_MIN_REG;
++
++      /* Varargs has the va_dcl argument, but we don't count it.  */
++      if (!stdarg_p)
++	{
++	  if (gpr > GP_ARG_NUM_REG)
++	    words -= 1;
++	}
++
++      bits = (GP_ARG_MAX_REG - GP_ARG_MIN_REG + 1) << 8
++	| (FP_ARG_MAX_REG - FP_ARG_MIN_REG + 1);
++      if (HOST_BITS_PER_WIDE_INT >= BITS_PER_WORD)
++	tmp = GEN_INT (bits << (BITS_PER_WORD - 16));
++      else
++	{
++	  bits <<= BITS_PER_WORD - HOST_BITS_PER_WIDE_INT - 16;
++	  tmp = immed_double_const (0, bits, word_mode);
++	}
++
++      emit_move_insn (mem_gpr_fpr, tmp);
++
++      /* Find the overflow area.  */
++      tmp = expand_binop (Pmode, add_optab, virtual_incoming_args_rtx,
++			  GEN_INT (words * UNITS_PER_WORD),
++			  mem_overflow, 0, OPTAB_WIDEN);
++      if (tmp != mem_overflow)
++	  emit_move_insn (mem_overflow, tmp);
++
++      /*tmp = expand_binop (Pmode, add_optab, virtual_stack_vars_rtx,
++	GEN_INT (-RS6000_VARARGS_SIZE),
++	mem_reg_save_area, 0, OPTAB_WIDEN);
++	if (tmp != mem_reg_save_area)
++	emit_move_insn (mem_reg_save_area, tmp);*/
++
++      /* Return the address of the va_list constructor.  */
++      res = XEXP (block, 0);
++    }
++  else
++    {
++      res = expand_builtin_saveregs ();
++    }
++
++  dprintf ("exit\n");
++  return res;
++}
++#endif
++
++/* Define subtarget builtins */
++
++void
++amigaos_init_builtins (void)
++{
++	tree ftype;
++  ftype = build_function_type (ptr_type_node,
++			 tree_cons (NULL_TREE,
++				    build_pointer_type (TREE_TYPE (va_list_type_node)),
++				    void_list_node));
++
++  add_builtin_function ("__builtin_getlinearva",
++		    ftype,
++		    AMIGAOS_BUILTIN_GETLINEARVA,
++		    BUILT_IN_MD, NULL, NULL_TREE);
++}
++
++
++/* Expand builtins */
++rtx
++amigaos_expand_builtin (tree exp, rtx target, rtx subtarget ATTRIBUTE_UNUSED,
++			enum machine_mode mode ATTRIBUTE_UNUSED,
++			int ignore ATTRIBUTE_UNUSED, bool *success)
++{
++  tree fndecl = TREE_OPERAND (CALL_EXPR_FN (exp), 0);
++  tree f_gpr, f_fpr, f_res, f_ovf;
++  tree arg0, valist, ovf;
++
++  unsigned int fcode = DECL_FUNCTION_CODE (fndecl);
++
++//  debug_tree(exp);
++//  debug_tree(fndecl);
++  if (fcode != AMIGAOS_BUILTIN_GETLINEARVA)
++  {
++	  *success = 0;
++	  return NULL_RTX;
++  }
++
++  if (! (crtl->args.info.call_cookie & CALL_LINEARVARARGS))
++  {
++      /* TODO: This probably should be a fatal, but then the generated executable can't be linked. */
++      error ("__builtin_getlinearva can only be used in a linearvarargs function");
++      *success = 1;
++      return 0;
++  }
++
++  arg0 = CALL_EXPR_ARG (exp, 0);
++  if (arg0 == error_mark_node)
++    return const0_rtx;
++
++  f_gpr = TYPE_FIELDS (TREE_TYPE (va_list_type_node));
++  f_fpr = TREE_CHAIN (f_gpr);
++  f_res = TREE_CHAIN (f_fpr);
++  f_ovf = TREE_CHAIN (f_res);
++  target = const0_rtx;
++  valist = build_simple_mem_ref(arg0);//build1 (INDIRECT_REF, TREE_TYPE (TREE_TYPE (arg0)), arg0);
++  ovf = build3 (COMPONENT_REF, TREE_TYPE (f_ovf), valist, f_ovf, NULL_TREE);
++  target = copy_to_reg (expand_expr (ovf, NULL_RTX, Pmode, EXPAND_NORMAL));
++  *success = 1;
++  return target;
++}
++
++/* Handle a "linearvarargs" attribute. */
++tree
++amigaos_handle_linearvarargs_attribute (tree *node, tree name,
++	tree args ATTRIBUTE_UNUSED, int flags ATTRIBUTE_UNUSED,
++	bool *no_add_attrs)
++{
++  if (TREE_CODE (*node) != FUNCTION_TYPE
++      && TREE_CODE (*node) != METHOD_TYPE
++      && TREE_CODE (*node) != FIELD_DECL
++      && TREE_CODE (*node) != TYPE_DECL)
++    {
++      warning (0, "%s attribute only applies to functions",
++	       IDENTIFIER_POINTER (name));
++      *no_add_attrs = true;
++    }
++
++  return NULL_TREE;
++}
++
++
++/* Generate code for base relative access */
++
++rtx
++amigaos_legitimize_baserel_address (rtx addr)
++{
++  rtx dest = gen_reg_rtx (Pmode);
++
++  emit_insn (gen_elf_base_high (dest, gen_rtx_REG (Pmode, 2), addr));
++  emit_insn (gen_elf_base_low (dest, dest, addr));
++
++  return dest;
++}
++
++int
++amigaos_not_baserel_tree_p(tree decl)
++{
++  return(TREE_READONLY(decl)
++         || TREE_CONSTANT(decl)
++         || (DECL_ATTRIBUTES(decl)
++             && lookup_attribute("force_no_baserel", DECL_ATTRIBUTES(decl))));
++}
++
++int
++amigaos_baserel_operand(rtx x)
++{
++  tree decl;
++  int ret = 0;
++
++  if (GET_CODE(x) == SYMBOL_REF)
++  {
++    decl = SYMBOL_REF_DECL(x);
++
++    if (decl)
++    {
++      if (SYMBOL_REF_FUNCTION_P(x) || amigaos_not_baserel_tree_p(decl))
++        ret = 0;
++      else
++        ret = 1;
++    }
++  }
++  else if (GET_CODE(x) == CONST
++           && GET_CODE(XEXP(x, 0)) == PLUS
++           && GET_CODE(XEXP(XEXP(x, 0), 0)) == SYMBOL_REF
++           && GET_CODE(XEXP(XEXP(x, 0), 1)) == CONST_INT)
++    ret = amigaos_baserel_operand(XEXP(XEXP(x, 0), 0));
++  else if (GET_CODE(x) == LO_SUM)
++    ret = amigaos_baserel_operand(XEXP(x, 1));
++
++  return ret;
++}
++
++void amigaos_function_end_prologue(FILE *file);
++void amigaos_function_end_prologue(FILE *file)
++{
++  if (TARGET_BASEREL
++      && current_function_decl
++      && lookup_attribute ("baserel_restore", TYPE_ATTRIBUTES (TREE_TYPE (current_function_decl))))
++    {
++       fprintf( file, "\tbl __baserel_get_addr\n");
++    }
++}
++
++
++tree
++amigaos_handle_baserel_restore_attribute (tree *node, tree name,
++	tree args ATTRIBUTE_UNUSED, int flags ATTRIBUTE_UNUSED,
++	bool *no_add_attrs)
++{
++  if (TREE_CODE (*node) != FUNCTION_TYPE
++      && TREE_CODE (*node) != METHOD_TYPE
++      && TREE_CODE (*node) != FIELD_DECL
++      && TREE_CODE (*node) != TYPE_DECL)
++    {
++      warning (0, "%s attribute only applies to functions",
++	       IDENTIFIER_POINTER (name));
++      *no_add_attrs = true;
++    }
++
++  return NULL_TREE;
++}
++
++tree
++amigaos_handle_force_no_baserel_attribute (tree *node, tree name,
++	tree args ATTRIBUTE_UNUSED, int flags ATTRIBUTE_UNUSED,
++	bool *no_add_attrs)
++{
++  if (TREE_CODE (*node) != VAR_DECL)
++    {
++      warning (0, "%s attribute only applies to variables",
++	       IDENTIFIER_POINTER (name));
++      *no_add_attrs = true;
++    }
++
++  return NULL_TREE;
++}
++
++/* Handle a "check68kfuncptr" attribute. */
++
++tree
++amigaos_handle_check68kfuncptr_attribute (tree *node, tree name,
++	tree args ATTRIBUTE_UNUSED, int flags ATTRIBUTE_UNUSED,
++	bool *no_add_attrs)
++{
++  if (TREE_CODE (*node) != FUNCTION_TYPE
++      && TREE_CODE (*node) != METHOD_TYPE
++      && TREE_CODE (*node) != FIELD_DECL
++      && TREE_CODE (*node) != TYPE_DECL)
++    {
++      warning (0, "%s attribute only applies to functions",
++	       IDENTIFIER_POINTER (name));
++      *no_add_attrs = true;
++    }
++
++  return NULL_TREE;
++}
+diff --git a/gcc/config/rs6000/amigaos.h b/gcc/config/rs6000/amigaos.h
+new file mode 100644
+index 0000000000000000000000000000000000000000..1153ece337930f7bbf5f9978bf6f3faf2138bda6
+--- /dev/null
++++ b/gcc/config/rs6000/amigaos.h
+@@ -0,0 +1,437 @@
++/* Definitions of target machine for GNU compiler, for AmigaOS.
++   Copyright (C) 1997, 2003, 2005 Free Software Foundation, Inc.
++
++   This file is part of GCC.
++
++   GCC is free software; you can redistribute it and/or modify it
++   under the terms of the GNU General Public License as published
++   by the Free Software Foundation; either version 2, or (at your
++   option) any later version.
++
++   GCC is distributed in the hope that it will be useful, but WITHOUT
++   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
++   or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
++   License for more details.
++
++   You should have received a copy of the GNU General Public License
++   along with GCC; see the file COPYING.  If not, write to the
++   Free Software Foundation, 59 Temple Place - Suite 330, Boston,
++   MA 02111-1307, USA.  */
++
++
++/* Don't assume anything about the header files. */
++#define NO_IMPLICIT_EXTERN_C
++
++#undef MD_EXEC_PREFIX
++#undef MD_STARTFILE_PREFIX
++
++/* Make CPU default to 604e. FIXME: Make this 750 later */
++#undef PROCESSOR_DEFAULT
++#define PROCESSOR_DEFAULT PROCESSOR_PPC604e
++
++#undef DEFAULT_ABI
++#define DEFAULT_ABI ABI_V4
++
++#undef ASM_CPU_SPEC
++#define ASM_CPU_SPEC \
++"%{!mcpu*: \
++  %{mpower: %{!mpower2: -mpwr}} \
++  %{mpower2: -mpwrx} \
++  %{mpowerpc64*: -mppc64} \
++  %{!mpowerpc64*: %{mpowerpc*: -mppc}} \
++  %{mno-power: %{!mpowerpc*: -mcom}} \
++  %{!mno-power: %{!mpower*: %(asm_default)}}} \
++%{mcpu=common: -mcom} \
++%{mcpu=power: -mpwr} \
++%{mcpu=power2: -mpwrx} \
++%{mcpu=power3: -mppc64} \
++%{mcpu=power4: -mpower4} \
++%{mcpu=power5: -mpower4} \
++%{mcpu=powerpc: -mppc} \
++%{mcpu=rios: -mpwr} \
++%{mcpu=rios1: -mpwr} \
++%{mcpu=rios2: -mpwrx} \
++%{mcpu=rsc: -mpwr} \
++%{mcpu=rsc1: -mpwr} \
++%{mcpu=rs64a: -mppc64} \
++%{mcpu=401: -mppc} \
++%{mcpu=403: -m403} \
++%{mcpu=405: -m405} \
++%{mcpu=405fp: -m405} \
++%{mcpu=440: -m440} \
++%{mcpu=440fp: -m440} \
++%{mcpu=505: -mppc} \
++%{mcpu=601: -m601} \
++%{mcpu=602: -mppc} \
++%{mcpu=603: -mppc} \
++%{mcpu=603e: -mppc} \
++%{mcpu=ec603e: -mppc} \
++%{mcpu=604: -mppc} \
++%{mcpu=604e: -mppc} \
++%{mcpu=620: -mppc64} \
++%{mcpu=630: -mppc64} \
++%{mcpu=740: -mppc} \
++%{mcpu=750: -mppc} \
++%{mcpu=G3: -mppc} \
++%{mcpu=7400: -mppc -maltivec} \
++%{mcpu=7450: -mppc -maltivec} \
++%{mcpu=G4: -mppc -maltivec} \
++%{mcpu=801: -mppc} \
++%{mcpu=821: -mppc} \
++%{mcpu=823: -mppc} \
++%{mcpu=860: -mppc} \
++%{mcpu=970: -mpower4 -maltivec} \
++%{mcpu=G5: -mpower4 -maltivec} \
++%{mcpu=8540: -me500} \
++%{maltivec: -maltivec}"
++
++#define IS_MCRT(MCRTNAME) \
++  (strcmp(amigaos_crt, MCRTNAME) == 0)
++
++/* Make most of the definitions from other compilers available */
++#undef TARGET_OS_CPP_BUILTINS
++#define TARGET_OS_CPP_BUILTINS()                \
++  do                                            \
++    {                                           \
++      builtin_define_std ("PPC");		\
++      builtin_define_std ("powerpc");		\
++      builtin_assert ("cpu=powerpc");		\
++      builtin_assert ("machine=powerpc");	\
++      builtin_define_std ("AMIGA");		\
++      builtin_define_std ("AMIGAOS");		\
++      builtin_define_std ("AMIGAOS4");		\
++      builtin_define_std ("amiga");		\
++      builtin_define_std ("amigaos");		\
++      builtin_define_std ("amigaos4");		\
++      builtin_assert ("system=amigaos");	\
++      if (!amigaos_crt)			\
++        {					\
++          error ("no CRT specified");		\
++        }					\
++      else if (IS_MCRT("clib2") || IS_MCRT("clib2-ts")) \
++        {					\
++          builtin_define_std ("CLIB2");		\
++          if (IS_MCRT("clib2-ts"))		\
++            builtin_define ("__THREAD_SAFE");	\
++        }					\
++      else if (IS_MCRT("ixemul"))		\
++        {					\
++          builtin_define_std ("ixemul");	\
++          builtin_define_std ("IXEMUL");	\
++        }					\
++      else if (IS_MCRT("libnix"))		\
++        {					\
++          builtin_define_std ("libnix");	\
++          builtin_define_std ("LIBNIX");	\
++        }					\
++      else if (IS_MCRT("newlib"))		\
++        {					\
++          builtin_define_std ("NEWLIB");	\
++        }					\
++      TARGET_OS_SYSV_CPP_BUILTINS ();		\
++    }                                           \
++  while (0)
++
++#undef CPP_SPEC
++#define CPP_SPEC "%{posix: -D_POSIX_SOURCE} %(cpp_os_default)"
++
++/*#define STANDARD_INCLUDE_DIR "/GCC/include"*/
++/*#undef SYSTEM_INCLUDE_DIR *//* So that the include path order is the same in native and cross compilers */
++#undef LOCAL_INCLUDE_DIR
++
++#ifndef CROSS_DIRECTORY_STRUCTURE
++#define BASE_GCC_SPEC "/GCC/"
++#define BASE_SDK_SPEC "/SDK/"
++#else
++#define BASE_GCC_SPEC EXEC_PREFIX
++#define BASE_SDK_SPEC EXEC_PREFIX "ppc-amigaos/SDK/"
++#endif
++
++#define LIB_SUBDIR_TYPE_SPEC "\
++%{mbaserel:/baserel; msdata|msdata=default|msdata=sysv:/small-data}\
++%{msoft-float:/soft-float}"
++
++/* default linker specs */
++#undef REAL_LIBGCC_SPEC
++#define REAL_LIBGCC_SPEC "\
++%{static|static-libgcc: %{!use-dynld: -lgcc -lgcc_eh} %{use-dynld: -lgcc} }%{!static:%{!static-libgcc:%{!shared:%{!shared-libgcc: %{!use-dynld: -lgcc -lgcc_eh} %{use-dynld: -lgcc}}%{shared-libgcc:-lgcc}}%{shared:%{shared-libgcc:-lgcc}%{!shared-libgcc:-lgcc}}}}"
++
++
++/* make newlib the default */
++#if 1
++#define CPP_AMIGA_DEFAULT_SPEC "%{mcrt=default|!mcrt=*:%<mcrt=default -mcrt=newlib} %(cpp_newlib)"
++#define LINK_AMIGA_DEFAULT_SPEC "%(link_newlib)"
++#define STARTFILE_AMIGA_DEFAULT_SPEC "%(startfile_newlib)"
++#define ENDFILE_AMIGA_DEFAULT_SPEC "%(endfile_newlib)"
++#undef MULTILIB_DEFAULTS
++#define MULTILIB_DEFAULTS {"mcrt=newlib"}
++#else
++/* make clib2 the default */
++#define CPP_AMIGA_DEFAULT_SPEC "%{mcrt=default|!mcrt=*:%<mcrt=default -mcrt=clib2} %(cpp_clib2)"
++#define LINK_AMIGA_DEFAULT_SPEC "%(link_clib2)"
++#define STARTFILE_AMIGA_DEFAULT_SPEC "%(startfile_clib2)"
++#define ENDFILE_AMIGA_DEFAULT_SPEC "%(endfile_clib2)"
++#undef MULTILIB_DEFAULTS
++#define MULTILIB_DEFAULTS {"mcrt=clib2"}
++#endif
++
++
++/* For specifying the include system paths, we generally use -idirafter so the include
++ * paths are added at the end of the gcc default include paths. This is required for
++ * fixincludes and libstdc++ to work properly
++ */
++
++
++/* clib2 */
++
++#define CPP_CLIB2_SPEC "\
++-idirafter %(base_sdk)clib2/include -idirafter %(base_sdk)local/clib2/include"
++
++#define LIB_SUBDIR_CLIB2_SPEC "%{mcrt=clib2-ts:lib.threadsafe; :lib}%(lib_subdir_type)"
++
++#define LINK_CLIB2_SPEC "\
++-L%(base_sdk)clib2/%(lib_subdir_clib2) \
++-L%(base_gcc)lib/gcc/ppc-amigaos/%(version)/%{mcrt=clib2-ts:clib2-ts; :clib2}/lib%(lib_subdir_type) \
++-L%(base_sdk)local/clib2/%(lib_subdir_clib2)"
++
++#define STARTFILE_CLIB2_SPEC "\
++%(base_sdk)clib2/%{mcrt=clib2-ts:lib.threadsafe; :lib}" \
++                 "%{!msoft-float:%(lib_subdir_type)}/crtbegin.o \
++%(base_sdk)clib2/%{mcrt=clib2-ts:lib.threadsafe; :lib}" \
++                 "%{!msoft-float:%(lib_subdir_type)}/crt0.o"
++
++#define ENDFILE_CLIB2_SPEC "\
++%(base_sdk)clib2/%{mcrt=clib2-ts:lib.threadsafe; :lib}" \
++                 "%{!msoft-float:%(lib_subdir_type)}/crtend.o"
++
++/* ixemul */
++
++#define CPP_IXEMUL_SPEC "\
++-idirafter %(base_sdk)ixemul/include -idirafter %(base_sdk)local/ixemul/include"
++
++#define LIB_SUBDIR_IXEMUL_SPEC "lib%(lib_subdir_type)"
++
++#define LINK_IXEMUL_SPEC "\
++-L%(base_sdk)ixemul/%(lib_subdir_ixemul) \
++-L%(base_gcc)lib/gcc/ppc-amigaos/%(version)/ixemul/%(lib_subdir_ixemul) \
++-L%(base_sdk)local/ixemul/%(lib_subdir_ixemul)"
++
++/* ixemul startfile should work for all library flavours */
++#define STARTFILE_IXEMUL_SPEC "%(base_sdk)ixemul/%(lib_subdir_ixemul)/crtbegin.o"
++#define ENDFILE_IXEMUL_SPEC "%(base_sdk)ixemul/%(lib_subdir_ixemul)/crtend.o"
++
++/* libnix */
++
++#define CPP_LIBNIX_SPEC "\
++-idirafter %(base_sdk)libnix/include -idirafter %(base_sdk)local/libnix/include"
++
++#define LIB_SUBDIR_LIBNIX_SPEC "lib%(lib_subdir_type)"
++
++#define LINK_LIBNIX_SPEC "\
++-L%(base_sdk)libnix/%(lib_subdir_libnix) \
++-L%(base_gcc)lib/gcc/ppc-amigaos/%(version)/libnix/%(lib_subdir_libnix) \
++-L%(base_sdk)local/libnix/%(lib_subdir_libnix)"
++
++#define STARTFILE_LIBNIX_SPEC "%(base_sdk)libnix/%(lib_subdir_libnix)/crtbegin.o"
++#define ENDFILE_LIBNIX_SPEC "%(base_sdk)libnix/%(lib_subdir_libnix)/crtend.o"
++
++/* newlib */
++
++#define CPP_NEWLIB_SPEC "\
++-idirafter %(base_sdk)newlib/include -idirafter %(base_sdk)local/newlib/include"
++
++#define LIB_SUBDIR_NEWLIB_SPEC "lib%(lib_subdir_type)"
++
++#define LINK_NEWLIB_SPEC "\
++-L%(base_sdk)newlib/%(lib_subdir_newlib) \
++-L%(base_gcc)lib/gcc/ppc-amigaos/%(version)/newlib/%(lib_subdir_newlib) \
++-L%(base_sdk)local/newlib/%(lib_subdir_newlib)"
++
++/* newlib startfile should work for all library flavours */
++#define STARTFILE_NEWLIB_SPEC "\
++%{shared: %(base_sdk)newlib/%(lib_subdir_newlib)/shcrtbegin.o} %{!shared: %(base_sdk)newlib/%(lib_subdir_newlib)/crtbegin.o}"
++
++#define ENDFILE_NEWLIB_SPEC "\
++%{shared: %(base_sdk)newlib/%(lib_subdir_newlib)/shcrtend.o} %{!shared: %(base_sdk)newlib/%(lib_subdir_newlib)/crtend.o}"
++
++/* End clib specific */
++
++#undef CPP_OS_DEFAULT_SPEC
++#define CPP_OS_DEFAULT_SPEC "\
++%{mcrt=clib2|mcrt=clib2-ts: %(cpp_clib2); \
++mcrt=ixemul: %(cpp_ixemul); \
++mcrt=libnix: %(cpp_libnix); \
++mcrt=newlib: %(cpp_newlib); \
++mcrt=default|!mcrt=*: %{mcrt=default|!nostdinc: %(cpp_amiga_default)}; \
++: %eInvalid C runtime library} \
++-idirafter %(base_sdk)include/include_h \
++-idirafter %(base_sdk)include/netinclude \
++-idirafter %(base_sdk)local/common/include \
++%{mbaserel: %{msdata|msdata=default|msdata=sysv: %e-mbaserel and -msdata options are incompatible}} \
++%{newlib: %e-newlib is obsolete, use -mcrt=newlib instead}"
++
++#undef LINK_SPEC
++#define LINK_SPEC "\
++--defsym __amigaos4__=1 \
++%{!shared: %{!use-dynld: -Bstatic}} \
++-q -d %{h*} %{v:-V} %{G*} \
++%{Wl,*:%*} %{YP,*} %{R*} \
++%{Qy:} %{!Qn:-Qy} \
++%(link_shlib) %(link_text) \
++%{mbaserel: %{msdata|msdata=default|msdata=sysv: %e-mbaserel and -msdata options are incompatible}} \
++%{mcrt=clib2|mcrt=clib2-ts: %(link_clib2); \
++mcrt=ixemul: %(link_ixemul); \
++mcrt=libnix: %(link_libnix); \
++mcrt=newlib: %(link_newlib); \
++mcrt=default|!mcrt=*: %(link_amiga_default); \
++: %eInvalid C runtime library} \
++-L%(base_sdk)local/common/lib%(lib_subdir_type) \
++%{newlib: %e-newlib is obsolete, use -mcrt=newlib instead}"
++
++/* FIXME: LINK_TEXT has been made empty now. Could we get rid of it? */
++#if 0
++#define LINK_TEXT "\
++%{use-dynld: -Ttext=0x100000} %{!use-dynld: %{shared: -Ttext=0x100000} %{!shared: %{!Wl,-T*: %{!T*:-Ttext=0}}}}"
++#else
++#define LINK_TEXT ""
++#endif
++
++#define LINK_SHLIB "\
++%{shared:-shared -dy --defsym __dynld_version__=1} %{!shared: %{static:-static}} %{use-dynld: -dy}"
++
++#undef STARTFILE_SPEC
++#define STARTFILE_SPEC "\
++%{mcrt=clib2|mcrt=clib2-ts: %(startfile_clib2); \
++mcrt=ixemul: %(startfile_ixemul); \
++mcrt=libnix: %(startfile_libnix); \
++mcrt=newlib: %(startfile_newlib); \
++mcrt=default|!mcrt=*: %(startfile_amiga_default); \
++: %eInvalid C runtime library}"
++
++#undef ENDFILE_SPEC
++#define ENDFILE_SPEC "\
++%{mcrt=clib2|mcrt=clib2-ts: %(endfile_clib2); \
++mcrt=ixemul: %(endfile_ixemul); \
++mcrt=libnix: %(endfile_libnix); \
++mcrt=newlib: %(endfile_newlib); \
++mcrt=default|!mcrt=*: %(endfile_amiga_default); \
++: %eInvalid C runtime library}"
++
++#undef LIB_SPEC
++#define LIB_SPEC "\
++--start-group -lc --end-group"
++
++#undef TARGET_DEFAULT
++#define TARGET_DEFAULT 0
++
++#undef SUBTARGET_EXTRA_SPECS
++#define SUBTARGET_EXTRA_SPECS \
++  {"base_gcc", BASE_GCC_SPEC}, \
++  {"base_sdk", BASE_SDK_SPEC}, \
++  {"cpp_os_default", CPP_OS_DEFAULT_SPEC}, \
++  {"lib_subdir_type", LIB_SUBDIR_TYPE_SPEC}, \
++  /* default C runtime */ \
++  {"cpp_amiga_default", CPP_AMIGA_DEFAULT_SPEC}, \
++  {"link_amiga_default", LINK_AMIGA_DEFAULT_SPEC}, \
++  {"startfile_amiga_default", STARTFILE_AMIGA_DEFAULT_SPEC}, \
++  {"endfile_amiga_default", ENDFILE_AMIGA_DEFAULT_SPEC}, \
++  /* clib2 */ \
++  {"cpp_clib2", CPP_CLIB2_SPEC}, \
++  {"lib_subdir_clib2", LIB_SUBDIR_CLIB2_SPEC}, \
++  {"link_clib2", LINK_CLIB2_SPEC}, \
++  {"startfile_clib2", STARTFILE_CLIB2_SPEC}, \
++  {"endfile_clib2", ENDFILE_CLIB2_SPEC}, \
++  /* ixemul */ \
++  {"cpp_ixemul", CPP_IXEMUL_SPEC}, \
++  {"lib_subdir_ixemul", LIB_SUBDIR_IXEMUL_SPEC}, \
++  {"link_ixemul", LINK_IXEMUL_SPEC}, \
++  {"startfile_ixemul", STARTFILE_IXEMUL_SPEC}, \
++  {"endfile_ixemul", ENDFILE_IXEMUL_SPEC}, \
++  /* libnix */ \
++  {"cpp_libnix", CPP_LIBNIX_SPEC}, \
++  {"lib_subdir_libnix", LIB_SUBDIR_LIBNIX_SPEC}, \
++  {"link_libnix", LINK_LIBNIX_SPEC}, \
++  {"startfile_libnix", STARTFILE_LIBNIX_SPEC}, \
++  {"endfile_libnix", ENDFILE_LIBNIX_SPEC}, \
++  /* newlib */ \
++  {"cpp_newlib", CPP_NEWLIB_SPEC}, \
++  {"lib_subdir_newlib", LIB_SUBDIR_NEWLIB_SPEC}, \
++  {"link_newlib", LINK_NEWLIB_SPEC}, \
++  {"startfile_newlib", STARTFILE_NEWLIB_SPEC}, \
++  {"endfile_newlib", ENDFILE_NEWLIB_SPEC}, \
++  /* used in link spec  */ \
++  {"link_text", LINK_TEXT}, \
++  {"link_shlib", LINK_SHLIB},
++
++#undef DEFAULT_VTABLE_THUNKS
++#ifndef USE_GNULIBC_1
++#define DEFAULT_VTABLE_THUNKS 1
++#endif
++
++#undef JUMP_TABLES_IN_TEXT_SECTION
++#define JUMP_TABLES_IN_TEXT_SECTION 0
++
++/* Used as cookie for linear vararg passing */
++#define CALL_LINEARVARARGS      0x10000000
++
++#define SUB3TARGET_OVERRIDE_OPTIONS  \
++do                                   \
++{                                    \
++  if (TARGET_ALTIVEC)                \
++  {                                  \
++    rs6000_altivec_abi = 1;          \
++    TARGET_ALTIVEC_VRSAVE = 1;       \
++  }                                  \
++} while(0)
++
++#undef SUBTARGET_EXPAND_BUILTIN
++#define SUBTARGET_EXPAND_BUILTIN(EXP, TARGET, SUBTARGET, MODE, IGNORE, SUCCESS) \
++  amigaos_expand_builtin (EXP, TARGET, SUBTARGET, MODE, IGNORE, SUCCESS)
++
++#undef SUBTARGET_INIT_BUILTINS
++#define SUBTARGET_INIT_BUILTINS \
++  amigaos_init_builtins ()
++
++/* AmigaOS specific attribute */
++/* { name, min_len, max_len, decl_req, type_req, fn_type_req,
++       affects_type_identity, handler, exclude } */
++#define SUBTARGET_ATTRIBUTE_TABLE \
++  { "linearvarargs", 0, 0, false, true,  true, false, amigaos_handle_linearvarargs_attribute, NULL}, \
++  { "lineartags", 0, 0, false, true, true, false, amigaos_handle_lineartags_attribute, NULL}, \
++  { "baserel_restore", 0, 0, false, true, true, false, amigaos_handle_baserel_restore_attribute, NULL }, \
++  { "force_no_baserel", 0, 0, true, false, false, false, amigaos_handle_force_no_baserel_attribute, NULL }, \
++  { "check68kfuncptr", 0, 0, false, true, true, false, amigaos_handle_check68kfuncptr_attribute, NULL }
++
++/* Overrides */
++/*
++#undef INIT_CUMULATIVE_ARGS
++#define INIT_CUMULATIVE_ARGS(CUM, FNTYPE, LIBNAME, INDIRECT, N_NAMED_ARGS) \
++  amigaos_init_cumulative_args (&CUM, FNTYPE, LIBNAME, FALSE, N_NAMED_ARGS)
++
++#undef INIT_CUMULATIVE_INCOMING_ARGS
++#define INIT_CUMULATIVE_INCOMING_ARGS(CUM, FNTYPE, LIBNAME) \
++  amigaos_init_cumulative_args (&CUM, FNTYPE, LIBNAME, TRUE, 1000)
++
++#undef FUNCTION_ARG_ADVANCE
++#define FUNCTION_ARG_ADVANCE(CUM, MODE, TYPE, NAMED)    \
++  amigaos_function_arg_advance (&CUM, MODE, TYPE, NAMED)
++
++#undef FUNCTION_ARG
++#define FUNCTION_ARG(CUM, MODE, TYPE, NAMED) \
++  amigaos_function_arg (&CUM, MODE, TYPE, NAMED)
++*/
++#undef EXPAND_BUILTIN_VA_START
++#define EXPAND_BUILTIN_VA_START(VALIST, NEXTARG) \
++  amigaos_expand_builtin_va_start (VALIST, NEXTARG)
++
++/*
++//#undef SLOW_UNALIGNED_ACCESS
++//#define SLOW_UNALIGNED_ACCESS(MODE, ALIGN)				\
++//  (STRICT_ALIGNMENT							\
++//   || (((MODE) == SFmode) && (ALIGN) < 32)				\
++//   || (((MODE) == DFmode || (MODE) == TFmode || (MODE) == DImode)	\
++//       && (ALIGN) < 64))
++*/
++
++/* This target uses the amigaos.opt file.  */
++#define TARGET_USES_AMIGAOS_OPT 1
+diff --git a/gcc/config/rs6000/amigaos.opt b/gcc/config/rs6000/amigaos.opt
+new file mode 100644
+index 0000000000000000000000000000000000000000..30df7d489e867ddb4e62b3d207d8245bdb7f9e1f
+--- /dev/null
++++ b/gcc/config/rs6000/amigaos.opt
+@@ -0,0 +1,37 @@
++; Options for the PowerPC AmigaOS port
++;
++; Copyright (C) 2005 Free Software Foundation, Inc.
++; Contributed by Jens Langner <Jens.Langner@light-speed.de>
++;
++; This file is part of GCC.
++;
++; GCC is free software; you can redistribute it and/or modify it under
++; the terms of the GNU General Public License as published by the Free
++; Software Foundation; either version 2, or (at your option) any later
++; version.
++;
++; GCC is distributed in the hope that it will be useful, but WITHOUT
++; ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
++; or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
++; License for more details.
++;
++; You should have received a copy of the GNU General Public License
++; along with GCC; see the file COPYING.  If not, write to the Free
++; Software Foundation, 51 Franklin Street, Fifth Floor, Boston, MA
++; 02110-1301, USA.
++
++mcrt=
++Target RejectNegative Joined Var(amigaos_crt) Init("newlib")
++Select C runtime library
++
++mbaserel
++Target Mask(BASEREL)
++Generate base relative data access
++
++mcheck68kfuncptr
++Target Var(CHECK68KFUNCPTR)
++Generate target checking for function pointers
++
++use-dynld
++Target Driver
++Generated binary employs the dynamic linker for shared objects.
+diff --git a/gcc/config/rs6000/rs6000-builtin.def b/gcc/config/rs6000/rs6000-builtin.def
+index 609bebdfd74850692f80acc7a7efbddb2610796f..709e02f22f1d9cd0ac7a952949a096d72ab4577a 100644
+--- a/gcc/config/rs6000/rs6000-builtin.def
++++ b/gcc/config/rs6000/rs6000-builtin.def
+@@ -3192,12 +3192,19 @@ BU_SPECIAL_X (RS6000_BUILTIN_CPU_SUPPORTS, "__builtin_cpu_supports",
+ 	      RS6000_BTM_ALWAYS, RS6000_BTC_MISC)
+ 
+ /* Darwin CfString builtin.  */
+ BU_SPECIAL_X (RS6000_BUILTIN_CFSTRING, "__builtin_cfstring", RS6000_BTM_ALWAYS,
+ 	      RS6000_BTC_MISC)
+ 
++/* AmigaOS specific builtin. */
++RS6000_BUILTIN_2 (AMIGAOS_BUILTIN_GETLINEARVA,	/* ENUM */	\
++		    "__builtin_getlinearva",	/* NAME */	\
++		    RS6000_BTM_ALWAYS,		/* MASK */	\
++		    RS6000_BTC_MISC,		/* ATTR */	\
++		    CODE_FOR_nothing)		/* ICODE */
++
+ /* POWER10 MMA builtins.  */
+ BU_P10V_VSX_1 (XVCVBF16SPN,	 "xvcvbf16spn",	MISC, vsx_xvcvbf16spn)
+ BU_P10V_VSX_1 (XVCVSPBF16,	    "xvcvspbf16",	MISC, vsx_xvcvspbf16)
+ 
+ BU_MMA_1 (XXMFACC,	    "xxmfacc",		QUAD, mma_xxmfacc)
+ BU_MMA_1 (XXMTACC,	    "xxmtacc",		QUAD, mma_xxmtacc)
+diff --git a/gcc/config/rs6000/rs6000-call.c b/gcc/config/rs6000/rs6000-call.c
+index f56762553878a829f3334a3ab39678a9c65386d0..770bd7b8c06088f0bdc4a32dad83861ee7975d67 100644
+--- a/gcc/config/rs6000/rs6000-call.c
++++ b/gcc/config/rs6000/rs6000-call.c
+@@ -6553,12 +6553,18 @@ init_cumulative_args (CUMULATIVE_ARGS *cum, tree fntype,
+ 	  if (!(fntype
+ 		&& lookup_attribute ("plt", TYPE_ATTRIBUTES (fntype))))
+ 	    cum->call_cookie |= CALL_LONG;
+ 	}
+     }
+ 
++  /* AmigaOS4: Check if either libcall or linear varargs, set appropriate cookie */
++  if (fntype && (lookup_attribute ("libcall", TYPE_ATTRIBUTES (fntype))))
++    cum->call_cookie |= CALL_LINEARVARARGS;
++  if (fntype && (lookup_attribute ("linearvarargs", TYPE_ATTRIBUTES (fntype))))
++    cum->call_cookie |= CALL_LINEARVARARGS;
++
+   if (TARGET_DEBUG_ARG)
+     {
+       fprintf (stderr, "\ninit_cumulative_args:");
+       if (fntype)
+ 	{
+ 	  tree ret_type = TREE_TYPE (fntype);
+@@ -7232,12 +7238,21 @@ rs6000_function_arg_advance_1 (CUMULATIVE_ARGS *cum, machine_mode mode,
+ 	  fprintf (stderr, "nargs = %4d, proto = %d, mode = %4s, ",
+ 		   cum->nargs_prototype, cum->prototype, GET_MODE_NAME (mode));
+ 	  fprintf (stderr, "named = %d, align = %d, depth = %d\n",
+ 		   named, align_words - start_words, depth);
+ 	}
+     }
++
++  /*  If the function has the linearvarargs attribute and this argument
++   to advance over is the last non-vararg argument, then advance over
++   all registers, so that the overflow area is hit immediately. */
++  if (cum->call_cookie & CALL_LINEARVARARGS && cum->nargs_prototype <= 0)
++    {
++      cum->sysv_gregno = GP_ARG_MAX_REG + 1;
++      cum->fregno = FP_ARG_V4_MAX_REG + 1;
++    }
+ }
+ 
+ void
+ rs6000_function_arg_advance (cumulative_args_t cum,
+ 			     const function_arg_info &arg)
+ {
+@@ -8303,12 +8318,18 @@ setup_incoming_varargs (cumulative_args_t cum,
+       save_area = crtl->args.internal_arg_pointer;
+ 
+       if (targetm.calls.must_pass_in_stack (arg))
+ 	first_reg_offset += rs6000_arg_size (TYPE_MODE (arg.type), arg.type);
+     }
+ 
++#ifdef CALL_LINEARVARARGS
++  /* For AmigaOS: No need to save registers for linearvarargs functions */
++  if (next_cum.call_cookie & CALL_LINEARVARARGS)
++    return;
++#endif
++
+   set = get_varargs_alias_set ();
+   if (! no_rtl && first_reg_offset < GP_ARG_NUM_REG
+       && cfun->va_list_gpr_size)
+     {
+       int n_gpr, nregs = GP_ARG_NUM_REG - first_reg_offset;
+ 
+@@ -8426,13 +8447,13 @@ rs6000_build_builtin_va_list (void)
+   return build_array_type (record, build_index_type (size_zero_node));
+ }
+ 
+ /* Implement va_start.  */
+ 
+ void
+-rs6000_va_start (tree valist, rtx nextarg)
++rs6000_va_start2 (tree valist, rtx nextarg)
+ {
+   HOST_WIDE_INT words, n_gpr, n_fpr;
+   tree f_gpr, f_fpr, f_res, f_ovf, f_sav;
+   tree gpr, fpr, ovf, sav, t;
+ 
+   /* Only SVR4 needs something special.  */
+@@ -8461,12 +8482,21 @@ rs6000_va_start (tree valist, rtx nextarg)
+   words = crtl->args.info.words;
+   n_gpr = MIN (crtl->args.info.sysv_gregno - GP_ARG_MIN_REG,
+ 	       GP_ARG_NUM_REG);
+   n_fpr = MIN (crtl->args.info.fregno - FP_ARG_MIN_REG,
+ 	       FP_ARG_NUM_REG);
+ 
++  /* For linearvarargs functions, immediately increase the fpr
++     and gpr count to the maximum value, so that va_arg will look
++     only at the stack. */
++  if (crtl->args.info.call_cookie & CALL_LINEARVARARGS)
++    {
++	n_gpr = GP_ARG_NUM_REG;
++	n_fpr = FP_ARG_NUM_REG;
++    }
++
+   if (TARGET_DEBUG_ARG)
+     fprintf (stderr, "va_start: words = " HOST_WIDE_INT_PRINT_DEC", n_gpr = "
+ 	     HOST_WIDE_INT_PRINT_DEC", n_fpr = " HOST_WIDE_INT_PRINT_DEC"\n",
+ 	     words, n_gpr, n_fpr);
+ 
+   if (cfun->va_list_gpr_size)
+@@ -8512,12 +8542,18 @@ rs6000_va_start (tree valist, rtx nextarg)
+     t = fold_build_pointer_plus_hwi (t, cfun->machine->varargs_save_offset);
+   t = build2 (MODIFY_EXPR, TREE_TYPE (sav), sav, t);
+   TREE_SIDE_EFFECTS (t) = 1;
+   expand_expr (t, const0_rtx, VOIDmode, EXPAND_NORMAL);
+ }
+ 
++void
++rs6000_va_start (tree valist, rtx nextarg)
++{
++  rs6000_va_start2(valist, nextarg);
++}
++
+ /* Implement va_arg.  */
+ 
+ tree
+ rs6000_gimplify_va_arg (tree valist, tree type, gimple_seq *pre_p,
+ 			gimple_seq *post_p)
+ {
+@@ -12883,12 +12919,19 @@ rs6000_expand_builtin (tree exp, rtx target, rtx subtarget ATTRIBUTE_UNUSED,
+ 
+       case CODE_FOR_xscmpexpqp_unordered_kf:
+ 	icode = CODE_FOR_xscmpexpqp_unordered_tf;
+ 	break;
+       }
+ 
++  /* Try subtarget first */
++#ifdef SUBTARGET_EXPAND_BUILTIN
++  ret = SUBTARGET_EXPAND_BUILTIN (exp, target, subtarget, mode, ignore, &success);
++  if (success)
++    return ret;
++#endif
++
+   if (TARGET_DEBUG_BUILTIN)
+     {
+       const char *name1 = rs6000_builtin_info[uns_fcode].name;
+       const char *name2 = (icode != CODE_FOR_nothing)
+ 			   ? get_insn_name ((int) icode)
+ 			   : "nothing";
+diff --git a/gcc/config/rs6000/rs6000-internal.h b/gcc/config/rs6000/rs6000-internal.h
+index 428a7861a987c8b296fbf0aff1e56e3038958d1b..314e83f1980c15d6ff784c68cd3ffd1aa11893ba 100644
+--- a/gcc/config/rs6000/rs6000-internal.h
++++ b/gcc/config/rs6000/rs6000-internal.h
+@@ -55,12 +55,18 @@ typedef struct rs6000_stack {
+   int altivec_size;		/* size of saved AltiVec registers */
+   int cr_size;			/* size to hold CR if not in fixed area */
+   int vrsave_size;		/* size to hold VRSAVE */
+   int altivec_padding_size;	/* size of altivec alignment padding */
+   HOST_WIDE_INT total_size;	/* total bytes allocated for stack */
+   int savres_strategy;
++#ifdef TARGET_BASEREL
++  int baserel_save_p;           /* true if the baserel register needs to be
++                                   saved */
++  int baserel_save_offset;      /* offset to save baserel register */
++  int baserel_size;             /* size of saved baserel register */
++#endif
+ } rs6000_stack_t;
+ 
+ 
+ extern int need_toc_init;
+ extern char toc_label_name[10];
+ extern int rs6000_pic_labelno;
+diff --git a/gcc/config/rs6000/rs6000-logue.c b/gcc/config/rs6000/rs6000-logue.c
+index b0ac183ceff1645fde6ee2984fa49a675766103e..d08e651d0e20083f34187a53e7fac280f768a3b4 100644
+--- a/gcc/config/rs6000/rs6000-logue.c
++++ b/gcc/config/rs6000/rs6000-logue.c
+@@ -714,12 +714,25 @@ rs6000_stack_info (void)
+   info->altivec_size = 16 * (LAST_ALTIVEC_REGNO + 1
+ 				 - info->first_altivec_reg_save);
+ 
+   /* Does this function call anything (apart from sibling calls)?  */
+   info->calls_p = (!crtl->is_leaf || cfun->machine->ra_needs_full_frame);
+ 
++#ifdef TARGET_BASEREL
++  /* Check if the function wants to setup the baserel register (r2) */
++  if (TARGET_BASEREL
++      && current_function_decl
++      && lookup_attribute ("baserel_restore", TYPE_ATTRIBUTES (TREE_TYPE (current_function_decl))))
++    {
++      info->baserel_save_p = 1;
++      info->baserel_size = reg_size;
++      df_set_regs_ever_live(2,true);
++      info->calls_p = 1;
++    }
++#endif /* TARGET_BASEREL */
++
+   /* Determine if we need to save the condition code registers.  */
+   if (save_reg_p (CR2_REGNO)
+       || save_reg_p (CR3_REGNO)
+       || save_reg_p (CR4_REGNO))
+     {
+       info->cr_save_p = 1;
+@@ -817,13 +830,18 @@ rs6000_stack_info (void)
+       info->lr_save_offset = 2*reg_size;
+       break;
+ 
+     case ABI_V4:
+       info->fp_save_offset = -info->fp_size;
+       info->gp_save_offset = info->fp_save_offset - info->gp_size;
++#ifdef TARGET_BASEREL
++      info->baserel_save_offset = info->gp_save_offset - info->baserel_size;
++      info->cr_save_offset = info->baserel_save_offset - info->cr_size;
++#else
+       info->cr_save_offset = info->gp_save_offset - info->cr_size;
++#endif
+ 
+       if (TARGET_ALTIVEC_ABI)
+ 	{
+ 	  info->vrsave_save_offset = info->cr_save_offset - info->vrsave_size;
+ 
+ 	  /* Align stack so vector save area is on a quadword boundary.  */
+@@ -852,12 +870,16 @@ rs6000_stack_info (void)
+ 				  + ehrd_size
+ 				  + ehcr_size
+ 				  + info->cr_size
+ 				  + info->vrsave_size,
+ 				  save_align);
+ 
++#ifdef TARGET_BASEREL
++  info->save_size += RS6000_ALIGN (info->baserel_size, save_align);
++#endif
++
+   non_fixed_size = info->vars_size + info->parm_size + info->save_size;
+ 
+   info->total_size = RS6000_ALIGN (non_fixed_size + info->fixed_size,
+ 				   ABI_STACK_BOUNDARY / BITS_PER_UNIT);
+ 
+   /* Determine if we need to save the link register.  */
+@@ -961,12 +983,17 @@ debug_stack_info (rs6000_stack_t *info)
+   if (info->lr_save_p)
+     fprintf (stderr, "\tlr_save_p           = %5d\n", info->lr_save_p);
+ 
+   if (info->cr_save_p)
+     fprintf (stderr, "\tcr_save_p           = %5d\n", info->cr_save_p);
+ 
++#ifdef TARGET_BASEREL
++  if (info->baserel_save_p)
++    fprintf (stderr, "\tbaserel_save_p      = %5d\n", info->baserel_save_p);
++#endif
++
+   if (info->vrsave_mask)
+     fprintf (stderr, "\tvrsave_mask         = 0x%x\n", info->vrsave_mask);
+ 
+   if (info->push_p)
+     fprintf (stderr, "\tpush_p              = %5d\n", info->push_p);
+ 
+@@ -993,12 +1020,17 @@ debug_stack_info (rs6000_stack_t *info)
+   if (info->cr_save_p)
+     fprintf (stderr, "\tcr_save_offset      = %5d\n", info->cr_save_offset);
+ 
+   if (info->varargs_save_offset)
+     fprintf (stderr, "\tvarargs_save_offset = %5d\n", info->varargs_save_offset);
+ 
++#ifdef TARGET_BASEREL
++  if (info->baserel_save_offset && TARGET_BASEREL)
++    fprintf (stderr, "\tbaserel_save_offset = %5d\n", info->baserel_save_offset);
++#endif
++
+   if (info->total_size)
+     fprintf (stderr, "\ttotal_size          = " HOST_WIDE_INT_PRINT_DEC"\n",
+ 	     info->total_size);
+ 
+   if (info->vars_size)
+     fprintf (stderr, "\tvars_size           = " HOST_WIDE_INT_PRINT_DEC"\n",
+@@ -1019,12 +1051,17 @@ debug_stack_info (rs6000_stack_t *info)
+   if (info->altivec_size)
+     fprintf (stderr, "\taltivec_size        = %5d\n", info->altivec_size);
+ 
+   if (info->vrsave_size)
+     fprintf (stderr, "\tvrsave_size         = %5d\n", info->vrsave_size);
+ 
++#ifdef TARGET_BASEREL
++  if (info->baserel_size && TARGET_BASEREL)
++    fprintf (stderr, "\tbaserel_size        = %5d\n", info->baserel_size);
++#endif
++
+   if (info->altivec_padding_size)
+     fprintf (stderr, "\taltivec_padding_size= %5d\n",
+ 	     info->altivec_padding_size);
+ 
+   if (info->cr_size)
+     fprintf (stderr, "\tcr_size             = %5d\n", info->cr_size);
+@@ -3378,12 +3415,28 @@ rs6000_emit_prologue (void)
+ 			     sp_off - frame_off);
+ 
+ 	  offset += reg_size;
+ 	}
+     }
+ 
++#ifdef TARGET_BASEREL
++  if (info->baserel_save_p && TARGET_BASEREL)
++    {
++      /* Store r2 */
++      rtx addr, reg, mem;
++
++      addr = gen_rtx_PLUS (Pmode, frame_reg_rtx,
++			   GEN_INT (info->baserel_save_offset + frame_off)); /* or sp_off? */
++      mem = gen_frame_mem (reg_mode, addr);
++
++      reg = gen_rtx_REG (reg_mode, 2);
++      insn = emit_move_insn (mem, reg);
++      rs6000_frame_related (insn, gen_rtx_REG (Pmode, 12), info->total_size, /* verify info->total_size */
++				NULL_RTX, NULL_RTX);
++    }
++#endif
+   if (crtl->calls_eh_return)
+     {
+       unsigned int i;
+       rtvec p;
+ 
+       for (i = 0; ; ++i)
+@@ -3839,12 +3892,19 @@ rs6000_emit_prologue (void)
+ 
+       if (!info->lr_save_p)
+ 	emit_move_insn (lr, gen_rtx_REG (Pmode, 0));
+     }
+ #endif
+ 
++#ifdef TARGET_BASEREL
++      /* Emit a blockage to prevent r2-dependant instructions from moving into
++       * the prologue. r2 is set up later in amigaos_function_end_prologue.  */
++      if (info->baserel_save_p && TARGET_BASEREL)
++        emit_insn (gen_blockage ());
++#endif
++
+   /* If we need to, save the TOC register after doing the stack setup.
+      Do not emit eh frame info for this save.  The unwinder wants info,
+      conceptually attached to instructions in this function, about
+      register values in the caller of this function.  This R2 may have
+      already been changed from the value in the caller.
+      We don't attempt to write accurate DWARF EH frame info for R2
+@@ -3900,12 +3960,17 @@ rs6000_output_savres_externs (FILE *file)
+ 		     & REST_NOINLINE_FPRS_DOESNT_RESTORE_LR) == 0;
+ 	  int sel = SAVRES_FPR | (lr ? SAVRES_LR : 0);
+ 	  name = rs6000_savres_routine_name (regno, sel);
+ 	  fprintf (file, "\t.extern %s\n", name);
+ 	}
+     }
++
++#ifdef TARGET_BASEREL
++  if (info->baserel_save_p && TARGET_BASEREL)
++    fprintf (file, "\t.extern __baserel_get_addr\n");
++#endif
+ }
+ 
+ /* Write function prologue.  */
+ 
+ void
+ rs6000_output_function_prologue (FILE *file)
+@@ -4807,12 +4872,30 @@ rs6000_emit_epilogue (enum epilogue_type epilogue_type)
+ 				      + reg_size * (int) i);
+ 
+ 	  emit_move_insn (gen_rtx_REG (reg_mode, regno), mem);
+ 	}
+     }
+ 
++#ifdef TARGET_BASEREL
++  if (info->baserel_save_p && TARGET_BASEREL)
++    {
++      rtx addr, mem, reg;
++
++      /* Restore r2 */
++      addr = gen_rtx_PLUS (Pmode, gen_rtx_REG (Pmode, 12),
++			   GEN_INT (info->baserel_save_offset + frame_off)); /* or sp_off? */
++      mem = gen_frame_mem (reg_mode, addr);
++
++      reg = gen_rtx_REG (reg_mode, 2);
++      emit_move_insn (reg, mem);
++
++      /* Mark register as used.  */
++      emit_insn (gen_rtx_USE (VOIDmode, reg));
++    }
++#endif
++
+   /* Restore GPRs.  This is done as a PARALLEL if we are using
+      the load-multiple instructions.  */
+   if (!restoring_GPRs_inline)
+     {
+       /* We are jumping to an out-of-line function.  */
+       rtx ptr_reg;
+diff --git a/gcc/config/rs6000/rs6000.c b/gcc/config/rs6000/rs6000.c
+index 844fee88cf3c1407fae35b833cc1f97e5898765a..27be17fa981c2d09489da244192404d7a8dc4c4e 100644
+--- a/gcc/config/rs6000/rs6000.c
++++ b/gcc/config/rs6000/rs6000.c
+@@ -1384,12 +1384,18 @@ static const struct attribute_spec rs6000_attribute_table[] =
+ 
+ #undef TARGET_ASM_FUNCTION_PROLOGUE
+ #define TARGET_ASM_FUNCTION_PROLOGUE rs6000_output_function_prologue
+ #undef TARGET_ASM_FUNCTION_EPILOGUE
+ #define TARGET_ASM_FUNCTION_EPILOGUE rs6000_output_function_epilogue
+ 
++#ifdef TARGET_BASEREL
++extern void amigaos_function_end_prologue(FILE *);
++#undef TARGET_ASM_FUNCTION_END_PROLOGUE
++#define TARGET_ASM_FUNCTION_END_PROLOGUE amigaos_function_end_prologue
++#endif
++
+ #undef TARGET_ASM_OUTPUT_ADDR_CONST_EXTRA
+ #define TARGET_ASM_OUTPUT_ADDR_CONST_EXTRA rs6000_output_addr_const_extra
+ 
+ #undef  TARGET_ASM_GENERATE_PIC_ADDR_DIFF_VEC
+ #define TARGET_ASM_GENERATE_PIC_ADDR_DIFF_VEC rs6000_gen_pic_addr_diff_vec
+ 
+@@ -5857,12 +5863,15 @@ rs6000_file_start (void)
+ 	putc ('\n', file);
+     }
+ 
+ #ifdef USING_ELFOS_H
+   rs6000_machine = rs6000_machine_from_flags ();
+   emit_asm_machine ();
++  /* AmigaOS: This was temporarily disabled to not override e.g., -mcpu=440 */
++  /* Not entirely sure why, but there might be a good reason so consider this
++   * a FIXME. Refer to patches for gcc <= 9. */
+ #endif
+ 
+   if (DEFAULT_ABI == ABI_ELFv2)
+     fprintf (file, "\t.abiversion 2\n");
+ }
+ 
+@@ -8929,12 +8938,20 @@ rs6000_legitimize_address (rtx x, rtx oldx ATTRIBUTE_UNUSED,
+     {
+       enum tls_model model = SYMBOL_REF_TLS_MODEL (x);
+       if (model != 0)
+ 	return rs6000_legitimize_tls_address (x, model);
+     }
+ 
++#ifdef TARGET_BASEREL
++  if (TARGET_BASEREL
++      && amigaos_baserel_operand(x))
++    {
++      return amigaos_legitimize_baserel_address(x);
++    }
++#endif
++
+   extra = 0;
+   switch (mode)
+     {
+     case E_TFmode:
+     case E_TDmode:
+     case E_TImode:
+@@ -10495,12 +10512,21 @@ rs6000_emit_move (rtx dest, rtx source, machine_mode mode)
+ 	  tmp = gen_rtx_PLUS (mode, tmp, addend);
+ 	  tmp = force_operand (tmp, operands[0]);
+ 	}
+       operands[1] = tmp;
+     }
+ 
++#ifdef TARGET_BASEREL
++  if (/*GET_CODE (operands[1]) == SYMBOL_REF
++      && */TARGET_BASEREL
++      && amigaos_baserel_operand (operands[1]))
++    {
++       operands[1] = amigaos_legitimize_baserel_address (operands[1]);
++    }
++#endif
++
+   /* 128-bit constant floating-point values on Darwin should really be loaded
+      as two parts.  However, this premature splitting is a problem when DFmode
+      values can go into Altivec registers.  */
+   if (TARGET_MACHO && CONST_DOUBLE_P (operands[1]) && FLOAT128_IBM_P (mode)
+       && !reg_addr[DFmode].scalar_in_vmx_p)
+     {
+@@ -10755,12 +10781,20 @@ rs6000_emit_move (rtx dest, rtx source, machine_mode mode)
+ 	      emit_insn (gen_macho_high (Pmode, target, operands[1]));
+ 	      emit_insn (gen_macho_low (Pmode, operands[0],
+ 					target, operands[1]));
+ 	      return;
+ 	    }
+ 
++#ifdef TARGET_BASEREL
++	  if (TARGET_BASEREL && amigaos_baserel_operand(operands[1]))
++	    {
++              emit_insn (gen_elf_base_high (target, gen_rtx_REG (Pmode, 2), operands[1]));
++              emit_insn (gen_elf_base_low (operands[0], target, operands[1]));
++              return;
++        }
++#endif
+ 	  emit_insn (gen_elf_high (target, operands[1]));
+ 	  emit_insn (gen_elf_low (operands[0], target, operands[1]));
+ 	  return;
+ 	}
+ 
+       /* If this is a SYMBOL_REF that refers to a constant pool entry,
+@@ -14222,13 +14256,22 @@ print_operand_address (FILE *file, rtx x)
+ #endif
+ #if TARGET_ELF
+   else if (GET_CODE (x) == LO_SUM && REG_P (XEXP (x, 0))
+ 	   && CONSTANT_P (XEXP (x, 1)))
+     {
+       output_addr_const (file, XEXP (x, 1));
++#ifdef TARGET_BASEREL
++      if (TARGET_BASEREL && amigaos_baserel_operand(x))
++        {
++          fprintf (file, "@brel@l(%s)", reg_names[ REGNO (XEXP (x, 0)) ]);
++        }
++      else
++          fprintf (file, "@l(%s)", reg_names[ REGNO (XEXP (x, 0)) ]);
++#else
+       fprintf (file, "@l(%s)", reg_names[ REGNO (XEXP (x, 0)) ]);
++#endif
+     }
+ #endif
+   else if (toc_relative_expr_p (x, false, &tocrel_base_oac, &tocrel_offset_oac))
+     {
+       /* This hack along with a corresponding hack in
+ 	 rs6000_output_addr_const_extra arranges to output addends
+diff --git a/gcc/config/rs6000/rs6000.h b/gcc/config/rs6000/rs6000.h
+index 164d359b724ca97129bf15d5f7835ccc402045a5..bb2d31b75212130db3545a16afba60cddb63a466 100644
+--- a/gcc/config/rs6000/rs6000.h
++++ b/gcc/config/rs6000/rs6000.h
+@@ -2614,6 +2614,9 @@ while (0)
+   do									\
+     {									\
+      if (TARGET_PREFIXED)						\
+        rs6000_asm_output_opcode (STREAM);				\
+     }									\
+   while (0)
++
++/* Used by amigaos port */
++void rs6000_va_start (tree valist, rtx nextarg);
+diff --git a/gcc/config/rs6000/rs6000.md b/gcc/config/rs6000/rs6000.md
+index c8cdc42533c1af749981b63578b9906e7872dd8e..6864b4eb786fe1b33a13b93eb60252c43f43efc6 100644
+--- a/gcc/config/rs6000/rs6000.md
++++ b/gcc/config/rs6000/rs6000.md
+@@ -10528,12 +10528,37 @@
+     && legitimate_constant_pool_address_p (operands[1], QImode, false)"
+    "la %0,%a1"
+    "&& TARGET_CMODEL != CMODEL_SMALL && reload_completed"
+   [(set (match_dup 0) (high:P (match_dup 1)))
+    (set (match_dup 0) (lo_sum:P (match_dup 0) (match_dup 1)))])
+ 
++;; This needs to be above elf_high/elf_low since elf_base_low and elf_low
++;; have the same instruction signature, so in some cases elf_low would be
++;; generated instead of elf_base_low. Since the requirements for elf_base_low
++;; are more restrictive than those for elf_low, there should be no problems
++;; when determining which instruction to use. Additionally, the elf_low function
++;; has now been guared against used accidently.
++(define_insn "elf_base_high"
++  [(set (match_operand:SI 0 "gpc_reg_operand" "=b")
++        (plus:SI (match_operand:SI 1 "gpc_reg_operand" "b")
++                 (high:SI (match_operand 2 "" ""))))]
++  "TARGET_ELF && ! TARGET_64BIT && TARGET_BASEREL"
++  "{cau|addis} %0,%1,%2@brel@ha"
++  [(set_attr "length" "4")])
++
++;; Nearly same as elf_low, but used base relative relocs.
++;; The second alternative has also been removed (as %K always
++;; uses normal relocs, see rs6000.c/print_operand()).
++(define_insn "elf_base_low"
++  [(set (match_operand:SI 0 "gpc_reg_operand" "=r")
++	(lo_sum:SI (match_operand:SI 1 "gpc_reg_operand" "b")
++		   (match_operand 2 "" "")))]
++   "TARGET_ELF && ! TARGET_64BIT && TARGET_BASEREL && amigaos_baserel_operand(operands[2])"
++   "{cal|la} %0,%2@brel@l(%1)"
++   [(set_attr "length" "4")])
++
+ ;; Elf specific ways of loading addresses for non-PIC code.
+ ;; The output of this could be r0, but we make a very strong
+ ;; preference for a base register because it will usually
+ ;; be needed there.
+ (define_insn "elf_high"
+   [(set (match_operand:SI 0 "gpc_reg_operand" "=b*r")
+@@ -10542,13 +10567,13 @@
+   "lis %0,%1@ha")
+ 
+ (define_insn "elf_low"
+   [(set (match_operand:SI 0 "gpc_reg_operand" "=r")
+ 	(lo_sum:SI (match_operand:SI 1 "gpc_reg_operand" "b")
+ 		   (match_operand 2 "" "")))]
+-   "TARGET_ELF && !TARGET_64BIT && !flag_pic"
++   "TARGET_ELF && !TARGET_64BIT && !flag_pic && !(TARGET_BASEREL && amigaos_baserel_operand(operands[2]))"
+    "la %0,%2@l(%1)")
+ 
+ (define_insn "*pltseq_tocsave_<mode>"
+   [(set (match_operand:P 0 "memory_operand" "=m")
+ 	(unspec:P [(match_operand:P 1 "gpc_reg_operand" "b")
+ 		   (match_operand:P 2 "symbol_ref_operand" "s")
+diff --git a/gcc/config/rs6000/t-amigaos b/gcc/config/rs6000/t-amigaos
+new file mode 100644
+index 0000000000000000000000000000000000000000..15d9d3fd5a5f0c8109cd158242745fa52b19257e
+--- /dev/null
++++ b/gcc/config/rs6000/t-amigaos
+@@ -0,0 +1,20 @@
++# Makefile fragment for AmigaOS/PPC target.
++
++# Extra object file linked to the cc1* executables.
++amigaos.o: $(srcdir)/config/rs6000/amigaos.c $(CONFIG_H)
++	$(CXX) -c $(ALL_CXXFLAGS) $(ALL_CPPFLAGS) $(INCLUDES) $< $(OUTPUT_OPTION)
++
++# We always have limits.h.
++LIMITS_H_TEST = true
++
++# Override defaults.
++# FIXME: This is only correct when building a native version natively.
++NATIVE_SYSTEM_HEADER_DIR=/gcc/include
++#OTHER_FIXINCLUDES_DIRS=${gcc_tooldir}/include
++
++# Build the libraries for both newlib and clib2
++# We do not build soft float flavours as none of the
++# libs support soft floats
++MULTILIB_OPTIONS = mcrt=newlib/mcrt=clib2
++MULTILIB_DIRNAMES = newlib clib2
++#MULTILIB_REUSE = =mcrt=newlib
+diff --git a/gcc/cp/typeck.c b/gcc/cp/typeck.c
+index 50d0f1e6a62aa402c5f16626ec435073c753b009..91996a6dc755ff07a9b1c38cca4b292cc4da51f0 100644
+--- a/gcc/cp/typeck.c
++++ b/gcc/cp/typeck.c
+@@ -4029,12 +4029,28 @@ cp_build_function_call_vec (tree function, vec<tree, va_gc> **params,
+ 
+       return error_mark_node;
+     }
+ 
+   /* fntype now gets the type of function pointed to.  */
+   fntype = TREE_TYPE (fntype);
++
++  if (lookup_attribute ("libcall", TYPE_ATTRIBUTES (fntype)) ||
++      lookup_attribute ("libcall2", TYPE_ATTRIBUTES (fntype)))
++  {
++	if (TREE_CODE (function) == COMPONENT_REF && lvalue_p (function))
++	{
++		/* Type of 0 operand of a component ref is always a dereferenced object but
++		 * we need to pass the address of this object */
++
++		/* FIXME: param_types? */
++		vec_safe_insert(*params,0,
++			build1(ADDR_EXPR, build_pointer_type (TREE_TYPE (TREE_OPERAND (function, 0))),
++				TREE_OPERAND (function, 0)));
++	}
++  }
++
+   parm_types = TYPE_ARG_TYPES (fntype);
+ 
+   if (params == NULL)
+     {
+       allocated = make_tree_vector ();
+       params = &allocated;
+diff --git a/gcc/doc/extend.texi b/gcc/doc/extend.texi
+index 3260f0639d2b80f6c8566868f8da04faacb60404..4dd9a8cfb9a037bdcfa86d1c8365f27960188dcc 100644
+--- a/gcc/doc/extend.texi
++++ b/gcc/doc/extend.texi
+@@ -4059,12 +4059,164 @@ int foo ()
+ @}
+ @end smallexample
+ 
+ @noindent
+ results in warning on line 5.
+ 
++
++@item libcall
++@cindex AmigaOS specific function attributes
++On AmigaOS, the @code{libcall} attribute is used to declare function
++pointers in an AmigaOS @emph{Interface}.  When such a function pointer
++is invoked, a pointer to the Interface itself is passed as a hidden
++first argument, similar to @code{this} in C++.
++
++ISO/IEC 9899:1999 Edits for Libcall functions
++
++The following are a set of changes to ISO/IEC 9899:1999 (aka C99)
++that document the exact semantics of the language extension.
++
++@itemize @bullet
++@item
++@cite{6.5.2.2  Function calls}
++
++Change paragraph 3 to
++
++@quotation
++[...] denotes the called function.  The arguments to the function
++are specified by the implicit argument, if any, followed by the list
++of expressions.
++@end quotation
++
++Add new paragraph before paragraph 4
++
++@quotation
++If the expression that denotes the called function is a structure or union
++member expression as defined in (6.5.2.3) (or such an expression enclosed
++in any number of parentheses expressions), is an lvalue, and has a type
++that includes the attribute @code{libcall}, then the function call has an
++implicit argument.  In other cases there is no implicit argument.  If there
++is an implicit argument, then this will be the first argument to the function,
++and the list of expressions will follow it.  The type of the implicit
++argument is that of a pointer to the structure or union object of which the
++function expression designates a member.  The value of the implicit argument
++is the address of this structure or union object.
++@end quotation
++@end itemize
++
++@item linearvarargs
++@cindex AmigaOS specific function attributes
++On AmigaOS, the @code{linearvarargs} attribute causes all unprototyped
++arguments to a varargs function to be passed on the stack, and not in
++registers as the SVR4 ABI defines.  Please note that @code{libcall} also
++implies @code{linearvarargs}.
++
++@item baserel_restore
++@cindex AmigaOS specific function attributes
++On AmigaOS, when compiling with @option{-mbaserel} causes the compiler
++to create a call to @code{baserel_get_addr} function in the function prologue
++to set up register @code{r2}. The previous contents of register @code{r2}
++are restored in the function epilogue. See @option{-mbaserel} option for
++more details.
++
++@item check68kfuncptr
++@cindex AmigaOS specific function attributes
++On AmigaOS, when calling a function using a function pointer causes
++the compiler to emit additional code to allow for function pointers
++to m68k functions. This is currently available only in the C front end.
++
++The generated code will call @code{__amigaos4_check68k_check} function
++which expects one function pointer argument and returns an integer
++value. If the return value is non-zero, the function pointer will be
++used to perform the function call in the usual way, otherwise
++@code{__amigaos4_check68k_trampoline} function will be called to perform
++the call. The @code{__amigaos4_check68k_check} function should be provided
++by the user and will usually just return the result of
++@code{exec.library} @code{IsNative} call on its argument.
++
++The @code{__amigaos4_check68k_trampoline} function is a @code{linearvarargs}
++function and should also be provided by the user. It will receive at
++least two arguments: the number of arguments to the function pointer and
++the function pointer itself. Additionally, the arguments to the function
++pointer will follow on the stack, each having one zero longword in front
++of it with one final zero longword after all the arguments. This makes it
++possible to create tag pairs and a terminating @code{TAG_DONE} for a
++call to @code{EmulateTags} in @code{exec.library}. The return code of
++@code{__amigaos4_check68k_trampoline} function will be used as a return
++code of the function pointer call.
++
++The following example can be used for functions that have no more than
++13 arguments:
++
++@smallexample
++static const UWORD trampoline_code[][6] =
++@{
++    /* @r{JMP (A5)} */
++    @{0X4ED5, 0, 0, 0, 0, 0@},
++    /* @r{MOVEM.L D0, -(A7); JSR (A5); ADDQ.L #4,A7; RTS} */
++    @{0X48E7, 0X8000, 0X4E95, 0X588F, 0X4E75, 0@},
++    /* @r{MOVEM.L D0-D1, -(A7); JSR (A5); ADDQ.L #8, A7; RTS} */
++    @{0X48E7, 0XC000, 0X4E95, 0X508F, 0X4E75, 0@},
++    /* @r{MOVEM.L D0-D2, -(A7); JSR (A5); ADDA.W #0X000C, A7; RTS} */
++    @{0X48E7, 0XE000, 0X4E95, 0XDEFC, 0X000C, 0X4E75@},
++    /* @r{MOVEM.L D0-D3, -(A7); JSR (A5); ADDA.W #0X0010, A7; RTS} */
++    @{0X48E7, 0XF000, 0X4E95, 0XDEFC, 0X0010, 0X4E75@},
++    /* @r{MOVEM.L D0-D4, -(A7); JSR (A5); ADDA.W #0X0014, A7; RTS} */
++    @{0X48E7, 0XF800, 0X4E95, 0XDEFC, 0X0014, 0X4E75@},
++    /* @r{MOVEM.L D0-D5, -(A7); JSR (A5); ADDA.W #0X0018, A7; RTS} */
++    @{0X48E7, 0XFC00, 0X4E95, 0XDEFC, 0X0018, 0X4E75@},
++    /* @r{MOVEM.L D0-D6, -(A7); JSR (A5); ADDA.W #0X001C, A7; RTS} */
++    @{0X48E7, 0XFE00, 0X4E95, 0XDEFC, 0X001C, 0X4E75@},
++    /* @r{MOVEM.L D0-D7, -(A7); JSR (A5); ADDA.W #0X0020, A7; RTS} */
++    @{0X48E7, 0XFF00, 0X4E95, 0XDEFC, 0X0020, 0X4E75@},
++    /* @r{MOVEM.L D0-D7/A0, -(A7); JSR (A5); ADDA.W #0X0024, A7; RTS} */
++    @{0X48E7, 0XFF80, 0X4E95, 0XDEFC, 0X0024, 0X4E75@},
++    /* @r{MOVEM.L D0-D7/A0-A1, -(A7); JSR (A5); ADDA.W #0X0028, A7; RTS} */
++    @{0X48E7, 0XFFC0, 0X4E95, 0XDEFC, 0X0028, 0X4E75@},
++    /* @r{MOVEM.L D0-D7/A0-A2, -(A7); JSR (A5); ADDA.W #0X002C, A7; RTS} */
++    @{0X48E7, 0XFFE0, 0X4E95, 0XDEFC, 0X002C, 0X4E75@},
++    /* @r{MOVEM.L D0-D7/A0-A3, -(A7); JSR (A5); ADDA.W #0X0030, A7; RTS} */
++    @{0X48E7, 0XFFF0, 0X4E95, 0XDEFC, 0X0030, 0X4E75@},
++    /* @r{MOVEM.L D0-D7/A0-A3, -(A7); JSR (A5); ADDA.W #0X0034, A7; RTS} */
++    @{0X48E7, 0XFFF8, 0X4E95, 0XDEFC, 0X0034, 0X4E75@}
++@};
++
++int VARARGS68K __amigaos4_check68k_trampoline(int num_args,
++                                              int func,
++                                              ...)
++@{
++    int result, i;
++    va_list args;
++    long *stack;
++
++    va_startlinear(args, func);
++    stack = va_getlinearva(args, long *);
++
++    /* @r{Replace 0's with tag id's} */
++    for(i = 0; i < 8 && i < num_args; i++)
++        stack[i * 2] = ET_RegisterD0 + i;
++
++    while(i < num_args)
++    @{
++        stack[i * 2] = ET_RegisterA0 + i - 8;
++        i++;
++    @}
++
++    if (num_args < sizeof(trampoline_code)
++                   / sizeof(trampoline_code[0]))
++        result = IExec->EmulateTags(trampoline_code[num_args],
++                                    ET_SaveRegs, TRUE,
++                                    ET_RegisterA5, func,
++                                    TAG_MORE, stack);
++
++    va_end(args);
++
++    return(result);
++@}
++@end smallexample
++
+ @item weak
+ @cindex @code{weak} function attribute
+ The @code{weak} attribute causes a declaration of an external symbol
+ to be emitted as a weak symbol rather than a global.  This is primarily
+ useful in defining library functions that can be overridden in user code,
+ though it can also be used with non-function declarations.  The overriding
+@@ -8067,12 +8219,28 @@ For full documentation of the struct attributes please see the
+ documentation in @ref{x86 Variable Attributes}.
+ 
+ @cindex @code{altivec} variable attribute, PowerPC
+ For documentation of @code{altivec} attribute please see the
+ documentation in @ref{PowerPC Type Attributes}.
+ 
++@subsection AmigaOS PPC Variable Attributes
++
++One attribute is currently defined for AmigaOS PPC.
++
++@table @code
++@item force_no_baserel
++@cindex forcing a variable not to be addressed base relative
++
++This attribute forces access to a variable in code compiled with
++@option{-mbaserel} option not to be base relative. If necessary, the
++access should be protected with some sort of arbitration. See
++documentation on @option{-mbaserel} option for more details about this
++attribute.
++
++@end table
++
+ @node RL78 Variable Attributes
+ @subsection RL78 Variable Attributes
+ 
+ @cindex @code{saddr} variable attribute, RL78
+ The RL78 back end supports the @code{saddr} variable attribute.  This
+ specifies placement of the corresponding variable in the SADDR area,
+diff --git a/gcc/doc/invoke.texi b/gcc/doc/invoke.texi
+index 4a87b9ef8e8c5c615b84c7f12306816f3cb771cc..0d1140696ce17e4b75a3cabeed47d6a5e38c4c89 100644
+--- a/gcc/doc/invoke.texi
++++ b/gcc/doc/invoke.texi
+@@ -1427,12 +1427,41 @@ See RS/6000 and PowerPC Options.
+ -mtarget-align  -mno-target-align @gol
+ -mlongcalls  -mno-longcalls @gol
+ -mabi=@var{abi-type}}
+ 
+ @emph{zSeries Options}
+ See S/390 and zSeries Options.
++
++@emph{AmigaOS PPC options}
++@gccoptlist{-mcrt=@var{crt}  -mbaserel  -mno-baserel @gol
++-mcheck68kfuncptr}
++
++@item Code Generation Options
++@xref{Code Gen Options,,Options for Code Generation Conventions}.
++@gccoptlist{-fcall-saved-@var{reg}  -fcall-used-@var{reg} @gol
++-ffixed-@var{reg}  -fexceptions @gol
++-fnon-call-exceptions  -fdelete-dead-exceptions  -funwind-tables @gol
++-fasynchronous-unwind-tables @gol
++-fno-gnu-unique @gol
++-finhibit-size-directive  -finstrument-functions @gol
++-finstrument-functions-exclude-function-list=@var{sym},@var{sym},@dots{} @gol
++-finstrument-functions-exclude-file-list=@var{file},@var{file},@dots{} @gol
++-fno-common  -fno-ident @gol
++-fpcc-struct-return  -fpic  -fPIC -fpie -fPIE @gol
++-fno-jump-tables @gol
++-frecord-gcc-switches @gol
++-freg-struct-return  -fshort-enums @gol
++-fshort-double  -fshort-wchar @gol
++-fverbose-asm  -fpack-struct[=@var{n}]  -fstack-check @gol
++-fstack-limit-register=@var{reg}  -fstack-limit-symbol=@var{sym} @gol
++-fno-stack-limit -fsplit-stack @gol
++-fleading-underscore  -ftls-model=@var{model} @gol
++-fstack-reuse=@var{reuse_level} @gol
++-ftrapv  -fwrapv  -fbounds-check @gol
++-fvisibility=@r{[}default@r{|}internal@r{|}hidden@r{|}protected@r{]} @gol
++-fstrict-volatile-bitfields -fsync-libcalls}
+ @end table
+ 
+ 
+ @node Overall Options
+ @section Options Controlling the Kind of Output
+ 
+@@ -18001,12 +18030,13 @@ platform.
+ * VMS Options::
+ * VxWorks Options::
+ * x86 Options::
+ * x86 Windows Options::
+ * Xstormy16 Options::
+ * Xtensa Options::
++* AmigaOS PPC options::
+ * zSeries Options::
+ @end menu
+ 
+ @node AArch64 Options
+ @subsection AArch64 Options
+ @cindex AArch64 Options
+@@ -31836,12 +31866,143 @@ These options are defined for Xstormy16:
+ @table @gcctabopt
+ @item -msim
+ @opindex msim
+ Choose startup files and linker script suitable for the simulator.
+ @end table
+ 
++@node AmigaOS PPC options
++@subsection AmigaOS PPC options
++@cindex AmigaOS PPC options
++
++@table @gcctabopt
++
++@item -mcrt=@var{crt}
++@opindex mcrt
++
++Select the C runtime library to use. The same option must be used for
++both compiling and linking. Some of the possible values are @samp{default},
++@samp{clib2}, @samp{clib2-ts} (thread-safe variant of clib2) and @samp{newlib}.
++Each option makes available an appropriate define, for example
++@code{__CLIB2__}, @code{__NEWLIB__} etc. Additionally, @samp{clib2-ts} option
++provides the @code{__THREAD_SAFE} define.
++
++@item -mbaserel
++@opindex mbaserel
++
++Generate code to access all non-constant data relative to register @code{r2}.
++The executable should also be linked with @option{-mbaserel} option.
++
++This option is useful for creating shared libraries for which all
++openers have a separate copy of non-constant data but share the constant
++data. A better way to do this is by using interface cloning, but
++sometimes this is not possible, for example when some package is being
++ported in form of shared library.
++
++This option can also be used to create residentable programs with
++special startup code.
++
++The startup code or the appropriate interface setup method should use
++@code{CopyDataSegment} function from @samp{elf.library} v51.8 or later to
++copy and relocate the data segment that each instance should have a copy of
++and then set up @code{r2} (and/or @code{EnvironmentVector} interface field
++for libraries) appropriately:
++
++@smallexample
++Elf32_Handle handle = NULL;
++BPTR seg = IDOS->GetProcSegList(NULL);
++
++if (seg)
++@{
++    IDOS->GetSegListInfoTags(seg, GSLI_ElfHandle, &handle, TAG_DONE);
++
++    if (handle
++        && (handle = IElf->OpenElfTags(OET_ElfHandle, handle, TAG_DONE)))
++    @{
++        uint32 offset;
++        uint8 *data = IElf->CopyDataSegment(handle, &offset);
++
++        if (data)
++        @{
++            /* @r{Store @code{data} somewhere since it will be required}
++             * @r{in the cleanup stage}
++             */
++
++            CurrentInterface->Data.EnvironmentVector = data + offset;
++
++            /* @r{Optionally, set r2 to the same value as @code{EnvironmentVector}} if the
++             * @r{current method will call functions access instance local data. This is}
++             * @r{not necessary if the current method will only call interface methods}
++             * @r{which have @code{baserel_restore} attribute (see below).}
++             */
++
++            IElf->CloseElfTags(handle, CET_ReClose, TRUE, TAG_DONE);
++        @}
++        else
++            /* Data was not allocated */;
++    @}
++    else
++        /* ELF handle couldn't be obtained */;
++@}
++else
++    /* Process segment list was not retrieved */;
++
++@end smallexample
++
++The copied data segment should be freed in the cleanup stage using the
++same procedure to obtain the ELF handle and then @code{FreeDataSegmentCopy}
++should be called with the value @code{CopyDataSegment} returned (@emph{not}
++with the value that @code{EnvironmentVector} contains).
++
++Interface methods should include @code{baserel_restore} attribute in their
++definition. When this attribute is present, the compiler will call
++@code{__baserel_get_addr} function in the function prologue. This function
++should set up @code{r2} register and must not modify any other registers
++except @code{r2}. Since it will be called in function prologue, register
++@code{r3} will contain the the first argument of the function. For
++interfaces, this is the interface pointer through which
++@code{EnvironmentVector} field can be accessed. Previous contents
++of register @code{r2} will be restored in the function epilogue.
++
++One possible implementation of @code{__baserel_get_addr} function:
++
++@smallexample
++asm("\n\
++     text\n\
++     globl __baserel_get_addr\n\
++
++__baserel_get_addr:\n\
++     lwz 2, 48(3) /* @r{Fetch EnvironmentVector from struct Interface *} */\n\
++     blr\n\
++");
++@end smallexample
++
++If some non-constant variable needs to be shared by all instances, it
++can be declared with @code{force_no_baserel} attribute. The variable will
++still be present in instance local data area that was created on
++startup, but the compiler will generate code to access it in the
++original data section for all instances. Because of that, the
++declaration of the variable with this attribute must be available to the
++compiler whenever the variable is accessed, otherwise it will generate
++code to access instance local copy of that variable which is probably
++not the desired behaviour. Additionally, some sort of access arbitration
++is probably required.
++
++@item -mno-baserel
++@opindex mno-baserel
++
++Generate absolute data access. This is the default.
++
++@item -mcheck68kfuncptr
++@opindex mcheck68kfuncptr
++
++Causes each function call through a function pointer to be performed as
++if the function pointer was declared with the @samp{check68kfuncptr}
++function attribute. @xref{Function Attributes}.
++
++@end table
++
+ @node Xtensa Options
+ @subsection Xtensa Options
+ @cindex Xtensa Options
+ 
+ These options are supported for Xtensa targets:
+ 
+diff --git a/gcc/expr.c b/gcc/expr.c
+index a0e194659659da378edc603b53d51128bfce9bd0..c38a67a46aa29173d06ddb96bc55bcdf726d54b2 100644
+--- a/gcc/expr.c
++++ b/gcc/expr.c
+@@ -8681,13 +8681,12 @@ expand_expr_real_2 (sepops ops, rtx target, machine_mode tmode,
+   tree treeop0, treeop1, treeop2;
+ #define REDUCE_BIT_FIELD(expr)	(reduce_bit_field			  \
+ 				 ? reduce_to_bit_field_precision ((expr), \
+ 								  target, \
+ 								  type)	  \
+ 				 : (expr))
+-
+   type = ops->type;
+   mode = TYPE_MODE (type);
+   unsignedp = TYPE_UNSIGNED (type);
+ 
+   treeop0 = ops->op0;
+   treeop1 = ops->op1;
+diff --git a/gcc/gcc.c b/gcc/gcc.c
+index 7837553958b44a124c7d710a6cea0b15d7a041e2..30d8d268b6c5655776eb7c664cd8ea7e5f82e7ce 100644
+--- a/gcc/gcc.c
++++ b/gcc/gcc.c
+@@ -3263,13 +3263,13 @@ execute (void)
+ 	commands[0].argv[0] = string;
+     }
+ 
+   for (n_commands = 1, i = 0; argbuf.iterate (i, &arg); i++)
+     if (arg && strcmp (arg, "|") == 0)
+       {				/* each command.  */
+-#if defined (__MSDOS__) || defined (OS2) || defined (VMS)
++#if defined (__MSDOS__) || defined (OS2) || defined (VMS) || defined(AMIGA)
+ 	fatal_error (input_location, "%<-pipe%> not supported");
+ #endif
+ 	argbuf[i] = 0; /* Termination of command args.  */
+ 	commands[n_commands].prog = argbuf[i + 1];
+ 	commands[n_commands].argv
+ 	  = &(argbuf.address ())[i + 1];
+@@ -5270,13 +5270,12 @@ process_command (unsigned int decoded_options_count,
+       add_prefix (&exec_prefixes, standard_exec_prefix, "BINUTILS",
+ 		  PREFIX_PRIORITY_LAST, 2, 0);
+ #endif
+       add_prefix (&startfile_prefixes, standard_exec_prefix, "BINUTILS",
+ 		  PREFIX_PRIORITY_LAST, 1, 0);
+     }
+-
+   gcc_assert (!IS_ABSOLUTE_PATH (tooldir_base_prefix));
+   tooldir_prefix2 = concat (tooldir_base_prefix, spec_machine,
+ 			    dir_separator_str, NULL);
+ 
+   /* Look for tools relative to the location from which the driver is
+      running, or, if that is not available, the configured prefix.  */
+@@ -7407,12 +7406,17 @@ give_switch (int switchnum, int omit_first_word)
+ 	      if (dot)
+ 		(CONST_CAST (char *, arg))[length] = '.';
+ 	      do_spec_1 (suffix_subst, 1, NULL);
+ 	    }
+ 	  else
+ 	    do_spec_1 (arg, 1, NULL);
++
++#ifdef __amigaos__
++	  /* Don't lose args which happen to be the empty string */
++	  arg_going = 1;
++#endif /* __amigaos__ */
+ 	}
+     }
+ 
+   do_spec_1 (" ", 0, NULL);
+   switches[switchnum].validated = true;
+ }
+@@ -7800,13 +7804,15 @@ is_directory (const char *path1, bool linker)
+   len1 = strlen (path1);
+   path = (char *) alloca (3 + len1);
+   memcpy (path, path1, len1);
+   cp = path + len1;
+   if (!IS_DIR_SEPARATOR (cp[-1]))
+     *cp++ = DIR_SEPARATOR;
++#ifndef __amigaos__
+   *cp++ = '.';
++#endif
+   *cp = '\0';
+ 
+   /* Exclude directories that the linker is known to search.  */
+   if (linker
+       && IS_DIR_SEPARATOR (path[0])
+       && ((cp - path == 6
+@@ -8341,22 +8347,24 @@ driver::set_up_specs () const
+ 			      ? gcc_exec_prefix : standard_exec_prefix,
+ 			      machine_suffix,
+ 			      standard_startfile_prefix, NULL),
+ 		      NULL, PREFIX_PRIORITY_LAST, 0, 1);
+ 	}
+ 
++#ifndef __amigaos__
+       /* Sysrooted prefixes are relocated because target_system_root is
+ 	 also relocated by gcc_exec_prefix.  */
+       if (*standard_startfile_prefix_1)
+  	add_sysrooted_prefix (&startfile_prefixes,
+ 			      standard_startfile_prefix_1, "BINUTILS",
+ 			      PREFIX_PRIORITY_LAST, 0, 1);
+       if (*standard_startfile_prefix_2)
+ 	add_sysrooted_prefix (&startfile_prefixes,
+ 			      standard_startfile_prefix_2, "BINUTILS",
+ 			      PREFIX_PRIORITY_LAST, 0, 1);
++#endif
+     }
+ 
+   /* Process any user specified specs in the order given on the command
+      line.  */
+   for (struct user_specs *uptr = user_specs_head; uptr; uptr = uptr->next)
+     {
+diff --git a/gcc/prefix.c b/gcc/prefix.c
+index 747c09de638df317217a2035d340d013b3cb7334..bd5e14a4155f722ae41f39c18241962f79bca8a3 100644
+--- a/gcc/prefix.c
++++ b/gcc/prefix.c
+@@ -326,13 +326,13 @@ update_path (const char *path, const char *key)
+ 
+ #ifdef UPDATE_PATH_HOST_CANONICALIZE
+   /* Perform host dependent canonicalization when needed.  */
+   UPDATE_PATH_HOST_CANONICALIZE (result);
+ #endif
+ 
+-#ifdef DIR_SEPARATOR_2
++#if defined (DIR_SEPARATOR_2) && !defined (__amigaos__)
+   /* Convert DIR_SEPARATOR_2 to DIR_SEPARATOR.  */
+   if (DIR_SEPARATOR_2 != DIR_SEPARATOR)
+     tr (result, DIR_SEPARATOR_2, DIR_SEPARATOR);
+ #endif
+ 
+ #if defined (DIR_SEPARATOR) && !defined (DIR_SEPARATOR_2)
+diff --git a/intl/dcigettext.c b/intl/dcigettext.c
+index a8d4a14d273b153b117b507ec76356635ccd876e..a9cc1066050e10b539149027a5c159f21accfaca 100644
+--- a/intl/dcigettext.c
++++ b/intl/dcigettext.c
+@@ -145,13 +145,15 @@ extern int errno;
+ # define tfind __tfind
+ #else
+ # if !defined HAVE_GETCWD
+ char *getwd ();
+ #  define getcwd(buf, max) getwd (buf)
+ # else
++#   if !defined getcwd
+ char *getcwd ();
++#   endif
+ # endif
+ # ifndef HAVE_STPCPY
+ static char *stpcpy PARAMS ((char *dest, const char *src));
+ # endif
+ # ifndef HAVE_MEMPCPY
+ static void *mempcpy PARAMS ((void *dest, const void *src, size_t n));
+diff --git a/libcpp/line-map.c b/libcpp/line-map.c
+index a03d6760a8e62a787bece6059fe9d5d22a59d144..895f6418df808698adb5631bc3b7198ec630984a 100644
+--- a/libcpp/line-map.c
++++ b/libcpp/line-map.c
+@@ -1036,12 +1036,15 @@ linemap_ordinary_map_lookup (const line_maps *set, location_t line)
+ 
+   unsigned mn = LINEMAPS_ORDINARY_CACHE (set);
+   unsigned mx = LINEMAPS_ORDINARY_USED (set);
+ 
+   const line_map_ordinary *cached = LINEMAPS_ORDINARY_MAP_AT (set, mn);
+   /* We should get a segfault if no line_maps have been added yet.  */
++#ifdef __amigaos4__
++  linemap_assert(cached != 0);
++#endif
+   if (line >= MAP_START_LOCATION (cached))
+     {
+       if (mn + 1 == mx || line < MAP_START_LOCATION (&cached[1]))
+ 	return cached;
+     }
+   else
+diff --git a/libgcc/config.host b/libgcc/config.host
+index f808b61be704cf32c2c234eb4792493cde1958de..4fa41e00393f606aa47c0cceb3b76cdc412a8792 100644
+--- a/libgcc/config.host
++++ b/libgcc/config.host
+@@ -1127,12 +1127,15 @@ or1k-*-*)
+ 	tmake_file="$tmake_file or1k/t-or1k"
+ 	tmake_file="$tmake_file t-softfp-sfdf t-softfp"
+ 	;;
+ pdp11-*-*)
+ 	tmake_file="pdp11/t-pdp11 t-fdpbit"
+ 	;;
++powerpc-*-amigaos*)
++	tmake_file="${tmake_file} rs6000/t-savresfgpr rs6000/t-amigaos"
++	;;
+ powerpc-*-darwin*)
+ 	case ${host} in
+ 	*-*-darwin9* | *-*-darwin[12][0-9]*)
+ 	  # libSystem contains unwind information for signal frames since
+ 	  # Darwin 9.
+ 	  ;;
+diff --git a/libgcc/config/rs6000/t-amigaos b/libgcc/config/rs6000/t-amigaos
+new file mode 100644
+index 0000000000000000000000000000000000000000..da1e303eed7e60df883971a610e8904db0df3e23
+--- /dev/null
++++ b/libgcc/config/rs6000/t-amigaos
+@@ -0,0 +1,45 @@
++# We need to enable the altivec in the assembler as
++# crtsavevr.S needs it. Not sure how this is handled
++# on other platforms or if this is a limitiation
++# of our binutils.
++HOST_LIBGCC2_CFLAGS += -Wa,-maltivec
++
++# The shared library needs to be compiled with -fPIC
++
++gcc_s_compile += -fPIC
++
++
++# We want fine grained libraries, so use the new code to build the
++# floating point emulation libraries.
++FPBIT = fp-bit.c
++DPBIT = dp-bit.c
++
++dp-bit.c: $(srcdir)/config/fp-bit.c
++	cat $(srcdir)/config/fp-bit.c > dp-bit.c
++
++fp-bit.c: $(srcdir)/config/fp-bit.c
++	echo '#define FLOAT' > fp-bit.c
++	cat $(srcdir)/config/fp-bit.c >> fp-bit.c
++
++# Build a shared libgcc library.
++# Note that this also builds clib2 shared lib which is not useable at
++# this writing
++#
++# We don't set LIBGCC2_CFLAGS += -fPIC here as this will also
++# produce a position independend static library. The -fPIC is
++# ensured in the special libgcc t-amigaos file.
++#
++SHLIB_DIR = @multilib_dir@
++SHLIB_SLIBDIR_QUAL = @shlib_slibdir_qual@
++SHLIB_OBJS = @shlib_objs@
++SHLIB_EXT = .so
++SHLIB_SONAME = @shlib_base_name@$(SHLIB_EXT)
++SHLIB_LINK = $(GCC_FOR_TARGET) -shared $(SHLIB_OBJS) -nodefaultlibs $(LIBGCC2_CFLAGS) \
++	-Wl,--soname=libgcc$(SHLIB_EXT) \
++	-o $(SHLIB_DIR)/$(SHLIB_SONAME) @multilib_flags@ $(SHLIB_LC)
++
++# Install the shared libgcc library, but ensure that the name is libgcc.so
++SHLIB_INSTALL = \
++	$(mkinstalldirs) $(DESTDIR)$(inst_libdir); \
++	$(INSTALL_DATA) $(SHLIB_DIR)/$(SHLIB_SONAME) \
++	  $(DESTDIR)$(inst_libdir)/libgcc$(SHLIB_EXT);
+diff --git a/libiberty/Makefile.in b/libiberty/Makefile.in
+index 4f1213b983b6cc6ce868cc712b36724e8bcba998..4bacf36d4eb8a597e44dc907591dd30854adebbe 100644
+--- a/libiberty/Makefile.in
++++ b/libiberty/Makefile.in
+@@ -140,12 +140,13 @@ CFILES = alloca.c argv.c asprintf.c atexit.c				\
+ 	make-temp-file.c md5.c memchr.c memcmp.c memcpy.c memmem.c	\
+ 	 memmove.c mempcpy.c memset.c mkstemps.c			\
+ 	objalloc.c obstack.c						\
+ 	partition.c pexecute.c						\
+ 	 pex-common.c pex-djgpp.c pex-msdos.c pex-one.c			\
+ 	 pex-unix.c pex-win32.c						\
++	 pex-amigaos.c		\
+          physmem.c putenv.c						\
+ 	random.c regex.c rename.c rindex.c				\
+ 	rust-demangle.c							\
+ 	safe-ctype.c setenv.c setproctitle.c sha1.c sigsetmask.c        \
+ 	 simple-object.c simple-object-coff.c simple-object-elf.c	\
+ 	 simple-object-mach-o.c simple-object-xcoff.c			\
+@@ -211,12 +212,13 @@ CONFIGURED_OFILES = ./asprintf.$(objext) ./atexit.$(objext)		\
+ 	./getcwd.$(objext) ./getpagesize.$(objext)			\
+ 	 ./gettimeofday.$(objext)					\
+ 	./index.$(objext) ./insque.$(objext)				\
+ 	./memchr.$(objext) ./memcmp.$(objext) ./memcpy.$(objext) 	\
+ 	./memmem.$(objext) ./memmove.$(objext)				\
+ 	 ./mempcpy.$(objext) ./memset.$(objext) ./mkstemps.$(objext)	\
++	./pex-amigaos.$(objext)						\
+ 	./pex-djgpp.$(objext) ./pex-msdos.$(objext)			\
+ 	 ./pex-unix.$(objext) ./pex-win32.$(objext)			\
+ 	 ./putenv.$(objext)						\
+ 	./random.$(objext) ./rename.$(objext) ./rindex.$(objext)	\
+ 	./setenv.$(objext) 						\
+ 	 ./setproctitle.$(objext)					\
+@@ -1151,12 +1153,19 @@ $(CONFIGURED_OFILES): stamp-picdir stamp-noasandir
+ 	else true; fi
+ 	if [ x"$(NOASANFLAG)" != x ]; then \
+ 	  $(COMPILE.c) $(PICFLAG) $(NOASANFLAG) $(srcdir)/pex-win32.c -o noasan/$@; \
+ 	else true; fi
+ 	$(COMPILE.c) $(srcdir)/pex-win32.c $(OUTPUT_OPTION)
+ 
++./pex-amigaos.$(objext): $(srcdir)/pex-amigaos.c config.h $(INCDIR)/ansidecl.h \
++	$(INCDIR)/libiberty.h $(srcdir)/pex-common.h
++	if [ x"$(PICFLAG)" != x ]; then \
++	  $(COMPILE.c) $(PICFLAG) $(srcdir)/pex-amigaos.c -o pic/$@; \
++	else true; fi
++	$(COMPILE.c) $(srcdir)/pex-amigaos.c $(OUTPUT_OPTION)
++
+ ./pexecute.$(objext): $(srcdir)/pexecute.c config.h $(INCDIR)/ansidecl.h \
+ 	$(INCDIR)/libiberty.h
+ 	if [ x"$(PICFLAG)" != x ]; then \
+ 	  $(COMPILE.c) $(PICFLAG) $(srcdir)/pexecute.c -o pic/$@; \
+ 	else true; fi
+ 	if [ x"$(NOASANFLAG)" != x ]; then \
+diff --git a/libiberty/basename.c b/libiberty/basename.c
+index 0f2c069f0ccf5a7d91e4913548e068c247e12efb..6ba5c4aa4f814fbc28f03127d22e91253c980c1b 100644
+--- a/libiberty/basename.c
++++ b/libiberty/basename.c
+@@ -15,32 +15,13 @@ Behavior is undefined if the pathname ends in a directory separator.
+ #ifdef HAVE_CONFIG_H
+ #include "config.h"
+ #endif
+ #include "ansidecl.h"
+ #include "libiberty.h"
+ #include "safe-ctype.h"
+-
+-#ifndef DIR_SEPARATOR
+-#define DIR_SEPARATOR '/'
+-#endif
+-
+-#if defined (_WIN32) || defined (__MSDOS__) || defined (__DJGPP__) || \
+-  defined (__OS2__)
+-#define HAVE_DOS_BASED_FILE_SYSTEM
+-#ifndef DIR_SEPARATOR_2 
+-#define DIR_SEPARATOR_2 '\\'
+-#endif
+-#endif
+-
+-/* Define IS_DIR_SEPARATOR.  */
+-#ifndef DIR_SEPARATOR_2
+-# define IS_DIR_SEPARATOR(ch) ((ch) == DIR_SEPARATOR)
+-#else /* DIR_SEPARATOR_2 */
+-# define IS_DIR_SEPARATOR(ch) \
+-	(((ch) == DIR_SEPARATOR) || ((ch) == DIR_SEPARATOR_2))
+-#endif /* DIR_SEPARATOR_2 */
++#include "filenames.h"
+ 
+ char *
+ basename (const char *name)
+ {
+   const char *base;
+ 
+diff --git a/libiberty/configure b/libiberty/configure
+index 2ea7c119809845230f41741bbd6af5e46c5d1a42..14648cbbe3fcfb0172b96df452836ba034f2c4bb 100755
+--- a/libiberty/configure
++++ b/libiberty/configure
+@@ -7328,12 +7328,13 @@ fi
+ 
+ # Figure out which version of pexecute to use.
+ case "${host}" in
+      *-*-mingw* | *-*-winnt*)	pexecute=pex-win32  ;;
+      *-*-msdosdjgpp*)		pexecute=pex-djgpp  ;;
+      *-*-msdos*)		pexecute=pex-msdos  ;;
++     *-*-amigaos*)		pexecute=pex-amigaos;;
+      *)				pexecute=pex-unix   ;;
+ esac
+ 
+ 
+ 
+ 
+diff --git a/libiberty/configure.ac b/libiberty/configure.ac
+index ad952963971a31968b5d109661b9cab0aa4b95fc..e8357be951baf8b96cebff9dac737380315a5533 100644
+--- a/libiberty/configure.ac
++++ b/libiberty/configure.ac
+@@ -698,12 +698,13 @@ fi
+ 
+ # Figure out which version of pexecute to use.
+ case "${host}" in
+      *-*-mingw* | *-*-winnt*)	pexecute=pex-win32  ;;
+      *-*-msdosdjgpp*)		pexecute=pex-djgpp  ;;
+      *-*-msdos*)		pexecute=pex-msdos  ;;
++     *-*-amigaos*)		pexecute=pex-amigaos ;;
+      *)				pexecute=pex-unix   ;;
+ esac
+ AC_SUBST(pexecute)
+ 
+ libiberty_AC_FUNC_STRNCMP
+ 
+diff --git a/libiberty/lrealpath.c b/libiberty/lrealpath.c
+index 83bdd173867737f4c72d23f353948bee343c781f..b99a5d54ee7f66cb41017c1468e7c96c9de3ee10 100644
+--- a/libiberty/lrealpath.c
++++ b/libiberty/lrealpath.c
+@@ -46,12 +46,13 @@ components will be simplified.  The returned value will be allocated using
+ #ifdef HAVE_UNISTD_H
+ #include <unistd.h>
+ #endif
+ #ifdef HAVE_STRING_H
+ #include <string.h>
+ #endif
++#include <stdio.h> /* for MAXPATHLEN */
+ 
+ /* On GNU libc systems the declaration is only visible with _GNU_SOURCE.  */
+ #if defined(HAVE_CANONICALIZE_FILE_NAME) \
+     && defined(NEED_DECLARATION_CANONICALIZE_FILE_NAME)
+ extern char *canonicalize_file_name (const char *);
+ #endif
+@@ -106,13 +107,13 @@ lrealpath (const char *filename)
+      compile time buffer size and no alternative function.  Query the
+      OS, using pathconf(), for the buffer limit.  Care is needed
+      though, some systems do not limit PATH_MAX (return -1 for
+      pathconf()) making it impossible to pass a correctly sized buffer
+      to realpath() (it could always overflow).  On those systems, we
+      skip this.  */
+-#if defined (HAVE_REALPATH) && defined (HAVE_UNISTD_H)
++#if !defined (REALPATH_LIMIT) && defined (HAVE_REALPATH) && defined (HAVE_UNISTD_H)
+   {
+     /* Find out the max path size.  */
+     long path_max = pathconf ("/", _PC_PATH_MAX);
+     if (path_max > 0)
+       {
+ 	/* PATH_MAX is bounded.  */
+diff --git a/libiberty/make-relative-prefix.c b/libiberty/make-relative-prefix.c
+index ef932ff022e7e31dfd058a892ab3f8ce6af37aaf..37ad5e77b1e56347acddb8c7740a944a60649cd6 100644
+--- a/libiberty/make-relative-prefix.c
++++ b/libiberty/make-relative-prefix.c
+@@ -62,44 +62,43 @@ relative prefix can be found, return @code{NULL}.
+ #endif
+ 
+ #include <string.h>
+ 
+ #include "ansidecl.h"
+ #include "libiberty.h"
++#include "filenames.h"
+ 
+ #ifndef R_OK
+ #define R_OK 4
+ #define W_OK 2
+ #define X_OK 1
+ #endif
+ 
+-#ifndef DIR_SEPARATOR
+-#  define DIR_SEPARATOR '/'
+-#endif
+-
+ #if defined (_WIN32) || defined (__MSDOS__) \
+     || defined (__DJGPP__) || defined (__OS2__)
+-#  define HAVE_DOS_BASED_FILE_SYSTEM
+-#  define HAVE_HOST_EXECUTABLE_SUFFIX
+-#  define HOST_EXECUTABLE_SUFFIX ".exe"
+-#  ifndef DIR_SEPARATOR_2 
+-#    define DIR_SEPARATOR_2 '\\'
+-#  endif
+-#  define PATH_SEPARATOR ';'
+-#else
+-#  define PATH_SEPARATOR ':'
++# define HAVE_HOST_EXECUTABLE_SUFFIX
++# define HOST_EXECUTABLE_SUFFIX ".exe"
++# define PATH_SEPARATOR ';'
++#endif
++
++#ifdef __amigaos__
++# define PATH_SEPARATOR ':'
++# define DIR_UP ".."
+ #endif
+ 
+-#ifndef DIR_SEPARATOR_2
+-#  define IS_DIR_SEPARATOR(ch) ((ch) == DIR_SEPARATOR)
+-#else
+-#  define IS_DIR_SEPARATOR(ch) \
+-	(((ch) == DIR_SEPARATOR) || ((ch) == DIR_SEPARATOR_2))
++#ifndef PATH_SEPARATOR
++# define PATH_SEPARATOR ':'
+ #endif
+ 
+-#define DIR_UP ".."
++#ifndef DIR_UP
++# define DIR_UP ".."
++#endif
++
++#ifndef DIR_SEPARATOR
++# define DIR_SEPARATOR '/'
++#endif
+ 
+ static char *save_string (const char *, int);
+ static char **split_directories	(const char *, int *);
+ static void free_split_directories (char **);
+ 
+ static char *
+diff --git a/libiberty/make-temp-file.c b/libiberty/make-temp-file.c
+index 7465cec5ea6a7dcd31a17d97f5b85aa30001f2b6..650c7519b83db87d6c6eb8a91f5a2ead8367e02d 100644
+--- a/libiberty/make-temp-file.c
++++ b/libiberty/make-temp-file.c
+@@ -37,25 +37,26 @@ Boston, MA 02110-1301, USA.  */
+ #include <sys/file.h>   /* May get R_OK, etc. on some systems.  */
+ #endif
+ #if defined(_WIN32) && !defined(__CYGWIN__)
+ #include <windows.h>
+ #endif
+ 
++#ifndef DIR_SEPARATOR
++#define DIR_SEPARATOR '/'
++#endif
++
+ #ifndef R_OK
+ #define R_OK 4
+ #define W_OK 2
+ #define X_OK 1
+ #endif
+ 
+ #include "libiberty.h"
+-extern int mkstemps (char *, int);
++#include "filenames.h"
+ 
+-/* '/' works just fine on MS-DOS based systems.  */
+-#ifndef DIR_SEPARATOR
+-#define DIR_SEPARATOR '/'
+-#endif
++extern int mkstemps (char *, int);
+ 
+ /* Name of temporary file.
+    mktemp requires 6 trailing X's.  */
+ #define TEMP_FILE "XXXXXX"
+ #define TEMP_FILE_LEN (sizeof(TEMP_FILE) - 1)
+ 
+@@ -77,17 +78,19 @@ try_dir (const char *dir, const char *base)
+   if (dir != 0
+       && access (dir, R_OK | W_OK | X_OK) == 0)
+     return dir;
+   return 0;
+ }
+ 
++#ifndef __amigaos__
+ static const char tmp[] = { DIR_SEPARATOR, 't', 'm', 'p', 0 };
+ static const char usrtmp[] =
+ { DIR_SEPARATOR, 'u', 's', 'r', DIR_SEPARATOR, 't', 'm', 'p', 0 };
+ static const char vartmp[] =
+ { DIR_SEPARATOR, 'v', 'a', 'r', DIR_SEPARATOR, 't', 'm', 'p', 0 };
++#endif /* __amigaos__ */
+ 
+ #endif
+ 
+ static char *memoized_tmpdir;
+ 
+ /*
+@@ -126,27 +129,37 @@ choose_tmpdir (void)
+       if (strcmp (P_tmpdir, "\\") == 0)
+ 	base = try_dir ("\\.", base);
+       else
+ 	base = try_dir (P_tmpdir, base);
+ #endif
+ 
++#ifndef __amigaos__
+       /* Try /var/tmp, /usr/tmp, then /tmp.  */
+       base = try_dir (vartmp, base);
+       base = try_dir (usrtmp, base);
+       base = try_dir (tmp, base);
++#else
++      base = try_dir ("T:", base);
++#endif
+       
+       /* If all else fails, use the current directory!  */
+       if (base == 0)
+ 	base = ".";
+       /* Append DIR_SEPARATOR to the directory we've chosen
+ 	 and return it.  */
+       len = strlen (base);
+       tmpdir = XNEWVEC (char, len + 2);
+       strcpy (tmpdir, base);
+-      tmpdir[len] = DIR_SEPARATOR;
+-      tmpdir[len+1] = '\0';
++
++      /* Don't add DIR_SEPARATOR if base already ends with a dir separator,
++         it's unneeded and can cause ill effects on e.g. AmigaOS.  */
++      if (!IS_DIR_SEPARATOR(base[len-1]))
++        {
++          tmpdir[len] = DIR_SEPARATOR;
++          tmpdir[len+1] = '\0';
++        }
+       memoized_tmpdir = tmpdir;
+ #else /* defined(_WIN32) && !defined(__CYGWIN__) */
+       DWORD len;
+ 
+       /* Figure out how much space we need.  */
+       len = GetTempPath(0, NULL);
+diff --git a/libiberty/pex-amigaos.c b/libiberty/pex-amigaos.c
+new file mode 100644
+index 0000000000000000000000000000000000000000..0c61a108764c8501f8a2e9552c7c07499f402b1a
+--- /dev/null
++++ b/libiberty/pex-amigaos.c
+@@ -0,0 +1,325 @@
++/* Utilities to execute a program in a subprocess (possibly linked by pipes
++   with other subprocesses), and wait for it.  Generic AMIGAOS specialization.
++   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2003, 2005
++   Free Software Foundation, Inc.
++
++This file is part of the libiberty library.
++Libiberty is free software; you can redistribute it and/or
++modify it under the terms of the GNU Library General Public
++License as published by the Free Software Foundation; either
++version 2 of the License, or (at your option) any later version.
++
++Libiberty is distributed in the hope that it will be useful,
++but WITHOUT ANY WARRANTY; without even the implied warranty of
++MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++Library General Public License for more details.
++
++You should have received a copy of the GNU Library General Public
++License along with libiberty; see the file COPYING.LIB.  If not,
++write to the Free Software Foundation, Inc., 51 Franklin Street - Fifth Floor,
++Boston, MA 02110-1301, USA.  */
++
++#include "pex-common.h"
++
++#include <stdio.h>
++#include <errno.h>
++#ifdef NEED_DECLARATION_ERRNO
++extern int errno;
++#endif
++#ifdef HAVE_STDLIB_H
++#include <stdlib.h>
++#endif
++#include <string.h>
++#include <fcntl.h>
++#include <unistd.h>
++#include <sys/stat.h>
++#include <ctype.h>
++
++/* Use ECHILD if available, otherwise use EINVAL.  */
++#ifdef ECHILD
++#define PWAIT_ERROR ECHILD
++#else
++#define PWAIT_ERROR EINVAL
++#endif
++
++#if !defined(FD_CLOEXEC)
++#define FD_CLOEXEC 1
++#endif
++
++static int pex_amiga_open_read (struct pex_obj *, const char *, int);
++static int pex_amiga_open_write (struct pex_obj *, const char *, int);
++static pid_t pex_amiga_exec_child (struct pex_obj *, int, const char *,
++				 char * const *, char * const *,
++				 int, int, int, int,
++				 const char **, int *);
++static int pex_amiga_close (struct pex_obj *, int);
++static int pex_amiga_wait (struct pex_obj *, long, int *, struct pex_time *,
++			   int, const char **, int *);
++static FILE *pex_amiga_fdopenr (struct pex_obj *, int, int);
++static FILE *pex_amiga_fdopenw (struct pex_obj *, int, int);
++
++/* The list of functions we pass to the common routines.  */
++
++const struct pex_funcs funcs =
++{
++  pex_amiga_open_read,
++  pex_amiga_open_write,
++  pex_amiga_exec_child,
++  pex_amiga_close,
++  pex_amiga_wait,
++  NULL, /* pipe */
++  pex_amiga_fdopenr,
++  pex_amiga_fdopenw,
++  NULL, /* cleanup */
++};
++
++/* Return a newly initialized pex_obj structure.  */
++
++struct pex_obj *
++pex_init (int flags, const char *pname, const char *tempbase)
++{
++  /* AMIGAOS does not support pipes.  */
++  flags &= ~ PEX_USE_PIPES;
++  return pex_init_common (flags, pname, tempbase, &funcs);
++}
++
++/* Open a file for reading.  */
++
++static int
++pex_amiga_open_read (struct pex_obj *obj ATTRIBUTE_UNUSED, const char *name,
++		    int binary ATTRIBUTE_UNUSED)
++{
++  return open (name, O_RDONLY);
++}
++
++/* Open a file for writing.  */
++
++static int
++pex_amiga_open_write (struct pex_obj *obj ATTRIBUTE_UNUSED, const char *name,
++		     int binary ATTRIBUTE_UNUSED)
++{
++  /* Note that we can't use O_EXCL here because gcc may have already
++     created the temporary file via make_temp_file.  */
++  return open (name, O_WRONLY | O_CREAT | O_TRUNC);
++}
++
++/* Close a file.  */
++
++static int
++pex_amiga_close (struct pex_obj *obj ATTRIBUTE_UNUSED, int fd)
++{
++  return close (fd);
++}
++
++/* Execute a child.  */
++
++const unsigned char __shell_escape_character = '\\';
++
++static pid_t
++pex_amiga_exec_child (struct pex_obj *obj, int flags ATTRIBUTE_UNUSED, const char *executable ATTRIBUTE_UNUSED,
++		     char * const * argv, char * const * env ATTRIBUTE_UNUSED,
++                     int in ATTRIBUTE_UNUSED, int out ATTRIBUTE_UNUSED, int errdes ATTRIBUTE_UNUSED,
++		     int toclose ATTRIBUTE_UNUSED, const char **errmsg, int *err)
++{
++  int rc;
++  char *scmd,*s;
++  int i,j,c,len,arglen;
++  int need_quote;
++  int already_have_quote;
++  int escaped;
++  int *statuses;
++
++  len = 0;
++
++  for(i = 0 ; argv[i] != NULL ; i++)
++  {
++    arglen = strlen(argv[i]);
++
++    len += 1 + arglen;
++
++    need_quote = already_have_quote = 0;
++
++    /* Check if this parameter is already surrounded by double quotes.
++       What counts is that the first character is a double quote. We
++       hope that the last character is an unescaped double quote, but
++       don't check for it. */
++    if(argv[i][0] == '\"')
++    {
++      already_have_quote = 1;
++    }
++    else
++    {
++      /* Check if there's a blank space in the argument. If so, we will
++         need to add double quote characters. */
++      for (j = 0 ; j < arglen ; j++)
++      {
++        c = argv[i][j];
++
++        if (isspace(c))
++        {
++          need_quote = 1;
++          break;
++        }
++      }
++
++      /* Make room for the double quote characters that we will have to add. */
++      if(need_quote)
++        len += 2;
++    }
++
++    /* Check if there are " or * characters in the quoted string which
++       may have to be escaped. */
++    if (need_quote || already_have_quote)
++    {
++      for (j = 0 ; j < arglen ; j++)
++      {
++        c = argv[i][j];
++
++        /* We just might have to add an escape character in front of these two. */
++        if (c == '\"' || c == '*')
++	        len++;
++      }
++    }
++  }
++
++  s = scmd = (char *) xmalloc (len+1);
++
++  for(i = 0 ; argv[i] != NULL ; i++)
++  {
++    arglen = strlen(argv[i]);
++
++    need_quote = already_have_quote = 0;
++
++    if (argv[i][0] == '\"')
++    {
++      already_have_quote = 1;
++    }
++    else
++    {
++      for (j = 0 ; j < arglen ; j++)
++      {
++        c = argv[i][j];
++
++        if (isspace(c))
++        {
++          need_quote = 1;
++          break;
++        }
++      }
++    }
++
++    if(s != scmd)
++      (*s++) = ' ';
++
++    if(need_quote)
++      (*s++) = '\"';
++
++    escaped = 0;
++
++    for(j = 0 ; j < arglen ; j++)
++    {
++      c = argv[i][j];
++
++      /* If this is a " or * and the parameter is quoted, try to
++         add an escape character in front of it. */
++      if((c == '\"' || c == '*') && (need_quote || already_have_quote))
++	    {
++        /* Careful, don't escape the first double
++           quote character by mistake. */
++        if(!already_have_quote || j > 0)
++        {
++          /* Don't add an escape character here if the previous character
++             already was an escape character. */
++          if(!escaped)
++            (*s++) = '*';
++	      }
++      }
++
++      (*s++) = c;
++
++      /* Remember if the last character read was an escape character. */
++      if (escaped)
++        escaped = 0;
++      else
++        escaped = (c == __shell_escape_character && c != '*');
++    }
++
++    if(need_quote)
++      (*s++) = '\"';
++  }
++
++  (*s) = '\0';
++
++  rc = system (scmd);
++
++  free (scmd);
++
++  if (rc == -1)
++  {
++    *err = errno;
++    *errmsg = install_error_msg;
++    return -1;
++  }
++
++  /* Save the exit status for later.  When we are called, obj->count
++     is the number of children which have executed before this
++     one.  */
++  statuses = (int *) obj->sysdep;
++  statuses = XRESIZEVEC (int, statuses, obj->count + 1);
++  statuses[obj->count] = (rc << 8); /* Tuck the status away for pwait */
++  obj->sysdep = (void *) statuses;
++
++  return obj->count;
++}
++
++/* Create a pipe.  */
++/*
++static int
++pex_amiga_pipe (struct pex_obj *obj ATTRIBUTE_UNUSED, int *p,
++	       int binary ATTRIBUTE_UNUSED)
++{
++  return pipe (p);
++}
++*/
++
++/* Get a FILE pointer to read from a file descriptor.  */
++
++static FILE *
++pex_amiga_fdopenr (struct pex_obj *obj ATTRIBUTE_UNUSED, int fd,
++		  int binary ATTRIBUTE_UNUSED)
++{
++  return fdopen (fd, "r");
++}
++
++/* Get a FILE pointer to write to a file descriptor.  */
++
++static FILE *
++pex_amiga_fdopenw (struct pex_obj *obj ATTRIBUTE_UNUSED, int fd,
++		  int binary ATTRIBUTE_UNUSED)
++{
++  if (fcntl (fd, F_SETFD, FD_CLOEXEC) < 0)
++    return NULL;
++  return fdopen (fd, "w");
++}
++
++
++/* Wait for a child process to complete.  Actually the child process
++   has already completed, and we just need to return the exit
++   status.  */
++
++static int
++pex_amiga_wait (struct pex_obj *obj, long pid, int *status,
++		struct pex_time *time, int done ATTRIBUTE_UNUSED,
++		const char **errmsg ATTRIBUTE_UNUSED,
++		int *err ATTRIBUTE_UNUSED)
++{
++  int *statuses;
++
++  if (time != NULL)
++    memset (time, 0, sizeof (struct pex_time));
++
++  statuses = (int *) obj->sysdep;
++  *status = statuses[pid];
++
++  return 0;
++}
+diff --git a/libstdc++-v3/configure b/libstdc++-v3/configure
+index 326a279c54f218ee55a62aad28b2ef12009e1bf2..576c495765d6dc1b50ac15bfb18edb58d5fc3a32 100755
+--- a/libstdc++-v3/configure
++++ b/libstdc++-v3/configure
+@@ -73911,12 +73911,171 @@ _ACEOF
+ 
+   fi
+ 
+ 
+ 
+     ;;
++  *-amigaos*)
++    for ac_header in nan.h ieeefp.h endian.h sys/isa_defs.h \
++      machine/endian.h machine/param.h sys/machine.h sys/types.h \
++      fp.h locale.h float.h inttypes.h
++do :
++  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
++ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
++eval as_val=\$$as_ac_Header
++   if test "x$as_val" = x""yes; then :
++  cat >>confdefs.h <<_ACEOF
++#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
++_ACEOF
++
++fi
++
++done
++
++    SECTION_FLAGS='-ffunction-sections -fdata-sections'
++
++
++  # If we're not using GNU ld, then there's no point in even trying these
++  # tests.  Check for that first.  We should have already tested for gld
++  # by now (in libtool), but require it now just to be safe...
++  test -z "$SECTION_LDFLAGS" && SECTION_LDFLAGS=''
++  test -z "$OPT_LDFLAGS" && OPT_LDFLAGS=''
++
++
++
++  # The name set by libtool depends on the version of libtool.  Shame on us
++  # for depending on an impl detail, but c'est la vie.  Older versions used
++  # ac_cv_prog_gnu_ld, but now it's lt_cv_prog_gnu_ld, and is copied back on
++  # top of with_gnu_ld (which is also set by --with-gnu-ld, so that actually
++  # makes sense).  We'll test with_gnu_ld everywhere else, so if that isn't
++  # set (hence we're using an older libtool), then set it.
++  if test x${with_gnu_ld+set} != xset; then
++    if test x${ac_cv_prog_gnu_ld+set} != xset; then
++      # We got through "ac_require(ac_prog_ld)" and still not set?  Huh?
++      with_gnu_ld=no
++    else
++      with_gnu_ld=$ac_cv_prog_gnu_ld
++    fi
++  fi
++
++  # Start by getting the version number.  I think the libtool test already
++  # does some of this, but throws away the result.
++  glibcxx_ld_is_gold=no
++  if test x"$with_gnu_ld" = x"yes"; then
++    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ld version" >&5
++$as_echo_n "checking for ld version... " >&6; }
++
++    if $LD --version 2>/dev/null | grep 'GNU gold' >/dev/null 2>&1; then
++      glibcxx_ld_is_gold=yes
++    fi
++    ldver=`$LD --version 2>/dev/null |
++	   sed -e 's/GNU gold /GNU ld /;s/GNU ld version /GNU ld /;s/GNU ld ([^)]*) /GNU ld /;s/GNU ld \([0-9.][0-9.]*\).*/\1/; q'`
++
++    glibcxx_gnu_ld_version=`echo $ldver | \
++	   $AWK -F. '{ if (NF<3) $3=0; print ($1*100+$2)*100+$3 }'`
++    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $glibcxx_gnu_ld_version" >&5
++$as_echo "$glibcxx_gnu_ld_version" >&6; }
++  fi
++
++  # Set --gc-sections.
++  glibcxx_have_gc_sections=no
++  if test "$glibcxx_ld_is_gold" = "yes"; then
++    if $LD --help 2>/dev/null | grep gc-sections >/dev/null 2>&1; then
++      glibcxx_have_gc_sections=yes
++    fi
++  else
++    glibcxx_gcsections_min_ld=21602
++    if test x"$with_gnu_ld" = x"yes" &&
++	test $glibcxx_gnu_ld_version -gt $glibcxx_gcsections_min_ld ; then
++      glibcxx_have_gc_sections=yes
++    fi
++  fi
++  if test "$glibcxx_have_gc_sections" = "yes"; then
++    # Sufficiently young GNU ld it is!  Joy and bunny rabbits!
++    # NB: This flag only works reliably after 2.16.1. Configure tests
++    # for this are difficult, so hard wire a value that should work.
++
++    ac_test_CFLAGS="${CFLAGS+set}"
++    ac_save_CFLAGS="$CFLAGS"
++    CFLAGS='-Wl,--gc-sections'
++
++    # Check for -Wl,--gc-sections
++    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ld that supports -Wl,--gc-sections" >&5
++$as_echo_n "checking for ld that supports -Wl,--gc-sections... " >&6; }
++    if test x$gcc_no_link = xyes; then
++  as_fn_error "Link tests are not allowed after GCC_NO_EXECUTABLES." "$LINENO" 5
++fi
++cat confdefs.h - <<_ACEOF >conftest.$ac_ext
++/* end confdefs.h.  */
++ int one(void) { return 1; }
++     int two(void) { return 2; }
++
++int
++main ()
++{
++ two();
++  ;
++  return 0;
++}
++_ACEOF
++if ac_fn_c_try_link "$LINENO"; then :
++  ac_gcsections=yes
++else
++  ac_gcsections=no
++fi
++rm -f core conftest.err conftest.$ac_objext \
++    conftest$ac_exeext conftest.$ac_ext
++    if test "$ac_gcsections" = "yes"; then
++      rm -f conftest.c
++      touch conftest.c
++      if $CC -c conftest.c; then
++	if $LD --gc-sections -o conftest conftest.o 2>&1 | \
++	   grep "Warning: gc-sections option ignored" > /dev/null; then
++	  ac_gcsections=no
++	fi
++      fi
++      rm -f conftest.c conftest.o conftest
++    fi
++    if test "$ac_gcsections" = "yes"; then
++      SECTION_LDFLAGS="-Wl,--gc-sections $SECTION_LDFLAGS"
++    fi
++    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_gcsections" >&5
++$as_echo "$ac_gcsections" >&6; }
++
++    if test "$ac_test_CFLAGS" = set; then
++      CFLAGS="$ac_save_CFLAGS"
++    else
++      # this is the suspicious part
++      CFLAGS=''
++    fi
++  fi
++
++  # Set -z,relro.
++  # Note this is only for shared objects.
++  ac_ld_relro=no
++  if test x"$with_gnu_ld" = x"yes"; then
++    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ld that supports -Wl,-z,relro" >&5
++$as_echo_n "checking for ld that supports -Wl,-z,relro... " >&6; }
++    cxx_z_relo=`$LD -v --help 2>/dev/null | grep "z relro"`
++    if test -n "$cxx_z_relo"; then
++      OPT_LDFLAGS="-Wl,-z,relro"
++      ac_ld_relro=yes
++    fi
++    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_ld_relro" >&5
++$as_echo "$ac_ld_relro" >&6; }
++  fi
++
++  # Set linker optimization flags.
++  if test x"$with_gnu_ld" = x"yes"; then
++    OPT_LDFLAGS="-Wl,-O1 $OPT_LDFLAGS"
++  fi
++
++
++
++
++    ;;
+   *)
+     as_fn_error $? "No support for this host/target combination." "$LINENO" 5
+    ;;
+ esac
+ 
+   fi
+@@ -79221,12 +79380,13 @@ fi
+     TIMESTAMP='$TIMESTAMP'
+     RM='$RM'
+     ofile='$ofile'
+ 
+ 
+ 
++ac_aux_dir='$ac_aux_dir'
+ 
+ 
+ 
+ GCC="$GCC"
+ CC="$CC"
+ acx_cv_header_stdint="$acx_cv_header_stdint"
+diff --git a/libstdc++-v3/configure.ac b/libstdc++-v3/configure.ac
+index 3c799be82b10e25087f67673107d58853cb4f285..8ab21039e90dc979687988df99cc0e702262505f 100644
+--- a/libstdc++-v3/configure.ac
++++ b/libstdc++-v3/configure.ac
+@@ -603,12 +603,15 @@ fi
+ GLIBCXX_EXPORT_INSTALL_INFO
+ 
+ # Export all the include and flag information to Makefiles.
+ GLIBCXX_EXPORT_INCLUDES
+ GLIBCXX_EXPORT_FLAGS
+ 
++# create libtool - libtool > 2.0:
++LT_OUTPUT
++
+ # Determine what GCC version number to use in filesystem paths.
+ GCC_BASE_VER
+ 
+ dnl In autoconf 2.5x, AC_OUTPUT is replaced by four AC_CONFIG_* macros,
+ dnl which can all be called multiple times as needed, plus one (different)
+ dnl AC_OUTPUT macro.  This one lists the files to be created:
+diff --git a/libstdc++-v3/crossconfig.m4 b/libstdc++-v3/crossconfig.m4
+index ff44d5ae019905eae8c2708fd187e227d3f0088f..cbbfff770cb1356bf9352ad7e61ef5c77458f262 100644
+--- a/libstdc++-v3/crossconfig.m4
++++ b/libstdc++-v3/crossconfig.m4
+@@ -309,12 +309,20 @@ dnl # switch to more elaborate tests.
+       ldexpf modff hypotf frexpf])
+ dnl # sincosl is the only one missing here, compared with the *l
+ dnl # functions in the list guarded by
+ dnl # long_double_math_on_this_cpu in configure.ac, right after
+ dnl # the expansion of the present macro.
+     ;;
++  *-amigaos*)
++    AC_CHECK_HEADERS([nan.h ieeefp.h endian.h sys/isa_defs.h \
++      machine/endian.h machine/param.h sys/machine.h sys/types.h \
++      fp.h locale.h float.h inttypes.h])
++    SECTION_FLAGS='-ffunction-sections -fdata-sections'
++    AC_SUBST(SECTION_FLAGS)
++    GLIBCXX_CHECK_LINKER_FEATURES
++    ;;
+   *)
+     AC_MSG_ERROR([No support for this host/target combination.])
+    ;;
+ esac
+ ])
+ 
+diff --git a/libstdc++-v3/include/c_global/cstddef b/libstdc++-v3/include/c_global/cstddef
+index 13ef7f03c12584804e4dd1635954723f628addc0..7272360eb4eb05bc95671e90acd4eff44ff91fb3 100644
+--- a/libstdc++-v3/include/c_global/cstddef
++++ b/libstdc++-v3/include/c_global/cstddef
+@@ -51,14 +51,17 @@
+ 
+ extern "C++"
+ {
+ #if __cplusplus >= 201103L
+ namespace std
+ {
++/* Needed as clib2 on AmigaOS has no C11 support yet */
++#if __STDC_VERSION__ >= 201112L
+   // We handle size_t, ptrdiff_t, and nullptr_t in c++config.h.
+   using ::max_align_t;
++#endif
+ }
+ #endif // C++11
+ 
+ #if __cplusplus >= 201703L
+ namespace std
+ {
+diff --git a/libstdc++-v3/include/c_std/cstddef b/libstdc++-v3/include/c_std/cstddef
+index 6568adfca2089c116ae2cbdfa8c933aa76fdddf8..16fa6bf68690127c7a735979108b1addbd562d2b 100644
+--- a/libstdc++-v3/include/c_std/cstddef
++++ b/libstdc++-v3/include/c_std/cstddef
+@@ -44,12 +44,15 @@
+ #include <bits/c++config.h>
+ #include <stddef.h>
+ 
+ #if __cplusplus >= 201103L
+ namespace std
+ {
++/* Needed as clib2 on AmigaOS has no C11 support yet */
++#if __STDC_VERSION__ >= 201112L
+   // We handle size_t, ptrdiff_t, and nullptr_t in c++config.h.
+   using ::max_align_t;
++#endif
+ }
+ #endif
+ 
+ #endif // _GLIBCXX_CSTDDEF
+-- 
+2.11.0
+

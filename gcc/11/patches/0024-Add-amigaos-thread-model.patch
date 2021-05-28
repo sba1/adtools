@@ -1,0 +1,2078 @@
+From d298f3b47c7fbf1dc976caa68134f4f07c79c191 Mon Sep 17 00:00:00 2001
+From: Sebastian Bauer <mail@sebastianbauer.info>
+Date: Fri, 4 May 2018 18:22:24 +0200
+Subject: [PATCH 24/35] Add amigaos thread model.
+
+It is work in progress.
+---
+ config/gthr.m4                 |    1 +
+ gcc/config.host                |    1 +
+ gcc/config/rs6000/amigaos.h    |    8 +-
+ gcc/config/rs6000/amigaos.opt  |   18 +
+ gcc/config/rs6000/x-amigaos    |   16 +
+ gcc/configure                  |    2 +-
+ gcc/configure.ac               |    2 +-
+ gcc/doc/invoke.texi            |    9 +-
+ libgcc/config/rs6000/t-amigaos |    5 +
+ libgcc/configure               |    1 +
+ libgcc/gthr-amigaos-asserts.h  |    8 +
+ libgcc/gthr-amigaos-native.c   | 1017 ++++++++++++++++++++++++++++++++++++++++
+ libgcc/gthr-amigaos-posix.c    |  233 +++++++++
+ libgcc/gthr-amigaos-single.c   |  141 ++++++
+ libgcc/gthr-amigaos.h          |  347 ++++++++++++++
+ libstdc++-v3/configure         |    1 +
+ 16 files changed, 1805 insertions(+), 5 deletions(-)
+ create mode 100644 gcc/config/rs6000/x-amigaos
+ create mode 100644 libgcc/gthr-amigaos-asserts.h
+ create mode 100644 libgcc/gthr-amigaos-native.c
+ create mode 100644 libgcc/gthr-amigaos-posix.c
+ create mode 100644 libgcc/gthr-amigaos-single.c
+ create mode 100644 libgcc/gthr-amigaos.h
+
+diff --git a/config/gthr.m4 b/config/gthr.m4
+index 4b937306ad0802c013aa4862eafeefaa597bd590..84d29116c9a06ce37b8ed0bd46cf46eed6a252d6 100644
+--- a/config/gthr.m4
++++ b/config/gthr.m4
+@@ -9,12 +9,13 @@ dnl Define header location by thread model
+ 
+ dnl usage: GCC_AC_THREAD_HEADER([thread_model])
+ AC_DEFUN([GCC_AC_THREAD_HEADER],
+ [
+ case $1 in
+     aix)	thread_header=config/rs6000/gthr-aix.h ;;
++    amigaos)	thread_header=gthr-amigaos.h ;;
+     dce)	thread_header=config/pa/gthr-dce.h ;;
+     gcn)	thread_header=config/gcn/gthr-gcn.h ;;
+     lynx)	thread_header=config/gthr-lynx.h ;;
+     mipssde)	thread_header=config/mips/gthr-mipssde.h ;;
+     posix)	thread_header=gthr-posix.h ;;
+     rtems)	thread_header=config/gthr-rtems.h ;;
+diff --git a/gcc/config.host b/gcc/config.host
+index a4354b5d3497e441d6e50b05aeefc232f4dfe40b..508a3cec85c32729c8cbca1a8b62afcfce041f97 100644
+--- a/gcc/config.host
++++ b/gcc/config.host
+@@ -257,12 +257,13 @@ case ${host} in
+     ;;
+   powerpc-*-amigaos*) # AmigaOS 4
+     prefix=/gcc
+     local_prefix=/gcc
+     host_can_use_collect2=no
+     host_xm_defines=HOST_LACKS_INODE_NUMBERS
++    host_xmake_file="${host_xmake_file} rs6000/x-amigaos"
+     ;;
+   powerpc-*-darwin*)
+     out_host_hook_obj="${out_host_hook_obj} host-ppc-darwin.o"
+     host_xmake_file="${host_xmake_file} rs6000/x-darwin"
+     ;;
+   powerpc64-*-darwin*)
+diff --git a/gcc/config/rs6000/amigaos.h b/gcc/config/rs6000/amigaos.h
+index d4812d8f618c2758bf95ec998f6aa53ee9bcb6fc..ec0146c4b8c05eb300f8928e475641123c3f5632 100644
+--- a/gcc/config/rs6000/amigaos.h
++++ b/gcc/config/rs6000/amigaos.h
+@@ -272,13 +272,13 @@ mcrt=default|!mcrt=*: %{mcrt=default|!nostdinc: %(cpp_amiga_default)}; \
+ #define LINK_SPEC "\
+ --defsym __amigaos4__=1 \
+ %{!shared: %{!use-dynld: -Bstatic}} \
+ -q -d %{h*} %{v:-V} %{G*} \
+ %{Wl,*:%*} %{YP,*} %{R*} \
+ %{Qy:} %{!Qn:-Qy} \
+-%(link_shlib) %(link_text) \
++%(link_thread) %(link_shlib) %(link_text) \
+ %{mbaserel: %{msdata|msdata=default|msdata=sysv: %e-mbaserel and -msdata options are incompatible}} \
+ %{mcrt=clib2|mcrt=clib2-ts: %(link_clib2); \
+ mcrt=ixemul: %(link_ixemul); \
+ mcrt=libnix: %(link_libnix); \
+ mcrt=newlib: %(link_newlib); \
+ mcrt=default|!mcrt=*: %(link_amiga_default); \
+@@ -294,12 +294,15 @@ mcrt=default|!mcrt=*: %(link_amiga_default); \
+ #define LINK_TEXT ""
+ #endif
+ 
+ #define LINK_SHLIB "\
+ %{shared:-shared -dy --defsym __dynld_version__=1} %{!shared: %{static:-static}} %{use-dynld: -dy}"
+ 
++#define LINK_THREAD "\
++%s%{athread=native:gthr-amigaos-native.o;athread=single:gthr-amigaos-single.o;athread=pthread:gthr-amigaos-pthread.o}"
++
+ #undef STARTFILE_SPEC
+ #define STARTFILE_SPEC "\
+ %{mcrt=clib2|mcrt=clib2-ts: %(startfile_clib2); \
+ mcrt=ixemul: %(startfile_ixemul); \
+ mcrt=libnix: %(startfile_libnix); \
+ mcrt=newlib: %(startfile_newlib); \
+@@ -356,13 +359,14 @@ mcrt=default|!mcrt=*: %(endfile_amiga_default); \
+   {"lib_subdir_newlib", LIB_SUBDIR_NEWLIB_SPEC}, \
+   {"link_newlib", LINK_NEWLIB_SPEC}, \
+   {"startfile_newlib", STARTFILE_NEWLIB_SPEC}, \
+   {"endfile_newlib", ENDFILE_NEWLIB_SPEC}, \
+   /* used in link spec  */ \
+   {"link_text", LINK_TEXT}, \
+-  {"link_shlib", LINK_SHLIB},
++  {"link_shlib", LINK_SHLIB}, \
++  {"link_thread", LINK_THREAD},
+ 
+ #undef DEFAULT_VTABLE_THUNKS
+ #ifndef USE_GNULIBC_1
+ #define DEFAULT_VTABLE_THUNKS 1
+ #endif
+ 
+diff --git a/gcc/config/rs6000/amigaos.opt b/gcc/config/rs6000/amigaos.opt
+index 30df7d489e867ddb4e62b3d207d8245bdb7f9e1f..73107b5ad79109bdb095f7ca0eaee5e725d2f8fc 100644
+--- a/gcc/config/rs6000/amigaos.opt
++++ b/gcc/config/rs6000/amigaos.opt
+@@ -32,6 +32,24 @@ mcheck68kfuncptr
+ Target Var(CHECK68KFUNCPTR)
+ Generate target checking for function pointers
+ 
+ use-dynld
+ Target Driver
+ Generated binary employs the dynamic linker for shared objects.
++
++Enum
++Name(athread) Type(int) UnknownError(argument %qs to %<-athread%> not recognized)
++
++EnumValue
++Enum(athread) String(single) Value(0)
++
++EnumValue
++Enum(athread) String(native) Value(1)
++
++EnumValue
++Enum(athread) String(pthread) Value(2)
++
++athread=
++Driver RejectNegative Joined Enum(athread)
++Specifies the thread implementation that is linked to the final binary.
++
++; This comment is to ensure we retain the blank line above.
+diff --git a/gcc/config/rs6000/x-amigaos b/gcc/config/rs6000/x-amigaos
+new file mode 100644
+index 0000000000000000000000000000000000000000..a3dd2195809c2ce1fbab8be854f3c987dccc039b
+--- /dev/null
++++ b/gcc/config/rs6000/x-amigaos
+@@ -0,0 +1,16 @@
++# AmigaOS-specific makefile fragment that is included when building a compiler
++# that runs on AmigaOS
++
++ALL_EXECUTABLES=\
++	$(COMPILERS) \
++	gcov$(exeext) \
++	gcov-dump$(exeext) \
++	gcov-tool$(exeext) \
++	lto-wrapper$(exeext) \
++	cpp$(exeext) \
++	xgcc$(exeext) \
++	xg++$(exeext)
++
++# We use the native amiga thread implementation and additionally remove all
++# unneeded sections
++$(ALL_EXECUTABLES) : override LDFLAGS += -athread=native -Wl,--gc-sections
+\ No newline at end of file
+diff --git a/gcc/configure b/gcc/configure
+index e8ecb3b0297bec33cdca816af1c46a3afcfcc9c0..45eee0562c08045deb86b61dec1eacbac2603046 100755
+--- a/gcc/configure
++++ b/gcc/configure
+@@ -12590,13 +12590,13 @@ case ${enable_threads} in
+     target_thread_file='single'
+     ;;
+   yes)
+     # default
+     target_thread_file='single'
+     ;;
+-  aix | dce | lynx | mipssde | posix | rtems | \
++  aix | amigaos | dce | lynx | mipssde | posix | rtems | \
+   single | tpf | vxworks | win32)
+     target_thread_file=${enable_threads}
+     ;;
+   *)
+     echo "${enable_threads} is an unknown thread package" 1>&2
+     exit 1
+diff --git a/gcc/configure.ac b/gcc/configure.ac
+index 96a6f62b0d37fae8faeff8172835c81a234789fb..275b72b50920e74aa82a5af193b4238afacf4b42 100644
+--- a/gcc/configure.ac
++++ b/gcc/configure.ac
+@@ -1922,13 +1922,13 @@ case ${enable_threads} in
+     target_thread_file='single'
+     ;;
+   yes)
+     # default
+     target_thread_file='single'
+     ;;
+-  aix | dce | lynx | mipssde | posix | rtems | \
++  aix | amigaos | dce | lynx | mipssde | posix | rtems | \
+   single | tpf | vxworks | win32)
+     target_thread_file=${enable_threads}
+     ;;
+   *)
+     echo "${enable_threads} is an unknown thread package" 1>&2
+     exit 1
+diff --git a/gcc/doc/invoke.texi b/gcc/doc/invoke.texi
+index 78429aaf94fb874308faf40e5ffe21044aa858b6..978244acf59a2f706abe74a38ba4d9bff4639d6d 100644
+--- a/gcc/doc/invoke.texi
++++ b/gcc/doc/invoke.texi
+@@ -1430,13 +1430,13 @@ See RS/6000 and PowerPC Options.
+ 
+ @emph{zSeries Options}
+ See S/390 and zSeries Options.
+ 
+ @emph{AmigaOS PowerPC options}
+ @gccoptlist{-mcrt=@var{crt}  -mbaserel  -mno-baserel @gol
+--mcheck68kfuncptr}
++-mcheck68kfuncptr -athread=@var{ti}}
+ 
+ @item Code Generation Options
+ @xref{Code Gen Options,,Options for Code Generation Conventions}.
+ @gccoptlist{-fcall-saved-@var{reg}  -fcall-used-@var{reg} @gol
+ -ffixed-@var{reg}  -fexceptions @gol
+ -fnon-call-exceptions  -fdelete-dead-exceptions  -funwind-tables @gol
+@@ -18699,12 +18699,19 @@ Compile for GCN5 Vega 20 devices (gfx906).
+ Specify how many @var{bytes} of stack space will be requested for each GPU
+ thread (wave-front).  Beware that there may be many threads and limited memory
+ available.  The size of the stack allocation may also have an impact on
+ run-time performance.  The default is 32KB when using OpenACC or OpenMP, and
+ 1MB otherwise.
+ 
++@item -athread
++@opindex athread
++
++This option specified which thread implementation should be linked to
++the final executable. You can choose among @samp{single}, @samp{native},
++and @samp{pthread}.
++
+ @end table
+ 
+ @node ARC Options
+ @subsection ARC Options
+ @cindex ARC options
+ 
+diff --git a/libgcc/config/rs6000/t-amigaos b/libgcc/config/rs6000/t-amigaos
+index da1e303eed7e60df883971a610e8904db0df3e23..fa9d22e72161436c81f6a9f687ddaa752f01a966 100644
+--- a/libgcc/config/rs6000/t-amigaos
++++ b/libgcc/config/rs6000/t-amigaos
+@@ -40,6 +40,11 @@ SHLIB_LINK = $(GCC_FOR_TARGET) -shared $(SHLIB_OBJS) -nodefaultlibs $(LIBGCC2_CF
+ 
+ # Install the shared libgcc library, but ensure that the name is libgcc.so
+ SHLIB_INSTALL = \
+ 	$(mkinstalldirs) $(DESTDIR)$(inst_libdir); \
+ 	$(INSTALL_DATA) $(SHLIB_DIR)/$(SHLIB_SONAME) \
+ 	  $(DESTDIR)$(inst_libdir)/libgcc$(SHLIB_EXT);
++
++EXTRA_PARTS += gthr-amigaos-native.o gthr-amigaos-single.o gthr-amigaos-pthread.o
++
++gthr-amigaos-%.o: $(srcdir)/gthr-amigaos-%.c $(srcdir)/gthr-amigaos.h
++	$(gcc_compile) -c $<
+diff --git a/libgcc/configure b/libgcc/configure
+index dd3afb2c95761f53dfa5bc71434e944369ef8a98..c2df42520e7e319627dcfe2a2111345013d53bf1 100755
+--- a/libgcc/configure
++++ b/libgcc/configure
+@@ -5638,12 +5638,13 @@ tm_file="${tm_file_}"
+ 
+ 
+ # Map from thread model to thread header.
+ 
+ case $target_thread_file in
+     aix)	thread_header=config/rs6000/gthr-aix.h ;;
++    amigaos)	thread_header=gthr-amigaos.h ;;
+     dce)	thread_header=config/pa/gthr-dce.h ;;
+     gcn)	thread_header=config/gcn/gthr-gcn.h ;;
+     lynx)	thread_header=config/gthr-lynx.h ;;
+     mipssde)	thread_header=config/mips/gthr-mipssde.h ;;
+     posix)	thread_header=gthr-posix.h ;;
+     rtems)	thread_header=config/gthr-rtems.h ;;
+diff --git a/libgcc/gthr-amigaos-asserts.h b/libgcc/gthr-amigaos-asserts.h
+new file mode 100644
+index 0000000000000000000000000000000000000000..bb6005cd52ef75cc7bfbc276d5d56ec54ed633cd
+--- /dev/null
++++ b/libgcc/gthr-amigaos-asserts.h
+@@ -0,0 +1,8 @@
++#ifndef __cplusplus
++_Static_assert(__atomic_always_lock_free(sizeof(uint32_t), 0), "Access to uint32_t is not lock free");
++_Static_assert(__atomic_always_lock_free(sizeof(char), 0), "Access to char is not lock free");
++_Static_assert(sizeof(__gthread_once_t) >= sizeof(__internal_gthread_once_t), "__gthread_once_t not large enough!");
++_Static_assert(sizeof(__gthread_mutex_t) >= sizeof(__internal_gthread_mutex_t), "__gthread_mutex_t not large enough!");
++_Static_assert(sizeof(__gthread_recursive_mutex_t) >= sizeof(__internal_gthread_mutex_t), "__gthread_recursive_mutex_t not large enough!");
++_Static_assert(sizeof(__gthread_cond_t) >= sizeof(__internal_gthread_cond_t), "__gthread_recursive_mutex_t not large enough!");
++#endif
+diff --git a/libgcc/gthr-amigaos-native.c b/libgcc/gthr-amigaos-native.c
+new file mode 100644
+index 0000000000000000000000000000000000000000..3806359eed9a80027a7b37e79d148cded12ce7b9
+--- /dev/null
++++ b/libgcc/gthr-amigaos-native.c
+@@ -0,0 +1,1017 @@
++/**
++ * This is the native implementation of gcc threads abstraction. The advantage
++ * over the pthreads one is that no pthreads.library is needed.
++ *
++ * (c) 2018 by Sebastian Bauer
++ */
++#define __NOLIBBASE__
++#define __NOGLOBALIFACE__
++
++#include "gthr-amigaos.h"
++
++#include <assert.h>
++#include <errno.h>
++#include <stdint.h>
++#include <string.h>
++#include <sys/time.h>
++
++#include <proto/dos.h>
++#include <proto/exec.h>
++#include <proto/timer.h>
++
++/******************************************************************************/
++
++#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
++
++/******************************************************************************/
++
++#ifdef __cplusplus
++extern "C"
++{
++#endif
++
++/******************************************************************************/
++
++typedef struct
++{
++  union
++  {
++    __gthread_once_t gonce;
++    struct
++    {
++      char done;
++      char started;
++    } i;
++  } u;
++} __internal_gthread_once_t;
++
++typedef struct
++{
++  union
++  {
++    __gthread_mutex_t gmutex;
++    struct
++    {
++      struct SignalSemaphore sem;
++      uint8_t recursive;
++      uint8_t acquired;
++    } i;
++  } u;
++} __internal_gthread_mutex_t;
++
++typedef struct
++{
++  union
++  {
++    __gthread_cond_t gcond;
++    struct
++    {
++      struct threadentry *first_in_cond_wait_list;
++    } i;
++  } u;
++} __internal_gthread_cond_t;
++
++/******************************************************************************/
++
++#include "gthr-amigaos-asserts.h"
++
++/******************************************************************************/
++
++static struct ExecIFace *iexec = 0;
++static struct DOSIFace *idos = 0;
++static struct Library *DOSBase;
++
++static __gthread_once_t libs_once = __GTHREAD_ONCE_INIT;
++
++/**
++ * The init function to open all necessary libs.
++ */
++static void init_libs(void)
++{
++  struct ExecBase *SysBase = *(struct ExecBase **)4;
++  iexec = (struct ExecIFace *)SysBase->MainInterface;
++  DOSBase = iexec->OpenLibrary("dos.library", 0);
++  idos = (struct DOSIFace *)iexec->GetInterface(DOSBase, "main", 1, NULL);
++}
++
++/******************************************************************************/
++
++/* We keep the entries of each key organized as a single linked list */
++struct threadentry
++{
++  struct threadentry *next;
++
++  struct Process *process;
++  int id;
++
++  struct MsgPort *timer_port;
++  struct TimeRequest *timer_io;
++  struct ITimer *itimer;
++
++  /* The task that is going to join us */
++  struct Task *joiner_task;
++
++  /* The call to entry() has already been returned */
++  int finished;
++
++  /* Valid if finished is set */
++  void *result;
++
++  /* Thread is detached (and cannot be joined) */
++  int detached;
++
++  void *(*entry) (void*);
++  void *args;
++
++  /* The next thread in the condition wait list. A thread can only be in one
++   * cond wait list so we can embed the linking in this structure.
++   */
++  struct threadentry *next_in_cond_wait_list;
++};
++
++typedef struct threadentry threadentry_t;
++
++typedef struct
++{
++  struct SignalSemaphore sem;
++
++  /* Singlely-linked list of threads */
++  threadentry_t *threads;
++
++  int next_thread_id;
++} threadstore_t;
++
++/******************************************************************************/
++
++static void
++__gthread_close_timer(threadentry_t *thr);
++
++/******************************************************************************/
++
++int
++__gthread_active_p (void)
++{
++  /* Thread-system is always active as we have to be explicitly linked to the
++   * final binary.
++   */
++  return 1;
++}
++
++/******************************************************************************/
++
++int
++__gthread_once (__gthread_once_t *__once, void (*__func) (void))
++{
++  __internal_gthread_once_t *once = (__internal_gthread_once_t *)__once;
++
++  if (__once == NULL || __func == NULL)
++    return EINVAL;
++
++  if (__atomic_load_1(&once->u.i.done, __ATOMIC_SEQ_CST))
++    return 0;
++
++  if (!__atomic_test_and_set(&once->u.i.started, __ATOMIC_SEQ_CST))
++    {
++      /* Started flag was not set so call func now */
++      __func();
++
++      /* Remember that we are done now. And make all effects prior to this
++       * store visible to all the other clients that will read that we are
++       * actually done.
++       */
++      __atomic_store_1(&once->u.i.done, 1, __ATOMIC_SEQ_CST);
++    }
++  else
++    {
++      while (!__atomic_load_1(&once->u.i.done, __ATOMIC_SEQ_CST))
++        {
++          /* Allow the other thread to progress quickly but iexec may be not available */
++          struct ExecBase *SysBase = *(struct ExecBase **)4;
++          struct ExecIFace *ie = (struct ExecIFace *)SysBase->MainInterface;
++          ie->Reschedule();
++        }
++    }
++  return 0;
++}
++
++/******************************************************************************/
++
++/* We keep the entries of each key organized as a single linked list */
++struct keyentry
++{
++  struct keyentry *next;
++  struct Task *task;
++  const void *data;
++};
++
++typedef struct keyentry keyentry_t;
++
++struct key
++{
++  keyentry_t *first;
++  void (*destroy) (void *);
++};
++
++typedef struct
++{
++  struct SignalSemaphore sem;
++
++  /* Each key is a single slot */
++  struct key *keys;
++
++  /* How many new keys */
++  int num_key_entries;
++
++  /* How many keys are allocated in total */
++  int num_key_entries_allocated;
++
++  /* Pool from which all key entries are allocated */
++  APTR keyentry_pool;
++
++  int num_threads;
++} keystore_t;
++
++static keystore_t *keystore;
++static __gthread_once_t keystore_once = __GTHREAD_ONCE_INIT;
++
++/**
++ * Initialize our keystore.
++ */
++static void init_keystore(void)
++{
++  if (!(keystore = (keystore_t *)iexec->AllocVec (sizeof(*keystore), MEMF_CLEAR)))
++    return;
++  iexec->InitSemaphore(&keystore->sem);
++
++  if (!(keystore->keyentry_pool = iexec->AllocSysObjectTags (ASOT_ITEMPOOL, ASOITEM_ItemSize, sizeof(keyentry_t), TAG_DONE)))
++    goto bailout;
++  return;
++bailout:
++  if (keystore)
++    iexec->FreeVec (keystore);
++  keystore = NULL;
++}
++
++int __gthread_key_create (__gthread_key_t *__key, void (*destroy) (void *))
++{
++  /* Initialize libs */
++  __gthread_once (&libs_once, init_libs);
++
++  /* Initialize our private keystore, but only once */
++  __gthread_once (&keystore_once, init_keystore);
++
++  if (!keystore)
++    return ENOMEM;
++
++  iexec->ObtainSemaphore (&keystore->sem);
++  if (keystore->num_key_entries >= keystore->num_key_entries_allocated)
++    {
++      struct key *new_keys;
++      int new_num_key_entries_allocated = keystore->num_key_entries_allocated * 2 + 4;
++
++      if (!(new_keys = (struct key *)iexec->AllocVec (sizeof(*new_keys) * new_num_key_entries_allocated, 0)))
++        {
++          iexec->ReleaseSemaphore (&keystore->sem);
++          return ENOMEM;
++        }
++      if (keystore->keys)
++        {
++          memcpy (new_keys, keystore->keys, keystore->num_key_entries * sizeof(*new_keys));
++          iexec->FreeVec (keystore->keys);
++        }
++      keystore->keys = new_keys;
++      keystore->num_key_entries_allocated = new_num_key_entries_allocated;
++    }
++  keystore->keys[keystore->num_key_entries].first = NULL;
++  keystore->keys[keystore->num_key_entries].destroy = destroy;
++
++  __key->id = keystore->num_key_entries++;
++
++  iexec->ReleaseSemaphore (&keystore->sem);
++  return 0;
++}
++
++int
++__gthread_key_delete (__gthread_key_t __key)
++{
++  /* Initialize libs */
++  __gthread_once (&libs_once, init_libs);
++
++  iexec->ObtainSemaphore (&keystore->sem);
++
++  /* TODO: Free the occupied storage for each entry */
++  keystore->keys[__key.id].first = NULL;
++
++  iexec->ReleaseSemaphore (&keystore->sem);
++  return 0;
++}
++
++/**
++ * Find the key entry that corresponds to id and task.
++ *
++ * @return the key entry or NULL.
++ */
++static keyentry_t *find_keyentry (int id, struct Task *task)
++{
++  keyentry_t *entry;
++  entry = keystore->keys[id].first;
++  while (entry)
++    {
++      if (entry->task == task)
++          break;
++      entry = entry->next;
++    }
++  return entry;
++}
++
++void *
++__gthread_getspecific (__gthread_key_t __key)
++{
++  struct Task *this_task;
++  keyentry_t *entry;
++
++  /* Initialize libs */
++  __gthread_once (&libs_once, init_libs);
++
++  this_task = iexec->FindTask(NULL);
++
++  iexec->ObtainSemaphoreShared (&keystore->sem);
++  entry = find_keyentry(__key.id, this_task);
++  iexec->ReleaseSemaphore (&keystore->sem);
++  return entry?((void*)entry->data):NULL;
++}
++
++int
++__gthread_setspecific (__gthread_key_t __key, const void *__v)
++{
++  struct Task *this_task;
++  keyentry_t *entry;
++
++  /* Initialize libs */
++  __gthread_once (&libs_once, init_libs);
++
++  this_task = iexec->FindTask(NULL);
++
++  iexec->ObtainSemaphore (&keystore->sem);
++  if (!(entry = find_keyentry(__key.id, this_task)))
++    {
++      /* Specific not found for this task, allocate a new entry */
++      if (!(entry = (keyentry_t *)iexec->ItemPoolAlloc(keystore->keyentry_pool)))
++        {
++          iexec->ReleaseSemaphore (&keystore->sem);
++          return ENOMEM;
++        }
++      entry->task = this_task;
++      /* entry->data will be set in the following */
++      entry->next = keystore->keys[__key.id].first;
++      keystore->keys[__key.id].first = entry;
++    }
++  entry->data = __v;
++  iexec->ReleaseSemaphore (&keystore->sem);
++  return 0;
++}
++
++/******************************************************************************/
++
++int
++__gthread_mutex_destroy (__gthread_mutex_t *__mutex UNUSED)
++{
++  return 0;
++}
++
++int
++__gthread_mutex_init (__gthread_mutex_t *__mutex)
++{
++  __internal_gthread_mutex_t *mx = (__internal_gthread_mutex_t *)__mutex;
++
++  /* Initialize libs */
++  __gthread_once (&libs_once, init_libs);
++
++  iexec->InitSemaphore (&mx->u.i.sem);
++  mx->u.i.recursive = 0;
++  mx->u.i.acquired = 0;
++  return 0;
++}
++
++int
++__gthread_mutex_lock (__gthread_mutex_t *__mutex)
++{
++  __internal_gthread_mutex_t *mx = (__internal_gthread_mutex_t *)__mutex;
++
++  /* Initialize libs */
++  __gthread_once (&libs_once, init_libs);
++
++  iexec->ObtainSemaphore (&mx->u.i.sem);
++  if (!mx->u.i.recursive && mx->u.i.acquired)
++    {
++      /* Deadlock */
++      iexec->DebugPrintF("threadimpl: non-recursive mutex_lock() called twice on the same thread.\n");
++      iexec->ReleaseSemaphore (&mx->u.i.sem);
++      return EBUSY;
++    }
++  mx->u.i.acquired++;
++  return 0;
++}
++
++int
++__gthread_mutex_trylock (__gthread_mutex_t *__mutex)
++{
++  __internal_gthread_mutex_t *mx = (__internal_gthread_mutex_t *)__mutex;
++
++  /* Initialize libs */
++  __gthread_once (&libs_once, init_libs);
++
++  if (iexec->AttemptSemaphore (&mx->u.i.sem))
++    {
++      if (!mx->u.i.recursive && mx->u.i.acquired)
++        {
++          iexec->ReleaseSemaphore (&mx->u.i.sem);
++          return EBUSY;
++        }
++      mx->u.i.acquired++;
++      return 0;
++    }
++  return EBUSY;
++}
++
++int
++__gthread_mutex_unlock (__gthread_mutex_t *__mutex)
++{
++  __internal_gthread_mutex_t *mx = (__internal_gthread_mutex_t *)__mutex;
++
++  /* Initialize libs */
++  __gthread_once (&libs_once, init_libs);
++
++  mx->u.i.acquired--;
++  iexec->ReleaseSemaphore (&mx->u.i.sem);
++  return 0;
++}
++
++/******************************************************************************/
++
++int
++__gthread_recursive_mutex_init (__gthread_recursive_mutex_t *__mutex)
++{
++  int err;
++  if (!(err = __gthread_mutex_init ((__gthread_mutex_t*)__mutex)))
++    {
++      __internal_gthread_mutex_t *mx = (__internal_gthread_mutex_t *)__mutex;
++      mx->u.i.recursive = 1;
++    }
++  return err;
++}
++
++int
++__gthread_recursive_mutex_lock (__gthread_recursive_mutex_t *__mutex)
++{
++  return __gthread_mutex_lock ((__gthread_mutex_t*)__mutex);
++}
++
++int
++__gthread_recursive_mutex_trylock (__gthread_recursive_mutex_t *__mutex)
++{
++  return __gthread_mutex_trylock ((__gthread_mutex_t*)__mutex);
++}
++
++int
++__gthread_recursive_mutex_unlock (__gthread_recursive_mutex_t *__mutex)
++{
++  return __gthread_mutex_unlock ((__gthread_mutex_t*)__mutex);
++}
++
++int
++__gthread_recursive_mutex_destroy (__gthread_recursive_mutex_t *__mutex)
++{
++  return __gthread_mutex_destroy ((__gthread_mutex_t*)__mutex);
++}
++
++/******************************************************************************/
++
++static threadstore_t *threadstore;
++static __gthread_once_t threadstore_once = __GTHREAD_ONCE_INIT;
++
++/**
++ * Allocate data structure for a new thread and prepare it with
++ * a new id.
++ */
++static threadentry_t *__gthread_new_threadentry (void)
++{
++  threadentry_t *thr;
++  int thr_id;
++
++  /* Initialize libs */
++  __gthread_once (&libs_once, init_libs);
++
++  if (!(thr = (threadentry_t *)iexec->AllocVec (sizeof (*thr), MEMF_CLEAR)))
++    return NULL;
++
++  iexec->ObtainSemaphore (&threadstore->sem);
++  thr_id = threadstore->next_thread_id++;
++  iexec->ReleaseSemaphore (&threadstore->sem);
++
++  thr->id = thr_id;
++
++  return thr;
++}
++
++/**
++ * Initialize our threadstore.
++ */
++static void init_threadstore (void)
++{
++  threadentry_t *thr;
++
++  /* Initialize libs */
++  __gthread_once (&libs_once, init_libs);
++
++  if (!(threadstore = (threadstore_t *)iexec->AllocVec (sizeof(*threadstore), MEMF_CLEAR)))
++    return;
++  iexec->InitSemaphore (&threadstore->sem);
++
++  /* Create thread structure for this thread (aka root thread) */
++  if (!(thr = __gthread_new_threadentry ()))
++    goto bailout;
++  thr->process = (struct Process*)iexec->FindTask(NULL);
++
++  threadstore->threads = thr;
++  return;
++bailout:
++  if (threadstore)
++    iexec->FreeVec (threadstore);
++  threadstore = NULL;
++}
++
++static int __gthread_entry(STRPTR args UNUSED, int32 length UNUSED, APTR execbase UNUSED)
++{
++  struct Task *task;
++  threadentry_t *thr;
++  int i;
++
++  /* Initialize libs */
++  __gthread_once (&libs_once, init_libs);
++
++  task = iexec->FindTask (NULL);
++  thr = (threadentry_t *)((struct Process*)task)->pr_Task.tc_UserData;
++
++  /* Wait for the parent task to enqueue the process in the global list */
++  while (!(iexec->Wait (SIGBREAKF_CTRL_F) & SIGBREAKF_CTRL_F));
++
++  thr->result = thr->entry(thr->args);
++
++  /* Invoke destructors of all non-NULL thread specifics */
++  iexec->ObtainSemaphore (&keystore->sem);
++  for (i = 0; i < keystore->num_key_entries; i++)
++    {
++      void (*destroy)(void *);
++      keyentry_t *key;
++
++      if (!(destroy = keystore->keys[i].destroy))
++        continue;
++
++      if (!(key = find_keyentry (i, task)))
++        continue;
++
++      if (key->data)
++        destroy ((void *)key->data);
++    }
++  iexec->ReleaseSemaphore (&keystore->sem);
++
++  __gthread_close_timer (thr);
++
++  thr->finished = 1;
++  return 0;
++}
++
++int
++__gthread_create (__gthread_t *thread, void *(*func) (void*), void *args)
++{
++  threadentry_t *threadentry;
++
++  /* Initialize libs */
++  __gthread_once (&libs_once, init_libs);
++
++  /* Initialize our private threadstore, but only once */
++  __gthread_once (&threadstore_once, init_threadstore);
++
++  if (!threadstore)
++    return ENOMEM;
++
++  if (!(threadentry = __gthread_new_threadentry ()))
++    return ENOMEM;
++
++  threadentry->entry = func;
++  threadentry->args = args;
++
++  threadentry->process = idos->CreateNewProcTags (
++                NP_Entry, __gthread_entry,
++                NP_Child, TRUE,
++                NP_UserData, (int32)threadentry,
++                NP_Input, idos->Input(),
++                NP_Output, idos->Output(),
++                NP_Error, idos->ErrorOutput(),
++                NP_CloseInput,  FALSE,
++                NP_CloseOutput, FALSE,
++                NP_CloseError, FALSE,
++                TAG_DONE);
++
++  iexec->ObtainSemaphore (&threadstore->sem);
++  threadentry->next = threadstore->threads;
++  threadstore->threads = threadentry;
++  iexec->ReleaseSemaphore (&threadstore->sem);
++
++  /* Signal that we have enqueued the task */
++  iexec->Signal (&threadentry->process->pr_Task, SIGBREAKF_CTRL_F);
++
++  *thread = threadentry->id;
++  return 0;
++}
++
++static threadentry_t *find_threadentry_by_process (struct Process *process)
++{
++  threadentry_t *thr;
++  thr = threadstore->threads;
++  while (thr)
++    {
++      if (thr->process == process)
++          break;
++      thr = thr->next;
++    }
++  return thr;
++}
++
++static threadentry_t *find_threadentry_by_id (__gthread_t id)
++{
++  threadentry_t *thr;
++  thr = threadstore->threads;
++  while (thr)
++    {
++      if (thr->id == id)
++          break;
++      thr = thr->next;
++    }
++  return thr;
++}
++
++int
++__gthread_join (__gthread_t thread, void **value_ptr)
++{
++  threadentry_t *thr;
++
++  /* Initialize libs */
++  __gthread_once (&libs_once, init_libs);
++
++  if (!(thr = find_threadentry_by_id (thread)))
++    return ESRCH;
++
++  /* FIXME: This is very ugly, use SIGF_SINGLE */
++  while (!thr->finished)
++    idos->Delay (1);
++
++  if (value_ptr)
++    *value_ptr = thr->result;
++  return 0;
++}
++
++int
++__gthread_detach (__gthread_t thread)
++{
++  threadentry_t *thr = find_threadentry_by_id (thread);
++  thr->detached = 1;
++  return 0;
++}
++
++int
++__gthread_equal (__gthread_t t1, __gthread_t t2)
++{
++  return t1 == t2;
++}
++
++__gthread_t
++__gthread_self (void)
++{
++  struct Task *task;
++  threadentry_t *thr;
++  __gthread_t id;
++
++  /* Initialize libs */
++  __gthread_once (&libs_once, init_libs);
++
++  /* Initialize our private threadstore, but only once */
++  __gthread_once (&threadstore_once, init_threadstore);
++
++  task = iexec->FindTask(NULL);
++  iexec->ObtainSemaphoreShared (&threadstore->sem);
++  if ((thr = find_threadentry_by_process ((struct Process *)task)))
++    {
++      id = thr->id;
++    }
++  else
++    /* FIXME: Record this thread */
++    id = -1;
++
++  iexec->ReleaseSemaphore (&threadstore->sem);
++  return id;
++}
++
++int
++__gthread_yield (void)
++{
++  /* Initialize libs */
++  __gthread_once (&libs_once, init_libs);
++
++  iexec->Reschedule();
++  return 0;
++}
++
++void
++__gthread_close_timer(threadentry_t *thr)
++{
++  /* Initialize libs */
++  __gthread_once (&libs_once, init_libs);
++
++  if (thr->timer_io)
++    {
++      if (thr->timer_io->Request.io_Device)
++        {
++          iexec->CloseDevice (&thr->timer_io->Request);
++        }
++      iexec->FreeSysObject (ASOT_IOREQUEST, thr->timer_io);
++      thr->timer_io = NULL;
++    }
++
++  if (thr->timer_port)
++    {
++      iexec->DeleteMsgPort (thr->timer_port);
++      thr->timer_port = NULL;
++    }
++}
++
++static int
++__gthread_open_timer(threadentry_t **thr_p)
++{
++  threadentry_t *thr;
++  struct Task *task;
++
++  /* Initialize libs */
++  __gthread_once (&libs_once, init_libs);
++
++  task = iexec->FindTask(NULL);
++
++  iexec->ObtainSemaphoreShared (&threadstore->sem);
++  if (!(thr = find_threadentry_by_process((struct Process*)task)))
++    {
++      /* This is not our thread */
++      iexec->ReleaseSemaphore (&threadstore->sem);
++      return -1;
++    }
++  iexec->ReleaseSemaphore (&threadstore->sem);
++
++  /* Only we can open the timer device */
++  if (!thr->timer_port)
++    {
++      if (!(thr->timer_port = iexec->CreateMsgPort ()))
++        goto bailout;
++
++      if (!(thr->timer_io = (struct TimeRequest *)iexec->AllocSysObjectTags (ASOT_IOREQUEST,
++          ASOIOR_Size, sizeof(struct TimeRequest),
++          ASOIOR_ReplyPort, thr->timer_port,
++          TAG_END)))
++        goto bailout;
++
++      if (iexec->OpenDevice(TIMERNAME, UNIT_MICROHZ, &thr->timer_io->Request, 0))
++        goto bailout;
++    }
++
++  *thr_p = thr;
++  return 0;
++bailout:
++  __gthread_close_timer(thr);
++  return -1;
++}
++
++/******************************************************************************/
++
++/**
++ * Remove the given thread from the condition wait list.
++ */
++static void
++__gthread_remove_thread_from_cond_wait_list (__internal_gthread_cond_t *cond, threadentry_t *thr)
++{
++  threadentry_t *cur_thr, *prev_thr;
++
++  prev_thr = NULL;
++  cur_thr = cond->u.i.first_in_cond_wait_list;
++  while (cur_thr)
++    {
++      if (cur_thr == thr)
++        {
++          if (!prev_thr)
++            cond->u.i.first_in_cond_wait_list = cur_thr->next_in_cond_wait_list;
++          else
++            prev_thr->next_in_cond_wait_list = cur_thr->next_in_cond_wait_list;
++          break;
++        }
++
++      prev_thr = cur_thr;
++      cur_thr = cur_thr->next_in_cond_wait_list;
++    }
++}
++
++int
++__gthread_cond_init (__gthread_cond_t *cond)
++{
++  memset(cond, 0, sizeof(*cond));
++  return 0;
++}
++
++int
++__gthread_cond_signal (__gthread_cond_t *__cond)
++{
++  __internal_gthread_cond_t *cond = (__internal_gthread_cond_t *)__cond;
++  threadentry_t *thr;
++
++  /* Initialize libs */
++  __gthread_once (&libs_once, init_libs);
++
++  /* Most of the time, we are called with the same mutex being locked that is
++   * supplied to __gthread_cond_wait(). However,  most of the time is not always,
++   * so we have to make the lists manipulation atomic on our own.
++   */
++  iexec->ObtainSemaphore (&threadstore->sem);
++
++  if ((thr = cond->u.i.first_in_cond_wait_list))
++    {
++      /* Remove us from the list, then signal */
++      cond->u.i.first_in_cond_wait_list = thr->next_in_cond_wait_list;
++      thr->next_in_cond_wait_list = NULL;
++
++      iexec->Signal (&thr->process->pr_Task, SIGF_SINGLE);
++    }
++
++  iexec->ReleaseSemaphore (&threadstore->sem);
++
++  return 0;
++}
++
++int
++__gthread_cond_broadcast (__gthread_cond_t *__cond)
++{
++  /* Initialize libs */
++  __gthread_once (&libs_once, init_libs);
++
++  /* Initialize our private threadstore, but only once */
++  __gthread_once (&threadstore_once, init_threadstore);
++
++  __internal_gthread_cond_t *cond = (__internal_gthread_cond_t *)__cond;
++  threadentry_t *thr;
++
++  /* See __gthread_cond_signal() */
++  iexec->ObtainSemaphore (&threadstore->sem);
++
++  thr = cond->u.i.first_in_cond_wait_list;
++  cond->u.i.first_in_cond_wait_list = NULL;
++
++  while (thr)
++    {
++      threadentry_t *next_thr = thr->next_in_cond_wait_list;
++
++      thr->next_in_cond_wait_list = NULL;
++
++      iexec->Signal (&thr->process->pr_Task, SIGF_SINGLE);
++
++      thr = next_thr;
++    }
++
++  iexec->ReleaseSemaphore (&threadstore->sem);
++
++  return 0;
++}
++
++/**
++ * Prepare cond_wait.
++ */
++static void
++__gthread_cond_wait_prepare (threadentry_t *self_thr, __internal_gthread_cond_t *cond, __gthread_mutex_t *mutex)
++{
++  /* Initialize libs */
++  __gthread_once (&libs_once, init_libs);
++
++  /* Enqueue us into this thread's dedicated cond wait list */
++  iexec->ObtainSemaphore (&threadstore->sem);
++  self_thr->next_in_cond_wait_list = cond->u.i.first_in_cond_wait_list;
++  cond->u.i.first_in_cond_wait_list = self_thr;
++
++  /* Along the way, clear SIGF_SINGLE bit to avoid spurious signals */
++  iexec->SetSignal (0L, SIGF_SINGLE);
++
++  iexec->ReleaseSemaphore (&threadstore->sem);
++
++  /* TODO: Set a condition variable, which the notifier is supposed to change
++   * to avoid more suspsious signals. However, the caller is supposed to check
++   * the condition anyway, so suspsious wakes are perhaps acceptable.
++   */
++  __gthread_mutex_unlock (mutex);
++}
++
++int
++__gthread_cond_wait (__gthread_cond_t *__cond, __gthread_mutex_t *mutex)
++{
++  __internal_gthread_cond_t *cond = (__internal_gthread_cond_t *)__cond;
++  __gthread_t self = __gthread_self ();
++  threadentry_t *self_thr;
++
++  if (!(self_thr = find_threadentry_by_id (self)))
++    return EINVAL;
++
++  __gthread_cond_wait_prepare (self_thr, cond, mutex);
++
++  /* Wait for anyone notifiying us */
++  while (!(iexec->Wait (SIGF_SINGLE) & SIGF_SINGLE));
++
++  __gthread_mutex_lock (mutex);
++
++  /* Receiving the proper SIGF_SINGLE also means that we have been removed from
++   * the cond's waiting list
++   */
++  return 0;
++}
++
++int
++__gthread_cond_timedwait (__gthread_cond_t *__cond,
++                          __gthread_mutex_t *mutex,
++                          const __gthread_time_t *abs_timeout)
++{
++  __internal_gthread_cond_t *cond = (__internal_gthread_cond_t *)__cond;
++  threadentry_t *self_thr;
++  uint32_t timer_mask;
++  struct timeval tv_now;
++  uint32_t sigs;
++  int borrow = 0;
++  int err;
++
++  /* Initialize libs */
++  __gthread_once (&libs_once, init_libs);
++
++  gettimeofday(&tv_now, 0);
++
++  /* Some timer arithmetics. TODO: Verify this! */
++  if (tv_now.tv_usec <= (uint32_t)(abs_timeout->nanoseconds / 1000))
++    tv_now.tv_usec = abs_timeout->nanoseconds / 1000 - tv_now.tv_usec;
++  else
++    {
++      tv_now.tv_usec = 1000000 + abs_timeout->nanoseconds / 1000 - tv_now.tv_usec;
++      borrow = 1;
++    }
++
++  if (tv_now.tv_sec + borrow <= (uint32_t)(abs_timeout->seconds))
++    tv_now.tv_sec = abs_timeout->seconds - (tv_now.tv_sec + borrow);
++  else
++    {
++      tv_now.tv_sec = 0;
++      tv_now.tv_usec = 1;
++    }
++
++  if ((err = __gthread_open_timer (&self_thr)))
++    return err;
++
++  self_thr->timer_io->Request.io_Command = TR_ADDREQUEST;
++  self_thr->timer_io->Time.Seconds = tv_now.tv_sec;
++  self_thr->timer_io->Time.Microseconds = tv_now.tv_usec;
++  iexec->SendIO (&self_thr->timer_io->Request);
++
++  __gthread_cond_wait_prepare (self_thr, cond, mutex);
++
++  /* Wait for anyone notifiying us or a timeout, note that according to
++   * some docs we should not wait on other signals when using SIGF_SINGLE,
++   * but we do it nonetheless.  */
++  timer_mask = 1UL << self_thr->timer_port->mp_SigBit;
++  sigs = iexec->Wait (SIGF_SINGLE | timer_mask);
++
++  if (!(iexec->CheckIO (&self_thr->timer_io->Request)))
++    iexec->AbortIO (&self_thr->timer_io->Request);
++  iexec->WaitIO (&self_thr->timer_io->Request);
++
++  __gthread_mutex_lock (mutex);
++
++  /* Receiving the proper SIGF_SINGLE also means that we have been removed from
++   * the cond's waiting list, but if this was a timeout, we have not yet been
++   * removed. So we remove ourselves. This is safe, even if we have been removed.
++   */
++  if (!(sigs & SIGF_SINGLE))
++    {
++      iexec->ObtainSemaphore (&threadstore->sem);
++      __gthread_remove_thread_from_cond_wait_list (cond, self_thr);
++      iexec->ReleaseSemaphore (&threadstore->sem);
++    }
++  return err;
++}
++
++int
++__gthread_cond_destroy (__gthread_cond_t *__cond UNUSED)
++{
++  return 0;
++}
++
++#ifdef __cplusplus
++}
++#endif
+diff --git a/libgcc/gthr-amigaos-posix.c b/libgcc/gthr-amigaos-posix.c
+new file mode 100644
+index 0000000000000000000000000000000000000000..53caa3c686d42a39324ce79c0555611263f0b141
+--- /dev/null
++++ b/libgcc/gthr-amigaos-posix.c
+@@ -0,0 +1,233 @@
++/**
++ * This is the posix.libraray-based implementation of gcc threads abstraction.
++ */
++
++#include "gthr-amigaos.h"
++
++#include <pthread.h>
++#include <proto/exec.h>
++
++#ifdef __cplusplus
++extern "C"
++{
++#endif
++
++/******************************************************************************/
++
++typedef struct
++{
++  union
++  {
++    __gthread_once_t gonce;
++    pthread_once_t ponce;
++  } u;
++} __internal_gthread_once_t;
++
++typedef struct
++{
++  union
++  {
++    __gthread_mutex_t gmutex;
++    pthread_mutex_t pmutex;
++  } u;
++} __internal_gthread_mutex_t;
++
++typedef struct
++{
++  union
++  {
++    __gthread_cond_t gcond;
++    pthread_cond_t pcond;
++  } u;
++} __internal_gthread_cond_t;
++
++
++/******************************************************************************/
++
++#include "gthr-amigaos-asserts.h"
++
++/******************************************************************************/
++
++int
++__gthread_active_p (void)
++{
++  /* Thread-system is always active as we have to be explicitly linked to the
++   * final binary.
++   */
++  return 1;
++}
++
++int
++__gthread_once (__gthread_once_t *__once, void (*__func) (void))
++{
++  __internal_gthread_once_t *once = (__internal_gthread_once_t *)__once;
++
++  if (__gthread_active_p ())
++    return pthread_once (&once->u.ponce, __func);
++  else
++    return -1;
++}
++
++int
++__gthread_key_create (__gthread_key_t *__key, void (*__func) (void *))
++{
++  int err;
++  pthread_key_t key;
++
++  if ((err = pthread_key_create (&key, __func)))
++    return err;
++  __key->id = key;
++  return 0;
++}
++
++int
++__gthread_key_delete (__gthread_key_t __key)
++{
++  return pthread_key_delete (__key.id);
++}
++
++void *
++__gthread_getspecific (__gthread_key_t __key)
++{
++  return pthread_getspecific (__key.id);
++}
++
++int
++__gthread_setspecific (__gthread_key_t __key, const void *__v)
++{
++  return pthread_setspecific (__key.id, __v);
++}
++
++int
++__gthread_mutex_init (__gthread_mutex_t *__mutex)
++{
++  __internal_gthread_mutex_t *mx = (__internal_gthread_mutex_t *)__mutex;
++
++  return pthread_mutex_init (&mx->u.pmutex, 0);
++}
++
++int
++__gthread_mutex_destroy (__gthread_mutex_t *__mutex)
++{
++  __internal_gthread_mutex_t *mx = (__internal_gthread_mutex_t *)__mutex;
++
++  return pthread_mutex_destroy (&mx->u.pmutex);
++}
++
++int
++__gthread_mutex_lock (__gthread_mutex_t *__mutex)
++{
++  __internal_gthread_mutex_t *mx = (__internal_gthread_mutex_t *)__mutex;
++
++  return pthread_mutex_lock (&mx->u.pmutex);
++}
++
++int
++__gthread_mutex_trylock (__gthread_mutex_t *__mutex)
++{
++  __internal_gthread_mutex_t *mx = (__internal_gthread_mutex_t *)__mutex;
++
++  return pthread_mutex_trylock (&mx->u.pmutex);
++}
++
++int
++__gthread_mutex_unlock (__gthread_mutex_t *__mutex)
++{
++  __internal_gthread_mutex_t *mx = (__internal_gthread_mutex_t *)__mutex;
++
++  return pthread_mutex_unlock (&mx->u.pmutex);
++}
++
++int
++__gthread_recursive_mutex_init (__gthread_recursive_mutex_t *__mutex)
++{
++  __internal_gthread_mutex_t *mx = (__internal_gthread_mutex_t *)__mutex;
++
++  pthread_mutexattr_t attr;
++  int err;
++
++  if ((err = pthread_mutexattr_init (&attr)))
++    return err;
++  if ((err = pthread_mutexattr_settype (&attr, PTHREAD_MUTEX_RECURSIVE)))
++    goto bailout;
++  if ((err = pthread_mutex_init (&mx->u.pmutex, &attr)))
++    goto bailout;
++  return pthread_mutexattr_destroy (&attr);
++bailout:
++  pthread_mutexattr_destroy (&attr);
++  return err;
++}
++
++int
++__gthread_recursive_mutex_lock (__gthread_recursive_mutex_t *__mutex)
++{
++  __internal_gthread_mutex_t *mx = (__internal_gthread_mutex_t *)__mutex;
++  return pthread_mutex_lock (&mx->u.pmutex);
++}
++
++int
++__gthread_recursive_mutex_trylock (__gthread_recursive_mutex_t *__mutex)
++{
++  __internal_gthread_mutex_t *mx = (__internal_gthread_mutex_t *)__mutex;
++  return pthread_mutex_trylock (&mx->u.pmutex);
++}
++
++int
++__gthread_recursive_mutex_unlock (__gthread_recursive_mutex_t *__mutex)
++{
++  __internal_gthread_mutex_t *mx = (__internal_gthread_mutex_t *)__mutex;
++  return pthread_mutex_unlock (&mx->u.pmutex);
++}
++
++int
++__gthread_recursive_mutex_destroy (__gthread_recursive_mutex_t *__mutex)
++{
++  __internal_gthread_mutex_t *mx = (__internal_gthread_mutex_t *)__mutex;
++  return pthread_mutex_destroy (&mx->u.pmutex);
++}
++
++int
++__gthread_create (__gthread_t *thread, void *(*func) (void*), void *args)
++{
++  int err;
++  pthread_t pthread;
++
++  if ((err =  pthread_create (&pthread, NULL, func, args)))
++    return err;
++  *thread = pthread;
++  return 0;
++}
++
++int
++__gthread_join (__gthread_t thread, void **value_ptr)
++{
++  return pthread_join (thread, value_ptr);
++}
++
++int
++__gthread_detach (__gthread_t thread)
++{
++  return pthread_detach (thread);
++}
++
++int
++__gthread_equal (__gthread_t t1, __gthread_t t2)
++{
++  return pthread_equal (t1, t2);
++}
++
++__gthread_t __gthread_self (void)
++{
++  return pthread_self ();
++}
++
++int
++__gthread_yield (void)
++{
++  IExec->Reschedule();
++  return 0;
++}
++
++#ifdef __cplusplus
++}
++#endif
+diff --git a/libgcc/gthr-amigaos-single.c b/libgcc/gthr-amigaos-single.c
+new file mode 100644
+index 0000000000000000000000000000000000000000..d68a3e019fbac94a93a420fcf59476d2563fccbf
+--- /dev/null
++++ b/libgcc/gthr-amigaos-single.c
+@@ -0,0 +1,141 @@
++/**
++ * This is the single-thread implementation of gcc threads abstraction.
++ */
++
++#include "gthr-amigaos.h"
++
++#define UNUSED __attribute__((__unused__))
++
++#ifdef __cplusplus
++extern "C"
++{
++#endif
++
++int
++__gthread_active_p (void)
++{
++  return 0;
++}
++
++int
++__gthread_once (__gthread_once_t *__once UNUSED, void (*__func) (void) UNUSED)
++{
++  return 0;
++}
++
++int UNUSED
++__gthread_key_create (__gthread_key_t *__key UNUSED, void (*__func) (void *) UNUSED)
++{
++  return 0;
++}
++
++int UNUSED
++__gthread_key_delete (__gthread_key_t __key UNUSED)
++{
++  return 0;
++}
++
++void *
++__gthread_getspecific (__gthread_key_t __key UNUSED)
++{
++  return 0;
++}
++
++int
++__gthread_setspecific (__gthread_key_t __key UNUSED, const void *__v UNUSED)
++{
++  return 0;
++}
++
++int
++__gthread_mutex_init (__gthread_mutex_t *__mutex UNUSED)
++{
++  return 0;
++}
++
++int
++__gthread_mutex_destroy (__gthread_mutex_t *__mutex UNUSED)
++{
++  return 0;
++}
++
++int
++__gthread_mutex_lock (__gthread_mutex_t *__mutex UNUSED)
++{
++  return 0;
++}
++
++int
++__gthread_mutex_trylock (__gthread_mutex_t *__mutex UNUSED)
++{
++  return 0;
++}
++
++int
++__gthread_mutex_unlock (__gthread_mutex_t *__mutex UNUSED)
++{
++  return 0;
++}
++
++int
++__gthread_recursive_mutex_init (__gthread_recursive_mutex_t *__mutex UNUSED)
++{
++  return 0;
++}
++
++int
++__gthread_recursive_mutex_lock (__gthread_recursive_mutex_t *__mutex UNUSED)
++{
++  return 0;
++}
++
++int
++__gthread_recursive_mutex_trylock (__gthread_recursive_mutex_t *__mutex UNUSED)
++{
++  return 0;
++}
++
++int
++__gthread_recursive_mutex_unlock (__gthread_recursive_mutex_t *__mutex UNUSED)
++{
++  return 0;
++}
++
++int
++__gthread_recursive_mutex_destroy (__gthread_recursive_mutex_t *__mutex UNUSED)
++{
++  return 0;
++}
++
++int
++__gthread_create (__gthread_t *thread, void *(*func) (void*), void *args UNUSED)
++{
++  return 0;
++}
++
++int
++__gthread_join (__gthread_t thread, void **value_ptr)
++{
++  return 0;
++}
++
++int
++__gthread_detach (__gthread_t thread)
++{
++  return 0;
++}
++
++int
++__gthread_equal (__gthread_t t1, __gthread_t t2)
++{
++  return 0;
++}
++
++__gthread_t __gthread_self (void)
++{
++  return 0;
++}
++
++#ifdef __cplusplus
++}
++#endif
+diff --git a/libgcc/gthr-amigaos.h b/libgcc/gthr-amigaos.h
+new file mode 100644
+index 0000000000000000000000000000000000000000..123d3512abed0a43a8c019bbce0d83f0128a89ec
+--- /dev/null
++++ b/libgcc/gthr-amigaos.h
+@@ -0,0 +1,347 @@
++/* Threads compatibility routines for libgcc2 and libobjc.  */
++/* Compile this one with gcc.  */
++/* Copyright (C) 1997-2018 Free Software Foundation, Inc.
++
++This file is part of GCC.
++
++GCC is free software; you can redistribute it and/or modify it under
++the terms of the GNU General Public License as published by the Free
++Software Foundation; either version 3, or (at your option) any later
++version.
++
++GCC is distributed in the hope that it will be useful, but WITHOUT ANY
++WARRANTY; without even the implied warranty of MERCHANTABILITY or
++FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
++for more details.
++
++Under Section 7 of GPL version 3, you are granted additional
++permissions described in the GCC Runtime Library Exception, version
++3.1, as published by the Free Software Foundation.
++
++You should have received a copy of the GNU General Public License and
++a copy of the GCC Runtime Library Exception along with this program;
++see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
++<http://www.gnu.org/licenses/>.  */
++
++#ifndef GCC_GTHR_AMIGAOS_H
++#define GCC_GTHR_AMIGAOS_H
++
++#include <stdlib.h>
++#include <stdint.h>
++
++typedef struct { int data1, data2; } __gthread_once_t;
++
++typedef struct { long unsigned int id; } __gthread_key_t;
++
++/* Should cover at least as much data as the maximum of sizeof(struct SignalSemaphore)
++ * and sizeof(pthread_mutex_t)
++ */
++typedef struct { char data[48]; } __gthread_mutex_t;
++typedef struct { char data[48]; } __gthread_recursive_mutex_t;
++
++typedef struct { char data[8]; } __gthread_cond_t;
++
++typedef int __gthread_t;
++typedef struct { int seconds; long nanoseconds;} __gthread_time_t;
++
++#define __GTHREADS 1
++#define __GTHREADS_CXX0X 1
++
++#define __GTHREAD_ONCE_INIT {0,0}
++//#define __GTHREAD_MUTEX_INIT 0
++#define __GTHREAD_MUTEX_INIT_FUNCTION(mx) __gthread_mutex_init(mx)
++//#define __GTHREAD_RECURSIVE_MUTEX_INIT 0
++#define __GTHREAD_RECURSIVE_MUTEX_INIT_FUNCTION(mx) __gthread_recursive_mutex_init(mx)
++
++//#define __GTHREAD_COND_INIT 0
++#define __GTHREAD_COND_INIT_FUNCTION(cond) __gthread_cond_init(cond)
++
++#ifdef __cplusplus
++extern "C"
++{
++#endif
++
++#ifdef _LIBOBJC
++
++#ifndef UNUSED
++#define UNUSED __attribute__((__unused__))
++#define UNUSED_DEFINED
++#endif
++
++/* Thread local storage for a single thread */
++static void *thread_local_storage = NULL;
++
++/* Backend initialization functions */
++
++/* Initialize the threads subsystem.  */
++static inline int
++__gthread_objc_init_thread_system (void)
++{
++  /* No thread support available */
++  return -1;
++}
++
++/* Close the threads subsystem.  */
++static inline int
++__gthread_objc_close_thread_system (void)
++{
++  /* No thread support available */
++  return -1;
++}
++
++/* Backend thread functions */
++
++/* Create a new thread of execution.  */
++static inline objc_thread_t
++__gthread_objc_thread_detach (void (* func)(void *), void * arg UNUSED)
++{
++  /* No thread support available */
++  return NULL;
++}
++
++/* Set the current thread's priority.  */
++static inline int
++__gthread_objc_thread_set_priority (int priority UNUSED)
++{
++  /* No thread support available */
++  return -1;
++}
++
++/* Return the current thread's priority.  */
++static inline int
++__gthread_objc_thread_get_priority (void)
++{
++  return OBJC_THREAD_INTERACTIVE_PRIORITY;
++}
++
++/* Yield our process time to another thread.  */
++static inline void
++__gthread_objc_thread_yield (void)
++{
++  return;
++}
++
++/* Terminate the current thread.  */
++static inline int
++__gthread_objc_thread_exit (void)
++{
++  /* No thread support available */
++  /* Should we really exit the program */
++  /* exit (&__objc_thread_exit_status); */
++  return -1;
++}
++
++/* Returns an integer value which uniquely describes a thread.  */
++static inline objc_thread_t
++__gthread_objc_thread_id (void)
++{
++  /* No thread support, use 1.  */
++  return (objc_thread_t) 1;
++}
++
++/* Sets the thread's local storage pointer.  */
++static inline int
++__gthread_objc_thread_set_data (void *value)
++{
++  thread_local_storage = value;
++  return 0;
++}
++
++/* Returns the thread's local storage pointer.  */
++static inline void *
++__gthread_objc_thread_get_data (void)
++{
++  return thread_local_storage;
++}
++
++/* Backend mutex functions */
++
++/* Allocate a mutex.  */
++static inline int
++__gthread_objc_mutex_allocate (objc_mutex_t mutex UNUSED)
++{
++  return 0;
++}
++
++/* Deallocate a mutex.  */
++static inline int
++__gthread_objc_mutex_deallocate (objc_mutex_t mutex UNUSED)
++{
++  return 0;
++}
++
++/* Grab a lock on a mutex.  */
++static inline int
++__gthread_objc_mutex_lock (objc_mutex_t mutex UNUSED)
++{
++  /* There can only be one thread, so we always get the lock */
++  return 0;
++}
++
++/* Try to grab a lock on a mutex.  */
++static inline int
++__gthread_objc_mutex_trylock (objc_mutex_t mutex UNUSED)
++{
++  /* There can only be one thread, so we always get the lock */
++  return 0;
++}
++
++/* Unlock the mutex */
++static inline int
++__gthread_objc_mutex_unlock (objc_mutex_t mutex UNUSED)
++{
++  return 0;
++}
++
++/* Backend condition mutex functions */
++
++/* Allocate a condition.  */
++static inline int
++__gthread_objc_condition_allocate (objc_condition_t condition UNUSED)
++{
++  return 0;
++}
++
++/* Deallocate a condition.  */
++static inline int
++__gthread_objc_condition_deallocate (objc_condition_t condition UNUSED)
++{
++  return 0;
++}
++
++/* Wait on the condition */
++static inline int
++__gthread_objc_condition_wait (objc_condition_t condition UNUSED,
++			       objc_mutex_t mutex UNUSED)
++{
++  return 0;
++}
++
++/* Wake up all threads waiting on this condition.  */
++static inline int
++__gthread_objc_condition_broadcast (objc_condition_t condition UNUSED)
++{
++  return 0;
++}
++
++/* Wake up one thread waiting on this condition.  */
++static inline int
++__gthread_objc_condition_signal (objc_condition_t condition UNUSED)
++{
++  return 0;
++}
++
++#ifndef UNUSED_DEFINED
++#undef UNUSED
++#endif
++
++#else /* _LIBOBJC */
++
++int
++__gthread_active_p (void);
++
++int
++__gthread_once (__gthread_once_t *__once, void (*__func) (void));
++
++int
++__gthread_key_create (__gthread_key_t *__key, void (*destroy) (void *));
++
++int
++__gthread_key_delete (__gthread_key_t __key);
++
++void *
++__gthread_getspecific (__gthread_key_t __key);
++
++int
++__gthread_setspecific (__gthread_key_t __key, const void *__v);
++
++int
++__gthread_mutex_init (__gthread_mutex_t *__mutex);
++
++int
++__gthread_mutex_destroy (__gthread_mutex_t *__mutex);
++
++int
++__gthread_mutex_lock (__gthread_mutex_t *__mutex);
++
++int
++__gthread_mutex_trylock (__gthread_mutex_t *__mutex);
++
++int
++__gthread_mutex_unlock (__gthread_mutex_t *__mutex);
++
++int
++__gthread_recursive_mutex_init (__gthread_recursive_mutex_t *__mutex);
++
++int
++__gthread_recursive_mutex_lock (__gthread_recursive_mutex_t *__mutex);
++
++int
++__gthread_recursive_mutex_trylock (__gthread_recursive_mutex_t *__mutex);
++
++int
++__gthread_recursive_mutex_unlock (__gthread_recursive_mutex_t *__mutex);
++
++int
++__gthread_recursive_mutex_destroy (__gthread_recursive_mutex_t *__mutex);
++
++/******************************************************************************/
++
++int
++__gthread_cond_init (__gthread_cond_t *cond);
++
++int
++__gthread_cond_signal (__gthread_cond_t *__cond);
++
++int
++__gthread_cond_broadcast (__gthread_cond_t *cond);
++
++int
++__gthread_cond_wait (__gthread_cond_t *cond, __gthread_mutex_t *mutex);
++
++int
++__gthread_cond_wait_recursive (__gthread_cond_t *cond,
++                               __gthread_recursive_mutex_t *mutex);
++
++int
++__gthread_cond_timedwait (__gthread_cond_t *cond,
++                            __gthread_mutex_t *mutex,
++                            const __gthread_time_t *abs_timeout);
++
++int
++__gthread_cond_destroy (__gthread_cond_t *__cond);
++
++/******************************************************************************/
++
++int
++__gthread_create (__gthread_t *thread, void *(*func) (void*), void *args);
++
++int
++__gthread_join (__gthread_t thread, void **value_ptr);
++
++int
++__gthread_detach (__gthread_t thread);
++
++int
++__gthread_equal (__gthread_t t1, __gthread_t t2);
++
++__gthread_t
++__gthread_self (void);
++
++int
++__gthread_yield (void);
++
++int
++__gthread_mutex_timedlock (__gthread_mutex_t *m, const __gthread_time_t *abs_timeout);
++
++int
++__gthread_recursive_mutex_timedlock (__gthread_recursive_mutex_t *m,
++                                    const __gthread_time_t *abs_time);
++
++#endif /* _LIBOBJC */
++
++#ifdef __cplusplus
++}
++#endif
++
++#endif /* ! GCC_GTHR_AMIGAOS_H */
+diff --git a/libstdc++-v3/configure b/libstdc++-v3/configure
+index 576c495765d6dc1b50ac15bfb18edb58d5fc3a32..57409c17c8aae7859d9c1c5c7c4097b77f948f84 100755
+--- a/libstdc++-v3/configure
++++ b/libstdc++-v3/configure
+@@ -15694,12 +15694,13 @@ $as_echo_n "checking for thread model used by GCC... " >&6; }
+   target_thread_file=`$CXX -v 2>&1 | sed -n 's/^Thread model: //p'`
+   { $as_echo "$as_me:${as_lineno-$LINENO}: result: $target_thread_file" >&5
+ $as_echo "$target_thread_file" >&6; }
+ 
+ case $target_thread_file in
+     aix)	thread_header=config/rs6000/gthr-aix.h ;;
++    amigaos)	thread_header=gthr-amigaos.h ;;
+     dce)	thread_header=config/pa/gthr-dce.h ;;
+     gcn)	thread_header=config/gcn/gthr-gcn.h ;;
+     lynx)	thread_header=config/gthr-lynx.h ;;
+     mipssde)	thread_header=config/mips/gthr-mipssde.h ;;
+     posix)	thread_header=gthr-posix.h ;;
+     rtems)	thread_header=config/gthr-rtems.h ;;
+-- 
+2.11.0
+

@@ -1,0 +1,33 @@
+From 9d0e224b004a251de67323e1a9aa64bae420ed10 Mon Sep 17 00:00:00 2001
+From: "ola.soder@axis.com" <ola.soder@axis.com>
+Date: Fri, 28 May 2021 16:21:55 +0200
+Subject: [PATCH 34/35] gcc11: Include stdint.h when sys/mman.h is missing.
+
+Since sys/mman.h indirectly includes stdint.h, we need to explicitly
+include stdint.h when sys/mman.h is missing.
+---
+ libgcc/libgcov.h | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/libgcc/libgcov.h b/libgcc/libgcov.h
+index 7b0d367ec52693dec4ea2a798635b3e32fa8f300..fc2a00eb4efb3539f2a4252ad39547ace7126ab6 100644
+--- a/libgcc/libgcov.h
++++ b/libgcc/libgcov.h
+@@ -44,12 +44,14 @@
+ #include "tm.h"
+ #include "libgcc_tm.h"
+ #include "gcov.h"
+ 
+ #if HAVE_SYS_MMAN_H
+ #include <sys/mman.h>
++#else
++#include <stdint.h>
+ #endif
+ 
+ #if __CHAR_BIT__ == 8
+ typedef unsigned gcov_unsigned_t __attribute__ ((mode (SI)));
+ typedef unsigned gcov_position_t __attribute__ ((mode (SI)));
+ #if LONG_LONG_TYPE_SIZE > 32
+-- 
+2.11.0
+

@@ -1,0 +1,345 @@
+From 5f804bcbdeeeb01ccf54a6c731096bd9f723bb71 Mon Sep 17 00:00:00 2001
+From: "ola.soder@axis.com" <ola.soder@axis.com>
+Date: Mon, 15 Mar 2021 15:55:11 +0100
+Subject: [PATCH 33/35] gcc10: Fix libstdc++v3 paths.
+
+---
+ libstdc++-v3/src/c++17/fs_ops.cc  |  17 +++++-
+ libstdc++-v3/src/c++17/fs_path.cc | 108 +++++++++++++++++++++++++++++++++++++-
+ 2 files changed, 122 insertions(+), 3 deletions(-)
+
+diff --git a/libstdc++-v3/src/c++17/fs_ops.cc b/libstdc++-v3/src/c++17/fs_ops.cc
+index 66207ae5e44704d8809910ffc50c56ec73caddab..9b005eb5233e7755d090564eca4ac44f39effeb0 100644
+--- a/libstdc++-v3/src/c++17/fs_ops.cc
++++ b/libstdc++-v3/src/c++17/fs_ops.cc
+@@ -135,25 +135,36 @@ fs::absolute(const path& p, error_code& ec)
+ 
+ namespace
+ {
+ #ifdef _GLIBCXX_FILESYSTEM_IS_WINDOWS
+   inline bool is_dot(wchar_t c) { return c == L'.'; }
+ #else
+-  inline bool is_dot(char c) { return c == '.'; }
++  inline bool is_dot(char c)
++  {
++#ifdef __amigaos4__
++      return c == '\0';
++#else
++      return c == '.';
++#endif
++  }
+ #endif
+ 
+   inline bool is_dot(const fs::path& path)
+   {
+     const auto& filename = path.native();
+     return filename.size() == 1 && is_dot(filename[0]);
+   }
+ 
+   inline bool is_dotdot(const fs::path& path)
+   {
+     const auto& filename = path.native();
++#ifdef __amigaos4__
++    return filename.size() == 1 && filename[0] == '/';
++#else
+     return filename.size() == 2 && is_dot(filename[0]) && is_dot(filename[1]);
++#endif
+   }
+ 
+   struct free_as_in_malloc
+   {
+     void operator()(void* p) const { ::free(p); }
+   };
+@@ -1622,14 +1633,18 @@ fs::path fs::temp_directory_path(error_code& ec)
+   p = std::move(buf);
+ #else
+   const char* tmpdir = nullptr;
+   const char* env[] = { "TMPDIR", "TMP", "TEMP", "TEMPDIR", nullptr };
+   for (auto e = env; tmpdir == nullptr && *e != nullptr; ++e)
+     tmpdir = ::getenv(*e);
++#ifdef __amigaos4__
++  p = tmpdir ? tmpdir : "T:";
++#else
+   p = tmpdir ? tmpdir : "/tmp";
+ #endif
++#endif
+   auto st = status(p, ec);
+   if (ec)
+     p.clear();
+   else if (!is_directory(st))
+     {
+       p.clear();
+diff --git a/libstdc++-v3/src/c++17/fs_path.cc b/libstdc++-v3/src/c++17/fs_path.cc
+index 506ff25f9a6db19ad8062a224c07c61e19f31f22..c557c7d055108771a3a4f74f5e42548993c8e2dd 100644
+--- a/libstdc++-v3/src/c++17/fs_path.cc
++++ b/libstdc++-v3/src/c++17/fs_path.cc
+@@ -77,12 +77,38 @@ struct path::_Parser
+   {
+     pos = 0;
+     pair<cmpt, cmpt> root;
+ 
+     const size_t len = input.size();
+ 
++    /* From the MorphOS SDK */
++#ifdef __amigaos4__
++    // look for root name (:)
++    if (input[0] == ':')
++    {
++        // got root directory
++        root.first.str = input.substr(0, 1);
++        root.first.type = _Type::_Root_dir;
++        ++pos;
++    }
++    // look for volume/device designator
++    else if (len > 1)
++    {
++        const auto despos = input.find_first_of(':', 1);
++        if (despos != input.npos)
++        {
++            // got volume/device designator
++            root.first.str = input.substr(0, despos);
++            root.first.type = _Type::_Root_name;
++
++            root.second.str = input.substr(despos, 1);
++            root.second.type = _Type::_Root_dir;
++            pos = despos + 1;
++        }
++    }
++#else
+     // look for root name or root directory
+     if (len && is_dir_sep(input[0]))
+       {
+ #if SLASHSLASH_IS_ROOTNAME
+ 	// look for root name, such as "//foo"
+ 	if (len > 2 && input[1] == input[0])
+@@ -134,12 +160,13 @@ struct path::_Parser
+ 	    root.second.str = input.substr(2, 1);
+ 	    root.second.type = _Type::_Root_dir;
+ 	  }
+ 	pos = input.find_first_not_of(L"/\\", 2);
+       }
+ #endif
++#endif
+ 
+     if (root.second.valid())
+       last_type = root.second.type;
+     else
+       last_type = root.first.type;
+ 
+@@ -156,12 +183,51 @@ struct path::_Parser
+ 
+     const int last_pos = pos;
+ 
+     cmpt f;
+     if (pos != input.npos)
+       {
++    /* From the MorphOS SDK */
++#ifdef __amigaos4__
++    // foo/bar////bleh
++    // =>
++    // 1. "foo" 2, "bar///" 3. "bleh"
++    pos = input.find_first_of(sep, pos);
++    if (pos != input.npos)
++    {
++        const auto end = input.find_first_not_of(sep, pos);
++        if (end == input.npos)
++        {
++            if (pos == last_pos)
++                // "work:/[/...]" met, include these chars as is
++                f.str = input.substr(last_pos, input.length() - last_pos);
++            else
++                // Remove last / as the path ends to one
++                f.str = input.substr(last_pos, input.length() - 1 - last_pos);
++        }
++        else
++        {
++            if (pos == last_pos)
++                // "work:/[/...]something" met, include these chars as is
++                f.str = input.substr(last_pos, end - last_pos);
++            else
++                f.str = input.substr(last_pos, end - 1 - last_pos);
++        }
++        f.type = _Type::_Filename;
++        pos = end;
++    }
++    else if (last_type == _Type::_Filename || last_type == _Type::_Root_dir ||
++            (last_pos == 0 && !input.empty()))
++    {
++        if (last_pos < input.length())
++        {
++            f.str = input.substr(last_pos);
++            f.type = _Type::_Filename;
++        }
++    }
++#else
+ 	pos = input.find_first_not_of(sep, pos);
+ 	if (pos != input.npos)
+ 	  {
+ 	    const auto end = input.find_first_of(sep, pos);
+ 	    f.str = input.substr(pos, end - pos);
+ 	    f.type = _Type::_Filename;
+@@ -173,12 +239,13 @@ struct path::_Parser
+ 	    // [fs.path.itr]/4 An empty element, if trailing non-root
+ 	    // directory-separator present.
+ 	    __glibcxx_assert(is_dir_sep(input.back()));
+ 	    f.str = input.substr(input.length(), 0);
+ 	    f.type = _Type::_Filename;
+ 	  }
++#endif
+       }
+     last_type = f.type;
+     return f;
+   }
+ 
+   string_view_type::size_type
+@@ -932,15 +999,17 @@ path::operator+=(const path& p)
+ 	  orig_filenamelen = back._M_pathname.length();
+ 	  back._M_pathname += it->_M_pathname;
+ 	  extra = it->_M_pathname;
+ 	  ++it;
+ 	}
+     }
++#ifndef __amigaos4__
+   else if (is_dir_sep(_M_pathname.back()) && _M_type() == _Type::_Multi
+       && _M_cmpts.back()._M_type() == _Type::_Filename)
+     orig_filenamelen = 0; // current path has empty filename at end
++#endif
+ 
+   int capacity = 0;
+   if (_M_type() == _Type::_Multi)
+     capacity += _M_cmpts.size();
+   else
+     capacity += 1;
+@@ -1650,24 +1719,39 @@ path::has_filename() const noexcept
+     }
+   return false;
+ }
+ 
+ namespace
+ {
+-  inline bool is_dot(fs::path::value_type c) { return c == dot; }
++  inline bool is_dot(fs::path::value_type c)
++  {
++#ifdef __amigaos4__
++      return c == '\0';
++#else
++      return c == dot;
++#endif
++  }
+ 
+   inline bool is_dot(const fs::path& path)
+   {
+     const auto& filename = path.native();
++#ifdef __amigaos4__
++    return filename.size() == 0;
++#else
+     return filename.size() == 1 && is_dot(filename[0]);
++#endif
+   }
+ 
+   inline bool is_dotdot(const fs::path& path)
+   {
+     const auto& filename = path.native();
++#ifdef __amigaos4__
++    return filename.size() == 1 && filename[0] == '/';
++#else
+     return filename.size() == 2 && is_dot(filename[0]) && is_dot(filename[1]);
++#endif
+   }
+ } // namespace
+ 
+ path
+ path::lexically_normal() const
+ {
+@@ -1756,23 +1840,25 @@ path::lexically_normal() const
+ 	ret += '/'; // using operator/=('/') would replace whole of ret
+ #endif
+       else
+ 	ret /= p;
+     }
+ 
++#ifndef __amigaos4__
+   if (ret._M_cmpts.size() >= 2)
+     {
+       auto back = std::prev(ret.end());
+       // If the last filename is dot-dot, ...
+       if (back->empty() && is_dotdot(*std::prev(back)))
+ 	// ... remove any trailing directory-separator.
+ 	ret = ret.parent_path();
+     }
+   // If the path is empty, add a dot.
+   else if (ret.empty())
+     ret = ".";
++#endif
+ 
+   return ret;
+ }
+ 
+ path
+ path::lexically_relative(const path& base) const
+@@ -1796,29 +1882,41 @@ path::lexically_relative(const path& base) const
+   if (!base.empty())
+     for (auto i = b, end = base.end(); i != end; ++i)
+       if (i->_M_type() == _Type::_Filename && is_disk_designator(i->native()))
+ 	return ret;
+ #endif
+   if (a == end() && b == base.end())
++#ifdef __amigaos4__
++    ret = "";
++#else
+     ret = ".";
++#endif
+   else
+   {
+     int n = 0;
+     for (; b != base.end(); ++b)
+     {
+       const path& p = *b;
+       if (is_dotdot(p))
+ 	--n;
+       else if (!p.empty() && !is_dot(p))
+ 	++n;
+     }
+     if (n == 0 && (a == end() || a->empty()))
++#ifdef __amigaos4__
++      ret = "";
++#else
+       ret = ".";
++#endif
+     else if (n >= 0)
+     {
++#ifdef __amigaos4__
++      const path dotdot("/");
++#else
+       const path dotdot("..");
++#endif
+       while (n--)
+ 	ret /= dotdot;
+       for (; a != end(); ++a)
+ 	ret /= *a;
+     }
+   }
+@@ -1869,13 +1967,19 @@ path::_M_split_cmpts()
+ 
+   if (_M_pathname.empty())
+     {
+       _M_cmpts.type(_Type::_Filename);
+       return;
+     }
+-  if (_M_pathname.length() == 1 && _M_pathname[0] == preferred_separator)
++  if (_M_pathname.length() == 1 &&
++#ifdef __amigaos4__
++      _M_pathname[0] == ':'
++#else
++      _M_pathname[0] == preferred_separator
++#endif
++     )
+     {
+       _M_cmpts.type(_Type::_Root_dir);
+       return;
+     }
+ 
+   _Parser parser(_M_pathname);
+-- 
+2.11.0
+

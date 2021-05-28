@@ -1,0 +1,207 @@
+From b4e383ad5b64361fd3253231907df96690fa6e16 Mon Sep 17 00:00:00 2001
+From: Sebastian Bauer <mail@sebastianbauer.info>
+Date: Fri, 3 Mar 2017 08:52:48 +0100
+Subject: [PATCH 09/35] Enable libatomic for ppc-amigaos.
+
+It is not really finished yet.
+---
+ libatomic/config/amigaos/host-config.h |  55 ++++++++++++++++++
+ libatomic/config/amigaos/lock.c        | 102 +++++++++++++++++++++++++++++++++
+ libatomic/configure.tgt                |   4 ++
+ 3 files changed, 161 insertions(+)
+ create mode 100644 libatomic/config/amigaos/host-config.h
+ create mode 100644 libatomic/config/amigaos/lock.c
+
+diff --git a/libatomic/config/amigaos/host-config.h b/libatomic/config/amigaos/host-config.h
+new file mode 100644
+index 0000000000000000000000000000000000000000..879758e4eb5594a79b8ee2d25564b19a6f51cd31
+--- /dev/null
++++ b/libatomic/config/amigaos/host-config.h
+@@ -0,0 +1,55 @@
++/* Copyright (C) 2012-2015 Free Software Foundation, Inc.
++   Contributed by Richard Henderson <rth@redhat.com>.
++
++   This file is part of the GNU Atomic Library (libatomic).
++
++   Libatomic is free software; you can redistribute it and/or modify it
++   under the terms of the GNU General Public License as published by
++   the Free Software Foundation; either version 3 of the License, or
++   (at your option) any later version.
++
++   Libatomic is distributed in the hope that it will be useful, but WITHOUT ANY
++   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
++   FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
++   more details.
++
++   Under Section 7 of GPL version 3, you are granted additional
++   permissions described in the GCC Runtime Library Exception, version
++   3.1, as published by the Free Software Foundation.
++
++   You should have received a copy of the GNU General Public License and
++   a copy of the GCC Runtime Library Exception along with this program;
++   see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
++   <http://www.gnu.org/licenses/>.  */
++
++/* Included after all more target-specific host-config.h.  */
++
++
++#ifndef protect_start_end
++# ifdef HAVE_ATTRIBUTE_VISIBILITY
++#  pragma GCC visibility push(hidden)
++# endif
++
++void libat_lock_1 (void *ptr);
++void libat_unlock_1 (void *ptr);
++
++static inline UWORD
++protect_start (void *ptr)
++{
++  libat_lock_1 (ptr);
++  return 0;
++}
++
++static inline void
++protect_end (void *ptr, UWORD dummy UNUSED)
++{
++  libat_unlock_1 (ptr);
++}
++
++# define protect_start_end 1
++# ifdef HAVE_ATTRIBUTE_VISIBILITY
++#  pragma GCC visibility pop
++# endif
++#endif /* protect_start_end */
++
++#include_next <host-config.h>
+diff --git a/libatomic/config/amigaos/lock.c b/libatomic/config/amigaos/lock.c
+new file mode 100644
+index 0000000000000000000000000000000000000000..ffd09f50095429f844bfe6bf7bec8741f56f1a28
+--- /dev/null
++++ b/libatomic/config/amigaos/lock.c
+@@ -0,0 +1,102 @@
++/* Copyright (C) 2012-2015 Free Software Foundation, Inc.
++   Contributed by Richard Henderson <rth@redhat.com>.
++
++   This file is part of the GNU Atomic Library (libatomic).
++
++   Libatomic is free software; you can redistribute it and/or modify it
++   under the terms of the GNU General Public License as published by
++   the Free Software Foundation; either version 3 of the License, or
++   (at your option) any later version.
++
++   Libatomic is distributed in the hope that it will be useful, but WITHOUT ANY
++   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
++   FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
++   more details.
++
++   Under Section 7 of GPL version 3, you are granted additional
++   permissions described in the GCC Runtime Library Exception, version
++   3.1, as published by the Free Software Foundation.
++
++   You should have received a copy of the GNU General Public License and
++   a copy of the GCC Runtime Library Exception along with this program;
++   see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
++   <http://www.gnu.org/licenses/>.  */
++
++#include "libatomic_i.h"
++
++#define UWORD UWORD_
++#include <proto/exec.h>
++
++/* The target page size.  Must be no larger than the runtime page size,
++   lest locking fail with virtual address aliasing (i.e. a page mmaped
++   at two locations).  */
++#ifndef PAGE_SIZE
++#define PAGE_SIZE	4096
++#endif
++
++/* The target cacheline size.  This is an optimization; the padding that
++   should be applied to the locks to keep them from interfering.  */
++#ifndef CACHLINE_SIZE
++#define CACHLINE_SIZE	64
++#endif
++
++/* The granularity at which locks are applied.  Almost certainly the
++   cachline size is the right thing to use here.  */
++#ifndef WATCH_SIZE
++#define WATCH_SIZE	CACHLINE_SIZE
++#endif
++
++struct lock
++{
++  struct SignalSemaphore sem;
++  char initialized;
++  char pad[sizeof(struct SignalSemaphore) + 1 < CACHLINE_SIZE
++	   ? CACHLINE_SIZE - sizeof(struct SignalSemaphore) - 1
++	   : 0];
++};
++
++/* TODO: Use a constructor to initialize the semaphore */
++#define NLOCKS		(PAGE_SIZE / WATCH_SIZE)
++static struct lock locks[NLOCKS];
++
++static inline uintptr_t 
++addr_hash (void *ptr)
++{
++  return ((uintptr_t)ptr / WATCH_SIZE) % NLOCKS;
++}
++
++void
++libat_lock_1 (void *ptr)
++{
++  struct lock *l = &locks[addr_hash (ptr)];
++  IExec->Forbid();
++  if (!l->initialized)
++  {
++    IExec->InitSemaphore(&l->sem);
++    l->initialized = 1;
++  }
++  IExec->Permit();
++  IExec->ObtainSemaphore(&l->sem);
++}
++
++void
++libat_unlock_1 (void *ptr)
++{
++  struct lock *l = &locks[addr_hash (ptr)];
++  IExec->ReleaseSemaphore(&l->sem);
++}
++
++#if 0
++
++/* TODO: Implement me when needed */
++void
++libat_lock_n (void *ptr, size_t n)
++{
++}
++
++void
++libat_unlock_n (void *ptr, size_t n)
++{
++}
++
++#endif
+diff --git a/libatomic/configure.tgt b/libatomic/configure.tgt
+index 670b0d72cfec2027a02347eb5b62521054f264c4..f78d93afba8849adac23d24b152cf400bab400cd 100644
+--- a/libatomic/configure.tgt
++++ b/libatomic/configure.tgt
+@@ -170,12 +170,16 @@ case "${target}" in
+ 
+   *-*-rtems*)
+ 	XCFLAGS="${configure_tgt_pre_target_cpu_XCFLAGS}"
+ 	config_path="rtems"
+ 	;;
+ 
++  *-*-amigaos*)
++	config_path="${config_path} amigaos"
++	;;
++
+   *-*-elf*)
+ 	# ??? No target OS.  We could be targeting bare-metal kernel-mode,
+ 	# or user-mode for some custom OS.  If the target supports TAS,
+ 	# we can build our own spinlocks, given there are no signals.
+ 	# If the target supports disabling interrupts, we can work in
+ 	# kernel-mode, given the system is not multi-processor.
+-- 
+2.11.0
+

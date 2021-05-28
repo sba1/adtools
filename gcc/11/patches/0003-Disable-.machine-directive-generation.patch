@@ -1,0 +1,37 @@
+From 6e9715268bc4bdbdf0b40f8050d51d21321357f2 Mon Sep 17 00:00:00 2001
+From: Sebastian Bauer <mail@sebastianbauer.info>
+Date: Thu, 9 Jul 2015 06:54:37 +0200
+Subject: [PATCH 03/35] Disable .machine directive generation.
+
+It breaks manual args to the assembler with different flavor,
+e.g., -Wa,-m440. This is probably not the right fix.
+
+This reverts parts of a commit from 2015-03-03.
+---
+ gcc/config/rs6000/rs6000.c | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
+
+diff --git a/gcc/config/rs6000/rs6000.c b/gcc/config/rs6000/rs6000.c
+index 27be17fa981c2d09489da244192404d7a8dc4c4e..d740c25ee96b1413ccf0596087646b4341982709 100644
+--- a/gcc/config/rs6000/rs6000.c
++++ b/gcc/config/rs6000/rs6000.c
+@@ -5863,15 +5863,13 @@ rs6000_file_start (void)
+ 	putc ('\n', file);
+     }
+ 
+ #ifdef USING_ELFOS_H
+   rs6000_machine = rs6000_machine_from_flags ();
+   emit_asm_machine ();
+-  /* AmigaOS: This was temporarily disabled to not override e.g., -mcpu=440 */
+-  /* Not entirely sure why, but there might be a good reason so consider this
+-   * a FIXME. Refer to patches for gcc <= 9. */
++  /* AmigaOS: FIXME: The 'Disable .machine directive generation' is temporarily disabled. */
+ #endif
+ 
+   if (DEFAULT_ABI == ABI_ELFv2)
+     fprintf (file, "\t.abiversion 2\n");
+ }
+ 
+-- 
+2.11.0
+
