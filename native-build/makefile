@@ -461,7 +461,7 @@ upload-release: native-dist
 
 .PHONY: clean-clib2
 clean-clib2:
-	$(MAKE) -C $(CLIB2_DIR) -f GNUmakefile.os4 clean
+	test ! -d $(CLIB2_DIR) && true || $(MAKE) -C $(CLIB2_DIR) -f GNUmakefile.os4 clean
 
 #
 # Cleanup gcc only
