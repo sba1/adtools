@@ -1,0 +1,264 @@
+From 8e19c0d58fa8ba425812a4b38dc74d92b03f8d26 Mon Sep 17 00:00:00 2001
+From: Sebastian Bauer <mail@sebastianbauer.info>
+Date: Sat, 27 Oct 2018 08:06:21 +0200
+Subject: [PATCH 25/35] Add aregparam attribute for functions for the m68k
+ backend.
+
+These can be used to pass arguments to directly named registers.
+This patch is based on changes that can be found in the mooli/gcc-amiga
+GitHub repository.
+---
+ gcc/config/m68k/m68k-protos.h |   7 +++
+ gcc/config/m68k/m68k.c        | 111 +++++++++++++++++++++++++++++++++++++++++-
+ gcc/config/m68k/m68k.h        |  27 ++++++----
+ 3 files changed, 134 insertions(+), 11 deletions(-)
+
+diff --git a/gcc/config/m68k/m68k-protos.h b/gcc/config/m68k/m68k-protos.h
+index 17861665fd438bfbb1eb9f3276bfee2c46e785b2..9b1152e5592eb9043d6971b5dc3a6a06f5591e33 100644
+--- a/gcc/config/m68k/m68k-protos.h
++++ b/gcc/config/m68k/m68k-protos.h
+@@ -111,6 +111,13 @@ extern const char *m68k_cpp_cpu_ident (const char *);
+ extern const char *m68k_cpp_cpu_family (const char *);
+ extern void init_68881_table (void);
+ extern rtx m68k_legitimize_call_address (rtx);
+ extern rtx m68k_legitimize_sibcall_address (rtx);
+ extern int m68k_hard_regno_rename_ok(unsigned int, unsigned int);
+ extern poly_int64 m68k_push_rounding (poly_int64);
++
++
++#ifdef TREE_CODE
++#ifdef RTX_CODE /* inside TREE_CODE */
++extern void m68k_init_cumulative_args (CUMULATIVE_ARGS*, tree, rtx, tree, int);
++#endif /* RTX_CODE inside TREE_CODE */
++#endif /* TREE_CODE */
+diff --git a/gcc/config/m68k/m68k.c b/gcc/config/m68k/m68k.c
+index 40bdcb052f8fbb8e454a90dc9d66d2a7bf048d9a..d7498465b1ee7f89b39a993975b89737539c8e44 100644
+--- a/gcc/config/m68k/m68k.c
++++ b/gcc/config/m68k/m68k.c
+@@ -361,12 +361,14 @@ static void m68k_asm_final_postscan_insn (FILE *, rtx_insn *insn, rtx [], int);
+ #define TARGET_ASM_FINAL_POSTSCAN_INSN m68k_asm_final_postscan_insn
+ 
+ static const struct attribute_spec m68k_attribute_table[] =
+ {
+   /* { name, min_len, max_len, decl_req, type_req, fn_type_req,
+        affects_type_identity, handler, exclude } */
++  { "aregparam", 1, 16, false, false, false, false,
++    m68k_handle_fndecl_attribute, NULL },
+   { "interrupt", 0, 0, true,  false, false, false,
+     m68k_handle_fndecl_attribute, NULL },
+   { "interrupt_handler", 0, 0, true,  false, false, false,
+     m68k_handle_fndecl_attribute, NULL },
+   { "interrupt_thread", 0, 0, true,  false, false, false,
+     m68k_handle_fndecl_attribute, NULL },
+@@ -1382,18 +1384,102 @@ m68k_reg_present_p (const_rtx parallel, unsigned int regno)
+ 	return true;
+     }
+ 
+   return false;
+ }
+ 
++/* Map register names from strings to their index used through code the
++ * rest of the code. */
++
++static int m68k_register (const char *regname)
++{
++  if (regname[0] == 'a' || regname[0] == 'A')
++    {
++      if (regname[1] >= '0' && regname[1] <= '7' && !regname[2])
++        return regname[1] - '0' + A0_REG;
++    }
++  else if (regname[0] == 'd' || regname[0] == 'D')
++    {
++      if (regname[1] >= '0' && regname[1] <= '7' && !regname[2])
++        return regname[1] - '0' + D0_REG;
++    }
++  return -1;
++}
++
++/* Store the registers mentioned in the aregparam attribute in the
++ * order of their appearance in the regparams array but not more
++ * than regparams_max_count. Return the number of actually written
++ * entries */
++
++static int
++m68k_regparams (tree fndecl, int *regparams, int regparams_max_count)
++{
++  int regparams_count = 0;
++
++  if (fndecl == NULL_TREE)
++    return 0;
++  if (TREE_CODE (fndecl) != FUNCTION_DECL)
++    return 0;
++
++  tree attrs = DECL_ATTRIBUTES (fndecl);
++
++  tree attr;
++  if ((attr = lookup_attribute ("aregparam", attrs)))
++    {
++      /* Scan list of registers */
++      tree parms = TREE_VALUE (attr);
++      while (parms != NULL_TREE)
++        {
++          if (TREE_CODE (parms) == TREE_LIST)
++            {
++              if (regparams_count == regparams_max_count)
++                return regparams_count;
++
++              tree reg = TREE_VALUE (parms);
++              if (TREE_CODE (reg) == STRING_CST)
++                {
++                  const char *regname = TREE_STRING_POINTER (reg);
++                  int regno = m68k_register(regname);
++
++                  if (regno != -1)
++                    {
++                      regparams[regparams_count] = regno;
++                      regparams_count++;
++                    } else
++                    {
++                      error ("Unknown register %s", regname);
++                    }
++                } else if (TREE_CODE(reg) == INTEGER_CST)
++                {
++                  int regno = tree_to_shwi(reg);
++                  if (regno >= 0 && regno < 16)
++                    {
++                      regparams[regparams_count] = regno;
++                      regparams_count++;
++                    } else
++                    {
++                      error ("Register value must be between 0 and 16 (inclusive), it was %d", regno);
++                    }
++                }
++            }
++
++            parms = TREE_CHAIN(parms);
++        }
++    }
++  return regparams_count;
++}
++
+ /* Implement TARGET_FUNCTION_OK_FOR_SIBCALL_P.  */
+ 
+ static bool
+ m68k_ok_for_sibcall_p (tree decl, tree exp)
+ {
+   enum m68k_function_kind kind;
++  int regparams_count;
++  int regparams[24];
++  int i;
+   
+   /* We cannot use sibcalls for nested functions because we use the
+      static chain register for indirect calls.  */
+   if (CALL_EXPR_STATIC_CHAIN (exp))
+     return false;
+ 
+@@ -1414,12 +1500,21 @@ m68k_ok_for_sibcall_p (tree decl, tree exp)
+       if (!(rtx_equal_p (cfun_value, call_value)
+ 	    || (REG_P (cfun_value)
+ 		&& m68k_reg_present_p (call_value, REGNO (cfun_value)))))
+ 	return false;
+     }
+ 
++  /* Also don't optimize if the sibling uses non-clobber registers */
++  regparams_count = m68k_regparams (decl, regparams, sizeof (regparams) / sizeof (regparams[0]));
++  for (i = 0; i < regparams_count; i++)
++    {
++      static const char call_used_registers[] = CALL_USED_REGISTERS;
++      if (!call_used_registers[regparams[i]])
++        return false;
++    }
++
+   kind = m68k_get_function_kind (current_function_decl);
+   if (kind == m68k_fk_normal_function)
+     /* We can always sibcall from a normal function, because it's
+        undefined if it is calling an interrupt function.  */
+     return true;
+ 
+@@ -1428,24 +1523,38 @@ m68k_ok_for_sibcall_p (tree decl, tree exp)
+   if (decl && m68k_get_function_kind (decl) == kind)
+     return true;
+   
+   return false;
+ }
+ 
+-/* On the m68k all args are always pushed.  */
++
++/* On the m68k all args are always pushed, except if the function is attributed
++   with aregparam which can be used to select the registers specificly */
++
++void
++m68k_init_cumulative_args (m68k_args *cum, tree fntype, rtx_def *, tree fndecl, int caller)
++{
++  memset(cum, 0, sizeof(*cum));
++
++  cum->regparams_count = m68k_regparams (fndecl, cum->regparams, sizeof(cum->regparams)/sizeof(cum->regparams[0]));
++}
+ 
+ static rtx
+ m68k_function_arg (cumulative_args_t, const function_arg_info &)
+ {
++  // FIXME: 'Add aregparam attribute for functions for the m68k backend.'
++  // could not be applied.
+   return NULL_RTX;
+ }
+ 
+ static void
+ m68k_function_arg_advance (cumulative_args_t cum_v,
+ 			   const function_arg_info &arg)
+ {
++  // FIXME: 'Add aregparam attribute for functions for the m68k backend.'
++  // could not be applied.
+   CUMULATIVE_ARGS *cum = get_cumulative_args (cum_v);
+ 
+   *cum += (arg.promoted_size_in_bytes () + 3) & ~3;
+ }
+ 
+ /* Convert X to a legitimate function call memory reference and return the
+diff --git a/gcc/config/m68k/m68k.h b/gcc/config/m68k/m68k.h
+index 8dfa3a9bb4c8f9ba8eca411bdc46580f0f511ea1..863cc7e967f13256fd3fdeffbd1a9ebdf97c27ef 100644
+--- a/gcc/config/m68k/m68k.h
++++ b/gcc/config/m68k/m68k.h
+@@ -484,22 +484,29 @@ extern enum reg_class regno_reg_class[];
+ 
+ /* Define this to be true when FUNCTION_VALUE_REGNO_P is true for
+    more than one register.
+    XXX This macro is m68k specific and used only for m68kemb.h.  */
+ #define NEEDS_UNTYPED_CALL 0
+ 
+-/* On the m68k, all arguments are usually pushed on the stack.  */
+-#define FUNCTION_ARG_REGNO_P(N) 0
+-
+-/* On the m68k, this is a single integer, which is a number of bytes
+-   of arguments scanned so far.  */
+-#define CUMULATIVE_ARGS int
+-
+-/* On the m68k, the offset starts at 0.  */
+-#define INIT_CUMULATIVE_ARGS(CUM, FNTYPE, LIBNAME, INDIRECT, N_NAMED_ARGS) \
+- ((CUM) = 0)
++/* On the m68k, all arguments can be passed via registers via aregparam
++ * attribute. Usually, they are passed on the stack though.
++.*/
++#define FUNCTION_ARG_REGNO_P(N) 1
++
++typedef struct m68k_args {
++    int bytes;			/* bytes of arguments scanned so far */
++    int regparams[24];		/* maximal 24 registers, i.e., A0-A7,D0-D7,FP0-FP7 */
++    size_t regparams_count;	/* number of valid entries of regparams */
++    size_t regparams_next;	/* index to regparams which to use next */
++} CUMULATIVE_ARGS;
++ /* Initialize a variable CUM of type CUMULATIVE_ARGS
++   for a call to a function whose data type is FNTYPE.
++   For a library call, FNTYPE is 0.  */
++#define INIT_CUMULATIVE_ARGS(CUM, FNTYPE, LIBNAME, FNDECL, N_NAMED_ARGS) \
++    m68k_init_cumulative_args (&(CUM), (FNTYPE), (LIBNAME), (FNDECL), \
++	(N_NAMED_ARGS) != -1)
+ 
+ #define FUNCTION_PROFILER(FILE, LABELNO)  \
+   asm_fprintf (FILE, "\tlea %LLP%d,%Ra0\n\tjsr mcount\n", (LABELNO))
+ 
+ #define EXIT_IGNORE_STACK 1
+ 
+-- 
+2.11.0
+

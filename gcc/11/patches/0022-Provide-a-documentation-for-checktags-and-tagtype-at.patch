@@ -1,0 +1,71 @@
+From f4361ca83957147ad83cfd948c1a9d29d3c66fad Mon Sep 17 00:00:00 2001
+From: Sebastian Bauer <mail@sebastianbauer.info>
+Date: Sun, 29 Apr 2018 00:08:22 +0200
+Subject: [PATCH 22/35] Provide a documentation for checktags and tagtype
+ attributes.
+
+---
+ gcc/doc/extend.texi | 28 ++++++++++++++++++++++++++++
+ 1 file changed, 28 insertions(+)
+
+diff --git a/gcc/doc/extend.texi b/gcc/doc/extend.texi
+index 0a2e5097698c919268d35e7909de817af95926ec..27950dc17a14d928c51cf2dbf34d6d524803b936 100644
+--- a/gcc/doc/extend.texi
++++ b/gcc/doc/extend.texi
+@@ -4211,12 +4211,24 @@ int VARARGS68K __amigaos4_check68k_trampoline(int num_args,
+     va_end(args);
+ 
+     return(result);
+ @}
+ @end smallexample
+ 
++@anchor{checktags}
++@item checktags
++@cindex @code{checktags} function attribute
++The @code{checktags} tells the some parameters of the function are
++taglists. In turn it will enable tag-type checking at compile-time, by
++leveraging the extra information provded to enum-defined tags to which
++a @code{tagtype} attribute is associated. The check assumes that if a
++parameter is an integer constant to which a type is associated, then
++it must be followed by an argument of that type. If that is not the
++case, the usual compiling warning about mismatched types will be
++emitted.
++
+ @item weak
+ @cindex @code{weak} function attribute
+ The @code{weak} attribute causes a declaration of an external symbol
+ to be emitted as a weak symbol rather than a global.  This is primarily
+ useful in defining library functions that can be overridden in user code,
+ though it can also be used with non-function declarations.  The overriding
+@@ -9068,12 +9080,28 @@ is used anywhere in the source file.  This is useful when identifying
+ enumerators that are expected to be removed in a future version of a
+ program.  The warning also includes the location of the declaration
+ of the deprecated enumerator, to enable users to easily find further
+ information about why the enumerator is deprecated, or what they should
+ do instead.  Note that the warnings only occurs for uses.
+ 
++@item tagtype
++@cindex @code{tagtype} enumerator attribute
++The @code{tagtype} attribute will associate an additional type to the
++enumerator constant that is leveraged by the compiler for
++@code{checktags}-attributed functions. For example, to define
++@code{WA_CustomScreen} and to teach that it it should be followed by a
++@code{struct Screen *} in that class of functions use:
++
++@smallexample
++enum @{
++  WA_CustomScreen __attribute__((tagtype(struct Screen *)))
++@};
++@end smallexample
++
++For more information, @pxref{checktags}.
++
+ @end table
+ 
+ @node Statement Attributes
+ @section Statement Attributes
+ @cindex Statement Attributes
+ 
+-- 
+2.11.0
+

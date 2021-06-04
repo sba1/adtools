@@ -1,0 +1,42 @@
+From 5ff9e537449fa4f8019a93945fdeb8e02f0ff75b Mon Sep 17 00:00:00 2001
+From: "ola.soder@axis.com" <ola.soder@axis.com>
+Date: Sat, 2 Jan 2021 22:07:45 +0100
+Subject: [PATCH 29/35] gcc10: Define CC1_SPEC.
+
+---
+ gcc/config/rs6000/amigaos.h | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+
+diff --git a/gcc/config/rs6000/amigaos.h b/gcc/config/rs6000/amigaos.h
+index 1731d3263ced055f39eb150e375392d055acd125..eacc455e168c4bf46522151148bc72c09a199485 100644
+--- a/gcc/config/rs6000/amigaos.h
++++ b/gcc/config/rs6000/amigaos.h
+@@ -79,12 +79,25 @@
+ %{mcpu=860: -mppc} \
+ %{mcpu=970: -mpower4 -maltivec} \
+ %{mcpu=G5: -mpower4 -maltivec} \
+ %{mcpu=8540: -me500} \
+ %{maltivec: -maltivec}"
+ 
++#undef CC1_SPEC
++#define        CC1_SPEC "%{G*} %(cc1_cpu)" \
++"%{g: %{!fno-eliminate-unused-debug-symbols: -feliminate-unused-debug-symbols}} \
++%{g1: %{!fno-eliminate-unused-debug-symbols: -feliminate-unused-debug-symbols}} \
++%{msdata: -msdata=default} \
++%{mno-sdata: -msdata=none} \
++%{!mbss-plt: %{!msecure-plt: %(cc1_secure_plt_default)}} \
++%{profile: -p} \
++%{faltivec:-maltivec -include altivec.h} %{fno-altivec:-mno-altivec} \
++%<faltivec %<fno-altivec \
++%{vec:-maltivec -include altivec.h} %{fno-vec:-mno-altivec} \
++%<fvec %<fno-vec "
++
+ #define IS_MCRT(MCRTNAME) \
+   (strcmp(amigaos_crt, MCRTNAME) == 0)
+ 
+ /* Make most of the definitions from other compilers available */
+ #undef TARGET_OS_CPP_BUILTINS
+ #define TARGET_OS_CPP_BUILTINS()                \
+-- 
+2.11.0
+

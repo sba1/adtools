@@ -1,0 +1,34 @@
+From 6f3ef4df7ccf44a827677d2b0544dd61c7233925 Mon Sep 17 00:00:00 2001
+From: "ola.soder@axis.com" <ola.soder@axis.com>
+Date: Fri, 8 Jan 2021 01:02:33 +0100
+Subject: [PATCH 30/35] gcc10: Link lto-dump with -athread=native.
+
+---
+ gcc/config/rs6000/x-amigaos | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/gcc/config/rs6000/x-amigaos b/gcc/config/rs6000/x-amigaos
+index a3dd2195809c2ce1fbab8be854f3c987dccc039b..6d9efb985ff5619c741e44edaf5431b99585b007 100644
+--- a/gcc/config/rs6000/x-amigaos
++++ b/gcc/config/rs6000/x-amigaos
+@@ -3,14 +3,15 @@
+ 
+ ALL_EXECUTABLES=\
+ 	$(COMPILERS) \
+ 	gcov$(exeext) \
+ 	gcov-dump$(exeext) \
+ 	gcov-tool$(exeext) \
++	lto-dump$(exeext) \
+ 	lto-wrapper$(exeext) \
+ 	cpp$(exeext) \
+ 	xgcc$(exeext) \
+ 	xg++$(exeext)
+ 
+ # We use the native amiga thread implementation and additionally remove all
+ # unneeded sections
+-$(ALL_EXECUTABLES) : override LDFLAGS += -athread=native -Wl,--gc-sections
+\ No newline at end of file
++$(ALL_EXECUTABLES) : override LDFLAGS += -athread=native -Wl,--gc-sections
+-- 
+2.11.0
+
