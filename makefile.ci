@@ -1,3 +1,7 @@
+BINUTILS_VERSION=2.23.2
+GCC_VERSION=8
+COREUTILS_VERSION=5.2
+
 .PHONY: all
 all:
 
@@ -14,9 +18,9 @@ build-setup:
 	wget http://mirrors.kernel.org/ubuntu/pool/multiverse/l/lha/lha_1.14i-10.3_amd64.deb
 	sudo dpkg -i lha_1.14i-10.3_amd64.deb
 	./bin/gild clone coreutils
-	./bin/gild checkout coreutils 5.2
-	./bin/gild checkout binutils 2.23.2
-	./bin/gild checkout gcc 8
+	./bin/gild checkout coreutils $(COREUTILS_VERSION)
+	./bin/gild checkout binutils $(BINUTILS_VERSION)
+	./bin/gild checkout gcc $(GCC_VERSION)
 
 .PHONY: ci-native
 ci-native:
