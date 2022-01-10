@@ -1,4 +1,4 @@
-From 5ff9e537449fa4f8019a93945fdeb8e02f0ff75b Mon Sep 17 00:00:00 2001
+From 8d844307bb0c80be96f8503b0aefad4eb38fa2ec Mon Sep 17 00:00:00 2001
 From: "ola.soder@axis.com" <ola.soder@axis.com>
 Date: Sat, 2 Jan 2021 22:07:45 +0100
 Subject: [PATCH 29/35] gcc10: Define CC1_SPEC.
@@ -38,5 +38,5 @@ index 1731d3263ced055f39eb150e375392d055acd125..eacc455e168c4bf46522151148bc72c0
  #undef TARGET_OS_CPP_BUILTINS
  #define TARGET_OS_CPP_BUILTINS()                \
 -- 
-2.11.0
+2.20.1
 

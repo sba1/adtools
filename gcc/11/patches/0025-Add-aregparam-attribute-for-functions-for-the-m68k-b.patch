@@ -1,4 +1,4 @@
-From 8e19c0d58fa8ba425812a4b38dc74d92b03f8d26 Mon Sep 17 00:00:00 2001
+From b0d35a81a741b213f09fb532dd90dbd64d7c6b4b Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Sat, 27 Oct 2018 08:06:21 +0200
 Subject: [PATCH 25/35] Add aregparam attribute for functions for the m68k
@@ -9,8 +9,8 @@ This patch is based on changes that can be found in the mooli/gcc-amiga
 GitHub repository.
 ---
  gcc/config/m68k/m68k-protos.h |   7 +++
- gcc/config/m68k/m68k.c        | 111 +++++++++++++++++++++++++++++++++++++++++-
- gcc/config/m68k/m68k.h        |  27 ++++++----
+ gcc/config/m68k/m68k.c        | 111 +++++++++++++++++++++++++++++++++-
+ gcc/config/m68k/m68k.h        |  27 ++++++---
  3 files changed, 134 insertions(+), 11 deletions(-)
 
 diff --git a/gcc/config/m68k/m68k-protos.h b/gcc/config/m68k/m68k-protos.h
@@ -260,5 +260,5 @@ index 8dfa3a9bb4c8f9ba8eca411bdc46580f0f511ea1..863cc7e967f13256fd3fdeffbd1a9ebd
  #define EXIT_IGNORE_STACK 1
  
 -- 
-2.11.0
+2.20.1
 

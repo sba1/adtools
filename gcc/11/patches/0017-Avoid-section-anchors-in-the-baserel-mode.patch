@@ -1,4 +1,4 @@
-From 85a6d4141f3351e7e9e933ea0874934e3f58562a Mon Sep 17 00:00:00 2001
+From e4362bd079be61e99bdee767f91d91ea6a8b0119 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Thu, 19 Apr 2018 21:00:30 +0200
 Subject: [PATCH 17/35] Avoid section anchors in the baserel mode.
@@ -77,5 +77,5 @@ index 1153ece337930f7bbf5f9978bf6f3faf2138bda6..d339c4280b67d863ec9c60dd38230d7b
  
  #undef INIT_CUMULATIVE_INCOMING_ARGS
 -- 
-2.11.0
+2.20.1
 

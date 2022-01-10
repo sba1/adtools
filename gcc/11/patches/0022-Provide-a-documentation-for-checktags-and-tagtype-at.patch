@@ -1,4 +1,4 @@
-From f4361ca83957147ad83cfd948c1a9d29d3c66fad Mon Sep 17 00:00:00 2001
+From 36245be768c6f0ad305ce93a029a804cbfa64f87 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Sun, 29 Apr 2018 00:08:22 +0200
 Subject: [PATCH 22/35] Provide a documentation for checktags and tagtype
@@ -9,7 +9,7 @@ Subject: [PATCH 22/35] Provide a documentation for checktags and tagtype
  1 file changed, 28 insertions(+)
 
 diff --git a/gcc/doc/extend.texi b/gcc/doc/extend.texi
-index 0a2e5097698c919268d35e7909de817af95926ec..27950dc17a14d928c51cf2dbf34d6d524803b936 100644
+index 601a15575b34f880bfd01b0146b1b3725ecf81bc..3e315f3419f05f65d5416f702e2ea03684a51abd 100644
 --- a/gcc/doc/extend.texi
 +++ b/gcc/doc/extend.texi
 @@ -4211,12 +4211,24 @@ int VARARGS68K __amigaos4_check68k_trampoline(int num_args,
@@ -67,5 +67,5 @@ index 0a2e5097698c919268d35e7909de817af95926ec..27950dc17a14d928c51cf2dbf34d6d52
  @cindex Statement Attributes
  
 -- 
-2.11.0
+2.20.1
 

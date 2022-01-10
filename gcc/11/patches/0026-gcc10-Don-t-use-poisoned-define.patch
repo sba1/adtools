@@ -1,4 +1,4 @@
-From 56ee611821f784f92a10ab51ed8acdf6102ddb4b Mon Sep 17 00:00:00 2001
+From 96d068707fe47baba0dfc800fd5ad8ad10f70b76 Mon Sep 17 00:00:00 2001
 From: "ola.soder@axis.com" <ola.soder@axis.com>
 Date: Sat, 2 Jan 2021 17:22:55 +0100
 Subject: [PATCH 26/35] gcc10: Don't use poisoned define.
@@ -28,5 +28,5 @@ index ec0146c4b8c05eb300f8928e475641123c3f5632..19dacdc885e71ef81186b3f990173dad
  #undef PROCESSOR_DEFAULT
  #define PROCESSOR_DEFAULT PROCESSOR_PPC604e
 -- 
-2.11.0
+2.20.1
 
