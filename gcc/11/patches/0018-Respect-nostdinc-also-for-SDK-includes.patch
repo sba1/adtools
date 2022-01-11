@@ -1,4 +1,4 @@
-From 87c11062597a4f074c3bbb6b43a35c4c978130a8 Mon Sep 17 00:00:00 2001
+From b00152fd3186eb3a8bb2cc8dc973c71b2b282269 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 20 Apr 2018 20:04:30 +0200
 Subject: [PATCH 18/35] Respect -nostdinc also for SDK includes.
@@ -29,5 +29,5 @@ index d339c4280b67d863ec9c60dd38230d7bb2549345..f88bfe5f879cb4ca09f067d907ec36ef
  #define LINK_SPEC "\
  --defsym __amigaos4__=1 \
 -- 
-2.11.0
+2.20.1
 

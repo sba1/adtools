@@ -1,4 +1,4 @@
-From d298f3b47c7fbf1dc976caa68134f4f07c79c191 Mon Sep 17 00:00:00 2001
+From a0d4c945d6d71906fc2f888bb21cee51fdee74de Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 4 May 2018 18:22:24 +0200
 Subject: [PATCH 24/35] Add amigaos thread model.
@@ -16,10 +16,10 @@ It is work in progress.
  libgcc/config/rs6000/t-amigaos |    5 +
  libgcc/configure               |    1 +
  libgcc/gthr-amigaos-asserts.h  |    8 +
- libgcc/gthr-amigaos-native.c   | 1017 ++++++++++++++++++++++++++++++++++++++++
- libgcc/gthr-amigaos-posix.c    |  233 +++++++++
- libgcc/gthr-amigaos-single.c   |  141 ++++++
- libgcc/gthr-amigaos.h          |  347 ++++++++++++++
+ libgcc/gthr-amigaos-native.c   | 1017 ++++++++++++++++++++++++++++++++
+ libgcc/gthr-amigaos-posix.c    |  233 ++++++++
+ libgcc/gthr-amigaos-single.c   |  141 +++++
+ libgcc/gthr-amigaos.h          |  347 +++++++++++
  libstdc++-v3/configure         |    1 +
  16 files changed, 1805 insertions(+), 5 deletions(-)
  create mode 100644 gcc/config/rs6000/x-amigaos
@@ -169,7 +169,7 @@ index 0000000000000000000000000000000000000000..a3dd2195809c2ce1fbab8be854f3c987
 +$(ALL_EXECUTABLES) : override LDFLAGS += -athread=native -Wl,--gc-sections
 \ No newline at end of file
 diff --git a/gcc/configure b/gcc/configure
-index e8ecb3b0297bec33cdca816af1c46a3afcfcc9c0..45eee0562c08045deb86b61dec1eacbac2603046 100755
+index 9b28369e3bfabe0882206353989097c29d662b44..e05eba999857400fdb47608a6f7f24873968604a 100755
 --- a/gcc/configure
 +++ b/gcc/configure
 @@ -12590,13 +12590,13 @@ case ${enable_threads} in
@@ -188,7 +188,7 @@ index e8ecb3b0297bec33cdca816af1c46a3afcfcc9c0..45eee0562c08045deb86b61dec1eacba
      echo "${enable_threads} is an unknown thread package" 1>&2
      exit 1
 diff --git a/gcc/configure.ac b/gcc/configure.ac
-index 96a6f62b0d37fae8faeff8172835c81a234789fb..275b72b50920e74aa82a5af193b4238afacf4b42 100644
+index 162e08cbc02565d803284f53ba2fac9e2edc3919..ccbd6d6edc8e59e907e76ed3e4e414f668f78673 100644
 --- a/gcc/configure.ac
 +++ b/gcc/configure.ac
 @@ -1922,13 +1922,13 @@ case ${enable_threads} in
@@ -207,10 +207,10 @@ index 96a6f62b0d37fae8faeff8172835c81a234789fb..275b72b50920e74aa82a5af193b4238a
      echo "${enable_threads} is an unknown thread package" 1>&2
      exit 1
 diff --git a/gcc/doc/invoke.texi b/gcc/doc/invoke.texi
-index 78429aaf94fb874308faf40e5ffe21044aa858b6..978244acf59a2f706abe74a38ba4d9bff4639d6d 100644
+index 5c47718a734cd8dac4c8b10c54c06b0608a3486c..4a856a5e47e5b4f89c7abf192683fdad2b8f6cc2 100644
 --- a/gcc/doc/invoke.texi
 +++ b/gcc/doc/invoke.texi
-@@ -1430,13 +1430,13 @@ See RS/6000 and PowerPC Options.
+@@ -1431,13 +1431,13 @@ See RS/6000 and PowerPC Options.
  
  @emph{zSeries Options}
  See S/390 and zSeries Options.
@@ -225,7 +225,7 @@ index 78429aaf94fb874308faf40e5ffe21044aa858b6..978244acf59a2f706abe74a38ba4d9bf
  @gccoptlist{-fcall-saved-@var{reg}  -fcall-used-@var{reg} @gol
  -ffixed-@var{reg}  -fexceptions @gol
  -fnon-call-exceptions  -fdelete-dead-exceptions  -funwind-tables @gol
-@@ -18699,12 +18699,19 @@ Compile for GCN5 Vega 20 devices (gfx906).
+@@ -18700,12 +18700,19 @@ Compile for GCN5 Vega 20 devices (gfx906).
  Specify how many @var{bytes} of stack space will be requested for each GPU
  thread (wave-front).  Beware that there may be many threads and limited memory
  available.  The size of the stack allocation may also have an impact on
@@ -262,10 +262,10 @@ index da1e303eed7e60df883971a610e8904db0df3e23..fa9d22e72161436c81f6a9f687ddaa75
 +gthr-amigaos-%.o: $(srcdir)/gthr-amigaos-%.c $(srcdir)/gthr-amigaos.h
 +	$(gcc_compile) -c $<
 diff --git a/libgcc/configure b/libgcc/configure
-index dd3afb2c95761f53dfa5bc71434e944369ef8a98..c2df42520e7e319627dcfe2a2111345013d53bf1 100755
+index 4919a56f51810665804b9d38b00c2848605d719c..36399c534410cdd120d66e89bb209b4c32f54c2e 100755
 --- a/libgcc/configure
 +++ b/libgcc/configure
-@@ -5638,12 +5638,13 @@ tm_file="${tm_file_}"
+@@ -5675,12 +5675,13 @@ tm_file="${tm_file_}"
  
  
  # Map from thread model to thread header.
@@ -2074,5 +2074,5 @@ index 576c495765d6dc1b50ac15bfb18edb58d5fc3a32..57409c17c8aae7859d9c1c5c7c4097b7
      posix)	thread_header=gthr-posix.h ;;
      rtems)	thread_header=config/gthr-rtems.h ;;
 -- 
-2.11.0
+2.20.1
 

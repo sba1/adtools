@@ -1,11 +1,11 @@
-From 5f804bcbdeeeb01ccf54a6c731096bd9f723bb71 Mon Sep 17 00:00:00 2001
+From 3d00d55fe836349cd70ba1bbc08b4b5ab6aac0b7 Mon Sep 17 00:00:00 2001
 From: "ola.soder@axis.com" <ola.soder@axis.com>
 Date: Mon, 15 Mar 2021 15:55:11 +0100
 Subject: [PATCH 33/35] gcc10: Fix libstdc++v3 paths.
 
 ---
- libstdc++-v3/src/c++17/fs_ops.cc  |  17 +++++-
- libstdc++-v3/src/c++17/fs_path.cc | 108 +++++++++++++++++++++++++++++++++++++-
+ libstdc++-v3/src/c++17/fs_ops.cc  |  17 ++++-
+ libstdc++-v3/src/c++17/fs_path.cc | 108 +++++++++++++++++++++++++++++-
  2 files changed, 122 insertions(+), 3 deletions(-)
 
 diff --git a/libstdc++-v3/src/c++17/fs_ops.cc b/libstdc++-v3/src/c++17/fs_ops.cc
@@ -50,7 +50,7 @@ index 66207ae5e44704d8809910ffc50c56ec73caddab..9b005eb5233e7755d090564eca4ac44f
    {
      void operator()(void* p) const { ::free(p); }
    };
-@@ -1622,14 +1633,18 @@ fs::path fs::temp_directory_path(error_code& ec)
+@@ -1622,13 +1633,17 @@ fs::path fs::temp_directory_path(error_code& ec)
    p = std::move(buf);
  #else
    const char* tmpdir = nullptr;
@@ -61,14 +61,13 @@ index 66207ae5e44704d8809910ffc50c56ec73caddab..9b005eb5233e7755d090564eca4ac44f
 +  p = tmpdir ? tmpdir : "T:";
 +#else
    p = tmpdir ? tmpdir : "/tmp";
- #endif
 +#endif
+ #endif
    auto st = status(p, ec);
    if (ec)
      p.clear();
    else if (!is_directory(st))
      {
-       p.clear();
 diff --git a/libstdc++-v3/src/c++17/fs_path.cc b/libstdc++-v3/src/c++17/fs_path.cc
 index 506ff25f9a6db19ad8062a224c07c61e19f31f22..c557c7d055108771a3a4f74f5e42548993c8e2dd 100644
 --- a/libstdc++-v3/src/c++17/fs_path.cc
@@ -112,20 +111,20 @@ index 506ff25f9a6db19ad8062a224c07c61e19f31f22..c557c7d055108771a3a4f74f5e425489
  #if SLASHSLASH_IS_ROOTNAME
  	// look for root name, such as "//foo"
  	if (len > 2 && input[1] == input[0])
-@@ -134,12 +160,13 @@ struct path::_Parser
+@@ -133,12 +159,13 @@ struct path::_Parser
+ 	  {
  	    root.second.str = input.substr(2, 1);
  	    root.second.type = _Type::_Root_dir;
  	  }
  	pos = input.find_first_not_of(L"/\\", 2);
        }
- #endif
 +#endif
+ #endif
  
      if (root.second.valid())
        last_type = root.second.type;
      else
        last_type = root.first.type;
- 
 @@ -156,12 +183,51 @@ struct path::_Parser
  
      const int last_pos = pos;
@@ -341,5 +340,5 @@ index 506ff25f9a6db19ad8062a224c07c61e19f31f22..c557c7d055108771a3a4f74f5e425489
  
    _Parser parser(_M_pathname);
 -- 
-2.11.0
+2.20.1
 

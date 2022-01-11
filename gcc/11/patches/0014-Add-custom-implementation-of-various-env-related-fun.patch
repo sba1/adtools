@@ -1,4 +1,4 @@
-From aa72aa0e0d26f029b4de5ee0a224b3a3381fe78b Mon Sep 17 00:00:00 2001
+From 4fe594d0329a4bdd78b065dde71a721f12126c09 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Wed, 4 Apr 2018 23:50:48 +0200
 Subject: [PATCH 14/35] Add custom implementation of various env-related
@@ -9,10 +9,10 @@ While there are custom implementation of setenv() and unsetenv(), it is
 unclear how their implementation interacts with the other ones that are
 part of the clib like putenv().
 ---
- libiberty/Makefile.in      | 13 ++++++--
- libiberty/configure        | 11 +++++++
+ libiberty/Makefile.in      | 13 +++++--
+ libiberty/configure        | 11 ++++++
  libiberty/configure.ac     |  6 ++++
- libiberty/setenv-amigaos.c | 74 ++++++++++++++++++++++++++++++++++++++++++++++
+ libiberty/setenv-amigaos.c | 74 ++++++++++++++++++++++++++++++++++++++
  4 files changed, 102 insertions(+), 2 deletions(-)
  create mode 100644 libiberty/setenv-amigaos.c
 
@@ -204,5 +204,5 @@ index 0000000000000000000000000000000000000000..dc9a460737538d74558bb43c21c21e61
 +	return lvar->lv_Value;
 +}
 -- 
-2.11.0
+2.20.1
 

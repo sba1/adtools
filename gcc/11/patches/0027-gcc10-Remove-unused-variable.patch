@@ -1,4 +1,4 @@
-From bd2625f4d18fa2bffc41fbaf8254ac1187dcd22d Mon Sep 17 00:00:00 2001
+From dc6a9e05f5a82493e34555145dc753483bbe4064 Mon Sep 17 00:00:00 2001
 From: "ola.soder@axis.com" <ola.soder@axis.com>
 Date: Sat, 2 Jan 2021 17:25:51 +0100
 Subject: [PATCH 27/35] gcc10: Remove unused variable.
@@ -8,10 +8,10 @@ Subject: [PATCH 27/35] gcc10: Remove unused variable.
  1 file changed, 3 deletions(-)
 
 diff --git a/gcc/c/c-parser.c b/gcc/c/c-parser.c
-index d1b5f473290d4909cc746eb2990657d178e228b5..5e4b1053aca84f8797ce2d6f814509510f24a63f 100644
+index 46340af1f22ec705f3ff66ce3b6f2c3fc2fef6f2..603c011ce40279e5f5abd1072b0d388755de22a2 100644
 --- a/gcc/c/c-parser.c
 +++ b/gcc/c/c-parser.c
-@@ -12616,28 +12616,25 @@ c_parser_pragma (c_parser *parser, enum pragma_context context, bool *if_p)
+@@ -12619,28 +12619,25 @@ c_parser_pragma (c_parser *parser, enum pragma_context context, bool *if_p)
     * file.
     */
    extern int was_tagtypepragma;
@@ -41,5 +41,5 @@ index d1b5f473290d4909cc746eb2990657d178e228b5..5e4b1053aca84f8797ce2d6f81450951
      bool old_flag_plugin_added = flag_plugin_added;
      register_callback ("amigaos-tagtype", PLUGIN_FINISH_DECL,
 -- 
-2.11.0
+2.20.1
 

@@ -1,13 +1,13 @@
-From b4e383ad5b64361fd3253231907df96690fa6e16 Mon Sep 17 00:00:00 2001
+From 18c6c52e647e8811d384e681595ddf8b556ec1e9 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 3 Mar 2017 08:52:48 +0100
 Subject: [PATCH 09/35] Enable libatomic for ppc-amigaos.
 
 It is not really finished yet.
 ---
- libatomic/config/amigaos/host-config.h |  55 ++++++++++++++++++
- libatomic/config/amigaos/lock.c        | 102 +++++++++++++++++++++++++++++++++
- libatomic/configure.tgt                |   4 ++
+ libatomic/config/amigaos/host-config.h |  55 +++++++++++++
+ libatomic/config/amigaos/lock.c        | 102 +++++++++++++++++++++++++
+ libatomic/configure.tgt                |   4 +
  3 files changed, 161 insertions(+)
  create mode 100644 libatomic/config/amigaos/host-config.h
  create mode 100644 libatomic/config/amigaos/lock.c
@@ -203,5 +203,5 @@ index 670b0d72cfec2027a02347eb5b62521054f264c4..f78d93afba8849adac23d24b152cf400
  	# If the target supports disabling interrupts, we can work in
  	# kernel-mode, given the system is not multi-processor.
 -- 
-2.11.0
+2.20.1
 

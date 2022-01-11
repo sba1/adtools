@@ -1,4 +1,4 @@
-From 072d9218860f77a3522a3cebd79c9ec0bbb39069 Mon Sep 17 00:00:00 2001
+From 4d258aa46bba9259e216a8211b034700d8627ae0 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Tue, 24 Apr 2018 22:46:21 +0200
 Subject: [PATCH 19/35] Add _Static_warning().
@@ -49,7 +49,7 @@ index f30b6c6ac33474d27939372c4529e9513804b67e..606e84c0be881daaa3fe2eb55b5eceed
    RID_FLOAT32,
    RID_FLOAT64,
 diff --git a/gcc/c/c-parser.c b/gcc/c/c-parser.c
-index 6b6e90759a6f5156b7cac3ce9369d7f2a93def5b..d1b5f473290d4909cc746eb2990657d178e228b5 100644
+index d94079e017c8580a5cd77c200ab1f3978700cd6f..46340af1f22ec705f3ff66ce3b6f2c3fc2fef6f2 100644
 --- a/gcc/c/c-parser.c
 +++ b/gcc/c/c-parser.c
 @@ -840,13 +840,13 @@ c_token_starts_declspecs (c_token *token)
@@ -104,7 +104,7 @@ index 6b6e90759a6f5156b7cac3ce9369d7f2a93def5b..d1b5f473290d4909cc746eb2990657d1
    else
      pedwarn_c99 (assert_loc, OPT_Wpedantic,
 diff --git a/gcc/cp/parser.c b/gcc/cp/parser.c
-index 99eccf0c5e4396b86c3a6c29c93648dc4b3e8bc0..1983a254ffaec67e840a5b5c3104df1787ddb655 100644
+index 705df0b797232c0d968f9dc8a330ef0b718d5895..37577c51d848874dda4247ab6a38f176862231fb 100644
 --- a/gcc/cp/parser.c
 +++ b/gcc/cp/parser.c
 @@ -152,12 +152,13 @@ enum required_token {
@@ -121,7 +121,7 @@ index 99eccf0c5e4396b86c3a6c29c93648dc4b3e8bc0..1983a254ffaec67e840a5b5c3104df17
    RT_TEMPLATE, /* template */
    RT_NAMESPACE, /* namespace */
    RT_USING, /* using */
-@@ -14273,13 +14274,13 @@ cp_parser_block_declaration (cp_parser *parser,
+@@ -14280,13 +14281,13 @@ cp_parser_block_declaration (cp_parser *parser,
        cp_parser_skip_to_end_of_statement (parser);
        /* If the next token is now a `;', consume it.  */
        if (cp_lexer_next_token_is (parser->lexer, CPP_SEMICOLON))
@@ -137,5 +137,5 @@ index 99eccf0c5e4396b86c3a6c29c93648dc4b3e8bc0..1983a254ffaec67e840a5b5c3104df17
  				  /*maybe_range_for_decl*/NULL);
  }
 -- 
-2.11.0
+2.20.1
 

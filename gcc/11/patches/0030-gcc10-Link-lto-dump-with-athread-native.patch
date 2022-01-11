@@ -1,4 +1,4 @@
-From 6f3ef4df7ccf44a827677d2b0544dd61c7233925 Mon Sep 17 00:00:00 2001
+From f650ab30030aa9b2e9897be9b8a3cdc2232d24e3 Mon Sep 17 00:00:00 2001
 From: "ola.soder@axis.com" <ola.soder@axis.com>
 Date: Fri, 8 Jan 2021 01:02:33 +0100
 Subject: [PATCH 30/35] gcc10: Link lto-dump with -athread=native.
@@ -30,5 +30,5 @@ index a3dd2195809c2ce1fbab8be854f3c987dccc039b..6d9efb985ff5619c741e44edaf5431b9
 \ No newline at end of file
 +$(ALL_EXECUTABLES) : override LDFLAGS += -athread=native -Wl,--gc-sections
 -- 
-2.11.0
+2.20.1
 

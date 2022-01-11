@@ -1,4 +1,4 @@
-From ab639a1f88b347eb8760fd609376f7fa98fa012b Mon Sep 17 00:00:00 2001
+From 7e209fba2b5a1fdce64470c5e893e941451c0269 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Tue, 17 Apr 2018 22:02:09 +0200
 Subject: [PATCH 16/35] Fix r2 restoring in the epilog of baserel-restoring
@@ -9,10 +9,10 @@ Subject: [PATCH 16/35] Fix r2 restoring in the epilog of baserel-restoring
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/gcc/config/rs6000/rs6000-logue.c b/gcc/config/rs6000/rs6000-logue.c
-index d08e651d0e20083f34187a53e7fac280f768a3b4..39e710e2ffd7fc17705ab3246db8d74cf411e4e9 100644
+index ee6188ade6491e3fd54f6a40f1c6a87c3aced2cf..4e34d13b8cf866f6d2016c8406a4a7df10ef62bf 100644
 --- a/gcc/config/rs6000/rs6000-logue.c
 +++ b/gcc/config/rs6000/rs6000-logue.c
-@@ -4878,13 +4878,13 @@ rs6000_emit_epilogue (enum epilogue_type epilogue_type)
+@@ -4917,13 +4917,13 @@ rs6000_emit_epilogue (enum epilogue_type epilogue_type)
  #ifdef TARGET_BASEREL
    if (info->baserel_save_p && TARGET_BASEREL)
      {
@@ -28,5 +28,5 @@ index d08e651d0e20083f34187a53e7fac280f768a3b4..39e710e2ffd7fc17705ab3246db8d74c
        emit_move_insn (reg, mem);
  
 -- 
-2.11.0
+2.20.1
 
