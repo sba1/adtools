@@ -47,7 +47,7 @@ COREUTILS_VERSION=5.2.1
 DIST_VERSION=$(shell date +%Y%m%d)-$(shell git rev-list --count HEAD)
 
 CLIB2_URL=https://github.com/sodero/clib2
-CLIB2_SHA1=74ef3ccf9730911cee89f1c9c98df88a1928382d
+CLIB2_SHA1=18ff2b535a59fff8aa5237c08fe32551cb0bfe45
 CLIB2_RELEASE_ARCHIVE_NAME=adtools-os4-clib2-$(DIST_VERSION).lha
 
 CROSS_PREFIX?=$(ROOT_DIR)/root-cross
