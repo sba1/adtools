@@ -1,4 +1,4 @@
-From ac04bd3d203929381c69a91e5c388da6a72584ae Mon Sep 17 00:00:00 2001
+From d57c5741f8aa7cd331ad1889671e585358f85c08 Mon Sep 17 00:00:00 2001
 From: "ola.soder@axis.com" <ola.soder@axis.com>
 Date: Fri, 28 May 2021 16:21:55 +0200
 Subject: [PATCH 34/35] gcc11: Include stdint.h when sys/mman.h is missing.
@@ -29,5 +29,5 @@ index 7b0d367ec52693dec4ea2a798635b3e32fa8f300..fc2a00eb4efb3539f2a4252ad39547ac
  typedef unsigned gcov_position_t __attribute__ ((mode (SI)));
  #if LONG_LONG_TYPE_SIZE > 32
 -- 
-2.20.1
+2.30.2
 

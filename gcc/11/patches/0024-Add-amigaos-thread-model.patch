@@ -1,4 +1,4 @@
-From a0d4c945d6d71906fc2f888bb21cee51fdee74de Mon Sep 17 00:00:00 2001
+From d38dbc52a42486f14cd57ecde6eb9b769a1cb75b Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 4 May 2018 18:22:24 +0200
 Subject: [PATCH 24/35] Add amigaos thread model.
@@ -169,10 +169,10 @@ index 0000000000000000000000000000000000000000..a3dd2195809c2ce1fbab8be854f3c987
 +$(ALL_EXECUTABLES) : override LDFLAGS += -athread=native -Wl,--gc-sections
 \ No newline at end of file
 diff --git a/gcc/configure b/gcc/configure
-index 9b28369e3bfabe0882206353989097c29d662b44..e05eba999857400fdb47608a6f7f24873968604a 100755
+index 7218b0c331a7245b38866e7a4bf90ec4dbf6967c..cd3cc0cf69f0048597a5a853ccce4554190febfc 100755
 --- a/gcc/configure
 +++ b/gcc/configure
-@@ -12590,13 +12590,13 @@ case ${enable_threads} in
+@@ -12631,13 +12631,13 @@ case ${enable_threads} in
      target_thread_file='single'
      ;;
    yes)
@@ -188,10 +188,10 @@ index 9b28369e3bfabe0882206353989097c29d662b44..e05eba999857400fdb47608a6f7f2487
      echo "${enable_threads} is an unknown thread package" 1>&2
      exit 1
 diff --git a/gcc/configure.ac b/gcc/configure.ac
-index 162e08cbc02565d803284f53ba2fac9e2edc3919..ccbd6d6edc8e59e907e76ed3e4e414f668f78673 100644
+index 49f043ed29bcc487e61d08a8b7d6f5676a405185..e095de340c8a4caa26cfa74086c9479359768985 100644
 --- a/gcc/configure.ac
 +++ b/gcc/configure.ac
-@@ -1922,13 +1922,13 @@ case ${enable_threads} in
+@@ -1953,13 +1953,13 @@ case ${enable_threads} in
      target_thread_file='single'
      ;;
    yes)
@@ -207,10 +207,10 @@ index 162e08cbc02565d803284f53ba2fac9e2edc3919..ccbd6d6edc8e59e907e76ed3e4e414f6
      echo "${enable_threads} is an unknown thread package" 1>&2
      exit 1
 diff --git a/gcc/doc/invoke.texi b/gcc/doc/invoke.texi
-index 5c47718a734cd8dac4c8b10c54c06b0608a3486c..4a856a5e47e5b4f89c7abf192683fdad2b8f6cc2 100644
+index f38461ee463a15f3406df3bb451136869f8354af..68aea3e6867f1a993da0cc86ca8c48070871aed2 100644
 --- a/gcc/doc/invoke.texi
 +++ b/gcc/doc/invoke.texi
-@@ -1431,13 +1431,13 @@ See RS/6000 and PowerPC Options.
+@@ -1433,13 +1433,13 @@ See RS/6000 and PowerPC Options.
  
  @emph{zSeries Options}
  See S/390 and zSeries Options.
@@ -225,7 +225,7 @@ index 5c47718a734cd8dac4c8b10c54c06b0608a3486c..4a856a5e47e5b4f89c7abf192683fdad
  @gccoptlist{-fcall-saved-@var{reg}  -fcall-used-@var{reg} @gol
  -ffixed-@var{reg}  -fexceptions @gol
  -fnon-call-exceptions  -fdelete-dead-exceptions  -funwind-tables @gol
-@@ -18700,12 +18700,19 @@ Compile for GCN5 Vega 20 devices (gfx906).
+@@ -18733,12 +18733,19 @@ devices.  The compiled code must match the device mode. The default is
  Specify how many @var{bytes} of stack space will be requested for each GPU
  thread (wave-front).  Beware that there may be many threads and limited memory
  available.  The size of the stack allocation may also have an impact on
@@ -239,12 +239,12 @@ index 5c47718a734cd8dac4c8b10c54c06b0608a3486c..4a856a5e47e5b4f89c7abf192683fdad
 +the final executable. You can choose among @samp{single}, @samp{native},
 +and @samp{pthread}.
 +
- @end table
- 
- @node ARC Options
- @subsection ARC Options
- @cindex ARC options
- 
+ @item -mxnack
+ @opindex mxnack
+ Compile binaries suitable for devices with the XNACK feature enabled.  Some
+ devices always require XNACK and some allow the user to configure XNACK.  The
+ compiled code must match the device mode.  The default is @samp{-mno-xnack}.
+ At present this option is a placeholder for support that is not yet
 diff --git a/libgcc/config/rs6000/t-amigaos b/libgcc/config/rs6000/t-amigaos
 index da1e303eed7e60df883971a610e8904db0df3e23..fa9d22e72161436c81f6a9f687ddaa752f01a966 100644
 --- a/libgcc/config/rs6000/t-amigaos
@@ -2056,10 +2056,10 @@ index 0000000000000000000000000000000000000000..123d3512abed0a43a8c019bbce0d83f0
 +
 +#endif /* ! GCC_GTHR_AMIGAOS_H */
 diff --git a/libstdc++-v3/configure b/libstdc++-v3/configure
-index 576c495765d6dc1b50ac15bfb18edb58d5fc3a32..57409c17c8aae7859d9c1c5c7c4097b77f948f84 100755
+index af5d1ad365ef3113c61c8ce05993077635061ac1..6f771d0b1bc3a62bb68bd0657bb295b11c005ba6 100755
 --- a/libstdc++-v3/configure
 +++ b/libstdc++-v3/configure
-@@ -15694,12 +15694,13 @@ $as_echo_n "checking for thread model used by GCC... " >&6; }
+@@ -15740,12 +15740,13 @@ $as_echo_n "checking for thread model used by GCC... " >&6; }
    target_thread_file=`$CXX -v 2>&1 | sed -n 's/^Thread model: //p'`
    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $target_thread_file" >&5
  $as_echo "$target_thread_file" >&6; }
@@ -2074,5 +2074,5 @@ index 576c495765d6dc1b50ac15bfb18edb58d5fc3a32..57409c17c8aae7859d9c1c5c7c4097b7
      posix)	thread_header=gthr-posix.h ;;
      rtems)	thread_header=config/gthr-rtems.h ;;
 -- 
-2.20.1
+2.30.2
 

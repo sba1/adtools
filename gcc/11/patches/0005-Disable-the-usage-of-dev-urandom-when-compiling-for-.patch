@@ -1,4 +1,4 @@
-From 9b146828e9fff3091323cd5f11ab73f21794bd0f Mon Sep 17 00:00:00 2001
+From 745abd8ce37a2a49484323513c2928291ad8932e Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Wed, 2 Dec 2015 21:39:42 +0100
 Subject: [PATCH 05/35] Disable the usage of /dev/urandom when compiling for
@@ -10,10 +10,10 @@ Subject: [PATCH 05/35] Disable the usage of /dev/urandom when compiling for
  2 files changed, 5 insertions(+)
 
 diff --git a/gcc/gcc.c b/gcc/gcc.c
-index d56b3b8e0c312367a07e7a46ebbf48a5d5e06862..cd517bea976a9f1ba319d16e0a8c59f570a1b6ce 100644
+index 7bc4e7047573d724e913679cf18fc7649534442f..cf92e18ecdacebad78a6aefc80f727c20c85b63d 100644
 --- a/gcc/gcc.c
 +++ b/gcc/gcc.c
-@@ -10445,22 +10445,25 @@ print_asm_header_spec_function (int arg ATTRIBUTE_UNUSED,
+@@ -10451,22 +10451,25 @@ print_asm_header_spec_function (int arg ATTRIBUTE_UNUSED,
  /* Get a random number for -frandom-seed */
  
  static unsigned HOST_WIDE_INT
@@ -67,5 +67,5 @@ index d8cc254adef2677798354697af5d7eb957c03c9a..9856a8009e42f37defb131ea38284dcf
  }
  
 -- 
-2.20.1
+2.30.2
 

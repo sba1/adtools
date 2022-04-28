@@ -1,4 +1,4 @@
-From 9dd1ff887cc5fb60b30b180bb7ef60e84678d529 Mon Sep 17 00:00:00 2001
+From 18f9b577bbf71a8c75719b80aaa17fe78f55bf96 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Sat, 5 Dec 2015 13:17:26 +0100
 Subject: [PATCH 06/35] Expand arg zero on AmigaOS using the PROGDIR: assign.
@@ -10,10 +10,10 @@ process_command().
  1 file changed, 10 insertions(+)
 
 diff --git a/gcc/gcc.c b/gcc/gcc.c
-index cd517bea976a9f1ba319d16e0a8c59f570a1b6ce..df24794ce329d03315fe4ebc7f31d2ac2c49b81a 100644
+index cf92e18ecdacebad78a6aefc80f727c20c85b63d..9ac8835c794a1dd66afaa081554c8eca6ad4e5e1 100644
 --- a/gcc/gcc.c
 +++ b/gcc/gcc.c
-@@ -8019,12 +8019,22 @@ driver::~driver ()
+@@ -8025,12 +8025,22 @@ driver::~driver ()
  int
  driver::main (int argc, char **argv)
  {
@@ -37,5 +37,5 @@ index cd517bea976a9f1ba319d16e0a8c59f570a1b6ce..df24794ce329d03315fe4ebc7f31d2ac
    set_up_specs ();
    putenv_COLLECT_AS_OPTIONS (assembler_options);
 -- 
-2.20.1
+2.30.2
 
