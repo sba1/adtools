@@ -1,4 +1,4 @@
-From a648cefdb68836c129ec4d0d28135e0456996646 Mon Sep 17 00:00:00 2001
+From 308e3f7dd36415e09893aafdc6fd248c33b2b67d Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 14 Nov 2014 20:03:56 +0100
 Subject: [PATCH 02/35] Added new function attribute "lineartags" and pragma
@@ -75,7 +75,7 @@ index 4f8e8e0128c3ddb77450a0d4976d00ad03c6a4c6..71c6d0856f49fe90e2933ebc40e673d0
    global_sso = default_sso;
    c_register_pragma (0, "scalar_storage_order", 
 diff --git a/gcc/c/c-parser.c b/gcc/c/c-parser.c
-index 8897e4348a257bab2fdaafd7f649cd2915073c32..d94079e017c8580a5cd77c200ab1f3978700cd6f 100644
+index 7690977f6b8590599e54bb0e3b49afe21c322092..aa760c7f9410d67fcaa74e2a0c3d3d354867b0b3 100644
 --- a/gcc/c/c-parser.c
 +++ b/gcc/c/c-parser.c
 @@ -97,12 +97,74 @@ set_c_expr_source_range (c_expr *expr,
@@ -169,7 +169,7 @@ index 8897e4348a257bab2fdaafd7f649cd2915073c32..d94079e017c8580a5cd77c200ab1f397
  	  if (!typespec_ok)
  	    goto out;
  	  attrs_ok = true;
-@@ -12270,12 +12335,32 @@ c_parser_pragma_unroll (c_parser *parser)
+@@ -12275,12 +12340,32 @@ c_parser_pragma_unroll (c_parser *parser)
      }
  
    c_parser_skip_to_pragma_eol (parser);
@@ -202,7 +202,7 @@ index 8897e4348a257bab2fdaafd7f649cd2915073c32..d94079e017c8580a5cd77c200ab1f397
     true if we actually parsed such a pragma.  */
  
  static bool
-@@ -12518,12 +12603,56 @@ c_parser_pragma (c_parser *parser, enum pragma_context context, bool *if_p)
+@@ -12523,12 +12608,56 @@ c_parser_pragma (c_parser *parser, enum pragma_context context, bool *if_p)
        break;
      }
  
@@ -260,7 +260,7 @@ index 8897e4348a257bab2fdaafd7f649cd2915073c32..d94079e017c8580a5cd77c200ab1f397
    c_parser_skip_to_pragma_eol (parser);
  
 diff --git a/gcc/c/c-typeck.c b/gcc/c/c-typeck.c
-index 29ba9a771c79d4058ff6f50e895843852e06c26b..b7e825de40c67f56bace920e08a6fa156cfcde72 100644
+index 9a150b910f117a86cf29b5bbb6b3f1fe213c29cc..3b1418c7eb9c479df997f1e4ff758b55ad837075 100644
 --- a/gcc/c/c-typeck.c
 +++ b/gcc/c/c-typeck.c
 @@ -3506,12 +3506,14 @@ convert_arguments (location_t loc, vec<location_t> arg_loc, tree typelist,
@@ -397,5 +397,5 @@ index ad8c0e64c056129afcd8bfa2a656749a2febfaaa..85c03f28e37d64865360692a14fcc8a1
  amigaos_legitimize_baserel_address (rtx addr)
  {
 -- 
-2.20.1
+2.30.2
 

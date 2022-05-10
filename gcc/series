@@ -4,5 +4,4 @@
 8	releases/gcc-8.4.0	http://ftp.gnu.org/gnu/gcc/gcc-8.4.0/gcc-8.4.0.tar.xz
 9	releases/gcc-9.1.0	http://ftp.gnu.org/gnu/gcc/gcc-9.1.0/gcc-9.1.0.tar.xz
 10	releases/gcc-10.3.0	http://github.com/gcc-mirror/gcc/archive/refs/tags/releases/gcc-10.3.0.tar.gz
-11	releases/gcc-11.2.0	http://github.com/gcc-mirror/gcc/archive/refs/tags/releases/gcc-11.2.0.tar.gz
-
+11	releases/gcc-11.3.0	http://github.com/gcc-mirror/gcc/archive/refs/tags/releases/gcc-11.3.0.tar.gz

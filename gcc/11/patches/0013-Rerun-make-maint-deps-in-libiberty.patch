@@ -1,4 +1,4 @@
-From e5c1cce7b4e74030a4f302095312a11ea44d5d16 Mon Sep 17 00:00:00 2001
+From aca719e2ae84f5c6a58b56bfb98e290f3c543b0c Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Wed, 4 Apr 2018 22:48:33 +0200
 Subject: [PATCH 13/35] Rerun make maint-deps in libiberty.
@@ -161,5 +161,5 @@ index 4bacf36d4eb8a597e44dc907591dd30854adebbe..8f7a5e14cb6e8b59a5a53ecde2f75933
  	  $(COMPILE.c) $(PICFLAG) $(NOASANFLAG) $(srcdir)/xmalloc.c -o noasan/$@; \
  	else true; fi
 -- 
-2.20.1
+2.30.2
 

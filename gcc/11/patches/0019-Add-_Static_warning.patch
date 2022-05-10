@@ -1,4 +1,4 @@
-From 4d258aa46bba9259e216a8211b034700d8627ae0 Mon Sep 17 00:00:00 2001
+From 44dc483b3468fc41b12505aba134a9da67664a7a Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Tue, 24 Apr 2018 22:46:21 +0200
 Subject: [PATCH 19/35] Add _Static_warning().
@@ -13,7 +13,7 @@ rather than an compiler error.
  4 files changed, 14 insertions(+), 3 deletions(-)
 
 diff --git a/gcc/c-family/c-common.c b/gcc/c-family/c-common.c
-index d227686a030f0194d4cca9474c8078ae74f93b31..80b327505f388e4b21cdf97d5065d78f148906b0 100644
+index 7b8f49d78dcfddb2c73efd1e8e81316572841b61..cc413b96ddb4cf996160dee07bae2a68187e09a4 100644
 --- a/gcc/c-family/c-common.c
 +++ b/gcc/c-family/c-common.c
 @@ -357,12 +357,13 @@ const struct c_common_resword c_common_reswords[] =
@@ -49,7 +49,7 @@ index f30b6c6ac33474d27939372c4529e9513804b67e..606e84c0be881daaa3fe2eb55b5eceed
    RID_FLOAT32,
    RID_FLOAT64,
 diff --git a/gcc/c/c-parser.c b/gcc/c/c-parser.c
-index d94079e017c8580a5cd77c200ab1f3978700cd6f..46340af1f22ec705f3ff66ce3b6f2c3fc2fef6f2 100644
+index aa760c7f9410d67fcaa74e2a0c3d3d354867b0b3..7e644cf341991336d9a11369f9910c0acd8550ab 100644
 --- a/gcc/c/c-parser.c
 +++ b/gcc/c/c-parser.c
 @@ -840,13 +840,13 @@ c_token_starts_declspecs (c_token *token)
@@ -104,7 +104,7 @@ index d94079e017c8580a5cd77c200ab1f3978700cd6f..46340af1f22ec705f3ff66ce3b6f2c3f
    else
      pedwarn_c99 (assert_loc, OPT_Wpedantic,
 diff --git a/gcc/cp/parser.c b/gcc/cp/parser.c
-index 705df0b797232c0d968f9dc8a330ef0b718d5895..37577c51d848874dda4247ab6a38f176862231fb 100644
+index 90d119eaa28025deabc21ef519f9f608a6317c4c..aa7099de9e8822a466f3f459ae10dcb17926a016 100644
 --- a/gcc/cp/parser.c
 +++ b/gcc/cp/parser.c
 @@ -152,12 +152,13 @@ enum required_token {
@@ -121,7 +121,7 @@ index 705df0b797232c0d968f9dc8a330ef0b718d5895..37577c51d848874dda4247ab6a38f176
    RT_TEMPLATE, /* template */
    RT_NAMESPACE, /* namespace */
    RT_USING, /* using */
-@@ -14280,13 +14281,13 @@ cp_parser_block_declaration (cp_parser *parser,
+@@ -14289,13 +14290,13 @@ cp_parser_block_declaration (cp_parser *parser,
        cp_parser_skip_to_end_of_statement (parser);
        /* If the next token is now a `;', consume it.  */
        if (cp_lexer_next_token_is (parser->lexer, CPP_SEMICOLON))
@@ -137,5 +137,5 @@ index 705df0b797232c0d968f9dc8a330ef0b718d5895..37577c51d848874dda4247ab6a38f176
  				  /*maybe_range_for_decl*/NULL);
  }
 -- 
-2.20.1
+2.30.2
 

@@ -1,4 +1,4 @@
-From 18949c7ef20f2fd4e52eaee772adf4a41541088f Mon Sep 17 00:00:00 2001
+From 7719077d8b23261bec91aa85be07cc443ad43b73 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Sat, 28 Apr 2018 08:09:58 +0200
 Subject: [PATCH 21/35] Fix order of AmigaOS PPC sections in the documentation.
@@ -9,10 +9,10 @@ Subject: [PATCH 21/35] Fix order of AmigaOS PPC sections in the documentation.
  2 files changed, 7 insertions(+), 7 deletions(-)
 
 diff --git a/gcc/doc/extend.texi b/gcc/doc/extend.texi
-index 49e08b022608b55a3f4a70e6e70fb4bb480410e0..601a15575b34f880bfd01b0146b1b3725ecf81bc 100644
+index b3118f5b01bf9eb1f3c69fa2bcaca0b49c568219..1cd6f26fd93e06e9c2ba4176c64daa6cdaf0048a 100644
 --- a/gcc/doc/extend.texi
 +++ b/gcc/doc/extend.texi
-@@ -8219,15 +8219,15 @@ For full documentation of the struct attributes please see the
+@@ -8225,15 +8225,15 @@ For full documentation of the struct attributes please see the
  documentation in @ref{x86 Variable Attributes}.
  
  @cindex @code{altivec} variable attribute, PowerPC
@@ -31,10 +31,10 @@ index 49e08b022608b55a3f4a70e6e70fb4bb480410e0..601a15575b34f880bfd01b0146b1b372
  
  This attribute forces access to a variable in code compiled with
 diff --git a/gcc/doc/invoke.texi b/gcc/doc/invoke.texi
-index 4e2a38c267af301649f33423ce01cfb0ae790322..5c47718a734cd8dac4c8b10c54c06b0608a3486c 100644
+index 7c39fc25397cc82a7c42672fdb4f320ffa4930bb..f38461ee463a15f3406df3bb451136869f8354af 100644
 --- a/gcc/doc/invoke.texi
 +++ b/gcc/doc/invoke.texi
-@@ -1429,13 +1429,13 @@ See RS/6000 and PowerPC Options.
+@@ -1431,13 +1431,13 @@ See RS/6000 and PowerPC Options.
  -mlongcalls  -mno-longcalls @gol
  -mabi=@var{abi-type}}
  
@@ -49,7 +49,7 @@ index 4e2a38c267af301649f33423ce01cfb0ae790322..5c47718a734cd8dac4c8b10c54c06b06
  @item Code Generation Options
  @xref{Code Gen Options,,Options for Code Generation Conventions}.
  @gccoptlist{-fcall-saved-@var{reg}  -fcall-used-@var{reg} @gol
-@@ -18031,13 +18031,13 @@ platform.
+@@ -18036,13 +18036,13 @@ platform.
  * VMS Options::
  * VxWorks Options::
  * x86 Options::
@@ -64,7 +64,7 @@ index 4e2a38c267af301649f33423ce01cfb0ae790322..5c47718a734cd8dac4c8b10c54c06b06
  @node AArch64 Options
  @subsection AArch64 Options
  @cindex AArch64 Options
-@@ -31882,15 +31882,15 @@ These options are defined for Xstormy16:
+@@ -31941,15 +31941,15 @@ These options are defined for Xstormy16:
  @table @gcctabopt
  @item -msim
  @opindex msim
@@ -84,5 +84,5 @@ index 4e2a38c267af301649f33423ce01cfb0ae790322..5c47718a734cd8dac4c8b10c54c06b06
  @opindex mcrt
  
 -- 
-2.20.1
+2.30.2
 

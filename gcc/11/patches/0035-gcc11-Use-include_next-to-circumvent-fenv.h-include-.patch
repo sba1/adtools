@@ -1,4 +1,4 @@
-From 089ecb6ba58b8d860c1b4673abcc121cb1a9a02c Mon Sep 17 00:00:00 2001
+From 1e3f0293998795f22c94709d934bb53f891db46f Mon Sep 17 00:00:00 2001
 From: "ola.soder@axis.com" <ola.soder@axis.com>
 Date: Fri, 28 May 2021 16:27:59 +0200
 Subject: [PATCH 35/35] gcc11: Use include_next to circumvent fenv.h include
@@ -30,5 +30,5 @@ index 0b0ec35a8377d8af928e97dbffd7e52a6ef9e3b3..3a6381577e0b3e34842759dba06e3ee8
  #undef feclearexcept
  #undef fegetexceptflag
 -- 
-2.20.1
+2.30.2
 

@@ -1,4 +1,4 @@
-From 39591b3a8301ca88dcfcf856be3ad7dd180f6f3c Mon Sep 17 00:00:00 2001
+From 5bc937a4934878f1a9e736f9b61ba78ee2f54c00 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Thu, 5 Apr 2018 19:56:45 +0200
 Subject: [PATCH 15/35] Define va_startlinear and va_getlinearva.
@@ -41,5 +41,5 @@ index 7b6c63237dd81117f5e0e92860a7b266b903f7d9..7127b05e44ac34d31b17125bce4e6e43
     have no conflict with that.  */
  #ifndef _VA_LIST_
 -- 
-2.20.1
+2.30.2
 
