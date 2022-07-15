@@ -181,7 +181,7 @@ index 0000000000000000000000000000000000000000..59c41e3a47d203cadd03ec834d8d0cff
 +           char *name = (char*)AllocVec(i + 1, MEMF_ANY);
 +           if (name)
 +           {
-+               strncpy(name, str, i - 1);
++               strncpy(name, str, i);
 +               name[i] = 0;
 +
 +               setenv(name, &str[i] + 1, 1);
