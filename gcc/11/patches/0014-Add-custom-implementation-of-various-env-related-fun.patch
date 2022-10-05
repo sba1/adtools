@@ -1,7 +1,7 @@
-From 6384023c2f32dc65ede8868ba6c712b2595e75ad Mon Sep 17 00:00:00 2001
+From 6a98220e936165ce6238e071fcfda1277ef80392 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Wed, 4 Apr 2018 23:50:48 +0200
-Subject: [PATCH 14/35] Add custom implementation of various env-related
+Subject: [PATCH 14/36] Add custom implementation of various env-related
  functions.
 
 No official clib does support unsetenv() but this is required by newer gcc.
@@ -17,7 +17,7 @@ part of the clib like putenv().
  create mode 100644 libiberty/setenv-amigaos.c
 
 diff --git a/libiberty/Makefile.in b/libiberty/Makefile.in
-index 8f7a5e14cb6e8b59a5a53ecde2f7593329c20fa4..4a2c78ce1234a35ecb645e90ba15266ccce727e4 100644
+index 8f7a5e14cb6e8b59a5a53ecde2f7593329c20fa4..f8aed54a79d8a2d16ce79cfe73a0648bb03cd7cc 100644
 --- a/libiberty/Makefile.in
 +++ b/libiberty/Makefile.in
 @@ -144,13 +144,13 @@ CFILES = alloca.c argv.c asprintf.c atexit.c				\
@@ -56,7 +56,7 @@ index 8f7a5e14cb6e8b59a5a53ecde2f7593329c20fa4..4a2c78ce1234a35ecb645e90ba15266c
  	  $(COMPILE.c) $(PICFLAG) $(NOASANFLAG) $(srcdir)/safe-ctype.c -o noasan/$@; \
  	else true; fi
  	$(COMPILE.c) $(srcdir)/safe-ctype.c $(OUTPUT_OPTION)
-
+ 
 +./setenv-amigaos.$(objext): $(srcdir)/setenv-amigaos.c
 +	if [ x"$(PICFLAG)" != x ]; then \
 +	  $(COMPILE.c) $(PICFLAG) $(srcdir)/setenv-amigaos.c -o pic/$@; \
@@ -82,7 +82,7 @@ index 9e43c9ae0d66795f2dafb4b6d192579261c1a9ab..99b1a3e12d69c105edb9b1de260275b2
      # function, which AC_CHECK_FUNCS does not handle properly.
      ac_cv_func_getpagesize=yes
      ;;
-
+ 
 +   *-*-amigaos*)
 +     # current newlib lacks unsetenv(), so we custom versions
 +     # of setenv() and unsetenv().
@@ -110,7 +110,7 @@ index 0f9b97cb457b68249dfe1e5424ce312bab705949..d57c6fb4682e21b0bc2094173eab0991
      # function, which AC_CHECK_FUNCS does not handle properly.
      ac_cv_func_getpagesize=yes
      ;;
-
+ 
 +  *-*-amigaos*)
 +    # current newlib lacks unsetenv(), so we custom versions
 +    # of setenv() and unsetenv().
@@ -122,10 +122,10 @@ index 0f9b97cb457b68249dfe1e5424ce312bab705949..d57c6fb4682e21b0bc2094173eab0991
      AC_LIBOBJ([snprintf])
      AC_LIBOBJ([vsnprintf])
      ;;
-
+ 
 diff --git a/libiberty/setenv-amigaos.c b/libiberty/setenv-amigaos.c
 new file mode 100644
-index 0000000000000000000000000000000000000000..59c41e3a47d203cadd03ec834d8d0cff7bbe2168
+index 0000000000000000000000000000000000000000..6ec12b89c740874d0b7a83f322f80d5cd6f7a05e
 --- /dev/null
 +++ b/libiberty/setenv-amigaos.c
 @@ -0,0 +1,74 @@
@@ -203,6 +203,6 @@ index 0000000000000000000000000000000000000000..59c41e3a47d203cadd03ec834d8d0cff
 +   }
 +   return lvar->lv_Value;
 +}
---
-2.30.2
+-- 
+2.34.1
 

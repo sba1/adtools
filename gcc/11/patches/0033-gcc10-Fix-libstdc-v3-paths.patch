@@ -1,7 +1,7 @@
-From 50d80a7e56c2f5fbbb6fe05d3f4d3fcc0e9da2db Mon Sep 17 00:00:00 2001
+From c3443778d66979c2734bb02baf24c14b979e7326 Mon Sep 17 00:00:00 2001
 From: "ola.soder@axis.com" <ola.soder@axis.com>
 Date: Mon, 15 Mar 2021 15:55:11 +0100
-Subject: [PATCH 33/35] gcc10: Fix libstdc++v3 paths.
+Subject: [PATCH 33/36] gcc10: Fix libstdc++v3 paths.
 
 ---
  libstdc++-v3/src/c++17/fs_ops.cc  |  17 ++++-
@@ -340,5 +340,5 @@ index 506ff25f9a6db19ad8062a224c07c61e19f31f22..c557c7d055108771a3a4f74f5e425489
  
    _Parser parser(_M_pathname);
 -- 
-2.30.2
+2.34.1
 
