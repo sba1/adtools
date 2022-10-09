@@ -25,7 +25,7 @@
 #
 # ===
 # Optional (DEFAULT=54.16):
-# Define SDK_URL to specify which version of the Amiga SDK is desired
+# Define SDK_VERSION to specify which version of the Amiga SDK is desired
 #
 
 ROOT_DIR=$(realpath .)
