@@ -1,7 +1,7 @@
-From af2a70bd67b7f047f151261dcb63a589478fb32c Mon Sep 17 00:00:00 2001
+From afab86a678caaa9ac9a9c3c3c20f403d751acebf Mon Sep 17 00:00:00 2001
 From: "ola.soder@axis.com" <ola.soder@axis.com>
 Date: Sat, 2 Jan 2021 17:25:51 +0100
-Subject: [PATCH 27/35] gcc10: Remove unused variable.
+Subject: [PATCH 27/36] gcc10: Remove unused variable.
 
 ---
  gcc/c/c-parser.c | 3 ---
@@ -41,5 +41,5 @@ index 7e644cf341991336d9a11369f9910c0acd8550ab..f284811b59c3574509aa2dbc5edd123f
      bool old_flag_plugin_added = flag_plugin_added;
      register_callback ("amigaos-tagtype", PLUGIN_FINISH_DECL,
 -- 
-2.30.2
+2.34.1
 

@@ -45,6 +45,11 @@ test-tls: test-tls.cpp
 test-checktags.o: test-checktags.c
 	$(XGCC) $< -c
 
+test-call-once: test-call-once.cpp
+	# This is only expected to work for gcc11+ since patch 0036
+	# only applies to the gcc11 patches!
+	$(CPP) -std=c++11 -athread=native -g $< -o $@
+
 ################################################################################
 
 .PHONY: run-all
@@ -54,7 +59,8 @@ run-all: \
 	run-test-aos4-extensions-simple-o3 \
 	run-test-baserel \
 	run-test-baserel-o1 \
-	run-test-baserel-o3
+	run-test-baserel-o3 \
+	run-test-call-once
 
 #
 # Macro to insert a recipe for compiling plain tests that run on a qemu target.

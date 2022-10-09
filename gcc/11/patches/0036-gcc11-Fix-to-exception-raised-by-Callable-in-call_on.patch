@@ -1,0 +1,131 @@
+From c99b141102f736198f6c013f5e58946ccc6d3b95 Mon Sep 17 00:00:00 2001
+From: rjd <3246251196ryan@gmail.com>
+Date: Wed, 5 Oct 2022 11:36:32 +0100
+Subject: [PATCH 36/36] gcc11: Fix to exception raised by Callable in call_once
+ implementation.
+
+In the case the Callable raises an exception, the shared resources between
+potentially multiple concurrent threads is not reset causing thread(s)
+(Amiga Tasks) to become stuck in an infinite loop.
+---
+ libgcc/gthr-amigaos-native.c   | 25 +++++++++++++++----------
+ libgcc/gthr-amigaos.h          |  3 +++
+ libstdc++-v3/include/std/mutex | 20 ++++++++++++++++++--
+ 3 files changed, 36 insertions(+), 12 deletions(-)
+
+diff --git a/libgcc/gthr-amigaos-native.c b/libgcc/gthr-amigaos-native.c
+index 3806359eed9a80027a7b37e79d148cded12ce7b9..683d7f497d08f749f188be915b3f9231bdf9a747 100644
+--- a/libgcc/gthr-amigaos-native.c
++++ b/libgcc/gthr-amigaos-native.c
+@@ -167,36 +167,41 @@ __gthread_once (__gthread_once_t *__once, void (*__func) (void))
+   if (__once == NULL || __func == NULL)
+     return EINVAL;
+ 
+   if (__atomic_load_1(&once->u.i.done, __ATOMIC_SEQ_CST))
+     return 0;
+ 
++  while (!__atomic_load_1(&once->u.i.done, __ATOMIC_SEQ_CST) && __atomic_load_1(&once->u.i.started, __ATOMIC_SEQ_CST))
++    {
++      /* Allow the other thread to progress quickly but iexec may be not available */
++      struct ExecBase *SysBase = *(struct ExecBase **)4;
++      struct ExecIFace *ie = (struct ExecIFace *)SysBase->MainInterface;
++      ie->Reschedule();
++    }
++
+   if (!__atomic_test_and_set(&once->u.i.started, __ATOMIC_SEQ_CST))
+     {
+       /* Started flag was not set so call func now */
+       __func();
+ 
+       /* Remember that we are done now. And make all effects prior to this
+        * store visible to all the other clients that will read that we are
+        * actually done.
+        */
+       __atomic_store_1(&once->u.i.done, 1, __ATOMIC_SEQ_CST);
+     }
+-  else
+-    {
+-      while (!__atomic_load_1(&once->u.i.done, __ATOMIC_SEQ_CST))
+-        {
+-          /* Allow the other thread to progress quickly but iexec may be not available */
+-          struct ExecBase *SysBase = *(struct ExecBase **)4;
+-          struct ExecIFace *ie = (struct ExecIFace *)SysBase->MainInterface;
+-          ie->Reschedule();
+-        }
+-    }
++
+   return 0;
+ }
+ 
++void __gthread_once_unlock(__gthread_once_t *__once)
++{
++  __internal_gthread_once_t *once = (__internal_gthread_once_t *)__once;
++  __atomic_store_1(&once->u.i.started, 0, __ATOMIC_SEQ_CST);
++}
++
+ /******************************************************************************/
+ 
+ /* We keep the entries of each key organized as a single linked list */
+ struct keyentry
+ {
+   struct keyentry *next;
+diff --git a/libgcc/gthr-amigaos.h b/libgcc/gthr-amigaos.h
+index 123d3512abed0a43a8c019bbce0d83f0128a89ec..62190bcc0578c33eb79da512648513db0df8a825 100644
+--- a/libgcc/gthr-amigaos.h
++++ b/libgcc/gthr-amigaos.h
+@@ -240,12 +240,15 @@ __gthread_objc_condition_signal (objc_condition_t condition UNUSED)
+ int
+ __gthread_active_p (void);
+ 
+ int
+ __gthread_once (__gthread_once_t *__once, void (*__func) (void));
+ 
++void
++__gthread_once_unlock (__gthread_once_t *__once);
++
+ int
+ __gthread_key_create (__gthread_key_t *__key, void (*destroy) (void *));
+ 
+ int
+ __gthread_key_delete (__gthread_key_t __key);
+ 
+diff --git a/libstdc++-v3/include/std/mutex b/libstdc++-v3/include/std/mutex
+index d4c5d13f65407aca5ce8aa938ea7131dc6b28662..17242119de191b34af5bf35b4a7842b5c7bfad20 100644
+--- a/libstdc++-v3/include/std/mutex
++++ b/libstdc++-v3/include/std/mutex
+@@ -777,14 +777,30 @@ _GLIBCXX_BEGIN_NAMESPACE_VERSION
+ 			std::forward<_Args>(__args)...);
+       };
+ 
+       once_flag::_Prepare_execution __exec(__callable);
+ 
+       // XXX pthread_once does not reset the flag if an exception is thrown.
+-      if (int __e = __gthread_once(&__once._M_once, &__once_proxy))
+-	__throw_system_error(__e);
++      // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=66146
++      // https://github.com/sba1/adtools/issues/82
++      int __e = 0;
++#if defined(__amigaos4__) && defined(__EXCEPTIONS)
++      try
++      {
++#endif
++        __e = __gthread_once(&__once._M_once, &__once_proxy);
++#if defined(__amigaos4__) && defined(__EXCEPTIONS)
++      }
++      catch (...)
++      {
++        __gthread_once_unlock(&__once._M_once);
++        throw;
++      }
++#endif
++      if (__e)
++        __throw_system_error(__e);
+     }
+ 
+ #else // _GLIBCXX_HAS_GTHREADS
+ 
+   /// Flag type used by std::call_once
+   struct once_flag
+-- 
+2.34.1
+
