@@ -20,6 +20,13 @@ other projects (e.g. gcc) are not imported directly into this
 repository. Instead only the patches that need to be applied to a given 
 base version (e.g. stock gcc 6) are directly stored and maintained.
 
+A Note on LHA
+-------------
+It is not recommended to use LHA from the packsge "lhasa" as the tool to
+decompress LHA files because it does not handle empty directories very
+well. Instead, use: https://github.com/jca02266/lha, build it from source,
+and install it.
+
 Installation
 ------------
 
