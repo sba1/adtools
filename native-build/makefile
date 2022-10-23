@@ -27,6 +27,10 @@
 # Optional (DEFAULT=54.16):
 # Define SDK_VERSION to specify which version of the Amiga SDK is desired
 #
+# ===
+# Optional (DEFAULT=0):
+# Define NO_COREUTILS=1 if the building of CoreUtils is not desired
+#
 
 ROOT_DIR=$(realpath .)
 
@@ -73,8 +77,13 @@ endif
 SDK_URL=http://www.hyperion-entertainment.biz/index.php?option=com_registration&amp;view=download&amp;format=raw&amp;file=$(SDK_URL_FILE)
 
 # Native tools
+NO_COREUTILS?=0
+ifeq ($(NO_COREUTILS),0)
 COREUTILS_SRC_DIR=../coreutils/repo
 COREUTILS_VERSION=5.2.1
+else
+$(shell touch NO_COREUTILS)
+endif
 
 # Distribution version, used as middle part of a distribution archive
 DIST_VERSION=$(shell date +%Y%m%d)-$(shell git rev-list --count HEAD)
@@ -327,6 +336,7 @@ else
 coreutils-native-done: gcc-cross-done-$(GCC_VERSION)
 endif
 	mkdir -p coreutils-native-build
+ifneq (0, $(shell test -f NO_COREUTILS ; echo $$?))
 	@if [ ! -f $(COREUTILS_SRC_DIR)/configure ]; then echo "Please checkout coreutils first!"; false; fi
 # Pretend few files to be uptodate
 	touch $(realpath $(COREUTILS_SRC_DIR))/configure $(realpath $(COREUTILS_SRC_DIR))/config.hin
@@ -338,6 +348,7 @@ else
 	cd coreutils-native-build ; PATH="$(CROSS_PREFIX)/bin:$(PATH)" CPPFLAGS="-mcrt=clib2" LDFLAGS="-mcrt=clib2" LIBS="-lunix -lnet" $(realpath $(COREUTILS_SRC_DIR))/configure --prefix=/gcc --host=ppc-amigaos --disable-maintainer-mode
 endif
 	PATH="$(CROSS_PREFIX)/bin:$(PATH)" $(MAKE) -C coreutils-native-build
+endif # NO_COREUTILS=0
 	touch $@
 
 
@@ -380,7 +391,7 @@ ReadMe: ReadMe.mak
 	python -c "\
 	from mako.template import Template;\
 	from mako.lookup import TemplateLookup;\
-	print Template(\
+	outStr=Template(\
 		filename='$<',\
 		input_encoding='utf-8',\
 		output_encoding='utf-8',\
@@ -392,7 +403,8 @@ ReadMe: ReadMe.mak
 			GCC_DEV_PHASE='$(GCC_DEV_PHASE)',\
 			COREUTILS_VERSION='$(COREUTILS_VERSION)',\
 			CLIB2_RELEASE_ARCHIVE_NAME='$(CLIB2_RELEASE_ARCHIVE_NAME)'\
-		)\
+		);\
+	print(outStr)\
 	" >$@.utf8
 	iconv --from-code=UTF8 --to-code=ISO-8859-15 $@.utf8 >$@
 
@@ -441,7 +453,9 @@ native-install: coreutils-native-done gcc-native-done-$(GCC_VERSION) ReadMe doc
 # Create copies of few files that usually are also accessible via a filename with the target alias prefix
 	$(foreach EXE, $(BINUTILS_EXES), $(call MAKE_TARGET_ALIAS,$(EXE))$(NL))
 	PATH="$(CROSS_PREFIX)/bin:$(PATH)" $(MAKE) -C gcc-native-build-$(GCC_VERSION) install
+ifneq (0, $(shell test -f NO_COREUTILS ; echo $$? ))
 	PATH="$(CROSS_PREFIX)/bin:$(PATH)" $(MAKE) -C coreutils-native-build install
+endif
 # Disabled SDK as we don't want to distribute it
 #	cp -R $(CROSS_PREFIX)/ppc-amigaos/SDK /gcc
 # Disabled, because we don't want to copy from CROSS_PREFIX here
@@ -464,12 +478,16 @@ native-separate-install:
 	rm -Rf root-native-coreutils
 	PATH="$(CROSS_PREFIX)/bin:$(PATH)" $(MAKE) -C binutils-native-build-$(BINUTILS_VERSION) install DESTDIR=$(ROOT_DIR)/root-native-binutils
 	PATH="$(CROSS_PREFIX)/bin:$(PATH)" $(MAKE) -C gcc-native-build-$(GCC_VERSION) install DESTDIR=$(ROOT_DIR)/root-native-gcc
+ifneq (0, $(shell test -f NO_COREUTILS ; echo $$? ))
 	PATH="$(CROSS_PREFIX)/bin:$(PATH)" $(MAKE) -C coreutils-native-build install DESTDIR=$(ROOT_DIR)/root-native-coreutils
+endif
 	$(MAKE) private-native-separate-dist
 
 # Private target. Unfinished
 private-native-separate-dist:
+ifneq (0, $(shell test -f NO_COREUTILS ; echo $$? ))
 	$(foreach var,$(wildcard $(ROOT_DIR)/root-native-coreutils/gcc/bin/*), $(STRIP) $(STRIPFLAGS) $(var) ; ) true
+endif
 	$(foreach var,$(wildcard $(ROOT_DIR)/root-native-binutils/gcc/bin/*), $(STRIP) $(STRIPFLAGS) $(var) ; ) true
 	$(foreach var,$(wildcard $(ROOT_DIR)/root-native-gcc/gcc/bin/*), $(STRIP) $(STRIPFLAGS) $(var) ; ) true
 	$(STRIP) $(STRIPFLAGS) $(ROOT_DIR)/root-native-gcc/gcc/libexec/gcc/ppc-amigaos/$(GCC_VERSION)/cc1
@@ -578,7 +596,4 @@ clean: clean-clib2 clean-gcc
 #
 .PNONY: clean-all
 clean-all: clean
-	rm -Rf downloads-done downloads-done-clib2 downloads
-ifeq (0, $(shell test -f EXP_CLIB2 ; echo $$?))
-	rm -f EXP_CLIB2
-endif
+	rm -Rf downloads-done downloads-done-clib2 downloads EXP_CLIB2 NO_COREUTILS
