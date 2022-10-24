@@ -158,7 +158,7 @@ $ make -C native-build
 ```
 
 The building should succeed, if all dependencies are met (e.g.,
-```libgmp-dev```, ```libmpc-dev```, ```libmpfr-dev```, ```lha | lhasa```).
+```libgmp-dev```, ```libmpc-dev```, ```libmpfr-dev```, ```lha```, ```bison```).
 If you just need a cross-compiler then call the ```gcc-cross``` target like
 that:
 
