@@ -28,7 +28,7 @@
 # Define SDK_VERSION to specify which version of the Amiga SDK is desired
 #
 # ===
-# Optional (DEFAULT=0:
+# Optional (DEFAULT=0):
 # Define NO_COREUTILS=1 if the building of CoreUtils is not desired
 #
 
