@@ -6,11 +6,16 @@
 #
 # The user running this script must have write access to /gcc
 #
+# ===
+# Optional (DEFAULT=0):
 # Define CROSS_IS_PRESENT=1 if a suitable cross compiler is already
 # present, in which case the cross compiler build is skipped, e.g.:
 #
 #  make CROSS_IS_PRESENT=1
 #
+# ===
+# Optional (DEFAULT=54.16):
+# Define SDK_VERSION to specify which version of the Amiga SDK is desired
 
 ROOT_DIR=$(realpath .)
 
@@ -36,8 +41,25 @@ endif
 
 GCC_BRANCH_NAME:=$(word 1, $(subst ., , $(GCC_VERSION)))
 
-SDK_URL=http://www.hyperion-entertainment.biz/index.php?option=com_registration&amp;view=download&amp;format=raw&amp;file=127
-SDK_VERSION=54.16
+SDK_VERSION?=54.16
+SDK_URL_FILE=127
+ifeq (53.34,$(SDK_VERSION))
+SDK_URL_FILE=125
+else
+ifeq (53.30,$(SDK_VERSION))
+SDK_URL_FILE=82
+else
+ifeq (53.24,$(SDK_VERSION))
+SDK_URL_FILE=69
+else
+ifneq (54.16,$(SDK_VERSION))
+$(error Unexpected SDK_VERSION supplied)
+endif
+endif
+endif
+endif
+
+SDK_URL=http://www.hyperion-entertainment.biz/index.php?option=com_registration&amp;view=download&amp;format=raw&amp;file=$(SDK_URL_FILE)
 
 # Native tools
 COREUTILS_SRC_DIR=../coreutils/repo
@@ -115,7 +137,11 @@ includes-done: downloads-done
 #	cd downloads/SDK_Install && lha xf clib2*.lha
 	cd downloads/SDK_Install && lha xf newlib*.lha
 	cd downloads/SDK_Install && lha xf base.lha
+ifneq (53.30,$(SDK_VERSION))
+ifneq (53.24,$(SDK_VERSION))
 	cd downloads/SDK_Install && lha xf execsg*.lha
+endif
+endif
 	cd downloads/SDK_Install && rm -Rf *.lha
 	cd downloads/SDK_Install && mv newlib* $(CROSS_PREFIX)/ppc-amigaos/SDK
 #	cd downloads/SDK_Install && mv clib2* $(CROSS_PREFIX)/ppc-amigaos/SDK
