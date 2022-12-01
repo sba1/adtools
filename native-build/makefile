@@ -158,7 +158,7 @@ includes-done: downloads-done
 	cd downloads/SDK_Install && lha xf base.lha
 ifneq (53.30,$(SDK_VERSION))
 ifneq (53.24,$(SDK_VERSION))
-	cd downloads/SDK_Install && lha xf exec*.lha
+	cd downloads/SDK_Install && lha xf execsg*.lha
 endif
 endif
 	cd downloads/SDK_Install && rm -Rf *.lha
