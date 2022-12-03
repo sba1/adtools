@@ -14,6 +14,16 @@
 #  make CROSS_IS_PRESENT=1
 #
 # ===
+# Optional (DEFAULT=0):
+# Define EXP_CLIB2=1 if the later experimental version of clib2 is desired
+# In case EXP_CLIB2=1, optionally define CLIB2_SHA1=X, where X is the commit id
+# or branch to be used within the experimental version; defaults to HEAD e.g.:
+#
+#  make EXP_CLIB2=1 CLIB2_SHA1=beta8
+#
+# See https://github.com/afxgroup/clib2.
+#
+# ===
 # Optional (DEFAULT=54.16):
 # Define SDK_VERSION to specify which version of the Amiga SDK is desired
 
@@ -68,8 +78,13 @@ COREUTILS_VERSION=5.2.1
 # Distribution version, used as middle part of a distribution archive
 DIST_VERSION=$(shell date +%Y%m%d)-$(shell git rev-list --count HEAD)
 
+ifeq (1,$(EXP_CLIB2))
+CLIB2_URL=https://github.com/afxgroup/clib2.git
+CLIB2_SHA1?=HEAD
+else
 CLIB2_URL=https://github.com/sodero/clib2
 CLIB2_SHA1=02ecf7d92448b5486502cd9e95fc838dca4804a7
+endif
 CLIB2_RELEASE_ARCHIVE_NAME=adtools-os4-clib2-$(DIST_VERSION).lha
 
 CROSS_PREFIX?=$(ROOT_DIR)/root-cross
@@ -95,6 +110,9 @@ print-dist-version:
 downloads-done-clib2:
 	mkdir -p downloads
 	cd downloads && (git clone $(CLIB2_URL) clib2 || true) && cd clib2 && git checkout $(CLIB2_SHA1)
+ifeq (1,$(EXP_CLIB2))
+	touch EXP_CLIB2
+endif
 	touch $@
 
 #
@@ -175,7 +193,13 @@ CLIB2_CROSS_DONE_DEPENDENCY=xgcc-done-$(GCC_VERSION)
 
 endif
 
-CLIB2_DIR=downloads/clib2/library
+EXP_CLIB2_DIR=downloads/clib2/
+STABLE_CLIB2_DIR=downloads/clib2/library/
+ifeq (1,$(EXP_CLIB2))
+CLIB2_DIR=$(EXP_CLIB2_DIR)
+else
+CLIB2_DIR=$(STABLE_CLIB2_DIR)
+endif
 
 #
 # Prints the folder where the basic xg (xgcc or xg++) compilers
@@ -202,14 +226,30 @@ xgcc-done-$(GCC_VERSION): includes-done binutils-cross-done-$(BINUTILS_VERSION)
 #
 clib2-cross-done-$(GCC_VERSION): $(CLIB2_CROSS_DONE_DEPENDENCY)
 # Build clib2 using xgcc that have just been built
+ifeq (1,$(EXP_CLIB2))
+	$(MAKE) -C $(CLIB2_DIR) -f GNUmakefile.os4 \
+		CC="$(XGCC_CC)" \
+		AR="$(XAR)" \
+		RANLIB="$(XRANLIB)" \
+		SHARED=no \
+		INSTALL_PREFIX=$(CROSS_PREFIX)/ppc-amigaos/SDK/clib2 \
+		SDK_INCLUDE=$(CROSS_PREFIX)/ppc-amigaos/SDK/include
+else
 	$(MAKE) -C $(CLIB2_DIR) -f GNUmakefile.os4 CC="$(XGCC_CC)" AR="$(XAR)" RANLIB="$(XRANLIB)"
+endif
 # Copy clib2 libs and includes
+ifeq (1,$(EXP_CLIB2))
+	$(MAKE) -C $(CLIB2_DIR) -f GNUmakefile.os4 install \
+		INSTALL_PREFIX=$(CROSS_PREFIX)/ppc-amigaos/SDK/clib2
+	cp $(CLIB2_DIR)/LICENSE* $(CROSS_PREFIX)/ppc-amigaos/SDK/clib2
+else
 	rm -Rf $(CROSS_PREFIX)/ppc-amigaos/SDK/clib2/lib $(CROSS_PREFIX)/ppc-amigaos/SDK/clib2/include
 	mkdir -p $(CROSS_PREFIX)/ppc-amigaos/SDK/clib2/lib
 	mkdir -p $(CROSS_PREFIX)/ppc-amigaos/SDK/clib2/include
 	cp -Rp $(CLIB2_DIR)/include/* $(CROSS_PREFIX)/ppc-amigaos/SDK/clib2/include
 	cp -Rp $(CLIB2_DIR)/lib/* $(CROSS_PREFIX)/ppc-amigaos/SDK/clib2/lib
 	cp $(CLIB2_DIR)/../LICENSE $(CROSS_PREFIX)/ppc-amigaos/SDK/clib2
+endif
 	touch $@
 
 #
@@ -290,7 +330,12 @@ endif
 # Pretend few files to be uptodate
 	touch $(realpath $(COREUTILS_SRC_DIR))/configure $(realpath $(COREUTILS_SRC_DIR))/config.hin
 #	cd coreutils-native-build ; PATH="$(CROSS_PREFIX)/bin:$(PATH)" LIBS="-lunix" $(realpath $(COREUTILS_SRC_DIR))/configure --prefix=/gcc --host=ppc-amigaos
+ifeq (0, $(shell test -f EXP_CLIB2 ; echo $$?))
+# We do not need libunix / lnet for EXP CLIB2
+	cd coreutils-native-build ; PATH="$(CROSS_PREFIX)/bin:$(PATH)" CPPFLAGS="-mcrt=clib2" LDFLAGS="-mcrt=clib2" $(realpath $(COREUTILS_SRC_DIR))/configure --prefix=/gcc --host=ppc-amigaos --disable-maintainer-mode
+else
 	cd coreutils-native-build ; PATH="$(CROSS_PREFIX)/bin:$(PATH)" CPPFLAGS="-mcrt=clib2" LDFLAGS="-mcrt=clib2" LIBS="-lunix -lnet" $(realpath $(COREUTILS_SRC_DIR))/configure --prefix=/gcc --host=ppc-amigaos --disable-maintainer-mode
+endif
 	PATH="$(CROSS_PREFIX)/bin:$(PATH)" $(MAKE) -C coreutils-native-build
 	touch $@
 
@@ -488,7 +533,11 @@ upload-release: native-dist
 
 .PHONY: clean-clib2
 clean-clib2:
-	test ! -d $(CLIB2_DIR) && true || $(MAKE) -C $(CLIB2_DIR) -f GNUmakefile.os4 clean
+ifeq (0, $(shell test -f EXP_CLIB2 ; echo $$?))
+	test ! -d $(EXP_CLIB2_DIR) || $(MAKE) -C $(EXP_CLIB2_DIR) -f GNUmakefile.os4 clean
+else
+	test ! -d $(STABLE_CLIB2_DIR) || $(MAKE) -C $(STABLE_CLIB2_DIR) -f GNUmakefile.os4 clean
+endif
 
 #
 # Cleanup gcc only
@@ -529,3 +578,6 @@ clean: clean-clib2 clean-gcc
 .PNONY: clean-all
 clean-all: clean
 	rm -Rf downloads-done downloads-done-clib2 downloads
+ifeq (0, $(shell test -f EXP_CLIB2 ; echo $$?))
+	rm -f EXP_CLIB2
+endif
