@@ -83,7 +83,7 @@ CLIB2_URL=https://github.com/afxgroup/clib2.git
 CLIB2_SHA1?=HEAD
 else
 CLIB2_URL=https://github.com/sodero/clib2
-CLIB2_SHA1=02ecf7d92448b5486502cd9e95fc838dca4804a7
+CLIB2_SHA1=1a42c693e03881f6f969c43ab36ce20d2569751d
 endif
 CLIB2_RELEASE_ARCHIVE_NAME=adtools-os4-clib2-$(DIST_VERSION).lha
 
