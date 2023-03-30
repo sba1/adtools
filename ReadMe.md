@@ -1,9 +1,6 @@
 The adtools project
 ===================
 
-[![Build Status](https://travis-ci.org/sba1/adtools.svg?branch=master)](https://travis-ci.org/sba1/adtools)
-[![DL](https://api.bintray.com/packages/sba1/adtools-native/adtools/images/download.svg)](https://bintray.com/sba1/adtools-native/adtools/_latestVersion#files)
-
 This is the Amiga developement tools project that host a number of tools
 that can be used to develop applications for AmigaOS and Amigaoid
 systems. At the moment only the version for the latest AmigaOS version
@@ -19,59 +16,6 @@ In contrast to the original approch, build products that are based on
 other projects (e.g. gcc) are not imported directly into this 
 repository. Instead only the patches that need to be applied to a given 
 base version (e.g. stock gcc 6) are directly stored and maintained.
-
-Installation
-------------
-
-### AmigaOS
-
-An lha archive with current binaries can be found at https://dl.bintray.com/sba1/adtools-native.
-
-In order to install it on your Amiga, extract the archive to a destination of your
-choice. Then establish a GCC: assignment to the extracted folder and add the contained
-```bin``` folder to the command search path
-
-```
- 1> ASSIGN GCC: <extracted folder>
- 1> PATH GCC:bin add
-```
-
-Furthermore, you need to have an ```SDK:``` assign as in the original SDK.
-
-Note that if you use the ```APPDIR:``` feature you should flush its contents. Otherwise,
-you may observe unexpected behaviour. Most easily this can be achieved by entering
-
-```
- 1> delete APPDIR:#?
-```
-
-
-### Debian-based Linux distributions
-
-Debian packages are generated automatically for the amd64 architecture. If not already
-done, add the Bintray key that is used to sign the package to your installation, e.g., via:
-
-```
-apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 379CE192D401AB61
-```
-
-Then insert
-
-```
- deb http://dl.bintray.com/sba1/adtools-deb /
-```
-
-to your ```/etc/apt/sources.list``` file. For instance, enter:
-
-```
-$ echo "deb http://dl.bintray.com/sba1/adtools-deb /" | sudo tee -a /etc/apt/sources.list
-```
-
-Installation is then as easy as typing
-
-```
-$ aptitude install adtools-binutils adtools-sdk adtools-gcc
-```
 
 Patch management
 ----------------
@@ -157,8 +101,14 @@ experimental version of gcc 6. Building is then a matter of entering
 $ make -C native-build
 ```
 
-The building should succeed, if all dependencies are met (e.g.,
-```libgmp-dev```, ```libmpc-dev```, ```libmpfr-dev```, ```lha | lhasa```).
+Building requires some dependencies:
+- libgmp-dev
+- libmpc-dev
+- libmpfr-dev
+- lha (NOT lhasa. Instead, use: https://github.com/jca02266/lha)
+- texinfo
+- flex
+
 If you just need a cross-compiler then call the ```gcc-cross``` target like
 that:
 
