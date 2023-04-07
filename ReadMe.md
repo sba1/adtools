@@ -108,6 +108,7 @@ Building requires some dependencies:
 - lha (NOT lhasa. Instead, use: https://github.com/jca02266/lha)
 - texinfo
 - flex
+- bison
 
 If you just need a cross-compiler then call the ```gcc-cross``` target like
 that:
