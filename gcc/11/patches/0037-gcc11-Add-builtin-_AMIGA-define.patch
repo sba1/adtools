@@ -1,0 +1,31 @@
+From 59202d8341b6a02e4ccc3c97063c95ab28f0ba43 Mon Sep 17 00:00:00 2001
+From: Ola Söder <rolfkopman@gmail.com>
+Date: Sun, 9 Apr 2023 22:34:16 +0200
+Subject: [PATCH 37/37] gcc11: Add builtin _AMIGA define.
+
+Define _AMIGA like on AROS, MorphOS and OS3 (SAS/C).
+---
+ gcc/config/rs6000/amigaos.h | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/gcc/config/rs6000/amigaos.h b/gcc/config/rs6000/amigaos.h
+index eacc455e168c4bf46522151148bc72c09a199485..8a549ed05ca4358e30e2bdef6a2b6d2d177fdd14 100644
+--- a/gcc/config/rs6000/amigaos.h
++++ b/gcc/config/rs6000/amigaos.h
+@@ -105,12 +105,13 @@
+     {                                           \
+       builtin_define_std ("PPC");		\
+       builtin_define_std ("powerpc");		\
+       builtin_assert ("cpu=powerpc");		\
+       builtin_assert ("machine=powerpc");	\
+       builtin_define_std ("AMIGA");		\
++      builtin_define ("_AMIGA");		\
+       builtin_define_std ("AMIGAOS");		\
+       builtin_define_std ("AMIGAOS4");		\
+       builtin_define_std ("amiga");		\
+       builtin_define_std ("amigaos");		\
+       builtin_define_std ("amigaos4");		\
+       builtin_assert ("system=amigaos");	\
+-- 
+2.34.1
+
