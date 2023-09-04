@@ -1,4 +1,4 @@
-4.9	876d41ed80ce13e060084ed5a552c37c301e5563	http://ftp.gnu.org/gnu/gcc/gcc-4.9.3/gcc-4.9.3.tar.bz2
+4.9	releases/gcc-4.9.3	http://ftp.gnu.org/gnu/gcc/gcc-4.9.3/gcc-4.9.3.tar.bz2
 5	releases/gcc-5.5.0	http://ftp.gnu.org/gnu/gcc/gcc-5.5.0/gcc-5.5.0.tar.gz
 6	releases/gcc-6.4.0	http://ftp.gnu.org/gnu/gcc/gcc-6.4.0/gcc-6.4.0.tar.xz
 8	releases/gcc-8.4.0	http://ftp.gnu.org/gnu/gcc/gcc-8.4.0/gcc-8.4.0.tar.xz
