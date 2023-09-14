@@ -157,8 +157,15 @@ experimental version of gcc 6. Building is then a matter of entering
 $ make -C native-build
 ```
 
-The building should succeed, if all dependencies are met (e.g.,
-```libgmp-dev```, ```libmpc-dev```, ```libmpfr-dev```, ```lha | lhasa```).
+Building requires some dependencies:
+- libgmp-dev
+- libmpc-dev
+- libmpfr-dev
+- lha (NOT lhasa. Instead, use: https://github.com/jca02266/lha)
+- texinfo
+- flex
+- bison
+
 If you just need a cross-compiler then call the ```gcc-cross``` target like
 that:
 
