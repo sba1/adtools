@@ -83,13 +83,11 @@ DIST_VERSION=$(shell date +%Y%m%d)-$(shell git rev-list --count HEAD)
 # Set up the necessary variables for the CLIBs
 CLIB4_URL=https://github.com/afxgroup/clib2.git
 CLIB4_DIR=downloads/clib4/
+CLIB4_RELEASE_ARCHIVE_NAME=adtools-os4-clib4-$(DIST_VERSION).lha
 
 CLIB2_URL=https://github.com/sodero/clib2
-CLIB2_SHA1=1a42c693e03881f6f969c43ab36ce20d2569751d
 CLIB2_DIR=downloads/clib2/library/
-
 CLIB2_RELEASE_ARCHIVE_NAME=adtools-os4-clib2-$(DIST_VERSION).lha
-CLIB4_RELEASE_ARCHIVE_NAME=adtools-os4-clib4-$(DIST_VERSION).lha
 
 CROSS_PREFIX?=$(ROOT_DIR)/root-cross
 # This assumes that cross prefix is absolute
@@ -237,7 +235,6 @@ clib4-cross-done-$(GCC_VERSION): $(CLIB_CROSS_DONE_DEPENDENCY)
 		AR="$(XAR)" \
 		RANLIB="$(XRANLIB)" \
 		STRIP=$(STRIP) \
-		SHARED=no \
 		INSTALL_PREFIX=$(CROSS_PREFIX)/ppc-amigaos/SDK/clib4 \
 		SDK_INCLUDE=$(CROSS_PREFIX)/ppc-amigaos/SDK/include
 # Copy clib libs and includes
@@ -266,7 +263,6 @@ clib2-cross-done-$(GCC_VERSION): $(CLIB_CROSS_DONE_DEPENDENCY)
 # Build the cross compiler
 #
 gcc-cross-done-$(GCC_VERSION): clib2-cross-done-$(GCC_VERSION) clib4-cross-done-$(GCC_VERSION)
-	exit 99
 # Compile remaining
 	$(MAKE) -C $(ROOT_DIR)/gcc-cross-build-$(GCC_VERSION)
 	$(MAKE) -C $(ROOT_DIR)/gcc-cross-build-$(GCC_VERSION) install
