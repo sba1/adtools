@@ -379,7 +379,7 @@ ReadMe: ReadMe.mak
 	python -c "\
 	from mako.template import Template;\
 	from mako.lookup import TemplateLookup;\
-	print Template(\
+	print (Template(\
 		filename='$<',\
 		input_encoding='utf-8',\
 		output_encoding='utf-8',\
@@ -391,7 +391,7 @@ ReadMe: ReadMe.mak
 			GCC_DEV_PHASE='$(GCC_DEV_PHASE)',\
 			COREUTILS_VERSION='$(COREUTILS_VERSION)',\
 			CLIB2_RELEASE_ARCHIVE_NAME='$(CLIB2_RELEASE_ARCHIVE_NAME)'\
-		)\
+		))\
 	" >$@.utf8
 	iconv --from-code=UTF8 --to-code=ISO-8859-15 $@.utf8 >$@
 
