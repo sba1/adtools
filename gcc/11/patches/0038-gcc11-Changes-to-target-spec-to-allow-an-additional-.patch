@@ -1,7 +1,7 @@
 From 89c0d9f8938e548f0ab8e9fdc90626b674756e4a Mon Sep 17 00:00:00 2001
 From: rjd <3246251196ryan@gmail.com>
 Date: Sun, 17 Sep 2023 12:33:45 +0100
-Subject: [PATCH 38/38] gcc11: Changes to target spec to allow an additional
+Subject: [PATCH 38/39] gcc11: Changes to target spec to allow an additional
  CRT: clib4.
 
 This patch introduces an additional C library named clib4. See

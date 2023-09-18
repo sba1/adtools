@@ -1,0 +1,30 @@
+From 97872fa3576653e81511d01de615d00652069a52 Mon Sep 17 00:00:00 2001
+From: rjd <3246251196ryan@gmail.com>
+Date: Mon, 18 Sep 2023 10:21:22 +0100
+Subject: [PATCH 39/39] clib4 profiling
+
+---
+ gcc/config/rs6000/amigaos.h | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/gcc/config/rs6000/amigaos.h b/gcc/config/rs6000/amigaos.h
+index a8040a84d958d84815193959f07a47684d8dae18..a4e8ae1a7848823aefad150afadc045cda88d5a4 100644
+--- a/gcc/config/rs6000/amigaos.h
++++ b/gcc/config/rs6000/amigaos.h
+@@ -126,12 +126,13 @@
+             builtin_define ("__THREAD_SAFE");	\
+         }					\
+       else if (IS_MCRT("clib4"))		\
+         {					\
+           builtin_define_std ("CLIB4");		\
+           builtin_define ("CLIB4");		\
++          builtin_define ("NO_PROFILE_COUNTERS=1")	\
+         }					\
+       else if (IS_MCRT("ixemul"))		\
+         {					\
+           builtin_define_std ("ixemul");	\
+           builtin_define_std ("IXEMUL");	\
+         }					\
+-- 
+2.34.1
+
