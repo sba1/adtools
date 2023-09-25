@@ -132,8 +132,7 @@ downloads-done-clib4:
 # Downloads the SDK and libraries necesseary to build the cross compiler
 #
 downloads-done: downloads-done-clib2 downloads-done-clib4
-####	wget "$(SDK_URL)" -O downloads/SDK_$(SDK_VERSION).lha
-	cp /home/rjd/Downloads/SDK_$(SDK_VERSION).lha downloads/SDK_$(SDK_VERSION).lha ### TODO : Put me BACK!
+	wget "$(SDK_URL)" -O downloads/SDK_$(SDK_VERSION).lha
 	cd downloads && wget -N http://ftp.gnu.org/gnu/gmp/$(GMP_ARCHIVE)
 	cd downloads && wget -N http://ftp.gnu.org/gnu/mpfr/$(MPFR_ARCHIVE)
 	cd downloads && wget -N http://ftp.gnu.org/gnu/mpc/$(MPC_ARCHIVE)
