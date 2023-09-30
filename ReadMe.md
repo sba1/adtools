@@ -165,6 +165,8 @@ Building requires some dependencies:
 - texinfo
 - flex
 - bison
+- python3
+- python3-mako
 
 If you just need a cross-compiler then call the ```gcc-cross``` target like
 that:
