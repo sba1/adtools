@@ -124,7 +124,7 @@ downloads-done-clib2:
 #
 # Downloads clib4
 #
-ifneq $($(CLIB4_SUPPORT),,)
+ifneq ($(CLIB4_SUPPORT),,)
 downloads-done-clib4:
 	mkdir -p downloads
 	cd downloads && \
