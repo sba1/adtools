@@ -400,7 +400,7 @@ doc:
 # Target for generating the ReadMe used for Aminet
 #
 ifneq ($(CLIB4_SUPPORT),,)
-CLIB4_RELEASE_ARCHIVE_NAME=CLIB4_RELEASE_ARCHIVE_NAME='$(CLIB4_RELEASE_ARCHIVE_NAME)'
+CLIB4_ENTRY=CLIB4_RELEASE_ARCHIVE_NAME='$(CLIB4_RELEASE_ARCHIVE_NAME)'
 endif
 ReadMe: ReadMe.mak
 	python -c "\
@@ -418,7 +418,7 @@ ReadMe: ReadMe.mak
 			GCC_DEV_PHASE='$(GCC_DEV_PHASE)',\
 			COREUTILS_VERSION='$(COREUTILS_VERSION)',\
 			CLIB2_RELEASE_ARCHIVE_NAME='$(CLIB2_RELEASE_ARCHIVE_NAME)',\
-			$(CLIB4_RELEASE_ARCHIVE_NAME)\
+			$(CLIB4_ENTRY)\
 		))\
 	" >$@.utf8
 	iconv --from-code=UTF8 --to-code=ISO-8859-15 $@.utf8 >$@
