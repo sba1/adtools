@@ -124,7 +124,7 @@ downloads-done-clib2:
 #
 # Downloads clib4
 #
-ifneq ($(CLIB4_SUPPORT),,)
+ifneq ($(CLIB4_SUPPORT),)
 downloads-done-clib4:
 	mkdir -p downloads
 	cd downloads && \
@@ -138,7 +138,7 @@ endif
 # Downloads the SDK and libraries necesseary to build the cross compiler
 #
 DOWNLOADS_DONE_DEPENDENCY=downloads-done-clib2
-ifneq ($(CLIB4_SUPPORT),,)
+ifneq ($(CLIB4_SUPPORT),)
 DOWNLOADS_DONE_DEPENDENCY+=downloads-done-clib4
 endif
 downloads-done: $(DOWNLOADS_DONE_DEPENDENCY)
@@ -200,7 +200,7 @@ XAR=ppc-amigaos-ar -q
 XRANLIB=ppc-amigaos-ranlib
 
 CLIB_CROSS_DONE_DEPENDENCY=downloads-done-clib2
-ifneq ($(CLIB4_SUPPORT),,)
+ifneq ($(CLIB4_SUPPORT),)
 CLIB_CROSS_DONE_DEPENDENCY+=downloads-done-clib4
 endif
 
@@ -240,7 +240,7 @@ xgcc-done-$(GCC_VERSION): includes-done binutils-cross-done-$(BINUTILS_VERSION)
 #
 # Build clib via xgcc
 #
-ifneq ($(CLIB4_SUPPORT),,)
+ifneq ($(CLIB4_SUPPORT),)
 clib4-cross-done-$(GCC_VERSION): $(CLIB_CROSS_DONE_DEPENDENCY)
 # Build clib using xgcc that have just been built
 	$(MAKE) -C $(CLIB4_DIR) -f GNUmakefile.os4 \
@@ -276,7 +276,7 @@ clib2-cross-done-$(GCC_VERSION): $(CLIB_CROSS_DONE_DEPENDENCY)
 # Build the cross compiler
 #
 GCC_CROSS_DONE_DEPENDENCY=clib2-cross-done-$(GCC_VERSION)
-ifneq ($(CLIB4_SUPPORT),,)
+ifneq ($(CLIB4_SUPPORT),)
 GCC_CROSS_DONE_DEPENDENCY+=clib4-cross-done-$(GCC_VERSION)
 endif
 gcc-cross-done-$(GCC_VERSION): $(GCC_CROSS_DONE_DEPENDENCY)
@@ -399,7 +399,7 @@ doc:
 #
 # Target for generating the ReadMe used for Aminet
 #
-ifneq ($(CLIB4_SUPPORT),,)
+ifneq ($(CLIB4_SUPPORT),)
 CLIB4_ENTRY=CLIB4_RELEASE_ARCHIVE_NAME='$(CLIB4_RELEASE_ARCHIVE_NAME)'
 endif
 ReadMe: ReadMe.mak
@@ -546,7 +546,7 @@ native-dist: native-strip-really
 #
 clib2-dist: clib2-cross-done-$(GCC_VERSION)
 	cd root-cross/ppc-amigaos/SDK && lha ao5 $(realpath .)/$(CLIB2_RELEASE_ARCHIVE_NAME) clib2
-ifneq ($(CLIB4_SUPPORT),,)
+ifneq ($(CLIB4_SUPPORT),)
 clib4-dist: clib4-cross-done-$(GCC_VERSION)
 	cd root-cross/ppc-amigaos/SDK && lha ao5 $(realpath .)/$(CLIB4_RELEASE_ARCHIVE_NAME) clib4
 endif
