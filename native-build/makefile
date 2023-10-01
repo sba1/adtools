@@ -355,11 +355,11 @@ endif
 # Pretend few files to be uptodate
 	touch $(realpath $(COREUTILS_SRC_DIR))/configure $(realpath $(COREUTILS_SRC_DIR))/config.hin
 	cd coreutils-native-build ; \
+		$(realpath $(COREUTILS_SRC_DIR))/configure --prefix=/gcc --host=ppc-amigaos --disable-maintainer-mode \
 		PATH="$(CROSS_PREFIX)/bin:$(PATH)" \
 		CPPFLAGS="-mcrt=clib2" \
 		LDFLAGS="-mcrt=clib2" \
-		LIBS="-lunix -lnet" \
-		$(realpath $(COREUTILS_SRC_DIR))/configure --prefix=/gcc --host=ppc-amigaos --disable-maintainer-mode
+		LIBS="-lunix -lnet"
 	PATH="$(CROSS_PREFIX)/bin:$(PATH)" $(MAKE) -C coreutils-native-build
 	touch $@
 
