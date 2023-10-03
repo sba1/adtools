@@ -48,6 +48,9 @@ accompanying clib2 release archive ${CLIB2_RELEASE_ARCHIVE_NAME} and install its
 contents into the SDK: folder. You can find this (unofficial) archive at
 https://dl.bintray.com/sba1/adtools-native/.
 
+Alternatively to clib2, there is clib4, which is a fork from the original
+clib2. The release archive is ${CLIB4_RELEASE_ARCHIVE_NAME}.
+
 Also for C++, it is recommended not to use the shared objects feature (aka
 dynload) for now. The reason is that the C++-ABI may change in the future.
 Lastly, you should link the final executable using the --athread=native

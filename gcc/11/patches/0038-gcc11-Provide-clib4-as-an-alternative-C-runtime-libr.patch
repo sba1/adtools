@@ -1,0 +1,207 @@
+From 89d22be348dd26a4d82b12f8c79ae8fe0db46ecb Mon Sep 17 00:00:00 2001
+From: rjd <3246251196ryan@gmail.com>
+Date: Mon, 2 Oct 2023 12:28:43 +0100
+Subject: [PATCH 38/38] gcc11: Provide clib4 as an alternative C runtime
+ library.
+
+The mcrt option will now accept clib4 (--mcrt=clib4) in addition to
+newlib and clib2.
+---
+ gcc/config/rs6000/amigaos.h           | 43 ++++++++++++++++++++-------
+ gcc/config/rs6000/t-amigaos           |  4 +--
+ libstdc++-v3/include/c_global/cstdlib |  4 +--
+ 3 files changed, 37 insertions(+), 14 deletions(-)
+
+diff --git a/gcc/config/rs6000/amigaos.h b/gcc/config/rs6000/amigaos.h
+index 8a549ed05ca4358e30e2bdef6a2b6d2d177fdd14..a8040a84d958d84815193959f07a47684d8dae18 100644
+--- a/gcc/config/rs6000/amigaos.h
++++ b/gcc/config/rs6000/amigaos.h
+@@ -122,12 +122,17 @@
+       else if (IS_MCRT("clib2") || IS_MCRT("clib2-ts")) \
+         {					\
+           builtin_define_std ("CLIB2");		\
+           if (IS_MCRT("clib2-ts"))		\
+             builtin_define ("__THREAD_SAFE");	\
+         }					\
++      else if (IS_MCRT("clib4"))		\
++        {					\
++          builtin_define_std ("CLIB4");		\
++          builtin_define ("CLIB4");		\
++        }					\
+       else if (IS_MCRT("ixemul"))		\
+         {					\
+           builtin_define_std ("ixemul");	\
+           builtin_define_std ("IXEMUL");	\
+         }					\
+       else if (IS_MCRT("libnix"))		\
+@@ -166,28 +171,18 @@
+ #undef REAL_LIBGCC_SPEC
+ #define REAL_LIBGCC_SPEC "\
+ %{static|static-libgcc: %{!use-dynld: -lgcc -lgcc_eh} %{use-dynld: -lgcc} }%{!static:%{!static-libgcc:%{!shared:%{!shared-libgcc: %{!use-dynld: -lgcc -lgcc_eh} %{use-dynld: -lgcc}}%{shared-libgcc:-lgcc}}%{shared:%{shared-libgcc:-lgcc}%{!shared-libgcc:-lgcc}}}}"
+ 
+ 
+ /* make newlib the default */
+-#if 1
+ #define CPP_AMIGA_DEFAULT_SPEC "%{mcrt=default|!mcrt=*:%<mcrt=default -mcrt=newlib} %(cpp_newlib)"
+ #define LINK_AMIGA_DEFAULT_SPEC "%(link_newlib)"
+ #define STARTFILE_AMIGA_DEFAULT_SPEC "%(startfile_newlib)"
+ #define ENDFILE_AMIGA_DEFAULT_SPEC "%(endfile_newlib)"
+ #undef MULTILIB_DEFAULTS
+ #define MULTILIB_DEFAULTS {"mcrt=newlib"}
+-#else
+-/* make clib2 the default */
+-#define CPP_AMIGA_DEFAULT_SPEC "%{mcrt=default|!mcrt=*:%<mcrt=default -mcrt=clib2} %(cpp_clib2)"
+-#define LINK_AMIGA_DEFAULT_SPEC "%(link_clib2)"
+-#define STARTFILE_AMIGA_DEFAULT_SPEC "%(startfile_clib2)"
+-#define ENDFILE_AMIGA_DEFAULT_SPEC "%(endfile_clib2)"
+-#undef MULTILIB_DEFAULTS
+-#define MULTILIB_DEFAULTS {"mcrt=clib2"}
+-#endif
+ 
+ 
+ /* For specifying the include system paths, we generally use -idirafter so the include
+  * paths are added at the end of the gcc default include paths. This is required for
+  * fixincludes and libstdc++ to work properly
+  */
+@@ -212,12 +207,30 @@
+                  "%{!msoft-float:%(lib_subdir_type)}/crt0.o"
+ 
+ #define ENDFILE_CLIB2_SPEC "\
+ %(base_sdk)clib2/%{mcrt=clib2-ts:lib.threadsafe; :lib}" \
+                  "%{!msoft-float:%(lib_subdir_type)}/crtend.o"
+ 
++/* clib4 */
++
++#define CPP_CLIB4_SPEC "\
++-idirafter %(base_sdk)clib4/include -idirafter %(base_sdk)local/clib4/include"
++
++#define LIB_SUBDIR_CLIB4_SPEC "lib%(lib_subdir_type)"
++
++#define LINK_CLIB4_SPEC "\
++-L%(base_sdk)clib4/%(lib_subdir_clib4) \
++-L%(base_gcc)lib/gcc/ppc-amigaos/%(version)/clib4/lib%(lib_subdir_clib4) \
++-L%(base_sdk)local/clib4/%(lib_subdir_clib4)"
++
++#define STARTFILE_CLIB4_SPEC "\
++%{shared: %(base_sdk)clib4/%(lib_subdir_clib4)/shcrtbegin.o} %{!shared: %(base_sdk)clib4/%(lib_subdir_clib4)/crtbegin.o} %{!shared: %(base_sdk)clib4/%(lib_subdir_clib4)/crt0.o}"
++
++#define ENDFILE_CLIB4_SPEC "\
++%{shared: %(base_sdk)clib4/%(lib_subdir_clib4)/shcrtend.o} %{!shared: %(base_sdk)clib4/%(lib_subdir_clib4)/crtend.o}"
++
+ /* ixemul */
+ 
+ #define CPP_IXEMUL_SPEC "\
+ -idirafter %(base_sdk)ixemul/include -idirafter %(base_sdk)local/ixemul/include"
+ 
+ #define LIB_SUBDIR_IXEMUL_SPEC "lib%(lib_subdir_type)"
+@@ -267,12 +280,13 @@
+ 
+ /* End clib specific */
+ 
+ #undef CPP_OS_DEFAULT_SPEC
+ #define CPP_OS_DEFAULT_SPEC "\
+ %{mcrt=clib2|mcrt=clib2-ts: %(cpp_clib2); \
++mcrt=clib4: %(cpp_clib4); \
+ mcrt=ixemul: %(cpp_ixemul); \
+ mcrt=libnix: %(cpp_libnix); \
+ mcrt=newlib: %(cpp_newlib); \
+ mcrt=default|!mcrt=*: %{mcrt=default|!nostdinc: %(cpp_amiga_default)}; \
+ : %eInvalid C runtime library} \
+ %{!nostdinc: -idirafter %(base_sdk)include/include_h -idirafter %(base_sdk)include/netinclude -idirafter %(base_sdk)local/common/include} \
+@@ -286,12 +300,13 @@ mcrt=default|!mcrt=*: %{mcrt=default|!nostdinc: %(cpp_amiga_default)}; \
+ -q -d %{h*} %{v:-V} %{G*} \
+ %{Wl,*:%*} %{YP,*} %{R*} \
+ %{Qy:} %{!Qn:-Qy} \
+ %(link_thread) %(link_shlib) %(link_text) \
+ %{mbaserel: %{msdata|msdata=default|msdata=sysv: %e-mbaserel and -msdata options are incompatible}} \
+ %{mcrt=clib2|mcrt=clib2-ts: %(link_clib2); \
++mcrt=clib4: %(link_clib4); \
+ mcrt=ixemul: %(link_ixemul); \
+ mcrt=libnix: %(link_libnix); \
+ mcrt=newlib: %(link_newlib); \
+ mcrt=default|!mcrt=*: %(link_amiga_default); \
+ : %eInvalid C runtime library} \
+ -L%(base_sdk)local/common/lib%(lib_subdir_type) \
+@@ -311,21 +326,23 @@ mcrt=default|!mcrt=*: %(link_amiga_default); \
+ #define LINK_THREAD "\
+ %s%{athread=native:gthr-amigaos-native.o;athread=single:gthr-amigaos-single.o;athread=pthread:gthr-amigaos-pthread.o}"
+ 
+ #undef STARTFILE_SPEC
+ #define STARTFILE_SPEC "\
+ %{mcrt=clib2|mcrt=clib2-ts: %(startfile_clib2); \
++mcrt=clib4: %(startfile_clib4); \
+ mcrt=ixemul: %(startfile_ixemul); \
+ mcrt=libnix: %(startfile_libnix); \
+ mcrt=newlib: %(startfile_newlib); \
+ mcrt=default|!mcrt=*: %(startfile_amiga_default); \
+ : %eInvalid C runtime library}"
+ 
+ #undef ENDFILE_SPEC
+ #define ENDFILE_SPEC "\
+ %{mcrt=clib2|mcrt=clib2-ts: %(endfile_clib2); \
++mcrt=clib4: %(endfile_clib4); \
+ mcrt=ixemul: %(endfile_ixemul); \
+ mcrt=libnix: %(endfile_libnix); \
+ mcrt=newlib: %(endfile_newlib); \
+ mcrt=default|!mcrt=*: %(endfile_amiga_default); \
+ : %eInvalid C runtime library}"
+ 
+@@ -350,12 +367,18 @@ mcrt=default|!mcrt=*: %(endfile_amiga_default); \
+   /* clib2 */ \
+   {"cpp_clib2", CPP_CLIB2_SPEC}, \
+   {"lib_subdir_clib2", LIB_SUBDIR_CLIB2_SPEC}, \
+   {"link_clib2", LINK_CLIB2_SPEC}, \
+   {"startfile_clib2", STARTFILE_CLIB2_SPEC}, \
+   {"endfile_clib2", ENDFILE_CLIB2_SPEC}, \
++  /* clib4 */ \
++  {"cpp_clib4", CPP_CLIB4_SPEC}, \
++  {"lib_subdir_clib4", LIB_SUBDIR_CLIB4_SPEC}, \
++  {"link_clib4", LINK_CLIB4_SPEC}, \
++  {"startfile_clib4", STARTFILE_CLIB4_SPEC}, \
++  {"endfile_clib4", ENDFILE_CLIB4_SPEC}, \
+   /* ixemul */ \
+   {"cpp_ixemul", CPP_IXEMUL_SPEC}, \
+   {"lib_subdir_ixemul", LIB_SUBDIR_IXEMUL_SPEC}, \
+   {"link_ixemul", LINK_IXEMUL_SPEC}, \
+   {"startfile_ixemul", STARTFILE_IXEMUL_SPEC}, \
+   {"endfile_ixemul", ENDFILE_IXEMUL_SPEC}, \
+diff --git a/gcc/config/rs6000/t-amigaos b/gcc/config/rs6000/t-amigaos
+index 15d9d3fd5a5f0c8109cd158242745fa52b19257e..0d8049f400ca7f0937330ffec4f01546d9d61cc2 100644
+--- a/gcc/config/rs6000/t-amigaos
++++ b/gcc/config/rs6000/t-amigaos
+@@ -12,9 +12,9 @@ LIMITS_H_TEST = true
+ NATIVE_SYSTEM_HEADER_DIR=/gcc/include
+ #OTHER_FIXINCLUDES_DIRS=${gcc_tooldir}/include
+ 
+ # Build the libraries for both newlib and clib2
+ # We do not build soft float flavours as none of the
+ # libs support soft floats
+-MULTILIB_OPTIONS = mcrt=newlib/mcrt=clib2
+-MULTILIB_DIRNAMES = newlib clib2
++MULTILIB_OPTIONS = mcrt=newlib/mcrt=clib2/mcrt=clib4
++MULTILIB_DIRNAMES = newlib clib2 clib4
+ #MULTILIB_REUSE = =mcrt=newlib
+diff --git a/libstdc++-v3/include/c_global/cstdlib b/libstdc++-v3/include/c_global/cstdlib
+index 99325ad0682f2f88bc04ca38a50cc97a2bcea4d5..deae1df7fd4657b48ee9ccd4f0d1781f2d09237e 100644
+--- a/libstdc++-v3/include/c_global/cstdlib
++++ b/libstdc++-v3/include/c_global/cstdlib
+@@ -188,14 +188,14 @@ _GLIBCXX_END_NAMESPACE_VERSION
+ #undef lldiv
+ #undef atoll
+ #undef strtoll
+ #undef strtoull
+ #undef strtof
+ 
+-/* Neigther clib2 nor newlib offers strtoud() */
+-#ifndef __amigaos4__
++/* clib2 and newlib do not provide an implementation of strtold */
++#if !defined (__amigaos4__) || defined(__CLIB4__)
+ #undef strtold
+ #endif
+ 
+ namespace __gnu_cxx _GLIBCXX_VISIBILITY(default)
+ {
+ _GLIBCXX_BEGIN_NAMESPACE_VERSION
+-- 
+2.34.1
+
