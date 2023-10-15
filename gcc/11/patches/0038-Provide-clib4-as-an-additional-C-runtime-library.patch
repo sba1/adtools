@@ -1,16 +1,18 @@
-From 89d22be348dd26a4d82b12f8c79ae8fe0db46ecb Mon Sep 17 00:00:00 2001
+From 796a82ede4a20c66b1f6be8a443baeefc45d0952 Mon Sep 17 00:00:00 2001
 From: rjd <3246251196ryan@gmail.com>
-Date: Mon, 2 Oct 2023 12:28:43 +0100
-Subject: [PATCH 38/38] gcc11: Provide clib4 as an alternative C runtime
- library.
+Date: Mon, 16 Oct 2023 00:47:53 +0100
+Subject: [PATCH 38/38] Provide clib4 as an additional C runtime library.
 
-The mcrt option will now accept clib4 (--mcrt=clib4) in addition to
-newlib and clib2.
+As well as the existing newlib and clib2 as C runtime library choices,
+clib4 is now introduced. Support for clib4 is currently restricted to
+GCC version 11.
 ---
  gcc/config/rs6000/amigaos.h           | 43 ++++++++++++++++++++-------
  gcc/config/rs6000/t-amigaos           |  4 +--
+ libstdc++-v3/configure                | 15 ++++++++++
+ libstdc++-v3/crossconfig.m4           | 12 ++++++++
  libstdc++-v3/include/c_global/cstdlib |  4 +--
- 3 files changed, 37 insertions(+), 14 deletions(-)
+ 5 files changed, 64 insertions(+), 14 deletions(-)
 
 diff --git a/gcc/config/rs6000/amigaos.h b/gcc/config/rs6000/amigaos.h
 index 8a549ed05ca4358e30e2bdef6a2b6d2d177fdd14..a8040a84d958d84815193959f07a47684d8dae18 100644
@@ -181,6 +183,67 @@ index 15d9d3fd5a5f0c8109cd158242745fa52b19257e..0d8049f400ca7f0937330ffec4f01546
 +MULTILIB_OPTIONS = mcrt=newlib/mcrt=clib2/mcrt=clib4
 +MULTILIB_DIRNAMES = newlib clib2 clib4
  #MULTILIB_REUSE = =mcrt=newlib
+diff --git a/libstdc++-v3/configure b/libstdc++-v3/configure
+index 6f771d0b1bc3a62bb68bd0657bb295b11c005ba6..d566c6173da7da2084d6eed531967c5fead2d779 100755
+--- a/libstdc++-v3/configure
++++ b/libstdc++-v3/configure
+@@ -74119,12 +74119,27 @@ $as_echo "$ac_ld_relro" >&6; }
+     OPT_LDFLAGS="-Wl,-O1 $OPT_LDFLAGS"
+   fi
+ 
+ 
+ 
+ 
++
++
++    for ac_func in acosf asinf atan2f atanf ceilf cosf coshf expf fabsf floorf fmodf frexpf sqrtf hypotf ldexpf log10f logf modff powf sinf sinhf tanf tanhf fabsl acosl asinl atanl atan2l ceill cosl coshl expl floorl fmodl frexpl sqrtl hypotl ldexpl logl log10l modfl powl sinl sinhl tanl tanhl
++do :
++  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
++ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
++if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
++  cat >>confdefs.h <<_ACEOF
++#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
++_ACEOF
++
++fi
++done
++
++
+     ;;
+   *)
+     as_fn_error $? "No support for this host/target combination." "$LINENO" 5
+    ;;
+ esac
+ 
+diff --git a/libstdc++-v3/crossconfig.m4 b/libstdc++-v3/crossconfig.m4
+index cbbfff770cb1356bf9352ad7e61ef5c77458f262..cb22f046dc2585323e457cde10a7d50a1683863b 100644
+--- a/libstdc++-v3/crossconfig.m4
++++ b/libstdc++-v3/crossconfig.m4
+@@ -316,12 +316,24 @@ dnl # the expansion of the present macro.
+     AC_CHECK_HEADERS([nan.h ieeefp.h endian.h sys/isa_defs.h \
+       machine/endian.h machine/param.h sys/machine.h sys/types.h \
+       fp.h locale.h float.h inttypes.h])
+     SECTION_FLAGS='-ffunction-sections -fdata-sections'
+     AC_SUBST(SECTION_FLAGS)
+     GLIBCXX_CHECK_LINKER_FEATURES
++
++dnl # Although we are cross compiling for Amiga, we already built the
++dnl # first stage compiler: the compiler without any libraries such as
++dnl # libstdc++. This means that we DO have access to AC_CHECK_FUNCS
++dnl # as all the CRTs have been built and installed at the point of
++dnl # running the configure file for libstdc++-v3.
++dnl #
++dnl # Adding checks here:
++
++dnl #
++    AC_CHECK_FUNCS(acosf asinf atan2f atanf ceilf cosf coshf expf fabsf floorf fmodf frexpf sqrtf hypotf ldexpf log10f logf modff powf sinf sinhf tanf tanhf fabsl acosl asinl atanl atan2l ceill cosl coshl expl floorl fmodl frexpl sqrtl hypotl ldexpl logl log10l modfl powl sinl sinhl tanl tanhl)
++
+     ;;
+   *)
+     AC_MSG_ERROR([No support for this host/target combination.])
+    ;;
+ esac
+ ])
 diff --git a/libstdc++-v3/include/c_global/cstdlib b/libstdc++-v3/include/c_global/cstdlib
 index 99325ad0682f2f88bc04ca38a50cc97a2bcea4d5..deae1df7fd4657b48ee9ccd4f0d1781f2d09237e 100644
 --- a/libstdc++-v3/include/c_global/cstdlib
