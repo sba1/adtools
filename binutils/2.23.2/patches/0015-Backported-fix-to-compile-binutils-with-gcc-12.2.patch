@@ -1,0 +1,53 @@
+From 4a681af0cc3ca0710b72e9818db4aa3cba5aceb6 Mon Sep 17 00:00:00 2001
+From: Josef Wegner <josef.wegner@outlook.com>
+Date: Tue, 14 Nov 2023 15:56:14 +0100
+Subject: [PATCH 15/15] Backported fix to compile binutils with gcc-12.2
+
+Newer versions of gcc catch a format overflow in bfd/ihex.c and bfd/srec.c
+Backported a fix from newer binutils to truncate the value to byte size before output
+---
+ bfd/ihex.c | 2 +-
+ bfd/srec.c | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/bfd/ihex.c b/bfd/ihex.c
+index 639e70823d66c4ad8308b07872be7232e355bc34..c031392636c3a45dc7946d56caacbc84c5d52c98 100644
+--- a/bfd/ihex.c
++++ b/bfd/ihex.c
+@@ -217,13 +217,13 @@ ihex_bad_byte (bfd *abfd, unsigned int lineno, int c, bfd_boolean error)
+     }
+   else
+     {
+       char buf[10];
+ 
+       if (! ISPRINT (c))
+-	sprintf (buf, "\\%03o", (unsigned int) c);
++	sprintf (buf, "\\%03o", (unsigned int) c & 0xff);
+       else
+ 	{
+ 	  buf[0] = c;
+ 	  buf[1] = '\0';
+ 	}
+       (*_bfd_error_handler)
+diff --git a/bfd/srec.c b/bfd/srec.c
+index 9d6fdcea625cd09d611b8444220c5a37aab2ba98..9a29fa78d3ab78054f2ab737a2f272c780683877 100644
+--- a/bfd/srec.c
++++ b/bfd/srec.c
+@@ -248,13 +248,13 @@ srec_bad_byte (bfd *abfd,
+     }
+   else
+     {
+       char buf[10];
+ 
+       if (! ISPRINT (c))
+-	sprintf (buf, "\\%03o", (unsigned int) c);
++	sprintf (buf, "\\%03o", (unsigned int) c & 0xff);
+       else
+ 	{
+ 	  buf[0] = c;
+ 	  buf[1] = '\0';
+ 	}
+       (*_bfd_error_handler)
+-- 
+2.39.2
+
