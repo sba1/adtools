@@ -1,6 +1,6 @@
-From 796a82ede4a20c66b1f6be8a443baeefc45d0952 Mon Sep 17 00:00:00 2001
+From 874a7d09eb853fe6b5e959a0e60e28636b3f0269 Mon Sep 17 00:00:00 2001
 From: rjd <3246251196ryan@gmail.com>
-Date: Mon, 16 Oct 2023 00:47:53 +0100
+Date: Thu, 23 Nov 2023 22:12:35 +0000
 Subject: [PATCH 38/38] Provide clib4 as an additional C runtime library.
 
 As well as the existing newlib and clib2 as C runtime library choices,
@@ -15,7 +15,7 @@ GCC version 11.
  5 files changed, 64 insertions(+), 14 deletions(-)
 
 diff --git a/gcc/config/rs6000/amigaos.h b/gcc/config/rs6000/amigaos.h
-index 8a549ed05ca4358e30e2bdef6a2b6d2d177fdd14..a8040a84d958d84815193959f07a47684d8dae18 100644
+index 8a549ed05ca4358e30e2bdef6a2b6d2d177fdd14..f92526783393a0ac40d0ea9c08ab932c7f472744 100644
 --- a/gcc/config/rs6000/amigaos.h
 +++ b/gcc/config/rs6000/amigaos.h
 @@ -122,12 +122,17 @@
@@ -81,7 +81,7 @@ index 8a549ed05ca4358e30e2bdef6a2b6d2d177fdd14..a8040a84d958d84815193959f07a4768
 +
 +#define LINK_CLIB4_SPEC "\
 +-L%(base_sdk)clib4/%(lib_subdir_clib4) \
-+-L%(base_gcc)lib/gcc/ppc-amigaos/%(version)/clib4/lib%(lib_subdir_clib4) \
++-L%(base_gcc)lib/gcc/ppc-amigaos/%(version)/clib4/lib%(lib_subdir_type) \
 +-L%(base_sdk)local/clib4/%(lib_subdir_clib4)"
 +
 +#define STARTFILE_CLIB4_SPEC "\
