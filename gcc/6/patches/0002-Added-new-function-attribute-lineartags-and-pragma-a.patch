@@ -1,7 +1,7 @@
-From bc0cb63bb0208881df98bd560e13aa4fff6608fa Mon Sep 17 00:00:00 2001
+From 091ebe485044d027b393b067505e9dfc35c12267 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 14 Nov 2014 20:03:56 +0100
-Subject: [PATCH 02/18] Added new function attribute "lineartags" and pragma
+Subject: [PATCH 02/19] Added new function attribute "lineartags" and pragma
  "amigaos tagtype".
 
 Functions that have the lineartags attribute are assumed to be functions
@@ -28,10 +28,10 @@ For instance, no check is done that the attribute is applied to varargs
 functions.
 ---
  gcc/c-family/c-pragma.c            |  10 +++
- gcc/c/c-parser.c                   | 129 +++++++++++++++++++++++++++++++++++++
- gcc/c/c-typeck.c                   |  26 ++++++++
+ gcc/c/c-parser.c                   | 129 +++++++++++++++++++++++++++++
+ gcc/c/c-typeck.c                   |  26 ++++++
  gcc/config/rs6000/amigaos-protos.h |   1 +
- gcc/config/rs6000/amigaos.c        |  33 ++++++++++
+ gcc/config/rs6000/amigaos.c        |  33 ++++++++
  5 files changed, 199 insertions(+)
 
 diff --git a/gcc/c-family/c-pragma.c b/gcc/c-family/c-pragma.c
@@ -397,5 +397,5 @@ index a6da7d543241e2fc8cf51a952633c62e19d7d875..0749b33bab279bebf7146a7592c4fc02
  amigaos_legitimize_baserel_address (rtx addr)
  {
 -- 
-2.14.2
+2.34.1
 

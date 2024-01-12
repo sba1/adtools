@@ -1,7 +1,7 @@
-From f24414cbb3acf07eaf6328ea3a15b90c03beeb56 Mon Sep 17 00:00:00 2001
+From a8c9e108ae1743f3451691f0506db40a1e5a1360 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 20 Apr 2018 20:04:30 +0200
-Subject: [PATCH 18/18] Respect -nostdinc also for SDK includes.
+Subject: [PATCH 18/19] Respect -nostdinc also for SDK includes.
 
 ---
  gcc/config/rs6000/amigaos.h | 4 +---
@@ -29,5 +29,5 @@ index 547b57d03708bb38904bfdf6fd92f7a055027564..e8303292ee8cc06a410fb4acc0390f13
  #define LINK_SPEC "\
  --defsym __amigaos4__=1 \
 -- 
-2.14.2
+2.34.1
 

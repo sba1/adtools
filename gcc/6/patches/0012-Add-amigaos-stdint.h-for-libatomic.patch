@@ -1,7 +1,7 @@
-From 2622f6d00602998782e488604056fb5c568aa61b Mon Sep 17 00:00:00 2001
+From 0cce69f2c07f7cb47daeeaddc02ca2de2afddc25 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Tue, 3 Apr 2018 19:52:01 +0200
-Subject: [PATCH 12/18] Add amigaos-stdint.h for libatomic.
+Subject: [PATCH 12/19] Add amigaos-stdint.h for libatomic.
 
 ---
  gcc/config.gcc                                      | 2 +-
@@ -47,5 +47,5 @@ index 23e94752d3dd84da609e3f5dd9caf8c5008a1d57..7d5248b96c92ee5c66410172ab93488e
  GCC is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
 -- 
-2.14.2
+2.34.1
 
