@@ -1,7 +1,7 @@
-From 0d8660c728facae5297abc8b10a15cf28b2f022e Mon Sep 17 00:00:00 2001
+From fb1fbc56ecf4c107fb138577d8aa135ed2ed80f6 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Tue, 17 Feb 2015 20:25:55 +0100
-Subject: [PATCH 01/18] Changes for AmigaOS version of gcc.
+Subject: [PATCH 01/19] Changes for AmigaOS version of gcc.
 
 ---
  fixincludes/configure                 |    1 +
@@ -12,11 +12,11 @@ Subject: [PATCH 01/18] Changes for AmigaOS version of gcc.
  gcc/config.gcc                        |    8 +
  gcc/config.host                       |    6 +
  gcc/config/rs6000/amigaos-protos.h    |   41 +
- gcc/config/rs6000/amigaos.c           |  463 +++++++++
- gcc/config/rs6000/amigaos.h           |  433 ++++++++
+ gcc/config/rs6000/amigaos.c           |  463 +++++++
+ gcc/config/rs6000/amigaos.h           |  433 ++++++
  gcc/config/rs6000/amigaos.opt         |   37 +
  gcc/config/rs6000/rs6000-builtin.def  |    7 +
- gcc/config/rs6000/rs6000.c            |  176 +++-
+ gcc/config/rs6000/rs6000.c            |  176 ++-
  gcc/config/rs6000/rs6000.h            |    3 +
  gcc/config/rs6000/rs6000.md           |   27 +-
  gcc/config/rs6000/t-amigaos           |   20 +
@@ -37,8 +37,8 @@ Subject: [PATCH 01/18] Changes for AmigaOS version of gcc.
  libiberty/lrealpath.c                 |    3 +-
  libiberty/make-relative-prefix.c      |   37 +-
  libiberty/make-temp-file.c            |   27 +-
- libiberty/pex-amigaos.c               |  325 ++++++
- libstdc++-v3/configure                | 1852 ++++++++++++++++++++++++++++++++-
+ libiberty/pex-amigaos.c               |  325 +++++
+ libstdc++-v3/configure                | 1852 ++++++++++++++++++++++++-
  libstdc++-v3/configure.ac             |    3 +
  libstdc++-v3/crossconfig.m4           |    8 +
  libstdc++-v3/include/c_global/cstddef |    3 +
@@ -5187,5 +5187,5 @@ index 58d4f4bb060de34ea2284d1b3ce908e360268a8a..21a77fcc3af4e3f05f2a79274dfa89c7
  
  #endif // _GLIBCXX_CSTDDEF
 -- 
-2.14.2
+2.34.1
 
