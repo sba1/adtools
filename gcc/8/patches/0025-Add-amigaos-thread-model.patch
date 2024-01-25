@@ -1,33 +1,33 @@
-From b054dbdd84d9aabc489e4a7a520c67a006a7c4f9 Mon Sep 17 00:00:00 2001
+From 3843dff1665663e20881f12dbab9f402a55591b9 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 4 May 2018 18:22:24 +0200
-Subject: [PATCH 25/27] Add amigaos thread model.
+Subject: [PATCH 25/28] Add amigaos thread model.
 
 It is work in progress.
 ---
- config/gthr.m4                 |    1 +
- gcc/config.host                |    1 +
- gcc/config/rs6000/amigaos.h    |    8 +-
- gcc/config/rs6000/amigaos.opt  |   18 +
- gcc/config/rs6000/x-amigaos    |   16 +
- gcc/configure                  |    2 +-
- gcc/configure.ac               |    2 +-
- gcc/doc/invoke.texi            |    9 +-
- libgcc/config/rs6000/t-amigaos |    5 +
- libgcc/configure               |    1 +
- libgcc/gthr-amigaos-asserts.h  |    8 +
- libgcc/gthr-amigaos-native.c   | 1017 ++++++++++++++++++++++++++++++++
- libgcc/gthr-amigaos-posix.c    |  233 ++++++++
- libgcc/gthr-amigaos-single.c   |  141 +++++
- libgcc/gthr-amigaos.h          |  347 +++++++++++
- libstdc++-v3/configure         |   15 +-
- 16 files changed, 1812 insertions(+), 12 deletions(-)
+ config/gthr.m4                           |    1 +
+ gcc/config.host                          |    1 +
+ gcc/config/rs6000/amigaos.h              |    8 +-
+ gcc/config/rs6000/amigaos.opt            |   18 +
+ gcc/config/rs6000/x-amigaos              |   16 +
+ gcc/configure                            |    2 +-
+ gcc/configure.ac                         |    2 +-
+ gcc/doc/invoke.texi                      |    9 +-
+ libgcc/config/rs6000/t-amigaos           |    5 +
+ libgcc/configure                         |    1 +
+ libgcc/gthr-amigaos-asserts.h            |    8 +
+ libgcc/gthr-amigaos-native.c             | 1017 ++++++++++++++++++++++
+ libgcc/gthr-amigaos-posix.c              |  233 +++++
+ libgcc/gthr-amigaos-single.c             |  141 +++
+ libgcc/{gthr-single.h => gthr-amigaos.h} |  217 +++--
+ libstdc++-v3/configure                   |   15 +-
+ 16 files changed, 1598 insertions(+), 96 deletions(-)
  create mode 100644 gcc/config/rs6000/x-amigaos
  create mode 100644 libgcc/gthr-amigaos-asserts.h
  create mode 100644 libgcc/gthr-amigaos-native.c
  create mode 100644 libgcc/gthr-amigaos-posix.c
  create mode 100644 libgcc/gthr-amigaos-single.c
- create mode 100644 libgcc/gthr-amigaos.h
+ copy libgcc/{gthr-single.h => gthr-amigaos.h} (59%)
 
 diff --git a/config/gthr.m4 b/config/gthr.m4
 index 7b29f1f3327c9fdde23f15a507757e6a234cd196..6f61465461d6f70a717eb9205062d5aee7375726 100644
@@ -1702,47 +1702,42 @@ index 0000000000000000000000000000000000000000..d68a3e019fbac94a93a420fcf59476d2
 +#ifdef __cplusplus
 +}
 +#endif
-diff --git a/libgcc/gthr-amigaos.h b/libgcc/gthr-amigaos.h
-new file mode 100644
-index 0000000000000000000000000000000000000000..123d3512abed0a43a8c019bbce0d83f0128a89ec
---- /dev/null
+diff --git a/libgcc/gthr-single.h b/libgcc/gthr-amigaos.h
+similarity index 59%
+copy from libgcc/gthr-single.h
+copy to libgcc/gthr-amigaos.h
+index d8bd5138fa35f0c82fe81a2a7cb80a4e2ecd3d60..123d3512abed0a43a8c019bbce0d83f0128a89ec 100644
+--- a/libgcc/gthr-single.h
 +++ b/libgcc/gthr-amigaos.h
-@@ -0,0 +1,347 @@
-+/* Threads compatibility routines for libgcc2 and libobjc.  */
-+/* Compile this one with gcc.  */
-+/* Copyright (C) 1997-2018 Free Software Foundation, Inc.
-+
-+This file is part of GCC.
-+
-+GCC is free software; you can redistribute it and/or modify it under
-+the terms of the GNU General Public License as published by the Free
-+Software Foundation; either version 3, or (at your option) any later
-+version.
-+
-+GCC is distributed in the hope that it will be useful, but WITHOUT ANY
-+WARRANTY; without even the implied warranty of MERCHANTABILITY or
-+FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-+for more details.
-+
-+Under Section 7 of GPL version 3, you are granted additional
-+permissions described in the GCC Runtime Library Exception, version
-+3.1, as published by the Free Software Foundation.
-+
-+You should have received a copy of the GNU General Public License and
-+a copy of the GCC Runtime Library Exception along with this program;
-+see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
-+<http://www.gnu.org/licenses/>.  */
-+
+@@ -20,31 +20,57 @@ permissions described in the GCC Runtime Library Exception, version
+ 
+ You should have received a copy of the GNU General Public License and
+ a copy of the GCC Runtime Library Exception along with this program;
+ see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
+ <http://www.gnu.org/licenses/>.  */
+ 
+-#ifndef GCC_GTHR_SINGLE_H
+-#define GCC_GTHR_SINGLE_H
 +#ifndef GCC_GTHR_AMIGAOS_H
 +#define GCC_GTHR_AMIGAOS_H
-+
+ 
+-/* Just provide compatibility for mutex handling.  */
 +#include <stdlib.h>
 +#include <stdint.h>
-+
+ 
+-typedef int __gthread_key_t;
+-typedef int __gthread_once_t;
+-typedef int __gthread_mutex_t;
+-typedef int __gthread_recursive_mutex_t;
 +typedef struct { int data1, data2; } __gthread_once_t;
-+
+ 
+-#define __GTHREAD_ONCE_INIT 0
+-#define __GTHREAD_MUTEX_INIT 0
+-#define __GTHREAD_MUTEX_INIT_FUNCTION(mx) do {} while (0)
+-#define __GTHREAD_RECURSIVE_MUTEX_INIT 0
 +typedef struct { long unsigned int id; } __gthread_key_t;
-+
+ 
+-#define UNUSED __attribute__((__unused__))
 +/* Should cover at least as much data as the maximum of sizeof(struct SignalSemaphore)
 + * and sizeof(pthread_mutex_t)
 + */
@@ -1770,222 +1765,142 @@ index 0000000000000000000000000000000000000000..123d3512abed0a43a8c019bbce0d83f0
 +extern "C"
 +{
 +#endif
-+
-+#ifdef _LIBOBJC
-+
+ 
+ #ifdef _LIBOBJC
+ 
 +#ifndef UNUSED
 +#define UNUSED __attribute__((__unused__))
 +#define UNUSED_DEFINED
 +#endif
 +
-+/* Thread local storage for a single thread */
-+static void *thread_local_storage = NULL;
-+
-+/* Backend initialization functions */
-+
-+/* Initialize the threads subsystem.  */
-+static inline int
-+__gthread_objc_init_thread_system (void)
-+{
-+  /* No thread support available */
-+  return -1;
-+}
-+
-+/* Close the threads subsystem.  */
-+static inline int
-+__gthread_objc_close_thread_system (void)
-+{
-+  /* No thread support available */
-+  return -1;
-+}
-+
-+/* Backend thread functions */
-+
-+/* Create a new thread of execution.  */
-+static inline objc_thread_t
-+__gthread_objc_thread_detach (void (* func)(void *), void * arg UNUSED)
-+{
-+  /* No thread support available */
-+  return NULL;
-+}
-+
-+/* Set the current thread's priority.  */
-+static inline int
-+__gthread_objc_thread_set_priority (int priority UNUSED)
-+{
-+  /* No thread support available */
-+  return -1;
-+}
-+
-+/* Return the current thread's priority.  */
-+static inline int
-+__gthread_objc_thread_get_priority (void)
-+{
-+  return OBJC_THREAD_INTERACTIVE_PRIORITY;
-+}
-+
-+/* Yield our process time to another thread.  */
-+static inline void
-+__gthread_objc_thread_yield (void)
-+{
-+  return;
-+}
-+
-+/* Terminate the current thread.  */
-+static inline int
-+__gthread_objc_thread_exit (void)
-+{
-+  /* No thread support available */
-+  /* Should we really exit the program */
-+  /* exit (&__objc_thread_exit_status); */
-+  return -1;
-+}
-+
-+/* Returns an integer value which uniquely describes a thread.  */
-+static inline objc_thread_t
-+__gthread_objc_thread_id (void)
-+{
-+  /* No thread support, use 1.  */
-+  return (objc_thread_t) 1;
-+}
-+
-+/* Sets the thread's local storage pointer.  */
-+static inline int
-+__gthread_objc_thread_set_data (void *value)
-+{
-+  thread_local_storage = value;
-+  return 0;
-+}
-+
-+/* Returns the thread's local storage pointer.  */
-+static inline void *
-+__gthread_objc_thread_get_data (void)
-+{
-+  return thread_local_storage;
-+}
-+
-+/* Backend mutex functions */
-+
-+/* Allocate a mutex.  */
-+static inline int
-+__gthread_objc_mutex_allocate (objc_mutex_t mutex UNUSED)
-+{
-+  return 0;
-+}
-+
-+/* Deallocate a mutex.  */
-+static inline int
-+__gthread_objc_mutex_deallocate (objc_mutex_t mutex UNUSED)
-+{
-+  return 0;
-+}
-+
-+/* Grab a lock on a mutex.  */
-+static inline int
-+__gthread_objc_mutex_lock (objc_mutex_t mutex UNUSED)
-+{
-+  /* There can only be one thread, so we always get the lock */
-+  return 0;
-+}
-+
-+/* Try to grab a lock on a mutex.  */
-+static inline int
-+__gthread_objc_mutex_trylock (objc_mutex_t mutex UNUSED)
-+{
-+  /* There can only be one thread, so we always get the lock */
-+  return 0;
-+}
-+
-+/* Unlock the mutex */
-+static inline int
-+__gthread_objc_mutex_unlock (objc_mutex_t mutex UNUSED)
-+{
-+  return 0;
-+}
-+
-+/* Backend condition mutex functions */
-+
-+/* Allocate a condition.  */
-+static inline int
-+__gthread_objc_condition_allocate (objc_condition_t condition UNUSED)
-+{
-+  return 0;
-+}
-+
-+/* Deallocate a condition.  */
-+static inline int
-+__gthread_objc_condition_deallocate (objc_condition_t condition UNUSED)
-+{
-+  return 0;
-+}
-+
-+/* Wait on the condition */
-+static inline int
-+__gthread_objc_condition_wait (objc_condition_t condition UNUSED,
-+			       objc_mutex_t mutex UNUSED)
-+{
-+  return 0;
-+}
-+
-+/* Wake up all threads waiting on this condition.  */
-+static inline int
-+__gthread_objc_condition_broadcast (objc_condition_t condition UNUSED)
-+{
-+  return 0;
-+}
-+
-+/* Wake up one thread waiting on this condition.  */
-+static inline int
-+__gthread_objc_condition_signal (objc_condition_t condition UNUSED)
-+{
-+  return 0;
-+}
-+
+ /* Thread local storage for a single thread */
+ static void *thread_local_storage = NULL;
+ 
+ /* Backend initialization functions */
+ 
+ /* Initialize the threads subsystem.  */
+@@ -202,97 +228,120 @@ __gthread_objc_condition_broadcast (objc_condition_t condition UNUSED)
+ static inline int
+ __gthread_objc_condition_signal (objc_condition_t condition UNUSED)
+ {
+   return 0;
+ }
+ 
 +#ifndef UNUSED_DEFINED
 +#undef UNUSED
 +#endif
 +
-+#else /* _LIBOBJC */
-+
+ #else /* _LIBOBJC */
+ 
+-static inline int
+-__gthread_active_p (void)
+-{
+-  return 0;
+-}
 +int
 +__gthread_active_p (void);
-+
+ 
+-static inline int
+-__gthread_once (__gthread_once_t *__once UNUSED, void (*__func) (void) UNUSED)
+-{
+-  return 0;
+-}
 +int
 +__gthread_once (__gthread_once_t *__once, void (*__func) (void));
-+
+ 
+-static inline int UNUSED
+-__gthread_key_create (__gthread_key_t *__key UNUSED, void (*__func) (void *) UNUSED)
+-{
+-  return 0;
+-}
 +int
 +__gthread_key_create (__gthread_key_t *__key, void (*destroy) (void *));
-+
+ 
+-static int UNUSED
+-__gthread_key_delete (__gthread_key_t __key UNUSED)
+-{
+-  return 0;
+-}
 +int
 +__gthread_key_delete (__gthread_key_t __key);
-+
+ 
+-static inline void *
+-__gthread_getspecific (__gthread_key_t __key UNUSED)
+-{
+-  return 0;
+-}
 +void *
 +__gthread_getspecific (__gthread_key_t __key);
-+
+ 
+-static inline int
+-__gthread_setspecific (__gthread_key_t __key UNUSED, const void *__v UNUSED)
+-{
+-  return 0;
+-}
 +int
 +__gthread_setspecific (__gthread_key_t __key, const void *__v);
-+
+ 
+-static inline int
+-__gthread_mutex_destroy (__gthread_mutex_t *__mutex UNUSED)
+-{
+-  return 0;
+-}
 +int
 +__gthread_mutex_init (__gthread_mutex_t *__mutex);
-+
+ 
+-static inline int
+-__gthread_mutex_lock (__gthread_mutex_t *__mutex UNUSED)
+-{
+-  return 0;
+-}
 +int
 +__gthread_mutex_destroy (__gthread_mutex_t *__mutex);
-+
+ 
+-static inline int
+-__gthread_mutex_trylock (__gthread_mutex_t *__mutex UNUSED)
+-{
+-  return 0;
+-}
 +int
 +__gthread_mutex_lock (__gthread_mutex_t *__mutex);
-+
+ 
+-static inline int
+-__gthread_mutex_unlock (__gthread_mutex_t *__mutex UNUSED)
+-{
+-  return 0;
+-}
 +int
 +__gthread_mutex_trylock (__gthread_mutex_t *__mutex);
-+
+ 
+-static inline int
+-__gthread_recursive_mutex_lock (__gthread_recursive_mutex_t *__mutex)
+-{
+-  return __gthread_mutex_lock (__mutex);
+-}
 +int
 +__gthread_mutex_unlock (__gthread_mutex_t *__mutex);
-+
+ 
+-static inline int
+-__gthread_recursive_mutex_trylock (__gthread_recursive_mutex_t *__mutex)
+-{
+-  return __gthread_mutex_trylock (__mutex);
+-}
 +int
 +__gthread_recursive_mutex_init (__gthread_recursive_mutex_t *__mutex);
-+
+ 
+-static inline int
+-__gthread_recursive_mutex_unlock (__gthread_recursive_mutex_t *__mutex)
+-{
+-  return __gthread_mutex_unlock (__mutex);
+-}
 +int
 +__gthread_recursive_mutex_lock (__gthread_recursive_mutex_t *__mutex);
-+
+ 
+-static inline int
+-__gthread_recursive_mutex_destroy (__gthread_recursive_mutex_t *__mutex)
+-{
+-  return __gthread_mutex_destroy (__mutex);
+-}
 +int
 +__gthread_recursive_mutex_trylock (__gthread_recursive_mutex_t *__mutex);
 +
@@ -2047,13 +1962,15 @@ index 0000000000000000000000000000000000000000..123d3512abed0a43a8c019bbce0d83f0
 +int
 +__gthread_recursive_mutex_timedlock (__gthread_recursive_mutex_t *m,
 +                                    const __gthread_time_t *abs_time);
-+
-+#endif /* _LIBOBJC */
-+
+ 
+ #endif /* _LIBOBJC */
+ 
+-#undef UNUSED
 +#ifdef __cplusplus
 +}
 +#endif
-+
+ 
+-#endif /* ! GCC_GTHR_SINGLE_H */
 +#endif /* ! GCC_GTHR_AMIGAOS_H */
 diff --git a/libstdc++-v3/configure b/libstdc++-v3/configure
 index f16bfea81cb0c480488d72c73b2edf5c7e6e7a87..45dcf6730020ffae5ae76ae84a88d64530f61c27 100755
@@ -2179,5 +2096,5 @@ index f16bfea81cb0c480488d72c73b2edf5c7e6e7a87..45dcf6730020ffae5ae76ae84a88d645
  template<typename T>
    struct same<T, T>;
 -- 
-2.30.0
+2.34.1
 

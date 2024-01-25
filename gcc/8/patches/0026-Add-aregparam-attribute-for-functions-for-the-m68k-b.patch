@@ -1,7 +1,7 @@
-From 6546786e0f3699b8663fce5cdb4530615f09e36a Mon Sep 17 00:00:00 2001
+From d76787f616ce352bcdda427ad5c2b7a27b7d3da0 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Sat, 27 Oct 2018 08:06:21 +0200
-Subject: [PATCH 26/27] Add aregparam attribute for functions for the m68k
+Subject: [PATCH 26/28] Add aregparam attribute for functions for the m68k
  backend.
 
 These can be used to pass arguments to directly named registers.
@@ -278,5 +278,5 @@ index 506fa4e50e76f386d683e42351d38ca2c5e3d661..41baf9fc61c3a6784845ee27a3d5c700
  #define EXIT_IGNORE_STACK 1
  
 -- 
-2.30.0
+2.34.1
 
