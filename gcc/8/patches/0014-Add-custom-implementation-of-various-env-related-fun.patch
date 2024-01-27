@@ -1,7 +1,7 @@
-From c6d68469620b2c54eca081bbe0d197f7dcba5bae Mon Sep 17 00:00:00 2001
+From e0055474bff8049f1174df7fc973ad76595020c1 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Wed, 4 Apr 2018 23:50:48 +0200
-Subject: [PATCH 14/27] Add custom implementation of various env-related
+Subject: [PATCH 14/28] Add custom implementation of various env-related
  functions.
 
 No official clib does support unsetenv() but this is required by newer gcc.
@@ -125,7 +125,7 @@ index e0edfb00ac01b1090151a6039b4888b2809ff452..bf659d099e9cdfa030ec2d90e7992d68
      ;;
 diff --git a/libiberty/setenv-amigaos.c b/libiberty/setenv-amigaos.c
 new file mode 100644
-index 0000000000000000000000000000000000000000..dc9a460737538d74558bb43c21c21e61aa5a3305
+index 0000000000000000000000000000000000000000..089d3cbcc6eb7d42d96e8dfb16d1b399cfe856b3
 --- /dev/null
 +++ b/libiberty/setenv-amigaos.c
 @@ -0,0 +1,74 @@
@@ -204,5 +204,5 @@ index 0000000000000000000000000000000000000000..dc9a460737538d74558bb43c21c21e61
 +	return lvar->lv_Value;
 +}
 -- 
-2.30.0
+2.34.1
 

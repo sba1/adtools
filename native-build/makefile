@@ -84,7 +84,7 @@ COREUTILS_VERSION=5.2.1
 DIST_VERSION=$(shell date +%Y%m%d)-$(shell git rev-list --count HEAD)
 
 # Set up the necessary variables for the CLIBs
-CLIB4_SUPPORT=$(filter 11 6,$(GCC_BRANCH_NAME))
+CLIB4_SUPPORT=$(filter 11 8 6,$(GCC_BRANCH_NAME))
 CLIB4_URL=https://github.com/AmigaLabs/clib4
 CLIB4_DIR=downloads/clib4/
 CLIB4_RELEASE_ARCHIVE_NAME=adtools-os4-clib4-$(DIST_VERSION).lha
