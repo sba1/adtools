@@ -1,7 +1,7 @@
 From 6b2502ad3148594cbc85b03cbf3d85ce82c70af7 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 3 Mar 2017 08:52:48 +0100
-Subject: [PATCH 09/28] Enable libatomic for ppc-amigaos.
+Subject: [PATCH 09/29] Enable libatomic for ppc-amigaos.
 
 It is not really finished yet.
 ---

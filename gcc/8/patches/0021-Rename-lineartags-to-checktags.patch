@@ -1,7 +1,7 @@
 From a4c043211aec7a771350a521604b950a9a7deef7 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Fri, 27 Apr 2018 22:48:18 +0200
-Subject: [PATCH 21/28] Rename lineartags to checktags.
+Subject: [PATCH 21/29] Rename lineartags to checktags.
 
 The name lineartags would imply linearvarargs but this is not implemented
 or necessary.

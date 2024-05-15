@@ -1,7 +1,7 @@
 From 986ab690792bea0447ddc69c70b5362c67921cf2 Mon Sep 17 00:00:00 2001
 From: Marcus Comstedt <marcus@mc.pp.se>
 Date: Wed, 31 Jul 2019 22:10:48 +0200
-Subject: [PATCH 27/28] Default to DWARF v2
+Subject: [PATCH 27/29] Default to DWARF v2
 
 ---
  gcc/config/rs6000/amigaos.h | 4 ++++

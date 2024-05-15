@@ -1,7 +1,7 @@
 From 74d90b4683ab3248fe2f3ee1154fe552a6d4f4a8 Mon Sep 17 00:00:00 2001
 From: rjd <3246251196ryan@gmail.com>
 Date: Fri, 12 Jan 2024 00:15:23 +0000
-Subject: [PATCH 19/19] Provide clib4 as an additional C runtime library.
+Subject: [PATCH 19/20] Provide clib4 as an additional C runtime library.
 
 As well as the existing newlib and clib2 as C runtime library choices,
 clib4 is now introduced.

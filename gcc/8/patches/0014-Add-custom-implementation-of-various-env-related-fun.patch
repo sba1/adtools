@@ -1,7 +1,7 @@
 From e0055474bff8049f1174df7fc973ad76595020c1 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Wed, 4 Apr 2018 23:50:48 +0200
-Subject: [PATCH 14/28] Add custom implementation of various env-related
+Subject: [PATCH 14/29] Add custom implementation of various env-related
  functions.
 
 No official clib does support unsetenv() but this is required by newer gcc.
