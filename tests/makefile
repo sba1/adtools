@@ -12,7 +12,8 @@ TESTS = \
 	test-lineartags.o \
 	test-std-string \
 	test-thread \
-	test-wchar
+	test-wchar \
+	test-pthread-option
 
 all: $(TESTS)
 
@@ -38,6 +39,9 @@ test-thread-direct: test-thread.cpp ../gcc/repo/libgcc/gthr-amigaos-native.c
 
 test-wchar: test-wchar.cpp
 	$(CPP) test-wchar.cpp -std=c++11 -mcrt=clib2 -o $@ -H
+
+test-pthread-option: test-pthread-option.c
+	$(CC) -o $@ $< -pthread -mcrt=clib4
 
 test-tls: test-tls.cpp
 	$(CPP) -g $< -o $@ ../gcc/repo/libgcc/gthr-amigaos-native.c -Wl,--cref -Wl,-M=$@.map

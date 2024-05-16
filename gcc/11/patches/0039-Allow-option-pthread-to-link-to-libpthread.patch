@@ -1,0 +1,52 @@
+From 77656b2f9fe825950b6c399466b0e80d7fa0c723 Mon Sep 17 00:00:00 2001
+From: rjd <3246251196ryan@gmail.com>
+Date: Tue, 14 May 2024 17:54:10 +0100
+Subject: [PATCH 39/39] Allow option -pthread to link to libpthread
+
+---
+ gcc/config/rs6000/amigaos.h   | 2 +-
+ gcc/config/rs6000/amigaos.opt | 3 +++
+ 2 files changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/gcc/config/rs6000/amigaos.h b/gcc/config/rs6000/amigaos.h
+index f92526783393a0ac40d0ea9c08ab932c7f472744..497a792ff41c8ecbaa2a5c02d8d5fd4ad3df7887 100644
+--- a/gcc/config/rs6000/amigaos.h
++++ b/gcc/config/rs6000/amigaos.h
+@@ -345,13 +345,13 @@ mcrt=libnix: %(endfile_libnix); \
+ mcrt=newlib: %(endfile_newlib); \
+ mcrt=default|!mcrt=*: %(endfile_amiga_default); \
+ : %eInvalid C runtime library}"
+ 
+ #undef LIB_SPEC
+ #define LIB_SPEC "\
+---start-group -lc --end-group"
++--start-group %{pthread:-lpthread} -lc --end-group"
+ 
+ #undef TARGET_DEFAULT
+ #define TARGET_DEFAULT 0
+ 
+ #undef SUBTARGET_EXTRA_SPECS
+ #define SUBTARGET_EXTRA_SPECS \
+diff --git a/gcc/config/rs6000/amigaos.opt b/gcc/config/rs6000/amigaos.opt
+index 73107b5ad79109bdb095f7ca0eaee5e725d2f8fc..771caa087fed837124cf2436b800df15d16735c3 100644
+--- a/gcc/config/rs6000/amigaos.opt
++++ b/gcc/config/rs6000/amigaos.opt
+@@ -29,12 +29,15 @@ Target Mask(BASEREL)
+ Generate base relative data access
+ 
+ mcheck68kfuncptr
+ Target Var(CHECK68KFUNCPTR)
+ Generate target checking for function pointers
+ 
++pthread
++Driver. Will link with -lpthread and nothing more
++
+ use-dynld
+ Target Driver
+ Generated binary employs the dynamic linker for shared objects.
+ 
+ Enum
+ Name(athread) Type(int) UnknownError(argument %qs to %<-athread%> not recognized)
+-- 
+2.34.1
+

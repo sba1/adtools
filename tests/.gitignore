@@ -13,5 +13,7 @@
 /test-thread-direct
 /test-thread.d
 /test-thread.o
+/test-pthread-option
 /test-tls
 /test-wchar
+/test-call-once
