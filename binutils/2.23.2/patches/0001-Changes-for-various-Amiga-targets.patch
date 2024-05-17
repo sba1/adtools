@@ -1375,7 +1375,7 @@ index 0000000000000000000000000000000000000000..9d715d64d458e6599c19ed65fbb61c25
 +	  break;
 +
 +	default:
-+	  /* Something very nasty happened: invalid hunk occured... */
++	  /* Something very nasty happened: invalid hunk occurred... */
 +	  bfd_set_error (bfd_error_wrong_format);
 +	  return FALSE;
 +	  break;
@@ -3913,7 +3913,7 @@ index 0000000000000000000000000000000000000000..9067a0a06b933c67bfd3542b299d1adb
 +This is not the case with a.out formats, so there relocations can be applied at link time,
 +not at run time, like on the Amiga.
 +The special routines compensate this: instead of applying the relocations, they are
-+copied to the output file, if neccessary.
++copied to the output file, if necessary.
 +As as consequence, @code{final_link} and @code{get_relocated_section_contents} are nearly identical to
 +the original routines from @file{linker.c} and @file{reloc.c}.
 +*/
@@ -27426,7 +27426,7 @@ index bc2dd491592e56fb664cdf96fc32491c08e1e075..bc40541b7c5aecc30a7a74fd61f29225
  };
  
  /* Name of register halves for MAC/EMAC.
-    Seperate from reg_names since 'spu', 'fpl' look weird.  */
+    Separate from reg_names since 'spu', 'fpl' look weird.  */
  static char *const reg_half_names[] =
 -- 
 2.30.2
