@@ -4,7 +4,7 @@
  * and,
  * the same again, only where the Callable raises an exception.
  *
- * It shall produce following output (most of the time! since the excecution
+ * It shall produce following output (most of the time! since the execution
  * of the threads is not deterministic)
  *
  * ```stdout
