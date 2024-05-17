@@ -133,7 +133,7 @@ index 61249cf94771ad0860b9fc8c582f4371fbc13c71..a3792f9bfae8022597391ff45e8c9ede
  	                      attr_warn_unused_result_exclusions },
 +  { "libcall",                0, 0, false, true, true, false,
 +                              handle_libcall_attribute, NULL },
-+  /* Similiar to libcall but doesn't imply linearvarargs. Can be handled as libcall here. */
++  /* Similar to libcall but doesn't imply linearvarargs. Can be handled as libcall here. */
 +  { "libcall2",               0, 0, false, true, true, false,
 +                              handle_libcall_attribute, NULL },
    { "sentinel",               0, 1, false, true, true, false,
@@ -1812,7 +1812,7 @@ index 4dbe8e5d133513f0e23affa2680c84f9aedf0a95..f086ad317ffeb21c5333574f07243ac8
 +;; generated instead of elf_base_low. Since the requirements for elf_base_low
 +;; are more restrictive than those for elf_low, there should be no problems
 +;; when determining which instruction to use. Additionally, the elf_low function
-+;; has now been guared against used accidently.
++;; has now been guarded against being used accidentally.
 +(define_insn "elf_base_high"
 +  [(set (match_operand:SI 0 "gpc_reg_operand" "=b")
 +        (plus:SI (match_operand:SI 1 "gpc_reg_operand" "b")
