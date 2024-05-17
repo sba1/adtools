@@ -140,7 +140,7 @@ index a7cfaaa2ca4ac913d78e3240aa994a65c2e4b03f..db803847e90047b90c8c88e3aa9b50c8
 +
  /* Addititionally to the normal anchor (optimization) suppression, suppress
   * it also in the baserel mode because we don't adjust the anchor access yet.
-  * It would make some sence to support anchros also in baserel mode, because
+  * It would make some sense to support anchors also in baserel mode, because
   * baserel access is 32 bit.
   */
  bool
