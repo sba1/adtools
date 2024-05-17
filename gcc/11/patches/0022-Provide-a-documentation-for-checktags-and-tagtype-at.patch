@@ -24,7 +24,7 @@ index 1cd6f26fd93e06e9c2ba4176c64daa6cdaf0048a..11b9555628735dccb8db88e5a4ee3c41
 +@cindex @code{checktags} function attribute
 +The @code{checktags} tells the some parameters of the function are
 +taglists. In turn it will enable tag-type checking at compile-time, by
-+leveraging the extra information provded to enum-defined tags to which
++leveraging the extra information provided to enum-defined tags to which
 +a @code{tagtype} attribute is associated. The check assumes that if a
 +parameter is an integer constant to which a type is associated, then
 +it must be followed by an argument of that type. If that is not the
