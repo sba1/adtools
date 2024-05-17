@@ -79,9 +79,9 @@ index 52c884cd83d95745e512b4ce04caec23a94b496d..c845164f6c6ad245174c0013b7a13da4
        free (compressed_buffer);
        sec->contents = uncompressed_buffer;
        sec->compress_status = COMPRESS_SECTION_DONE;
--      /* Fall thru */
+-      /* Fall through */
  #endif
-+      /* Fall thru */
++      /* Fall through */
  
      case COMPRESS_SECTION_DONE:
        if (p == NULL)
@@ -118,7 +118,7 @@ index fa9333b7f1d953b5ebcf338bd465c75f99842bb3..4f0c37c97accbb9a00762fc2e04c56ea
  	case R_PPC_UADDR16:
  	  if (info->shared)
  	    break;
-+	  /* Fall thru */
++	  /* Fall through */
  
  	case R_PPC_PLT32:
  	case R_PPC_PLTREL24:
@@ -136,7 +136,7 @@ index 5c92c53da7b3dec8f85a0a0b930190635f89dcfb..9166631ac66055c2621682b157f741bf
  	case R_PPC_UADDR16:
  	  if (info->shared)
  	    break;
-+	  /* Fall thru */
++	  /* Fall through */
  
  	case R_PPC_PLT32:
  	case R_PPC_PLTREL24:

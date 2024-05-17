@@ -1,7 +1,7 @@
 From 46bf473f82fa04bdb21d752fc45daca5690bc1ea Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Sat, 29 Nov 2014 11:32:22 +0100
-Subject: [PATCH 02/13] Fixed errors occuring with more recent versions of
+Subject: [PATCH 02/13] Fixed errors occurring with more recent versions of
  texinfo.
 
 ---

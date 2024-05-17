@@ -1,7 +1,7 @@
 From 3ce5beb5610ded6b50cac4fd492506ce74f71d0e Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Sun, 8 Jul 2018 15:37:39 +0200
-Subject: [PATCH 12/13] Fix pointer comparision bug.
+Subject: [PATCH 12/13] Fix pointer comparison bug.
 
 ---
  binutils/stabs.c | 2 +-
