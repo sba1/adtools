@@ -5,7 +5,7 @@ Subject: [PATCH 06/13] Introduced strip-unneeded-rel-relocs.
 
 Normally, on AmigaOS we keep all relocs for executables as we don't have
 an isolated address space. However, not all relative relocs are necessary
-to be kept, for instance if they are refering to the same program section.
+to be kept, for instance if they are referring to the same program section.
 With the newly introduced strip option --strip-unneeded-rel-relocs these
 can be removed now.
 ---
@@ -87,7 +87,7 @@ index 88bd071eefa8b5426eaadfd6431e9de5d4a4591b..4beee77179b85479d5b43507d9eb2a6e
 +		/* Don't keep the symbol, but keep the reloc unless it is a relative reloc that is
 +		 * requested by the user to be removed. For now, we also don't discard the reloc if
 +		 * its targeting a different section. This can happen for relocs in the .rodata
-+		 * segment that refering to the .text segment. AmigaOS will possibly split these
++		 * segment that referring to the .text segment. AmigaOS will possibly split these
 +		 * up.
 +		 */
 +		if (!strip_unneeded_rel_relocs || !relpp [i]->howto->pc_relative || sec->index != osection->index)
