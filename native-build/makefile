@@ -29,6 +29,10 @@ CLIB4_SHA1?=HEAD
 SDK_VERSION?=54.16
 # Optional (DEFAULT=54.16):
 # Define SDK_VERSION to specify which version of the Amiga SDK is desired
+export SDK_VERSION
+# This variable is also exported since it may have an effect on
+# components that are built for the compiler. As of May 2024 this only
+# has an effect for CLIB4
 
 ROOT_DIR=$(realpath .)
 
