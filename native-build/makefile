@@ -182,8 +182,8 @@ ifneq (53.24,$(SDK_VERSION))
 endif
 endif
 	cd downloads/SDK_Install && rm -Rf *.lha
-	cd downloads/SDK_Install && mv newlib* $(CROSS_PREFIX)/ppc-amigaos/SDK
-	cd downloads/SDK_Install && mv Include/* $(CROSS_PREFIX)/ppc-amigaos/SDK/include
+    cd downloads/SDK_Install && cp -rf newlib/* $(CROSS_PREFIX)/ppc-amigaos/SDK/newlib
+    cd downloads/SDK_Install && cp -rf Include/* $(CROSS_PREFIX)/ppc-amigaos/SDK/include
 	rm -Rf downloads/SDK_Install downloads/SDK_Install.info
 	touch $@
 
