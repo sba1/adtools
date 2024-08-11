@@ -1,7 +1,7 @@
 From 32df36c00d3b7244a206c14d8318d67065a75e26 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Sat, 27 Oct 2018 08:06:21 +0200
-Subject: [PATCH 25/39] Add aregparam attribute for functions for the m68k
+Subject: [PATCH 25/40] Add aregparam attribute for functions for the m68k
  backend.
 
 These can be used to pass arguments to directly named registers.

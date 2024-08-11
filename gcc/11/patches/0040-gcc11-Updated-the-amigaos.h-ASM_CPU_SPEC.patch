@@ -1,0 +1,143 @@
+From 0b85334ced2cdf972f806b7f0815ef0e95286dbc Mon Sep 17 00:00:00 2001
+From: rjd <3246251196ryan@gmail.com>
+Date: Sat, 10 Aug 2024 12:10:46 +0100
+Subject: [PATCH 40/40] gcc11: Updated the amigaos.h ASM_CPU_SPEC
+
+---
+ gcc/config/rs6000/amigaos.h | 114 ++++++++++++++++++++----------------
+ 1 file changed, 64 insertions(+), 50 deletions(-)
+
+diff --git a/gcc/config/rs6000/amigaos.h b/gcc/config/rs6000/amigaos.h
+index 497a792ff41c8ecbaa2a5c02d8d5fd4ad3df7887..3b6ed87d82a4f7fa51ac0dd866241b0b5f25abf4 100644
+--- a/gcc/config/rs6000/amigaos.h
++++ b/gcc/config/rs6000/amigaos.h
+@@ -28,62 +28,76 @@
+ 
+ #undef DEFAULT_ABI
+ #define DEFAULT_ABI ABI_V4
+ 
+ #undef ASM_CPU_SPEC
+ #define ASM_CPU_SPEC \
+-"%{!mcpu*: \
+-  %{mpower: %{!mpower2: -mpwr}} \
+-  %{mpower2: -mpwrx} \
+-  %{mpowerpc64*: -mppc64} \
+-  %{!mpowerpc64*: %{mpowerpc*: -mppc}} \
+-  %{mno-power: %{!mpowerpc*: -mcom}} \
+-  %{!mno-power: %{!mpower*: %(asm_default)}}} \
+-%{mcpu=common: -mcom} \
+-%{mcpu=power: -mpwr} \
+-%{mcpu=power2: -mpwrx} \
+-%{mcpu=power3: -mppc64} \
+-%{mcpu=power4: -mpower4} \
+-%{mcpu=power5: -mpower4} \
+-%{mcpu=powerpc: -mppc} \
+-%{mcpu=rios: -mpwr} \
+-%{mcpu=rios1: -mpwr} \
+-%{mcpu=rios2: -mpwrx} \
+-%{mcpu=rsc: -mpwr} \
+-%{mcpu=rsc1: -mpwr} \
+-%{mcpu=rs64a: -mppc64} \
+-%{mcpu=401: -mppc} \
+-%{mcpu=403: -m403} \
+-%{mcpu=405: -m405} \
+-%{mcpu=405fp: -m405} \
+-%{mcpu=440: -m440} \
+-%{mcpu=440fp: -m440} \
+-%{mcpu=505: -mppc} \
+-%{mcpu=601: -m601} \
+-%{mcpu=602: -mppc} \
+-%{mcpu=603: -mppc} \
+-%{mcpu=603e: -mppc} \
+-%{mcpu=ec603e: -mppc} \
+-%{mcpu=604: -mppc} \
+-%{mcpu=604e: -mppc} \
+-%{mcpu=620: -mppc64} \
+-%{mcpu=630: -mppc64} \
+-%{mcpu=740: -mppc} \
+-%{mcpu=750: -mppc} \
+-%{mcpu=G3: -mppc} \
+-%{mcpu=7400: -mppc -maltivec} \
+-%{mcpu=7450: -mppc -maltivec} \
+-%{mcpu=G4: -mppc -maltivec} \
+-%{mcpu=801: -mppc} \
+-%{mcpu=821: -mppc} \
+-%{mcpu=823: -mppc} \
+-%{mcpu=860: -mppc} \
+-%{mcpu=970: -mpower4 -maltivec} \
+-%{mcpu=G5: -mpower4 -maltivec} \
+-%{mcpu=8540: -me500} \
+-%{maltivec: -maltivec}"
++"%{mcpu=native: %(asm_cpu_native); \
++  mcpu=power10: -mpower10; \
++  mcpu=power9: -mpower9; \
++  mcpu=power8|mcpu=powerpc64le: %{mpower9-vector: -mpower9;: -mpower8}; \
++  mcpu=power7: -mpower7; \
++  mcpu=power6x: -mpower6 %{!mvsx:%{!maltivec:-maltivec}}; \
++  mcpu=power6: -mpower6 %{!mvsx:%{!maltivec:-maltivec}}; \
++  mcpu=power5+: -mpower5; \
++  mcpu=power5: -mpower5; \
++  mcpu=power4: -mpower4; \
++  mcpu=power3: -mppc64; \
++  mcpu=powerpc: -mppc; \
++  mcpu=powerpc64: -mppc64; \
++  mcpu=a2: -ma2; \
++  mcpu=cell: -mcell; \
++  mcpu=rs64: -mppc64; \
++  mcpu=401: -mppc; \
++  mcpu=403: -m403; \
++  mcpu=405: -m405; \
++  mcpu=405fp: -m405; \
++  mcpu=440: -m440; \
++  mcpu=440fp: -m440; \
++  mcpu=464: -m440; \
++  mcpu=464fp: -m440; \
++  mcpu=476: -m476; \
++  mcpu=476fp: -m476; \
++  mcpu=505: -mppc; \
++  mcpu=601: -m601; \
++  mcpu=602: -mppc; \
++  mcpu=603: -mppc; \
++  mcpu=603e: -mppc; \
++  mcpu=ec603e: -mppc; \
++  mcpu=604: -mppc; \
++  mcpu=604e: -mppc; \
++  mcpu=620: -mppc64; \
++  mcpu=630: -mppc64; \
++  mcpu=740: -mppc; \
++  mcpu=750: -mppc; \
++  mcpu=G3: -mppc; \
++  mcpu=7400: -mppc %{!mvsx:%{!maltivec:-maltivec}}; \
++  mcpu=7450: -mppc %{!mvsx:%{!maltivec:-maltivec}}; \
++  mcpu=G4: -mppc %{!mvsx:%{!maltivec:-maltivec}}; \
++  mcpu=801: -mppc; \
++  mcpu=821: -mppc; \
++  mcpu=823: -mppc; \
++  mcpu=860: -mppc; \
++  mcpu=970: -mpower4 %{!mvsx:%{!maltivec:-maltivec}}; \
++  mcpu=G5: -mpower4 %{!mvsx:%{!maltivec:-maltivec}}; \
++  mcpu=8540: -me500; \
++  mcpu=8548: -me500; \
++  mcpu=e300c2: -me300; \
++  mcpu=e300c3: -me300; \
++  mcpu=e500mc: -me500mc; \
++  mcpu=e500mc64: -me500mc64; \
++  mcpu=e5500: -me5500; \
++  mcpu=e6500: -me6500; \
++  mcpu=titan: -mtitan; \
++  !mcpu*: %{mpower9-vector: -mpower9; \
++	    mpower8-vector|mcrypto|mdirect-move|mhtm: -mpower8; \
++	    mvsx: -mpower7; \
++	    mpowerpc64: -mppc64;: %(asm_default)}; \
++  :%eMissing -mcpu option in ASM_CPU_SPEC?\n} \
++%{mvsx: -mvsx -maltivec; maltivec: -maltivec}" \
++ASM_OPT_ANY
+ 
+ #undef CC1_SPEC
+ #define        CC1_SPEC "%{G*} %(cc1_cpu)" \
+ "%{g: %{!fno-eliminate-unused-debug-symbols: -feliminate-unused-debug-symbols}} \
+ %{g1: %{!fno-eliminate-unused-debug-symbols: -feliminate-unused-debug-symbols}} \
+ %{msdata: -msdata=default} \
+-- 
+2.34.1
+

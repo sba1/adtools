@@ -1,7 +1,7 @@
 From 80cd06ee17ebac85775c82d8b884de7ead35f169 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Ola=20S=C3=B6der?= <rolfkopman@gmail.com>
 Date: Sun, 9 Apr 2023 22:34:16 +0200
-Subject: [PATCH 37/39] gcc11: Add builtin _AMIGA define.
+Subject: [PATCH 37/40] gcc11: Add builtin _AMIGA define.
 
 Define _AMIGA like on AROS, MorphOS and OS3 (SAS/C).
 ---

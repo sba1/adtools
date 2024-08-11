@@ -1,7 +1,7 @@
 From a5b8eb192677e48f84822bc15c20ba8975b5fad5 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Tue, 17 Apr 2018 22:02:09 +0200
-Subject: [PATCH 16/39] Fix r2 restoring in the epilog of baserel-restoring
+Subject: [PATCH 16/40] Fix r2 restoring in the epilog of baserel-restoring
  functions.
 
 ---

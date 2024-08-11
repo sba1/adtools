@@ -1,7 +1,7 @@
 From c3443778d66979c2734bb02baf24c14b979e7326 Mon Sep 17 00:00:00 2001
 From: "ola.soder@axis.com" <ola.soder@axis.com>
 Date: Mon, 15 Mar 2021 15:55:11 +0100
-Subject: [PATCH 33/39] gcc10: Fix libstdc++v3 paths.
+Subject: [PATCH 33/40] gcc10: Fix libstdc++v3 paths.
 
 ---
  libstdc++-v3/src/c++17/fs_ops.cc  |  17 ++++-

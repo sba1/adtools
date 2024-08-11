@@ -1,7 +1,7 @@
 From 57cdd99bfe45740a2021212005227a089eb5921c Mon Sep 17 00:00:00 2001
 From: "ola.soder@axis.com" <ola.soder@axis.com>
 Date: Fri, 28 May 2021 16:27:59 +0200
-Subject: [PATCH 35/39] gcc11: Use include_next to circumvent fenv.h include
+Subject: [PATCH 35/40] gcc11: Use include_next to circumvent fenv.h include
  guard.
 
 Include guards will prevent the correct fenv.h to be included

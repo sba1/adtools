@@ -1,7 +1,7 @@
 From 0b5fd31f94a96acd4b83b34be52e2915982494fc Mon Sep 17 00:00:00 2001
 From: "ola.soder@axis.com" <ola.soder@axis.com>
 Date: Fri, 28 May 2021 16:21:55 +0200
-Subject: [PATCH 34/39] gcc11: Include stdint.h when sys/mman.h is missing.
+Subject: [PATCH 34/40] gcc11: Include stdint.h when sys/mman.h is missing.
 
 Since sys/mman.h indirectly includes stdint.h, we need to explicitly
 include stdint.h when sys/mman.h is missing.

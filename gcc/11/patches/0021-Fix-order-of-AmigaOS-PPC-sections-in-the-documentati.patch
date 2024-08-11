@@ -1,7 +1,7 @@
 From 4257f6d9961b0a9e583bf71f8cabcceb92ca44d3 Mon Sep 17 00:00:00 2001
 From: Sebastian Bauer <mail@sebastianbauer.info>
 Date: Sat, 28 Apr 2018 08:09:58 +0200
-Subject: [PATCH 21/39] Fix order of AmigaOS PPC sections in the documentation.
+Subject: [PATCH 21/40] Fix order of AmigaOS PPC sections in the documentation.
 
 ---
  gcc/doc/extend.texi |  4 ++--

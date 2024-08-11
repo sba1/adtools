@@ -1,7 +1,7 @@
 From c99b141102f736198f6c013f5e58946ccc6d3b95 Mon Sep 17 00:00:00 2001
 From: rjd <3246251196ryan@gmail.com>
 Date: Wed, 5 Oct 2022 11:36:32 +0100
-Subject: [PATCH 36/39] gcc11: Fix to exception raised by Callable in call_once
+Subject: [PATCH 36/40] gcc11: Fix to exception raised by Callable in call_once
  implementation.
 
 In the case the Callable raises an exception, the shared resources between
